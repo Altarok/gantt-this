@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Gantt & Punkte Kalender</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Obsidian Dark Mode Ästhetik */
+        body {
+            background-color: #1e1e1e;
+            color: #dcddde;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #chart-container {
+            width: 100%;
+            background-color: #252525;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* D3 SVG Styles */
+        .axis path, .axis line { stroke: #555; }
+        .axis text { fill: #a3a3a3; font-size: 11px; user-select: none; }
+        .grid line { stroke: #333; stroke-dasharray: 4,4; }
+        .group-bg:nth-child(odd) { fill: rgba(255, 255, 255, 0.02); }
+        .group-bg:nth-child(even) { fill: rgba(255, 255, 255, 0.04); }
+        .group-label { fill: #d1d5db; font-size: 13px; font-weight: 600; user-select: none; }
+        
+        .bar { 
+            fill: #8b5cf6; 
+            rx: 6; 
+            ry: 6; 
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .bar:hover { opacity: 0.8; stroke: #fff; stroke-width: 1.5px; }
+        .bar-label { fill: #fff; font-size: 11px; pointer-events: none; }
+        
+        .point { 
+            fill: #10b981; 
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .point:hover { opacity: 0.8; stroke: #fff; stroke-width: 1.5px; }
+
+        /* Tooltip & Popover Styles (Mock für Obsidian Hover) */
+        .tooltip {
+            position: absolute;
+            background: #111827;
+            color: #f3f4f6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #374151;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            white-space: pre-line;
+        }
+
+        .obsidian-popover {
+            position: absolute;
+            background: #1e293b;
+            color: #e5e7eb;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1001;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            max-width: 300px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover { background-color: #2563eb; }
+    </style>
+</head>
+<body>
+
+    <h2>Fantasy Kampagnen Timeline</h2>
+    <div class="controls">
+        <button id="toggle-points">Punkte Umschalten</button>
+        <button id="toggle-bars">Gantt Balken Umschalten</button>
+        <span id="status-text" style="align-self: center; color: #a3a3a3; font-size: 14px;">Beides sichtbar</span>
+    </div>
+
+    <!-- Hier würde Obsidian den Codeblock rendern -->
+    <div id="chart-container"></div>
+
+    <!-- Container für Tooltips -->
+    <div id="tooltip" class="tooltip"></div>
+    <div id="obsidian-popover" class="obsidian-popover"></div>
+
+    <script>
+        /**
+         * 1. Fantasy Kalender Engine
+         * Kapselt die Berechnungen für non-gregorianische Kalender.
+         * Konvertiert {Jahr, Monat, Tag} in absolute Tage und umgekehrt.
+         */
+        class FantasyCalendar {
+            constructor(monthsDef) {
+                this.months = monthsDef; // Array mit Tagen pro Monat
+                this.yearDays = this.months.reduce((a, b) => a + b, 0);
+            }
+
+            // Wandelt ein Datum in absolute vergangene Tage seit Tag 0 um
+            dateToAbs(year, month, day) {
+                let days = year * this.yearDays;
+                for (let i = 0; i < month - 1; i++) {
+                    days += this.months[i];
+                }
+                days += (day - 1);
+                return days;
+            }
+
+            // Wandelt absolute Tage zurück in ein {Jahr, Monat, Tag} Objekt
+            absToDate(absDays) {
+                let y = Math.floor(absDays / this.yearDays);
+                let rem = absDays % this.yearDays;
+                if (rem < 0) { 
+                    y -= 1; 
+                    rem += this.yearDays; 
+                }
+                let m = 1;
+                for (let i = 0; i < this.months.length; i++) {
+                    if (rem < this.months[i]) break;
+                    rem -= this.months[i];
+                    m++;
+                }
+                let d = rem + 1;
+                return { year: y, month: m, day: d };
+            }
+        }
+
+        /**
+         * 2. Allgemeine Einstellungen & Config Manager
+         * Kapselt die Einstellungen (z.B. aus dem Obsidian YAML Codeblock)
+         */
+        class ConfigManager {
+            constructor(rawCodeblockData) {
+                this.calendar = new FantasyCalendar(rawCodeblockData.calendar.months);
+                this.settings = {
+                    showPoints: rawCodeblockData.settings?.showPoints ?? true,
+                    showBars: rawCodeblockData.settings?.showBars ?? true,
+                    groupBy: rawCodeblockData.settings?.groupBy ?? 'group',
+                    autoHeight: rawCodeblockData.settings?.autoHeight ?? true
+                };
+                this.rawData = rawCodeblockData.data || [];
+            }
+
+            togglePoints() { this.settings.showPoints = !this.settings.showPoints; }
+            toggleBars() { this.settings.showBars = !this.settings.showBars; }
+        }
+
+        /**
+         * 3. & 4. Data Processor (Punkte & Balken Berechnungen)
+         * Kapselt die Logik für Stacking, Gruppierung und Filterung
+         */
+        class DataProcessor {
+            constructor(configManager) {
+                this.config = configManager;
+                this.laneHeight = 36; // Höhe eines Datenpunkts/Balkens
+                this.groupPadding = 20; // Abstand zwischen Gruppen
+            }
+
+            process() {
+                let data = this.config.rawData;
+                
+                // Filtern basierend auf Einstellungen
+                if (!this.config.settings.showPoints) data = data.filter(d => d.type !== 'point');
+                if (!this.config.settings.showBars) data = data.filter(d => d.type !== 'bar');
+
+                // In absolute Werte konvertieren
+                data.forEach(d => {
+                    d.absStart = this.config.calendar.dateToAbs(d.start.year, d.start.month, d.start.day);
+                    if (d.end) {
+                        d.absEnd = this.config.calendar.dateToAbs(d.end.year, d.end.month, d.end.day);
+                    } else {
+                        d.absEnd = d.absStart;
+                    }
+                });
+
+                // Gruppieren
+                let grouped = d3.group(data, d => d[this.config.settings.groupBy] || 'Standard');
+
+                this.processedData = [];
+                this.layoutInfo = { groups: [], totalHeight: 0 };
+                let currentYOffset = 0;
+
+                // Stacking-Algorithmus pro Gruppe (Verhindert Überschneidungen)
+                grouped.forEach((items, groupName) => {
+                    // Sortiere nach Startzeit
+                    items.sort((a, b) => a.absStart - b.absStart);
+                    let lanes = []; // Speichert das Ende (absEnd) des letzten Elements in der Spur
+
+                    items.forEach(item => {
+                        let placed = false;
+                        for (let i = 0; i < lanes.length; i++) {
+                            if (lanes[i] <= item.absStart) { // Kein Overlap -> Platz in existierender Spur
+                                lanes[i] = item.absEnd;
+                                item.laneIndex = i;
+                                placed = true;
+                                break;
+                            }
+                        }
+                        if (!placed) { // Neues Overlap -> Neue Spur
+                            item.laneIndex = lanes.length;
+                            lanes.push(item.absEnd);
+                        }
+                    });
+
+                    let groupHeight = Math.max(1, lanes.length) * this.laneHeight;
+                    
+                    this.layoutInfo.groups.push({
+                        name: groupName,
+                        yOffset: currentYOffset,
+                        height: groupHeight
+                    });
+
+                    items.forEach(item => {
+                        item.y = currentYOffset + (item.laneIndex * this.laneHeight) + (this.laneHeight / 2);
+                        this.processedData.push(item);
+                    });
+
+                    currentYOffset += groupHeight + this.groupPadding;
+                });
+
+                this.layoutInfo.totalHeight = currentYOffset;
+            }
+
+            // Funktion zur Rücklieferung von Punkten
+            getPoints() { return this.processedData.filter(d => d.type === 'point'); }
+            
+            // Funktion zur Rücklieferung von Bar Charts
+            getBars() { return this.processedData.filter(d => d.type === 'bar'); }
+        }
+
+        /**
+         * 5. Axis Manager
+         * Funktion zur Erstellung der Axenbeschriftungen der Gesamthierarchie.
+         */
+        class AxisManager {
+            constructor(calendar) {
+                this.calendar = calendar;
+            }
+
+            // Bestimmt dynamisch die notwendigen 2 Ebenen der Hierarchie
+            getAxisHierarchy(domainStartAbs, domainEndAbs, chartWidthPixels) {
+                const span = domainEndAbs - domainStartAbs;
+                const daysPerPixel = span / chartWidthPixels;
+
+                // Logik für Zoom-Level
+                let level = 'year/month';
+                if (daysPerPixel < 0.2) {
+                    level = 'month/day'; // Nahe herangezoomt
+                }
+
+                let majorTicks = [];
+                let minorTicks = [];
+
+                let startDate = this.calendar.absToDate(Math.floor(domainStartAbs));
+                let endDate = this.calendar.absToDate(Math.ceil(domainEndAbs));
+
+                for (let y = startDate.year; y <= endDate.year; y++) {
+                    if (level === 'year/month') {
+                        majorTicks.push({ t: this.calendar.dateToAbs(y, 1, 1), label: `Jahr ${y}` });
+                    }
+
+                    for (let m = 1; m <= this.calendar.months.length; m++) {
+                        let tMonth = this.calendar.dateToAbs(y, m, 1);
+                        if (tMonth > domainEndAbs) break;
+
+                        if (level === 'year/month') {
+                            if (tMonth >= domainStartAbs) {
+                                // Reduziere Beschriftungen wenn herausgezoomt
+                                if (daysPerPixel < 2 || m % 3 === 1) {
+                                    minorTicks.push({ t: tMonth, label: `Monat ${m}` });
+                                }
+                            }
+                        } else if (level === 'month/day') {
+                            if (tMonth >= domainStartAbs && tMonth <= domainEndAbs) {
+                                 majorTicks.push({ t: tMonth, label: `Jahr ${y}, Monat ${m}` });
+                            }
+                            let daysInMonth = this.calendar.months[m-1];
+                            let step = daysPerPixel < 0.05 ? 1 : (daysPerPixel < 0.1 ? 5 : 10);
+                            
+                            for (let d = 1; d <= daysInMonth; d += step) {
+                                let tDay = this.calendar.dateToAbs(y, m, d);
+                                if (tDay >= domainStartAbs && tDay <= domainEndAbs) {
+                                    if (d === 1 && step > 1) continue; // Verhindere visuelle Überlappung mit Monatsanfang
+                                    minorTicks.push({ t: tDay, label: `${d}.` });
+                                }
+                            }
+                        }
+                    }
+                }
+                return { majorTicks, minorTicks, level };
+            }
+        }
+
+        /**
+         * 6. Zoom Manager
+         * Kapselt die D3 Zoom & Pan (nach links/rechts scrollen) Logik.
+         */
+        class ZoomManager {
+            constructor(svgElement, baseXScale, updateCallback) {
+                this.svg = svgElement;
+                this.baseXScale = baseXScale;
+                this.updateCallback = updateCallback;
+                
+                this.zoom = d3.zoom()
+                    .scaleExtent([0.01, 100]) // Extremes heraus- und hereinzoomen möglich
+                    .on("zoom", (event) => {
+                        // Rescale nur die X-Achse (Pan nach links/rechts, kein vertikales Scrollen im Canvas)
+                        const newXScale = event.transform.rescaleX(this.baseXScale);
+                        this.updateCallback(newXScale);
+                    });
+
+                this.svg.call(this.zoom);
+            }
+        }
+
+        /**
+         * 7. Interaktion & Tooltip Manager
+         * Kapselt interne und externe Links sowie Hover Vorschauen
+         */
+        class InteractionManager {
+            constructor() {
+                this.tooltip = d3.select('#tooltip');
+                this.popover = d3.select('#obsidian-popover');
+            }
+
+            handleHover(event, d) {
+                // Basis Tooltip
+                let text = `<strong>${d.title}</strong>\n${d.start.year}-${d.start.month}-${d.start.day}`;
+                if (d.end) text += ` bis ${d.end.year}-${d.end.month}-${d.end.day}`;
+                
+                this.tooltip.html(text)
+                    .style('opacity', 1)
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY + 10) + 'px');
+
+                // Obsidian Link Vorschau Mock
+                if (d.link && d.link.startsWith('[[')) {
+                    this.popover.html(`
+                        <div style="color: #94a3b8; font-size: 11px; text-transform: uppercase; margin-bottom: 5px;">
+                            Obsidian Seiten Vorschau
+                        </div>
+                        <strong>${d.link.replace(/[[\]]/g, '')}</strong><br/>
+                        <p style="color: #cbd5e1; margin-top: 5px; font-size: 13px;">
+                            Dies ist eine simulierte Vorschau einer Notiz, ausgelöst durch das Hovern über ein verlinktes Ereignis.
+                        </p>
+                    `);
+                    this.popover.style('opacity', 1)
+                        .style('left', (event.pageX + 20) + 'px')
+                        .style('top', (event.pageY + 30) + 'px');
+                }
+            }
+
+            handleMouseOut() {
+                this.tooltip.style('opacity', 0);
+                this.popover.style('opacity', 0);
+            }
+
+            handleClick(event, d) {
+                if (d.link) {
+                    alert(`Obsidian API: Öffne Notiz/Link -> ${d.link}`);
+                }
+            }
+        }
+
+        /**
+         * 1. Hauptklasse: Erstellung des Gantt Chart
+         * Koordiniert alle obigen Manager und zeichnet mit D3.
+         */
+        class GanttChartRenderer {
+            constructor(containerId, configManager) {
+                this.container = d3.select(containerId);
+                this.config = configManager;
+                this.dataProcessor = new DataProcessor(configManager);
+                this.axisManager = new AxisManager(configManager.calendar);
+                this.interaction = new InteractionManager();
+                
+                this.margin = { top: 60, right: 20, bottom: 20, left: 130 }; // Left margin für Labels
+            }
+
+            render() {
+                this.container.selectAll('*').remove();
+                this.dataProcessor.process();
+
+                const containerWidth = this.container.node().getBoundingClientRect().width;
+                const chartWidth = containerWidth - this.margin.left - this.margin.right;
+                
+                // Höhe automatisch basierend auf generierten "Lanes"
+                const chartHeight = this.dataProcessor.layoutInfo.totalHeight;
+                const totalHeight = chartHeight + this.margin.top + this.margin.bottom;
+
+                // Haupt-SVG
+                this.svg = this.container.append('svg')
+                    .attr('width', containerWidth)
+                    .attr('height', totalHeight);
+
+                // Initial Scale berechnen
+                const allData = this.dataProcessor.processedData;
+                let minAbs = d3.min(allData, d => d.absStart) || 0;
+                let maxAbs = d3.max(allData, d => d.absEnd) || 360;
+                const padding = Math.max((maxAbs - minAbs) * 0.05, 10);
+                
+                this.xScale = d3.scaleLinear()
+                    .domain([minAbs - padding, maxAbs + padding])
+                    .range([0, chartWidth]);
+
+                // Clip Path (verhindert das Überlaufen der Daten in den Margin-Bereich beim Pannen)
+                this.svg.append("defs").append("clipPath")
+                    .attr("id", "clip-chart")
+                    .append("rect")
+                    .attr("width", chartWidth)
+                    .attr("height", chartHeight);
+
+                const chartGroup = this.svg.append('g')
+                    .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
+
+                // Achsen Gruppen
+                this.majorAxisGroup = chartGroup.append('g').attr('class', 'axis').attr('transform', `translate(0, -25)`);
+                this.minorAxisGroup = chartGroup.append('g').attr('class', 'axis').attr('transform', `translate(0, 0)`);
+                this.gridGroup = chartGroup.append('g').attr('class', 'grid');
+
+                // Daten Container (Mit Clip Path)
+                const dataArea = chartGroup.append('g').attr('clip-path', 'url(#clip-chart)');
+                
+                this.bgGroup = dataArea.append('g');
+                this.barsGroup = dataArea.append('g');
+                this.pointsGroup = dataArea.append('g');
+                
+                // Gruppen Labels (Außerhalb des Clip Paths, bleiben statisch links stehen)
+                this.labelGroup = chartGroup.append('g');
+
+                // Initiale Zeichnung
+                this.drawBackgrounds(chartWidth);
+                this.updateView(this.xScale, chartWidth, chartHeight);
+
+                // Zoom initialisieren
+                new ZoomManager(this.svg, this.xScale, (newXScale) => {
+                    this.updateView(newXScale, chartWidth, chartHeight);
+                });
+            }
+
+            drawBackgrounds(chartWidth) {
+                // Gruppen-Hintergründe für den Stacking-Effekt
+                this.bgGroup.selectAll('.group-bg')
+                    .data(this.dataProcessor.layoutInfo.groups)
+                    .join('rect')
+                    .attr('class', 'group-bg')
+                    .attr('x', 0)
+                    .attr('y', d => d.yOffset)
+                    .attr('width', chartWidth)
+                    .attr('height', d => d.height);
+
+                // Statische Y-Achsen Labels
+                this.labelGroup.selectAll('.group-label')
+                    .data(this.dataProcessor.layoutInfo.groups)
+                    .join('text')
+                    .attr('class', 'group-label')
+                    .attr('x', -15)
+                    .attr('y', d => d.yOffset + 22)
+                    .attr('text-anchor', 'end')
+                    .text(d => d.name);
+            }
+
+            updateView(currentXScale, chartWidth, chartHeight) {
+                // 1. Achsen aktualisieren (2 Ebenen Logik aufrufen)
+                const domain = currentXScale.domain();
+                const hierarchy = this.axisManager.getAxisHierarchy(domain[0], domain[1], chartWidth);
+
+                const majorMap = new Map(hierarchy.majorTicks.map(d => [d.t, d.label]));
+                const minorMap = new Map(hierarchy.minorTicks.map(d => [d.t, d.label]));
+
+                this.majorAxisGroup.call(d3.axisTop(currentXScale)
+                    .tickValues(Array.from(majorMap.keys()))
+                    .tickFormat(t => majorMap.get(t))
+                    .tickSize(0) // Keine Linien für Major, nur Text
+                );
+                // Major Text Styling
+                this.majorAxisGroup.selectAll('text').style('font-weight', 'bold').style('fill', '#d1d5db');
+
+                this.minorAxisGroup.call(d3.axisTop(currentXScale)
+                    .tickValues(Array.from(minorMap.keys()))
+                    .tickFormat(t => minorMap.get(t))
+                );
+
+                // 2. Grid Lines basierend auf Minor Ticks
+                this.gridGroup.selectAll('line')
+                    .data(Array.from(minorMap.keys()))
+                    .join('line')
+                    .attr('x1', d => currentXScale(d))
+                    .attr('x2', d => currentXScale(d))
+                    .attr('y1', 0)
+                    .attr('y2', chartHeight);
+
+                // 3. Gantt Balken aktualisieren
+                const bars = this.dataProcessor.getBars();
+                const barHeight = this.dataProcessor.laneHeight - 8;
+
+                const barNodes = this.barsGroup.selectAll('g.bar-node')
+                    .data(bars, d => d.id)
+                    .join('g')
+                    .attr('class', 'bar-node')
+                    .attr('transform', d => `translate(${currentXScale(d.absStart)}, ${d.y - barHeight/2})`)
+                    .on('mouseover', (e, d) => this.interaction.handleHover(e, d))
+                    .on('mouseout', () => this.interaction.handleMouseOut())
+                    .on('click', (e, d) => this.interaction.handleClick(e, d));
+
+                barNodes.selectAll('rect')
+                    .data(d => [d])
+                    .join('rect')
+                    .attr('class', 'bar')
+                    .attr('width', d => Math.max(currentXScale(d.absEnd) - currentXScale(d.absStart), 4)) // Mindestbreite
+                    .attr('height', barHeight);
+
+                // 4. Punkte aktualisieren
+                const points = this.dataProcessor.getPoints();
+                this.pointsGroup.selectAll('path.point')
+                    .data(points, d => d.id)
+                    .join('path')
+                    .attr('class', 'point')
+                    // Nutze ein Rauten-Symbol für Punkte
+                    .attr('d', d3.symbol().type(d3.symbolDiamond).size(120))
+                    .attr('transform', d => `translate(${currentXScale(d.absStart)}, ${d.y})`)
+                    .on('mouseover', (e, d) => this.interaction.handleHover(e, d))
+                    .on('mouseout', () => this.interaction.handleMouseOut())
+                    .on('click', (e, d) => this.interaction.handleClick(e, d));
+            }
+        }
+
+        /* ==========================================
+           MOCK DATEN & INITIALISIERUNG
+           Simuliert den Markdown Codeblock in Obsidian
+        ============================================= */
+        const mockObsidianCodeblock = {
+            calendar: {
+                months: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30] // Standard 12x30 Fantasy Kalender
+            },
+            settings: {
+                showPoints: true,
+                showBars: true,
+                groupBy: 'player'
+            },
+            data: [
+                { id: 1, title: "Die Große Reise beginnt", start: { year: 1000, month: 1, day: 15 }, end: { year: 1000, month: 3, day: 10 }, player: "Heldengruppe", type: "bar", link: "[[Start der Kampagne]]" },
+                { id: 2, title: "Ankunft in Tiefwasser", start: { year: 1000, month: 2, day: 5 }, player: "Heldengruppe", type: "point", link: "[[Stadt Tiefwasser]]" },
+                { id: 3, title: "Magier Gilden Training", start: { year: 1000, month: 1, day: 20 }, end: { year: 1000, month: 2, day: 25 }, player: "Aramis (Magier)", type: "bar" },
+                { id: 4, title: "Spruchrolle gefunden", start: { year: 1000, month: 2, day: 10 }, player: "Aramis (Magier)", type: "point", link: "https://dnd5e.wikidot.com" },
+                { id: 5, title: "Überlappendes Training", start: { year: 1000, month: 2, day: 15 }, end: { year: 1000, month: 3, day: 5 }, player: "Aramis (Magier)", type: "bar" }, // Testet das Stacking!
+                { id: 6, title: "Drachenkampf", start: { year: 1000, month: 4, day: 1 }, end: { year: 1000, month: 4, day: 2 }, player: "Heldengruppe", type: "bar", link: "[[Roter Drache Begegnung]]" }
+            ]
+        };
+
+        // App Start
+        let configManager = new ConfigManager(mockObsidianCodeblock);
+        let chartRenderer = new GanttChartRenderer('#chart-container', configManager);
+        chartRenderer.render();
+
+        // UI Buttons verknüpfen
+        document.getElementById('toggle-points').addEventListener('click', () => {
+            configManager.togglePoints();
+            chartRenderer.render();
+            updateStatusText();
+        });
+        document.getElementById('toggle-bars').addEventListener('click', () => {
+            configManager.toggleBars();
+            chartRenderer.render();
+            updateStatusText();
+        });
+
+        function updateStatusText() {
+            const t = [];
+            if(configManager.settings.showBars) t.push("Balken");
+            if(configManager.settings.showPoints) t.push("Punkte");
+            document.getElementById('status-text').innerText = t.length > 0 ? t.join(' & ') + ' sichtbar' : 'Nichts sichtbar';
+        }
+
+        /* ========================================================================================
+        OBSIDIAN PLUGIN INTEGRATION (Beispiel für deine main.ts):
+        ========================================================================================
+        import { Plugin, MarkdownPostProcessorContext } from 'obsidian';
+        // Nutze eine Library wie 'js-yaml' um den Codeblock Text zu parsen
+        import { parseYaml } from 'obsidian'; 
+
+        export default class FantasyGanttPlugin extends Plugin {
+            async onload() {
+                this.registerMarkdownCodeBlockProcessor("fantasy-gantt", (source, el, ctx) => {
+                    try {
+                        const config = parseYaml(source);
+                        const configManager = new ConfigManager(config); // Nutzt Klasse von oben
+                        const renderer = new GanttChartRenderer(el, configManager); // Nutzt Klasse von oben
+                        renderer.render();
+                    } catch (e) {
+                        el.createEl("div", { text: "Fehler beim Rendern des Gantt Charts: " + e.message });
+                    }
+                });
+            }
+        }
+        ========================================================================================
+        */
+    </script>
+</body>
+</html>
