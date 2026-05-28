@@ -1,8 +1,73 @@
-/*
+.fantasy-gantt-wrapper {
+	position: relative;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 16px;
+	margin: 12px 0;
+	overflow: hidden;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.gantt-toolbar {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	background-color: var(--background-secondary);
+	padding: 8px 12px;
+	border-radius: 6px;
+	margin-bottom: 12px;
+}
 
-If your plugin does not need CSS, delete this file.
+.gantt-input-label {
+	font-size: var(--font-small-size);
+	color: var(--text-normal);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
 
-*/
+.gantt-btn {
+	margin-left: auto;
+	background-color: var(--interactive-normal);
+	color: var(--text-on-accent);
+	border: none;
+	padding: 4px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.gantt-btn:hover {
+	background-color: var(--interactive-hover);
+}
+
+.gantt-chart-container {
+	width: 100%;
+	overflow: hidden;
+}
+
+/* Tooltip implementation matching your Obsidian Mock specs */
+.gantt-tooltip {
+	background: var(--background-floating);
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	padding: 10px;
+	border-radius: 6px;
+	pointer-events: none;
+	max-width: 250px;
+	font-size: var(--font-small-size);
+	color: var(--text-normal);
+}
+
+.tooltip-title {
+	font-weight: bold;
+	color: var(--text-accent);
+	margin-bottom: 4px;
+}
+.tooltip-dates {
+	color: var(--text-muted);
+}
+.tooltip-link {
+	color: var(--link-color);
+	margin-top: 6px;
+	font-style: italic;
+}

@@ -12,9 +12,6 @@ export class MarkdownProcessor extends MarkdownRenderChild {
 	display(): void {
 
 		let sourcePath: string = this.ctx.sourcePath
-
-		debugger
-
 		sourcePath = sourcePath.replace(/(.+)\/.*/,'$1')
 
 		let folderByPath: TFolder | null = this.plugin.app.vault.getFolderByPath(sourcePath)

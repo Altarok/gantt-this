@@ -1,7 +1,7 @@
 {
-  "name": "timeline-cepeu",
+  "name": "gantt-this",
   "version": "0.0.1",
-  "description": "Was auch immer",
+  "description": "Proof of concept for TTRPG Gantt timeline",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
@@ -11,14 +11,19 @@
     "lint:css": "stylelint \"styles.css\""
   },
   "dependencies": {
-    "obsidian": "latest"
+    "d3": "^7.9.0",
+    "esbuild": "^0.28.0",
+    "eslint": "^10.4.0",
+    "eslint-plugin-obsidianmd": "^0.3.0",
+    "obsidian": "^1.12.3"
   },
   "devDependencies": {
-	"builtin-modules": "^5.2.0",
-	"esbuild": "0.25.5",
-    "process": "^0.11.10",
-    "typescript": "^5.8.3",
-    "uuid": "^14.0.0"
+    "@types/d3": "^7.4.3",
+    "builtin-modules": "^5.2.0",
+    "typescript": "^5.5.3"
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "esbuild@0.28.0": true
+  }
 }

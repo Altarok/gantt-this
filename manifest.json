@@ -1,9 +1,9 @@
 {
-	"id": "timeline-cepeu",
-	"name": "That other timeline",
+	"id": "gantt-this",
+	"name": "Gantt this",
 	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Was auch immer",
+	"description": "Proof of concept for TTRPG Gantt timeline",
 	"author": "Altarok",
 	"isDesktopOnly": true
 }
