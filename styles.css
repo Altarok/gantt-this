@@ -1,13 +1,15 @@
 .fantasy-gantt-wrapper {
 	position: relative;
 	background-color: var(--background-primary);
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 8px;
-	padding: 16px;
-	margin: 12px 0;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	margin: 0 0;
 	overflow: hidden;
+	/* New rules to span 100% of the active note area */
+	width: 100% !important;
+	box-sizing: border-box;
 }
-
 .gantt-toolbar {
 	display: flex;
 	gap: 16px;
@@ -15,9 +17,8 @@
 	background-color: var(--background-secondary);
 	padding: 8px 12px;
 	border-radius: 6px;
-	margin-bottom: 12px;
+	margin: 0; /* Added side margins so UI controls don't touch the screen edge */
 }
-
 .gantt-input-label {
 	font-size: var(--font-small-size);
 	color: var(--text-normal);
@@ -26,7 +27,6 @@
 	align-items: center;
 	gap: 6px;
 }
-
 .gantt-btn {
 	margin-left: auto;
 	background-color: var(--interactive-normal);
@@ -39,15 +39,21 @@
 .gantt-btn:hover {
 	background-color: var(--interactive-hover);
 }
-
 .gantt-chart-container {
-	width: 100%;
+	width: 100% !important;
 	overflow: hidden;
+	padding: 0; /* Ensures zero internal space around the chart */
+	margin: 0;
 }
-
-/* Tooltip implementation matching your Obsidian Mock specs */
+/* Force full width on the generated SVG */
+.gantt-chart-container svg {
+	width: 100% !important;
+	height: auto;
+	display: block;
+}
+/* Tooltip implementation matching Obsidian spec */
 .gantt-tooltip {
-	background: var(--background-floating);
+	/*background-color: var(--background-primary);*/
 	border: 1px solid var(--background-modifier-border);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 	padding: 10px;
@@ -57,7 +63,14 @@
 	font-size: var(--font-small-size);
 	color: var(--text-normal);
 }
-
+/* Explicit solid background for Dark Mode */
+.theme-dark .gantt-tooltip {
+	background-color: #1e1e1e; /* Solid dark grey */
+}
+/* Explicit solid background for Light Mode */
+.theme-light .gantt-tooltip {
+	background-color: #ffffff; /* Solid white */
+}
 .tooltip-title {
 	font-weight: bold;
 	color: var(--text-accent);
@@ -70,4 +83,20 @@
 	color: var(--link-color);
 	margin-top: 6px;
 	font-style: italic;
+}
+/* Break out of Obsidian's readable line width constraints for this specific code block type */
+.markdown-rendered .block-language-fantasy-gantt {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+}
+/* Fixes spacing inside the editor's live preview mode wrappers if applicable */
+.cm-embed-block:has(.fantasy-gantt-wrapper) {
+	padding: 0 !important;
+	margin: 0 !important;
+	max-width: 100% !important;
+	width: 100% !important;
 }
