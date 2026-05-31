@@ -100,3 +100,105 @@
 	max-width: 100% !important;
 	width: 100% !important;
 }
+/* Toolbar and standard buttons */
+.fantasy-gantt-wrapper {
+	width: 100%;
+}
+.gantt-toolbar {
+	display: flex;
+	gap: 12px;
+	margin-bottom: 10px;
+	align-items: center;
+}
+.gantt-input-label {
+	font-size: 12px;
+	cursor: pointer;
+}
+.gantt-btn {
+	cursor: pointer;
+}
+
+/* Core SVG & Canvas properties */
+.gantt-svg-canvas {
+	cursor: grab;
+	display: block;
+}
+.gantt-svg-canvas:active {
+	cursor: grabbing;
+}
+
+/* Group Headers and Capsules */
+.gantt-group-row-even {
+	fill: var(--background-secondary);
+	opacity: 0.3;
+	pointer-events: none;
+}
+.gantt-group-row-odd {
+	fill: var(--background-secondary);
+	opacity: 0.05;
+	pointer-events: none;
+}
+.gantt-group-text {
+	fill: var(--text-normal);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	pointer-events: none;
+}
+.gantt-group-badge {
+	fill: var(--background-modifier-border);
+	opacity: 0.6;
+	pointer-events: none;
+}
+.gantt-group-shadow {
+	fill: url(#header-bottom-shadow);
+	pointer-events: none;
+}
+
+/* Gridlines and Axis Lines */
+.gantt-axis-baseline {
+	stroke: var(--background-modifier-border);
+}
+.gantt-axis-gridline {
+	stroke: var(--background-modifier-border);
+	stroke-width: 1;
+	stroke-dasharray: 4 4;
+	opacity: 0.4;
+	pointer-events: none;
+}
+.gantt-axis-tick {
+	stroke: var(--text-muted);
+}
+.gantt-axis-tick-minor {
+	stroke: var(--text-muted);
+	stroke-width: 1;
+	opacity: 0.7;
+}
+.gantt-axis-text {
+	font-size: 11px;
+	user-select: none;
+	font-weight: 500;
+	fill: var(--text-muted);
+}
+
+/* Interactive Timeline Elements */
+.gantt-item {
+	cursor: pointer;
+}
+
+/* Fallback fill ONLY if color attribute isn't provided inline via frontmatter */
+.gantt-item.bar-rect:not([fill]) {
+	fill: var(--interactive-accent);
+}
+
+.gantt-item.point-circle:not([fill]) {
+	fill: var(--text-accent);
+}
+
+/* Tooltips */
+.gantt-tooltip {
+	opacity: 0;
+	position: fixed;
+	z-index: 9999;
+	pointer-events: none; /* Prevents tooltip from breaking hover states */
+}

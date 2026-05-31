@@ -1,4 +1,4 @@
-import { Plugin, TFile } from 'obsidian';
+import { Plugin } from 'obsidian';
 
 interface GanttItem {
 	id: number;
@@ -22,6 +22,7 @@ class CalendarUtils {
 		const day = (remainder % calendarConfig.daysInMonth) + 1;
 		return { year, month, day };
 	}
+
 	static formatLong(totalDays: number) {
 		const d = this.daysToDate(totalDays);
 		return `Tag ${d.day}, Mon. ${d.month}, Jahr ${d.year}`;
@@ -30,6 +31,62 @@ class CalendarUtils {
 
 export default class FantasyGanttPlugin extends Plugin {
 
+	// async onload() {
+	// 	this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
+	//
+	// 		const currentFile = this.app.workspace.getActiveFile();
+	// 		if (!currentFile || !currentFile.parent) {
+	// 			el.createEl('pre', { text: 'Fehler: Konnte den aktuellen Dateiordner nicht ermitteln.' });
+	// 			return;
+	// 		}
+	//
+	// 		const mainWrapper = el.createDiv({ cls: 'fantasy-gantt-wrapper' });
+	// 		const toolbar = mainWrapper.createDiv({ cls: 'gantt-toolbar' });
+	//
+	// 		const createCheckbox = (label: string, id: string, checked = true) => {
+	// 			const lbl = toolbar.createEl('label', { cls: 'gantt-input-label' });
+	// 			const input = lbl.createEl('input', { attr: { type: 'checkbox', id } });
+	// 			input.checked = checked;
+	// 			lbl.createEl('span', { text: ` ${label}` });
+	// 			return input;
+	// 		};
+	//
+	// 		const toggleBars = createCheckbox('Balken zeigen', 'toggle-bars');
+	// 		const togglePoints = createCheckbox('Punkte zeigen', 'toggle-points');
+	// 		const toggleGrouping = createCheckbox('Gruppieren', 'toggle-grouping');
+	// 		const resetBtn = toolbar.createEl('button', { text: 'Zoom Reset', cls: 'gantt-btn' });
+	//
+	// 		const chartContainer = mainWrapper.createDiv({ cls: 'gantt-chart-container' });
+	//
+	// 		const tooltip = document.body.createDiv({ cls: 'gantt-tooltip', attr: { id: 'gantt-tooltip-element' } });
+	//
+	// 		const hoverTitle = tooltip.createDiv({ cls: 'tooltip-title' });
+	// 		const hoverDates = tooltip.createDiv({ cls: 'tooltip-dates' });
+	// 		const hoverLink = tooltip.createDiv({ cls: 'tooltip-link', text: 'Klicke um Notiz zu öffnen' });
+	//
+	// 		let data = this.getGanttDataFromFolder(currentFile.parent.path);
+	//
+	// 		const renderEngine = new GanttRenderEngine(chartContainer, data, tooltip, hoverTitle, hoverDates, hoverLink, this);
+	//
+	// 		toggleBars.addEventListener('change', (e) => renderEngine.updateSettings({ showBars: (e.target as HTMLInputElement).checked }));
+	// 		togglePoints.addEventListener('change', (e) => renderEngine.updateSettings({ showPoints: (e.target as HTMLInputElement).checked }));
+	// 		toggleGrouping.addEventListener('change', (e) => renderEngine.updateSettings({ enableGrouping: (e.target as HTMLInputElement).checked }));
+	// 		resetBtn.addEventListener('click', () => renderEngine.resetZoom());
+	//
+	// 		this.registerEvent(
+	// 			this.app.metadataCache.on('changed', (file) => {
+	// 				if (file.parent && file.parent.path === currentFile.parent?.path) {
+	// 					const updatedData = this.getGanttDataFromFolder(currentFile.parent.path);
+	// 					renderEngine.updateData(updatedData);
+	// 				}
+	// 			})
+	// 		);
+	//
+	// 		ctx.onUnload(() => {
+	// 			tooltip.remove();
+	// 		});
+	// 	});
+	// }
 	async onload() {
 		this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
 
@@ -38,6 +95,27 @@ export default class FantasyGanttPlugin extends Plugin {
 				el.createEl('pre', { text: 'Fehler: Konnte den aktuellen Dateiordner nicht ermitteln.' });
 				return;
 			}
+
+			// --- Path Parsing Logic ---
+			let targetFolderPath = currentFile.parent.path; // Default: local
+
+			const lines = source.split('\n');
+			for (const line of lines) {
+				const match = line.match(/^path:\s*(.+)$/i);
+				if (match) {
+					const pathValue = match[1].trim().toLowerCase();
+					if (pathValue === 'root') {
+						targetFolderPath = '/';
+					} else if (pathValue === 'local') {
+						targetFolderPath = currentFile.parent.path;
+					} else {
+						// Keep user-specified literal path (e.g., "Kampagnen/Akt-1")
+						targetFolderPath = match[1].trim();
+					}
+					break;
+				}
+			}
+			// --------------------------
 
 			const mainWrapper = el.createDiv({ cls: 'fantasy-gantt-wrapper' });
 			const toolbar = mainWrapper.createDiv({ cls: 'gantt-toolbar' });
@@ -57,17 +135,13 @@ export default class FantasyGanttPlugin extends Plugin {
 
 			const chartContainer = mainWrapper.createDiv({ cls: 'gantt-chart-container' });
 
-			// FIX: Build and append the tooltip directly to the document body so it never clips
 			const tooltip = document.body.createDiv({ cls: 'gantt-tooltip', attr: { id: 'gantt-tooltip-element' } });
-			tooltip.style.opacity = '0';
-			tooltip.style.position = 'fixed'; // Use fixed positioning relative to viewport
-			tooltip.style.zIndex = '9999';   // Stay above all panels
 
 			const hoverTitle = tooltip.createDiv({ cls: 'tooltip-title' });
 			const hoverDates = tooltip.createDiv({ cls: 'tooltip-dates' });
 			const hoverLink = tooltip.createDiv({ cls: 'tooltip-link', text: 'Klicke um Notiz zu öffnen' });
 
-			let data = this.getGanttDataFromFolder(currentFile.parent.path);
+			let data = this.getGanttDataFromFolder(targetFolderPath);
 
 			const renderEngine = new GanttRenderEngine(chartContainer, data, tooltip, hoverTitle, hoverDates, hoverLink, this);
 
@@ -78,14 +152,17 @@ export default class FantasyGanttPlugin extends Plugin {
 
 			this.registerEvent(
 				this.app.metadataCache.on('changed', (file) => {
-					if (file.parent && file.parent.path === currentFile.parent?.path) {
-						const updatedData = this.getGanttDataFromFolder(currentFile.parent.path);
+					// Check if modified file sits inside our calculated scope target folder path
+					const fileInTargetScope = targetFolderPath === '/' ||
+						(file.parent && file.parent.path === targetFolderPath);
+
+					if (fileInTargetScope) {
+						const updatedData = this.getGanttDataFromFolder(targetFolderPath);
 						renderEngine.updateData(updatedData);
 					}
 				})
 			);
 
-			// Clean up the global tooltip when the user closes or switches the active note view
 			ctx.onUnload(() => {
 				tooltip.remove();
 			});
@@ -97,9 +174,15 @@ export default class FantasyGanttPlugin extends Plugin {
 		let incrementalId = 1;
 
 		const files = this.app.vault.getMarkdownFiles();
-		const neighboringFiles = files.filter(f => f.parent && f.parent.path === folderPath);
 
-		neighboringFiles.forEach(file => {
+		// Filter files based on selected target scope strategy
+		const targetFiles = files.filter(f => {
+			if (!f.parent) return false;
+			if (folderPath === '/') return true; // 'root' scans entire vault workspace
+			return f.parent.path === folderPath; // Matches exact folder sub-paths
+		});
+
+		targetFiles.forEach(file => {
 			const cache = this.app.metadataCache.getFileCache(file);
 			const frontmatter = cache?.frontmatter;
 
@@ -119,6 +202,35 @@ export default class FantasyGanttPlugin extends Plugin {
 
 		return items;
 	}
+
+
+	// private getGanttDataFromFolder(folderPath: string): GanttItem[] {
+	// 	const items: GanttItem[] = [];
+	// 	let incrementalId = 1;
+	//
+	// 	const files = this.app.vault.getMarkdownFiles();
+	// 	const neighboringFiles = files.filter(f => f.parent && f.parent.path === folderPath);
+	//
+	// 	neighboringFiles.forEach(file => {
+	// 		const cache = this.app.metadataCache.getFileCache(file);
+	// 		const frontmatter = cache?.frontmatter;
+	//
+	// 		if (frontmatter && frontmatter['gantt-item'] === true) {
+	// 			items.push({
+	// 				id: incrementalId++,
+	// 				name: frontmatter['gantt-name'] || file.basename,
+	// 				startDay: Number(frontmatter['gantt-start'] ?? 0),
+	// 				endDay: Number(frontmatter['gantt-end'] ?? frontmatter['gantt-start'] ?? 0),
+	// 				group: frontmatter['gantt-group'] || 'Allgemein',
+	// 				type: frontmatter['gantt-type'] === 'point' ? 'point' : 'bar',
+	// 				color: frontmatter['gantt-color'] || undefined,
+	// 				link: file.path
+	// 			});
+	// 		}
+	// 	});
+	//
+	// 	return items;
+	// }
 }
 
 class GanttRenderEngine {
@@ -142,7 +254,12 @@ class GanttRenderEngine {
 	private hoverLink: HTMLElement;
 
 	private settings = { showBars: true, showPoints: true, enableGrouping: true };
-	private config = { rowHeight: 35, groupHeaderHeight: 25, axisHeight: 50, margin: { top: 20, right: 0, bottom: 0, left: 0 } };
+	private config = {
+		rowHeight: 35,
+		groupHeaderHeight: 25,
+		axisHeight: 50,
+		margin: { top: 20, right: 0, bottom: 0, left: 0 }
+	};
 
 	private minDay = 0;
 	private maxDay = 1000;
@@ -230,16 +347,28 @@ class GanttRenderEngine {
 
 			let currentYOffset = this.config.margin.top;
 			groupedMap.forEach((items, groupName) => {
-				const { processedData, totalLanes } = this.calculateStacking(items);
+				const { processedData, totalLanes} = this.calculateStacking(items);
 				const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight + this.config.groupHeaderHeight;
-				this.groups.push({ name: groupName, items: processedData, yOffset: currentYOffset, height: groupHeight, lanes: totalLanes });
+				this.groups.push({
+					name: groupName,
+					items: processedData,
+					yOffset: currentYOffset,
+					height: groupHeight,
+					lanes: totalLanes
+				});
 				currentYOffset += groupHeight;
 			});
 			this.totalHeight = currentYOffset + this.config.axisHeight;
 		} else {
-			const { processedData, totalLanes } = this.calculateStacking(activeData);
+			const { processedData, totalLanes} = this.calculateStacking(activeData);
 			const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight;
-			this.groups.push({ name: 'Alle', items: processedData, yOffset: this.config.margin.top, height: groupHeight, lanes: totalLanes });
+			this.groups.push({
+				name: 'Alle',
+				items: processedData,
+				yOffset: this.config.margin.top,
+				height: groupHeight,
+				lanes: totalLanes
+			});
 			this.totalHeight = this.config.margin.top + groupHeight + this.config.axisHeight;
 		}
 		this.container.style.height = `${this.totalHeight}px`;
@@ -257,7 +386,7 @@ class GanttRenderEngine {
 		this.svg = this.createSVGElement('svg');
 		this.svg.setAttribute('width', '100%');
 		this.svg.setAttribute('height', this.totalHeight.toString());
-		this.svg.setAttribute('style', 'cursor: grab; display: block;');
+		this.svg.setAttribute('class', 'gantt-svg-canvas');
 		this.container.appendChild(this.svg);
 
 		this.backgroundG = this.createSVGElement('g');
@@ -272,6 +401,28 @@ class GanttRenderEngine {
 		this.svg.appendChild(this.axisArea);
 
 		const defs = this.createSVGElement('defs');
+
+		const shadowGradient = this.createSVGElement('linearGradient');
+		shadowGradient.setAttribute('id', 'header-bottom-shadow');
+		shadowGradient.setAttribute('x1', '0');
+		shadowGradient.setAttribute('y1', '0');
+		shadowGradient.setAttribute('x2', '0');
+		shadowGradient.setAttribute('y2', '1');
+
+		const stopStart = this.createSVGElement('stop');
+		shadowGradient.setAttribute('offset', '0%');
+		stopStart.setAttribute('stop-color', 'var(--background-modifier-box-shadow, #000000)');
+		stopStart.setAttribute('stop-opacity', '0.25');
+
+		const stopEnd = this.createSVGElement('stop');
+		stopEnd.setAttribute('offset', '100%');
+		stopEnd.setAttribute('stop-color', 'var(--background-modifier-box-shadow, #000000)');
+		stopEnd.setAttribute('stop-opacity', '0.0');
+
+		shadowGradient.appendChild(stopStart);
+		shadowGradient.appendChild(stopEnd);
+		defs.appendChild(shadowGradient);
+
 		const clipPath = this.createSVGElement('clipPath');
 		clipPath.setAttribute('id', 'gantt-clip');
 		this.clipRect = this.createSVGElement('rect');
@@ -308,34 +459,40 @@ class GanttRenderEngine {
 				const rect = this.createSVGElement('rect');
 				rect.setAttribute('width', width.toString());
 				rect.setAttribute('height', d.height.toString());
-				rect.setAttribute('fill', 'var(--background-secondary)');
-				rect.setAttribute('opacity', i % 2 === 0 ? '0.3' : '0.05');
-				rect.setAttribute('style', 'pointer-events: none;');
+				rect.setAttribute('class', i % 2 === 0 ? 'gantt-group-row-even' : 'gantt-group-row-odd');
 				groupG.appendChild(rect);
 
-				const textPaddingX = 10;
-				const textWidthEstimate = d.name.length * 6.5 + (textPaddingX * 2);
+				const text = this.createSVGElement('text');
+				text.setAttribute('x', '20');
+				text.setAttribute('y', '17');
+				text.setAttribute('class', 'gantt-group-text');
+				text.textContent = d.name.toUpperCase();
+
+				groupG.appendChild(text);
+
+				const computedLength = (text as any).getComputedTextLength ? (text as any).getComputedTextLength() : 0;
+				const textWidthEstimate = computedLength > 0 ? computedLength : d.name.length * 6.5;
+				const badgeWidth = textWidthEstimate + 20;
 				const badgeHeight = 18;
+
+				const shadowRect = this.createSVGElement('rect');
+				shadowRect.setAttribute('x', '10');
+				shadowRect.setAttribute('y', (5 + badgeHeight).toString());
+				shadowRect.setAttribute('width', badgeWidth.toString());
+				shadowRect.setAttribute('height', '4');
+				shadowRect.setAttribute('class', 'gantt-group-shadow');
 
 				const badge = this.createSVGElement('rect');
 				badge.setAttribute('x', '10');
 				badge.setAttribute('y', '5');
-				badge.setAttribute('width', textWidthEstimate.toString());
+				badge.setAttribute('width', badgeWidth.toString());
 				badge.setAttribute('height', badgeHeight.toString());
-				badge.setAttribute('fill', 'var(--background-modifier-border)');
-				badge.setAttribute('opacity', '0.6');
 				badge.setAttribute('rx', (badgeHeight / 2).toString());
 				badge.setAttribute('ry', (badgeHeight / 2).toString());
-				badge.setAttribute('style', 'pointer-events: none;');
-				groupG.appendChild(badge);
+				badge.setAttribute('class', 'gantt-group-badge');
 
-				const text = this.createSVGElement('text');
-				text.setAttribute('x', (10 + textPaddingX).toString());
-				text.setAttribute('y', '17');
-				text.setAttribute('fill', 'var(--text-normal)');
-				text.setAttribute('style', 'font-size: 10px; font-weight: 600; letter-spacing: 0.5px; pointer-events: none;');
-				text.textContent = d.name.toUpperCase();
-				groupG.appendChild(text);
+				groupG.insertBefore(shadowRect, text);
+				groupG.insertBefore(badge, text);
 			}
 			this.backgroundG.appendChild(groupG);
 		});
@@ -359,11 +516,10 @@ class GanttRenderEngine {
 					rect.setAttribute('y', (groupYStart + d.lane! * this.config.rowHeight + 4).toString());
 					rect.setAttribute('width', barWidth.toString());
 					rect.setAttribute('height', (this.config.rowHeight - 8).toString());
-					rect.setAttribute('fill', d.color || 'var(--interactive-accent)');
+					if (d.color) rect.setAttribute('fill', d.color);
 					rect.setAttribute('rx', '4');
 					rect.setAttribute('ry', '4');
 					rect.setAttribute('data-id', d.id.toString());
-					rect.setAttribute('style', 'cursor: pointer;');
 					this.dataG.appendChild(rect);
 				} else if (d.type === 'point') {
 					const cx = this.getXPosition(d.startDay, width);
@@ -373,9 +529,8 @@ class GanttRenderEngine {
 					circle.setAttribute('cx', cx.toString());
 					circle.setAttribute('cy', (groupYStart + d.lane! * this.config.rowHeight + this.config.rowHeight / 2).toString());
 					circle.setAttribute('r', '7');
-					circle.setAttribute('fill', d.color || 'var(--text-accent)');
+					if (d.color) circle.setAttribute('fill', d.color);
 					circle.setAttribute('data-id', d.id.toString());
-					circle.setAttribute('style', 'cursor: pointer;');
 					this.dataG.appendChild(circle);
 				}
 			});
@@ -391,7 +546,7 @@ class GanttRenderEngine {
 		baseline.setAttribute('x2', renderWidth.toString());
 		baseline.setAttribute('y1', '0');
 		baseline.setAttribute('y2', '0');
-		baseline.setAttribute('stroke', 'var(--background-modifier-border)');
+		baseline.setAttribute('class', 'gantt-axis-baseline');
 		this.axisArea.appendChild(baseline);
 
 		const totalDaysSpan = (this.maxDay - this.minDay) / this.zoomScale;
@@ -419,11 +574,7 @@ class GanttRenderEngine {
 				gridLine.setAttribute('x2', xPos.toString());
 				gridLine.setAttribute('y1', `-${this.totalHeight - this.config.axisHeight}`);
 				gridLine.setAttribute('y2', '0');
-				gridLine.setAttribute('stroke', 'var(--background-modifier-border)');
-				gridLine.setAttribute('stroke-width', '1');
-				gridLine.setAttribute('stroke-dasharray', '4 4');
-				gridLine.setAttribute('opacity', '0.4');
-				gridLine.setAttribute('style', 'pointer-events: none;');
+				gridLine.setAttribute('class', 'gantt-axis-gridline');
 				this.axisArea.appendChild(gridLine);
 
 				const tick = this.createSVGElement('line');
@@ -431,15 +582,14 @@ class GanttRenderEngine {
 				tick.setAttribute('x2', xPos.toString());
 				tick.setAttribute('y1', '0');
 				tick.setAttribute('y2', '6');
-				tick.setAttribute('stroke', 'var(--text-muted)');
+				tick.setAttribute('class', 'gantt-axis-tick');
 				this.axisArea.appendChild(tick);
 
 				const text = this.createSVGElement('text');
 				text.setAttribute('x', xPos.toString());
 				text.setAttribute('y', '24');
 				text.setAttribute('text-anchor', 'middle');
-				text.setAttribute('fill', 'var(--text-muted)');
-				text.setAttribute('style', 'font-size: 11px; user-select: none; font-weight: 500;');
+				text.setAttribute('class', 'gantt-axis-text');
 				text.textContent = `Tag ${day}`;
 				this.axisArea.appendChild(text);
 			} else {
@@ -448,9 +598,7 @@ class GanttRenderEngine {
 				minorTick.setAttribute('x2', xPos.toString());
 				minorTick.setAttribute('y1', '0');
 				minorTick.setAttribute('y2', '4');
-				minorTick.setAttribute('stroke', 'var(--text-muted)');
-				minorTick.setAttribute('stroke-width', '1');
-				minorTick.setAttribute('opacity', '0.7');
+				minorTick.setAttribute('class', 'gantt-axis-tick-minor');
 				this.axisArea.appendChild(minorTick);
 			}
 		}
@@ -460,7 +608,6 @@ class GanttRenderEngine {
 		this.svg.addEventListener('mousedown', (e: MouseEvent) => {
 			if ((e.target as HTMLElement).classList.contains('gantt-item')) return;
 			this.isDragging = true;
-			this.svg.setAttribute('style', 'cursor: grabbing; display: block;');
 			this.startX = e.clientX;
 			this.startTranslateX = this.zoomTranslateX;
 		});
@@ -477,7 +624,6 @@ class GanttRenderEngine {
 		window.addEventListener('mouseup', () => {
 			if (this.isDragging) {
 				this.isDragging = false;
-				this.svg.setAttribute('style', 'cursor: grab; display: block;');
 			}
 		});
 
@@ -514,8 +660,6 @@ class GanttRenderEngine {
 	setupInteractions() {
 		const showTooltip = (event: MouseEvent, d: GanttItem) => {
 			this.tooltip.style.opacity = '1';
-
-			// FIX: Position tracking directly using viewport client coordinates
 			this.tooltip.style.left = `${event.clientX + 15}px`;
 			this.tooltip.style.top = `${event.clientY + 15}px`;
 
@@ -541,7 +685,6 @@ class GanttRenderEngine {
 					const dataObj = this.rawData.find(d => d.id === id);
 					if (dataObj) showTooltip(event, dataObj);
 				}
-				// FIX: Simplified viewport tracking math
 				this.tooltip.style.left = `${event.clientX + 15}px`;
 				this.tooltip.style.top = `${event.clientY + 15}px`;
 			} else {
