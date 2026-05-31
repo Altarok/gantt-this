@@ -1,0 +1,32 @@
+{
+  "calendarPattern": "{dayName}, {day}. {monthName} {year}",
+  "timeStructure": {
+    "daysInWeek": 6,
+    "weekDays": ["Eldag", "Lundag", "Stardag", "Sondag", "Moondag", "Obisdag"],
+    "months": [
+      { "name": "Deepwinter", "days": 30 },
+      { "name": "Thaw", "days": 28 },
+      { "name": "Reaping", "days": 35 }
+    ]
+  },
+  "celestialCycles": [
+    {
+      "name": "Sol Prime",
+      "type": "sun",
+      "periodDays": 360,
+      "phases": ["Zenith", "Equinox", "Nadir"]
+    },
+    {
+      "name": "Lilith",
+      "type": "moon",
+      "periodDays": 24,
+      "phases": ["New Moon", "Waxing", "Full Moon", "Waning"]
+    },
+    {
+      "name": "Gorgon",
+      "type": "moon",
+      "periodDays": 54,
+      "phases": ["High Tide", "Low Tide"]
+    }
+  ]
+  ]

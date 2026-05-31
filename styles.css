@@ -1,204 +1,211 @@
 .fantasy-gantt-wrapper {
-	position: relative;
-	background-color: var(--background-primary);
-	border: none;
-	border-radius: 0;
-	padding: 0;
-	margin: 0 0;
-	overflow: hidden;
-	/* New rules to span 100% of the active note area */
-	width: 100% !important;
-	box-sizing: border-box;
+  position: relative;
+  background-color: var(--background-primary);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+
+  /* New rules to span 100% of the active note area */
+  width: 100% !important;
+  box-sizing: border-box;
 }
+
 .gantt-toolbar {
-	display: flex;
-	gap: 16px;
-	align-items: center;
-	background-color: var(--background-secondary);
-	padding: 8px 12px;
-	border-radius: 6px;
-	margin: 0; /* Added side margins so UI controls don't touch the screen edge */
+  display: flex;
+  align-items: center;
+  background-color: var(--background-secondary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 0; /* Added side margins so UI controls don't touch the screen edge */
+  gap: 12px;
+
+  /* margin-bottom: 10px; */
 }
+
 .gantt-input-label {
-	font-size: var(--font-small-size);
-	color: var(--text-normal);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	gap: 6px;
+  font-size: var(--font-small-size);
+  color: var(--text-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  /* font-size: 12px; */
 }
+
 .gantt-btn {
-	margin-left: auto;
-	background-color: var(--interactive-normal);
-	color: var(--text-on-accent);
-	border: none;
-	padding: 4px 10px;
-	border-radius: 4px;
-	cursor: pointer;
+  margin-left: auto;
+  background-color: var(--interactive-normal);
+  color: var(--text-on-accent);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
+
 .gantt-btn:hover {
-	background-color: var(--interactive-hover);
+  background-color: var(--interactive-hover);
 }
+
 .gantt-chart-container {
-	width: 100% !important;
-	overflow: hidden;
-	padding: 0; /* Ensures zero internal space around the chart */
-	margin: 0;
+  width: 100% !important;
+  overflow: hidden;
+  padding: 0; /* Ensures zero internal space around the chart */
+  margin: 0;
 }
+
 /* Force full width on the generated SVG */
 .gantt-chart-container svg {
-	width: 100% !important;
-	height: auto;
-	display: block;
+  width: 100% !important;
+  height: auto;
+  display: block;
 }
+
 /* Tooltip implementation matching Obsidian spec */
 .gantt-tooltip {
-	/*background-color: var(--background-primary);*/
-	border: 1px solid var(--background-modifier-border);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-	padding: 10px;
-	border-radius: 6px;
-	pointer-events: none;
-	max-width: 250px;
-	font-size: var(--font-small-size);
-	color: var(--text-normal);
+  /* background-color: var(--background-primary); */
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
+  padding: 10px;
+  border-radius: 6px;
+  pointer-events: none; /* Prevents tooltip from breaking hover states */
+  max-width: 250px;
+  font-size: var(--font-small-size);
+  color: var(--text-normal);
+  opacity: 0;
+  position: fixed;
+  z-index: 9999;
 }
+
 /* Explicit solid background for Dark Mode */
 .theme-dark .gantt-tooltip {
-	background-color: #1e1e1e; /* Solid dark grey */
+  background-color: #1e1e1e; /* Solid dark grey */
 }
+
 /* Explicit solid background for Light Mode */
 .theme-light .gantt-tooltip {
-	background-color: #ffffff; /* Solid white */
+  background-color: #fff; /* Solid white */
 }
+
 .tooltip-title {
-	font-weight: bold;
-	color: var(--text-accent);
-	margin-bottom: 4px;
+  font-weight: bold;
+  color: var(--text-accent);
+  margin-bottom: 4px;
 }
+
 .tooltip-dates {
-	color: var(--text-muted);
+  color: var(--text-muted);
 }
+
 .tooltip-link {
-	color: var(--link-color);
-	margin-top: 6px;
-	font-style: italic;
+  color: var(--link-color);
+  margin-top: 6px;
+  font-style: italic;
 }
+
 /* Break out of Obsidian's readable line width constraints for this specific code block type */
 .markdown-rendered .block-language-fantasy-gantt {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin-left: 0 !important;
-	margin-right: 0 !important;
-	padding-left: 0 !important;
-	padding-right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
+
 /* Fixes spacing inside the editor's live preview mode wrappers if applicable */
 .cm-embed-block:has(.fantasy-gantt-wrapper) {
-	padding: 0 !important;
-	margin: 0 !important;
-	max-width: 100% !important;
-	width: 100% !important;
-}
-/* Toolbar and standard buttons */
-.fantasy-gantt-wrapper {
-	width: 100%;
-}
-.gantt-toolbar {
-	display: flex;
-	gap: 12px;
-	margin-bottom: 10px;
-	align-items: center;
-}
-.gantt-input-label {
-	font-size: 12px;
-	cursor: pointer;
-}
-.gantt-btn {
-	cursor: pointer;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
 }
 
 /* Core SVG & Canvas properties */
 .gantt-svg-canvas {
-	cursor: grab;
-	display: block;
+  cursor: grab;
+  display: block;
 }
+
 .gantt-svg-canvas:active {
-	cursor: grabbing;
+  cursor: grabbing;
 }
 
 /* Group Headers and Capsules */
 .gantt-group-row-even {
-	fill: var(--background-secondary);
-	opacity: 0.3;
-	pointer-events: none;
+  fill: var(--background-secondary);
+  opacity: 0.3;
+  pointer-events: none;
 }
+
 .gantt-group-row-odd {
-	fill: var(--background-secondary);
-	opacity: 0.05;
-	pointer-events: none;
+  fill: var(--background-secondary);
+  opacity: 0.05;
+  pointer-events: none;
 }
+
 .gantt-group-text {
-	fill: var(--text-normal);
-	font-size: 10px;
-	font-weight: 600;
-	letter-spacing: 0.5px;
-	pointer-events: none;
+  fill: var(--text-normal);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  pointer-events: none;
 }
+
 .gantt-group-badge {
-	fill: var(--background-modifier-border);
-	opacity: 0.6;
-	pointer-events: none;
+  fill: var(--background-modifier-border);
+  opacity: 0.6;
+  pointer-events: none;
 }
+
 .gantt-group-shadow {
-	fill: url(#header-bottom-shadow);
-	pointer-events: none;
+  fill: url('#header-bottom-shadow');
+  pointer-events: none;
 }
 
 /* Gridlines and Axis Lines */
 .gantt-axis-baseline {
-	stroke: var(--background-modifier-border);
+  stroke: var(--background-modifier-border);
 }
+
 .gantt-axis-gridline {
-	stroke: var(--background-modifier-border);
-	stroke-width: 1;
-	stroke-dasharray: 4 4;
-	opacity: 0.4;
-	pointer-events: none;
+  stroke: var(--background-modifier-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.4;
+  pointer-events: none;
 }
+
 .gantt-axis-tick {
-	stroke: var(--text-muted);
+  stroke: var(--text-muted);
 }
+
 .gantt-axis-tick-minor {
-	stroke: var(--text-muted);
-	stroke-width: 1;
-	opacity: 0.7;
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  opacity: 0.7;
 }
+
 .gantt-axis-text {
-	font-size: 11px;
-	user-select: none;
-	font-weight: 500;
-	fill: var(--text-muted);
+  font-size: 11px;
+  user-select: none;
+  font-weight: 500;
+  fill: var(--text-muted);
 }
 
 /* Interactive Timeline Elements */
 .gantt-item {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 /* Fallback fill ONLY if color attribute isn't provided inline via frontmatter */
 .gantt-item.bar-rect:not([fill]) {
-	fill: var(--interactive-accent);
+  fill: var(--interactive-accent);
 }
 
 .gantt-item.point-circle:not([fill]) {
-	fill: var(--text-accent);
+  fill: var(--text-accent);
 }
 
-/* Tooltips */
-.gantt-tooltip {
-	opacity: 0;
-	position: fixed;
-	z-index: 9999;
-	pointer-events: none; /* Prevents tooltip from breaking hover states */
-}
