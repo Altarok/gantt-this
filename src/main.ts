@@ -114,7 +114,7 @@ const defaultCalendarSettings: CustomCalendarSettings = {
 };
 
 export default class FantasyGanttPlugin extends Plugin {
-  private calendarEngine: FantasyCalendarEngine;
+  private calendarEngine!: FantasyCalendarEngine;
 
   async onload() {
     this.calendarEngine = new FantasyCalendarEngine(defaultCalendarSettings);
