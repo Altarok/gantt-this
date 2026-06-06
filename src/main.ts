@@ -3,8 +3,10 @@ import { Plugin } from 'obsidian';
 interface GanttItem {
   id: number;
   name: string;
-  startDay: number;
-  endDay: number;
+  startDate: Date;
+  endDate: Date;
+  startMs: number; // Stored as milliseconds for easier math/sorting
+  endMs: number;
   group: string;
   type: 'bar' | 'point';
   color?: string;
@@ -12,113 +14,16 @@ interface GanttItem {
   lane?: number;
 }
 
-interface MonthConfig {
+interface GanttGroup {
   name: string;
-  days: number;
+  items: GanttItem[];
+  yOffset: number;
+  height: number;
+  lanes: number;
 }
-
-interface CelestialCycleConfig {
-  name: string;
-  type: 'sun' | 'moon';
-  periodDays: number;
-  phases: string[];
-}
-
-interface CustomCalendarSettings {
-  calendarPattern: string;
-  daysInWeek: number;
-  weekDays: string[];
-  months: MonthConfig[];
-  celestialCycles: CelestialCycleConfig[];
-}
-
-class FantasyCalendarEngine {
-  private settings: CustomCalendarSettings;
-  private daysInYear: number;
-
-  constructor(settings: CustomCalendarSettings) {
-    this.settings = settings;
-    this.daysInYear = settings.months.reduce((sum, m) => sum + m.days, 0);
-  }
-
-  public getSettings(): CustomCalendarSettings {
-    return this.settings;
-  }
-
-  public absoluteDaysToDate(totalDays: number) {
-    let year = Math.floor(totalDays / this.daysInYear);
-    let remainingDays = totalDays % this.daysInYear;
-    if (remainingDays < 0) {
-      remainingDays += this.daysInYear;
-    }
-
-    let monthIndex = 0;
-    let dayIndex = remainingDays;
-
-    // Fixed: Guard to make sure index values don't overflow layout limits
-    for (let i = 0; i < this.settings.months.length; i++) {
-      if (dayIndex < this.settings.months[i].days) {
-        monthIndex = i;
-        break;
-      }
-      dayIndex -= this.settings.months[i].days;
-    }
-
-    // Guard against index fallback anomalies
-    if (monthIndex >= this.settings.months.length) {
-      monthIndex = this.settings.months.length - 1;
-    }
-
-    const day = Math.floor(dayIndex) + 1;
-    const monthName = this.settings.months[monthIndex]?.name || "Unknown";
-    const monthNum = monthIndex + 1;
-
-    let weekdayIndex = totalDays % this.settings.daysInWeek;
-    if (weekdayIndex < 0) weekdayIndex += this.settings.daysInWeek;
-    const dayName = this.settings.weekDays[weekdayIndex];
-
-    return { year, monthName, monthNum, day, dayName };
-  }
-
-  public formatString(totalDays: number, formatPattern: string): string {
-    const date = this.absoluteDaysToDate(totalDays);
-    return formatPattern
-      .replace('{year}', date.year.toString())
-      .replace('{monthName}', date.monthName)
-      .replace('{month}', date.monthNum.toString())
-      .replace('{dayName}', date.dayName)
-      .replace('{day}', date.day.toString());
-  }
-}
-
-const defaultCalendarSettings: CustomCalendarSettings = {
-  calendarPattern: "{day}. {monthName}",
-  daysInWeek: 6,
-  weekDays: ["Eldag", "Lundag", "Stardag", "Sondag", "Moondag", "Obisdag"],
-  months: [
-    { name: "Deepwinter", days: 30 },
-    { name: "Thaw", days: 28 },
-    { name: "Reaping", days: 35 },
-    { name: "Summerturn", days: 30 },
-    { name: "Harvest", days: 32 },
-    { name: "Leaffall", days: 28 }
-  ],
-  celestialCycles: [
-    {
-      name: "Lilith",
-      type: "moon",
-      periodDays: 24,
-      phases: ["New Moon", "Waxing", "Full Moon", "Waning"]
-    }
-  ]
-};
 
 export default class FantasyGanttPlugin extends Plugin {
-  private calendarEngine!: FantasyCalendarEngine;
-
   async onload() {
-    this.calendarEngine = new FantasyCalendarEngine(defaultCalendarSettings);
-
     this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
       const currentFile = this.app.workspace.getActiveFile();
       if (!currentFile || !currentFile.parent) {
@@ -175,8 +80,7 @@ export default class FantasyGanttPlugin extends Plugin {
         hoverTitle,
         hoverDates,
         hoverLink,
-        this,
-        this.calendarEngine
+        this
       );
 
       toggleBars.addEventListener('change', (e) => renderEngine.updateSettings({ showBars: (e.target as HTMLInputElement).checked }));
@@ -216,11 +120,26 @@ export default class FantasyGanttPlugin extends Plugin {
       const frontmatter = cache?.frontmatter;
 
       if (frontmatter && frontmatter['gantt-item'] === true) {
+        const startInput = frontmatter['gantt-start'];
+        const endInput = frontmatter['gantt-end'];
+
+        if (!startInput) return;
+
+        const startDate = new Date(startInput);
+        // Fallback to start date if no end date provided or if format is invalid
+        const endDate = endInput ? new Date(endInput) : new Date(startDate);
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          return; // Skip rendering items with completely invalid ISO stamps
+        }
+
         items.push({
           id: incrementalId++,
           name: frontmatter['gantt-name'] || file.basename,
-          startDay: Number(frontmatter['gantt-start'] ?? 0),
-          endDay: Number(frontmatter['gantt-end'] ?? frontmatter['gantt-start'] ?? 0),
+          startDate: startDate,
+          endDate: endDate,
+          startMs: startDate.getTime(),
+          endMs: endDate.getTime(),
           group: frontmatter['gantt-group'] || 'Allgemein',
           type: frontmatter['gantt-type'] === 'point' ? 'point' : 'bar',
           color: frontmatter['gantt-color'] || undefined,
@@ -243,10 +162,9 @@ class GanttRenderEngine {
   private dataG: SVGElement;
   private clipRect: SVGElement;
 
-  private groups: any[] = [];
+  private groups: GanttGroup[] = [];
   private totalHeight = 400;
   private plugin: Plugin;
-  private calendarEngine: FantasyCalendarEngine;
   private resizeObserver: ResizeObserver;
 
   private tooltip: HTMLElement;
@@ -262,8 +180,8 @@ class GanttRenderEngine {
     margin: { top: 20, right: 0, bottom: 0, left: 0 }
   };
 
-  private minDay = 0;
-  private maxDay = 1000;
+  private minMs = 0;
+  private maxMs = 0;
   private zoomScale = 1;
   private zoomTranslateX = 0;
   private isDragging = false;
@@ -277,8 +195,7 @@ class GanttRenderEngine {
     hoverTitle: HTMLElement,
     hoverDates: HTMLElement,
     hoverLink: HTMLElement,
-    plugin: Plugin,
-    calendarEngine: FantasyCalendarEngine
+    plugin: Plugin
   ) {
     this.container = container;
     this.rawData = rawData;
@@ -287,7 +204,6 @@ class GanttRenderEngine {
     this.hoverDates = hoverDates;
     this.hoverLink = hoverLink;
     this.plugin = plugin;
-    this.calendarEngine = calendarEngine;
 
     this.calculateTimeBounds();
     this.initLayout();
@@ -300,11 +216,23 @@ class GanttRenderEngine {
   }
 
   private calculateTimeBounds() {
-    const startValues = this.rawData.map(d => d.startDay);
-    const endValues = this.rawData.map(d => Math.max(d.startDay, d.endDay ?? 0));
+    if (this.rawData.length === 0) {
+      const now = new Date().getTime();
+      this.minMs = now - 15 * 24 * 60 * 60 * 1000;
+      this.maxMs = now + 15 * 24 * 60 * 60 * 1000;
+      return;
+    }
 
-    this.minDay = this.rawData.length > 0 ? Math.min(...startValues) - 30 : 0;
-    this.maxDay = this.rawData.length > 0 ? Math.max(...endValues) + 30 : 360;
+    const startValues = this.rawData.map(d => d.startMs);
+    const endValues = this.rawData.map(d => Math.max(d.startMs, d.endMs));
+
+    const absoluteMin = Math.min(...startValues);
+    const absoluteMax = Math.max(...endValues);
+
+    // Padding bounds by 15 days on each end
+    const paddingMs = 15 * 24 * 60 * 60 * 1000;
+    this.minMs = absoluteMin - paddingMs;
+    this.maxMs = absoluteMax + paddingMs;
   }
 
   public updateData(newData: GanttItem[]) {
@@ -320,13 +248,15 @@ class GanttRenderEngine {
   }
 
   private calculateStacking(items: GanttItem[]) {
-    const sorted = [...items].sort((a, b) => a.startDay - b.startDay);
+    const sorted = [...items].sort((a, b) => a.startMs - b.startMs);
     const lanes: GanttItem[][] = [];
     sorted.forEach(item => {
       let placed = false;
       for (let i = 0; i < lanes.length; i++) {
         const lastItem = lanes[i][lanes[i].length - 1];
-        if (lastItem.endDay < item.startDay - 1) {
+        // 1 day buffer in milliseconds
+        const dayBufferMs = 24 * 60 * 60 * 1000;
+        if (lastItem.endMs < item.startMs - dayBufferMs) {
           lanes[i].push(item);
           item.lane = i;
           placed = true;
@@ -343,8 +273,8 @@ class GanttRenderEngine {
 
   initLayout() {
     let activeData: GanttItem[] = [];
-    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => d.type === 'bar' && d.startDay !== d.endDay));
-    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.type === 'point' || d.startDay === d.endDay));
+    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => d.type === 'bar' && d.startMs !== d.endMs));
+    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.type === 'point' || d.startMs === d.endMs));
 
     this.groups = [];
     if (this.settings.enableGrouping) {
@@ -357,7 +287,7 @@ class GanttRenderEngine {
 
       let currentYOffset = this.config.margin.top;
       groupedMap.forEach((items, groupName) => {
-        const { processedData, totalLanes} = this.calculateStacking(items);
+        const { processedData, totalLanes } = this.calculateStacking(items);
         const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight + this.config.groupHeaderHeight;
         this.groups.push({
           name: groupName,
@@ -370,7 +300,7 @@ class GanttRenderEngine {
       });
       this.totalHeight = currentYOffset + this.config.axisHeight;
     } else {
-      const { processedData, totalLanes} = this.calculateStacking(activeData);
+      const { processedData, totalLanes } = this.calculateStacking(activeData);
       const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight;
       this.groups.push({
         name: 'Alle',
@@ -384,9 +314,9 @@ class GanttRenderEngine {
     this.container.style.height = `${this.totalHeight}px`;
   }
 
-  private getXPosition(day: number, width: number): number {
+  private getXPosition(ms: number, width: number): number {
     const renderWidth = width - this.config.margin.left - this.config.margin.right;
-    const percentage = (day - this.minDay) / (this.maxDay - this.minDay);
+    const percentage = (ms - this.minMs) / (this.maxMs - this.minMs);
     return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX;
   }
 
@@ -494,8 +424,8 @@ class GanttRenderEngine {
 
       group.items.forEach((d: GanttItem) => {
         if (d.type === 'bar') {
-          const x1 = this.getXPosition(d.startDay, width);
-          const x2 = this.getXPosition(d.endDay, width);
+          const x1 = this.getXPosition(d.startMs, width);
+          const x2 = this.getXPosition(d.endMs, width);
           const barWidth = Math.max(2, x2 - x1);
 
           const rect = this.createSVGElement('rect');
@@ -508,7 +438,7 @@ class GanttRenderEngine {
           rect.setAttribute('data-id', d.id.toString());
           this.dataG.appendChild(rect);
         } else if (d.type === 'point') {
-          const cx = this.getXPosition(d.startDay, width);
+          const cx = this.getXPosition(d.startMs, width);
 
           const circle = this.createSVGElement('circle');
           circle.setAttribute('class', 'gantt-item point-circle');
@@ -535,26 +465,28 @@ class GanttRenderEngine {
     baseline.setAttribute('class', 'gantt-axis-baseline');
     this.axisArea.appendChild(baseline);
 
-    const totalDaysSpan = (this.maxDay - this.minDay) / this.zoomScale;
+    const totalDaysSpan = (this.maxMs - this.minMs) / (24 * 60 * 60 * 1000) / this.zoomScale;
 
-    // Adjusted dynamic visibility step thresholds
-    let majorStep = 1;
-    if (totalDaysSpan > 2000) majorStep = 60;
-    else if (totalDaysSpan > 1000) majorStep = 30;
-    else if (totalDaysSpan > 500) majorStep = 12;
-    else if (totalDaysSpan > 120) majorStep = 6;
-    else if (totalDaysSpan > 45) majorStep = 2;
+    // Determine intervals dynamically based on viewport day span
+    let stepDays = 1;
+    if (totalDaysSpan > 365 * 3) stepDays = 365;      // Years
+    else if (totalDaysSpan > 365) stepDays = 90;     // Quarters
+    else if (totalDaysSpan > 60) stepDays = 30;      // Months
+    else if (totalDaysSpan > 20) stepDays = 7;       // Weeks
+    else if (totalDaysSpan > 5) stepDays = 2;
 
-    const startDay = Math.floor(this.minDay / majorStep) * majorStep - majorStep;
-    const endDay = Math.ceil(this.maxDay / majorStep) * majorStep + majorStep;
-    const calendarConfig = this.calendarEngine.getSettings();
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const stepMs = stepDays * msPerDay;
 
-    // Pass 1: Draw micro-ticks for every single day loop block
-    if (totalDaysSpan < 400) {
-      for (let day = Math.floor(this.minDay); day <= Math.ceil(this.maxDay); day++) {
-        const xPos = this.getXPosition(day, width);
+    // Find a clean starting timestamp matching the interval bounds
+    const startMsValue = Math.floor(this.minMs / stepMs) * stepMs - stepMs;
+    const endMsValue = Math.ceil(this.maxMs / stepMs) * stepMs + stepMs;
+
+    // Draw minor daily tick-lines under dense views
+    if (totalDaysSpan < 60 && stepDays > 1) {
+      for (let curr = this.minMs; curr <= this.maxMs; curr += msPerDay) {
+        const xPos = this.getXPosition(curr, width);
         if (xPos < 0 || xPos > renderWidth) continue;
-        if (day % majorStep === 0) continue;
 
         const minorTick = this.createSVGElement('line');
         minorTick.setAttribute('x1', xPos.toString());
@@ -566,11 +498,10 @@ class GanttRenderEngine {
       }
     }
 
-    // Pass 2: Gridlines and Dates processing loops
     let lastTextX = -999;
 
-    for (let day = startDay; day <= endDay; day += majorStep) {
-      const xPos = this.getXPosition(day, width);
+    for (let currMs = startMsValue; currMs <= endMsValue; currMs += stepMs) {
+      const xPos = this.getXPosition(currMs, width);
       if (xPos < 0 || xPos > renderWidth) continue;
 
       const gridLine = this.createSVGElement('line');
@@ -589,34 +520,26 @@ class GanttRenderEngine {
       tick.setAttribute('class', 'gantt-axis-tick');
       this.axisArea.appendChild(tick);
 
-      if (xPos - lastTextX > 40) {
+      // Prevent overlapping text on narrow layouts
+      if (xPos - lastTextX > 55) {
+        const dateObj = new Date(currMs);
         const text = this.createSVGElement('text');
         text.setAttribute('x', xPos.toString());
         text.setAttribute('y', '24');
         text.setAttribute('text-anchor', 'middle');
         text.setAttribute('class', 'gantt-axis-text');
-        text.textContent = this.calendarEngine.formatString(day, calendarConfig.calendarPattern);
+
+        // Render format dynamically based on scale
+        if (stepDays >= 365) {
+          text.textContent = dateObj.getFullYear().toString();
+        } else if (stepDays >= 30) {
+          text.textContent = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+        } else {
+          text.textContent = dateObj.toISOString().split('T')[0];
+        }
+
         this.axisArea.appendChild(text);
         lastTextX = xPos;
-      }
-
-      if (calendarConfig.celestialCycles) {
-        calendarConfig.celestialCycles.forEach(moon => {
-          let relativeDay = day % moon.periodDays;
-          if (relativeDay < 0) relativeDay += moon.periodDays;
-
-          const currentPhaseIndex = Math.floor(relativeDay / (moon.periodDays / moon.phases.length));
-          const phaseName = moon.phases[currentPhaseIndex];
-
-          if (phaseName === "Full Moon") {
-            const celestialIndicator = this.createSVGElement('circle');
-            celestialIndicator.setAttribute('cx', xPos.toString());
-            celestialIndicator.setAttribute('cy', '-12');
-            celestialIndicator.setAttribute('r', '3');
-            celestialIndicator.setAttribute('fill', 'var(--text-accent)');
-            this.axisArea.appendChild(celestialIndicator);
-          }
-        });
       }
     }
   }
@@ -651,7 +574,7 @@ class GanttRenderEngine {
       const mouseX = e.clientX - rect.left - this.config.margin.left;
 
       const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-      const nextScale = Math.min(50, Math.max(0.1, this.zoomScale * zoomFactor));
+      const nextScale = Math.min(100, Math.max(0.05, this.zoomScale * zoomFactor));
 
       this.zoomTranslateX = mouseX - (mouseX - this.zoomTranslateX) * (nextScale / this.zoomScale);
       this.zoomScale = nextScale;
@@ -682,11 +605,10 @@ class GanttRenderEngine {
 
       this.hoverTitle.textContent = d.name;
 
-      const pattern = this.calendarEngine.getSettings().calendarPattern;
-      const startStr = this.calendarEngine.formatString(d.startDay, pattern);
-      const endStr = this.calendarEngine.formatString(d.endDay, pattern);
+      const startStr = d.startDate.toISOString().split('T')[0];
+      const endStr = d.endDate.toISOString().split('T')[0];
 
-      this.hoverDates.textContent = d.type === 'bar' ? `${startStr} - ${endStr}` : startStr;
+      this.hoverDates.textContent = d.type === 'bar' ? `${startStr} bis ${endStr}` : startStr;
       this.hoverLink.style.display = d.link ? 'block' : 'none';
     };
 
