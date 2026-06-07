@@ -209,3 +209,33 @@
   fill: var(--text-accent);
 }
 
+/* Container layout for the chemical drawing */
+.obsidian-smiles-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--background-modifier-border);
+  overflow: hidden;
+}
+
+/* Ensure the SVG scales responsively inside the code block area */
+.obsidian-smiles-container svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Error message formatting for broken SMILES syntax */
+.smiles-error-msg {
+  color: var(--text-error);
+  font-family: var(--font-monospace);
+  font-size: var(--font-small);
+  padding: 0.5rem;
+  border-left: 3px solid var(--text-error);
+  background-color: var(--background-message-error);
+  width: 100%;
+}

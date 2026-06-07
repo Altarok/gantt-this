@@ -1,4 +1,6 @@
-import { Plugin } from 'obsidian';
+import {MarkdownPostProcessorContext, Plugin} from 'obsidian';
+// Assuming smiles-drawer is installed via npm or included locally
+import SmilesDrawer from 'smiles-drawer';
 
 interface GanttItem {
   id: number;
@@ -23,84 +25,90 @@ interface GanttGroup {
 }
 
 export default class FantasyGanttPlugin extends Plugin {
+
   async onload() {
+
     this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
-      const currentFile = this.app.workspace.getActiveFile();
-      if (!currentFile || !currentFile.parent) {
-        el.createEl('pre', { text: 'Fehler: Konnte den aktuellen Dateiordner nicht ermitteln.' });
-        return;
-      }
+      this.registerCalendar(el, source, ctx);
+    });
+  }
 
-      let targetFolderPath = currentFile.parent.path;
-      const lines = source.split('\n');
-      for (const line of lines) {
-        const match = line.match(/^path:\s*(.+)$/i);
-        if (match) {
-          const pathValue = match[1].trim().toLowerCase();
-          if (pathValue === 'root') {
-            targetFolderPath = '/';
-          } else if (pathValue === 'local') {
-            targetFolderPath = currentFile.parent.path;
-          } else {
-            targetFolderPath = match[1].trim();
-          }
-          break;
+  private registerCalendar(el: HTMLElement, source: string, ctx: MarkdownPostProcessorContext) {
+    const currentFile = this.app.workspace.getActiveFile();
+    if (!currentFile || !currentFile.parent) {
+      el.createEl('pre', {text: 'Fehler: Konnte den aktuellen Dateiordner nicht ermitteln.'});
+      return;
+    }
+
+    let targetFolderPath = currentFile.parent.path;
+    const lines = source.split('\n');
+    for (const line of lines) {
+      const match = line.match(/^path:\s*(.+)$/i);
+      if (match) {
+        const pathValue = match[1].trim().toLowerCase();
+        if (pathValue === 'root') {
+          targetFolderPath = '/';
+        } else if (pathValue === 'local') {
+          targetFolderPath = currentFile.parent.path;
+        } else {
+          targetFolderPath = match[1].trim();
         }
+        break;
       }
+    }
 
-      const mainWrapper = el.createDiv({ cls: 'fantasy-gantt-wrapper' });
-      const toolbar = mainWrapper.createDiv({ cls: 'gantt-toolbar' });
+    const mainWrapper = el.createDiv({cls: 'fantasy-gantt-wrapper'});
+    const toolbar = mainWrapper.createDiv({cls: 'gantt-toolbar'});
 
-      const createCheckbox = (label: string, id: string, checked = true) => {
-        const lbl = toolbar.createEl('label', { cls: 'gantt-input-label' });
-        const input = lbl.createEl('input', { attr: { type: 'checkbox', id } });
-        input.checked = checked;
-        lbl.createEl('span', { text: ` ${label}` });
-        return input;
-      };
+    const createCheckbox = (label: string, id: string, checked = true) => {
+      const lbl = toolbar.createEl('label', {cls: 'gantt-input-label'});
+      const input = lbl.createEl('input', {attr: {type: 'checkbox', id}});
+      input.checked = checked;
+      lbl.createEl('span', {text: ` ${label}`});
+      return input;
+    };
 
-      const toggleBars = createCheckbox('Balken zeigen', 'toggle-bars');
-      const togglePoints = createCheckbox('Punkte zeigen', 'toggle-points');
-      const toggleGrouping = createCheckbox('Gruppieren', 'toggle-grouping');
-      const resetBtn = toolbar.createEl('button', { text: 'Zoom Reset', cls: 'gantt-btn' });
+    const toggleBars = createCheckbox('Balken zeigen', 'toggle-bars');
+    const togglePoints = createCheckbox('Punkte zeigen', 'toggle-points');
+    const toggleGrouping = createCheckbox('Gruppieren', 'toggle-grouping');
+    const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: 'gantt-btn'});
 
-      const chartContainer = mainWrapper.createDiv({ cls: 'gantt-chart-container' });
-      const tooltip = document.body.createDiv({ cls: 'gantt-tooltip', attr: { id: 'gantt-tooltip-element' } });
+    const chartContainer = mainWrapper.createDiv({cls: 'gantt-chart-container'});
+    const tooltip = document.body.createDiv({cls: 'gantt-tooltip', attr: {id: 'gantt-tooltip-element'}});
 
-      const hoverTitle = tooltip.createDiv({ cls: 'tooltip-title' });
-      const hoverDates = tooltip.createDiv({ cls: 'tooltip-dates' });
-      const hoverLink = tooltip.createDiv({ cls: 'tooltip-link', text: 'Klicke um Notiz zu öffnen' });
+    const hoverTitle = tooltip.createDiv({cls: 'tooltip-title'});
+    const hoverDates = tooltip.createDiv({cls: 'tooltip-dates'});
+    const hoverLink = tooltip.createDiv({cls: 'tooltip-link', text: 'Klicke um Notiz zu öffnen'});
 
-      let data = this.getGanttDataFromFolder(targetFolderPath);
+    let data = this.getGanttDataFromFolder(targetFolderPath);
 
-      const renderEngine = new GanttRenderEngine(
-        chartContainer,
-        data,
-        tooltip,
-        hoverTitle,
-        hoverDates,
-        hoverLink,
-        this
-      );
+    const renderEngine = new GanttRenderEngine(
+      chartContainer,
+      data,
+      tooltip,
+      hoverTitle,
+      hoverDates,
+      hoverLink,
+      this
+    );
 
-      toggleBars.addEventListener('change', (e) => renderEngine.updateSettings({ showBars: (e.target as HTMLInputElement).checked }));
-      togglePoints.addEventListener('change', (e) => renderEngine.updateSettings({ showPoints: (e.target as HTMLInputElement).checked }));
-      toggleGrouping.addEventListener('change', (e) => renderEngine.updateSettings({ enableGrouping: (e.target as HTMLInputElement).checked }));
-      resetBtn.addEventListener('click', () => renderEngine.resetZoom());
+    toggleBars.addEventListener('change', (e) => renderEngine.updateSettings({showBars: (e.target as HTMLInputElement).checked}));
+    togglePoints.addEventListener('change', (e) => renderEngine.updateSettings({showPoints: (e.target as HTMLInputElement).checked}));
+    toggleGrouping.addEventListener('change', (e) => renderEngine.updateSettings({enableGrouping: (e.target as HTMLInputElement).checked}));
+    resetBtn.addEventListener('click', () => renderEngine.resetZoom());
 
-      this.registerEvent(
-        this.app.metadataCache.on('changed', (file) => {
-          const fileInTargetScope = targetFolderPath === '/' || (file.parent && file.parent.path === targetFolderPath);
-          if (fileInTargetScope) {
-            const updatedData = this.getGanttDataFromFolder(targetFolderPath);
-            renderEngine.updateData(updatedData);
-          }
-        })
-      );
+    this.registerEvent(
+      this.app.metadataCache.on('changed', (file) => {
+        const fileInTargetScope = targetFolderPath === '/' || (file.parent && file.parent.path === targetFolderPath);
+        if (fileInTargetScope) {
+          const updatedData = this.getGanttDataFromFolder(targetFolderPath);
+          renderEngine.updateData(updatedData);
+        }
+      })
+    );
 
-      ctx.onUnload(() => {
-        tooltip.remove();
-      });
+    ctx.onUnload(() => {
+      tooltip.remove();
     });
   }
 

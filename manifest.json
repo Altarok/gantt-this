@@ -5,5 +5,5 @@
 	"minAppVersion": "1.13.0",
 	"description": "Proof of concept for TTRPG Gantt timeline",
 	"author": "Altarok",
-	"isDesktopOnly": true
+	"isDesktopOnly": false
 }
