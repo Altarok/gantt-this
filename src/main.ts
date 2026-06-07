@@ -1,6 +1,4 @@
 import {MarkdownPostProcessorContext, Plugin} from 'obsidian';
-// Assuming smiles-drawer is installed via npm or included locally
-import SmilesDrawer from 'smiles-drawer';
 
 interface GanttItem {
   id: number;
