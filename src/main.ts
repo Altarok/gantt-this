@@ -25,7 +25,6 @@ interface GanttGroup {
 export default class FantasyGanttPlugin extends Plugin {
 
   async onload() {
-
     this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
       this.registerCalendar(el, source, ctx);
     });
@@ -106,6 +105,7 @@ export default class FantasyGanttPlugin extends Plugin {
     );
 
     ctx.onUnload(() => {
+      debugger
       tooltip.remove();
     });
   }
@@ -142,8 +142,8 @@ export default class FantasyGanttPlugin extends Plugin {
         items.push({
           id: incrementalId++,
           name: frontmatter['gantt-name'] || file.basename,
-          startDate: startDate,
-          endDate: endDate,
+          startDate,
+          endDate,
           startMs: startDate.getTime(),
           endMs: endDate.getTime(),
           group: frontmatter['gantt-group'] || 'Allgemein',
@@ -159,8 +159,6 @@ export default class FantasyGanttPlugin extends Plugin {
 }
 
 class GanttRenderEngine {
-  private container: HTMLElement;
-  private rawData: GanttItem[];
   private svg: SVGElement;
   private backgroundG: SVGElement;
   private chartArea: SVGElement;
@@ -170,20 +168,14 @@ class GanttRenderEngine {
 
   private groups: GanttGroup[] = [];
   private totalHeight = 400;
-  private plugin: Plugin;
   private resizeObserver: ResizeObserver;
 
-  private tooltip: HTMLElement;
-  private hoverTitle: HTMLElement;
-  private hoverDates: HTMLElement;
-  private hoverLink: HTMLElement;
-
-  private settings = { showBars: true, showPoints: true, enableGrouping: true };
+  private settings = {showBars: true, showPoints: true, enableGrouping: true};
   private config = {
     rowHeight: 24,
     groupHeaderHeight: 25,
     axisHeight: 50,
-    margin: { top: 20, right: 0, bottom: 0, left: 0 }
+    margin: {top: 20, right: 0, bottom: 0, left: 0}
   };
 
   private minMs = 0;
@@ -195,22 +187,14 @@ class GanttRenderEngine {
   private startTranslateX = 0;
 
   constructor(
-    container: HTMLElement,
-    rawData: GanttItem[],
-    tooltip: HTMLElement,
-    hoverTitle: HTMLElement,
-    hoverDates: HTMLElement,
-    hoverLink: HTMLElement,
-    plugin: Plugin
+    public readonly container: HTMLElement,
+    public readonly rawData: GanttItem[],
+    public readonly tooltip: HTMLElement,
+    public readonly hoverTitle: HTMLElement,
+    public readonly hoverDates: HTMLElement,
+    public readonly hoverLink: HTMLElement,
+    public readonly plugin: Plugin
   ) {
-    this.container = container;
-    this.rawData = rawData;
-    this.tooltip = tooltip;
-    this.hoverTitle = hoverTitle;
-    this.hoverDates = hoverDates;
-    this.hoverLink = hoverLink;
-    this.plugin = plugin;
-
     this.calculateTimeBounds();
     this.initLayout();
     this.initChartStructure();
@@ -274,7 +258,7 @@ class GanttRenderEngine {
         item.lane = lanes.length - 1;
       }
     });
-    return { processedData: sorted, totalLanes: lanes.length };
+    return {processedData: sorted, totalLanes: lanes.length};
   }
 
   initLayout() {
@@ -293,7 +277,7 @@ class GanttRenderEngine {
 
       let currentYOffset = this.config.margin.top;
       groupedMap.forEach((items, groupName) => {
-        const { processedData, totalLanes } = this.calculateStacking(items);
+        const {processedData, totalLanes} = this.calculateStacking(items);
         const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight + this.config.groupHeaderHeight;
         this.groups.push({
           name: groupName,
@@ -306,7 +290,7 @@ class GanttRenderEngine {
       });
       this.totalHeight = currentYOffset + this.config.axisHeight;
     } else {
-      const { processedData, totalLanes } = this.calculateStacking(activeData);
+      const {processedData, totalLanes} = this.calculateStacking(activeData);
       const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight;
       this.groups.push({
         name: 'Alle',
@@ -587,7 +571,7 @@ class GanttRenderEngine {
 
       this.renderData(width);
       this.drawAxes(width);
-    }, { passive: false });
+    }, {passive: false});
   }
 
   resetZoom() {
@@ -597,7 +581,7 @@ class GanttRenderEngine {
   }
 
   updateSettings(newSettings: any) {
-    this.settings = { ...this.settings, ...newSettings };
+    this.settings = {...this.settings, ...newSettings};
     this.initLayout();
     this.initChartStructure();
     this.handleResize();
