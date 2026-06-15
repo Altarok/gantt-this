@@ -3,15 +3,17 @@ import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
 export interface FantasyGanttSettings {
   defaultType: string;
   fallbackColor: string;
-  typeColors: Record<string, string>;   // Map for calendar type colors (e.g., "iso-8601": "#2e7d32")
-  groupColors: Record<string, string>;  // Map for group colors (e.g., "Quest": "#ff8f00")
+  typeColors: Record<string, string>;       // Map for calendar type colors (e.g., "iso-8601": "#2e7d32")
+  groupColors: Record<string, string>;      // Map for group colors (e.g., "Quest": "#ff8f00")
+  visibleCalendars: Record<string, boolean>; // Map for tracking calendar visibility toggles
 }
 
 export const DEFAULT_SETTINGS: FantasyGanttSettings = {
   defaultType: 'iso-8601',
   fallbackColor: '#1565c0',
   typeColors: {},
-  groupColors: {}
+  groupColors: {},
+  visibleCalendars: {}
 };
 
 export class FantasyGanttSettingTab extends PluginSettingTab {
@@ -50,29 +52,76 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // 2. Calendar/Timestamp Type Colors Section
+    // 2. Calendar Visibility Section
+    containerEl.createEl('h3', { text: 'Calendar Visibility Filter' });
+    containerEl.createEl('p', {
+      text: 'Control which calendar types are visible on your timelines. If a calendar type is turned off here, items belonging to that calendar type will be hidden.',
+      attr: { style: 'font-size: 0.9em; color: var(--text-muted); margin-bottom: 10px;' }
+    });
+
+    const visibilityContainer = containerEl.createDiv({ cls: 'gantt-settings-visibility-list' });
+    this.renderVisibilitySettings(visibilityContainer);
+
+    // 3. Calendar/Timestamp Type Colors Section
     containerEl.createEl('h3', { text: 'Default Colors for Timestamp Types (Calendars)' });
 
-    // UI to add a new type color mapping
     const typeContainer = containerEl.createDiv({ cls: 'gantt-settings-container' });
     this.renderMapSettings(
       typeContainer,
       this.plugin.settings.typeColors,
       'New type (e.g., mayan)',
-      '#2e7d32'
+      '#2e7d32',
+      true // Pass true to synchronize added types to the visibility record automatically
     );
 
-    // 3. Group Colors Section
+    // 4. Group Colors Section
     containerEl.createEl('h3', { text: 'Default Colors for Groups' });
 
-    // UI to add a new group color mapping
     const groupContainer = containerEl.createDiv({ cls: 'gantt-settings-container' });
     this.renderMapSettings(
       groupContainer,
       this.plugin.settings.groupColors,
       'New group (e.g., Quest)',
-      '#ff8f00'
+      '#ff8f00',
+      false
     );
+  }
+
+  /**
+   * Renders a list of checkbox toggles for each calendar type found in typeColors
+   */
+  private renderVisibilitySettings(container: HTMLElement) {
+    const definedTypes = Object.keys(this.plugin.settings.typeColors);
+
+    // Ensure defaultType is always available to toggle even if no custom color is added yet
+    if (!definedTypes.includes(this.plugin.settings.defaultType)) {
+      definedTypes.push(this.plugin.settings.defaultType);
+    }
+
+    if (definedTypes.length === 0) {
+      container.createEl('span', {
+        text: 'No custom calendar types added yet. Add an assignment below to filter visibility.',
+        attr: { style: 'font-style: italic; color: var(--text-muted);' }
+      });
+      return;
+    }
+
+    definedTypes.forEach(typeKey => {
+      // Ensure state is initialized in the record
+      if (this.plugin.settings.visibleCalendars[typeKey] === undefined) {
+        this.plugin.settings.visibleCalendars[typeKey] = true;
+      }
+
+      new Setting(container)
+        .setName(`Show "${typeKey}" Calendar`)
+        .setDesc(`Toggle visibility for files using gantt-type: "${typeKey}"`)
+        .addToggle(toggle => toggle
+          .setValue(this.plugin.settings.visibleCalendars[typeKey])
+          .onChange(async (value) => {
+            this.plugin.settings.visibleCalendars[typeKey] = value;
+            await this.plugin.saveSettings();
+          }));
+    });
   }
 
   /**
@@ -82,7 +131,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     container: HTMLElement,
     record: Record<string, string>,
     placeholderText: string,
-    defaultColor: string
+    defaultColor: string,
+    syncToVisibility: boolean
   ) {
     const listEl = container.createDiv({ cls: 'gantt-settings-list' });
 
@@ -101,6 +151,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const deleteBtn = row.createEl('button', { text: 'Delete', cls: 'mod-warning' });
       deleteBtn.addEventListener('click', async () => {
         delete record[key];
+        if (syncToVisibility && this.plugin.settings.visibleCalendars[key] !== undefined) {
+          delete this.plugin.settings.visibleCalendars[key];
+        }
         await this.plugin.saveSettings();
         this.display(); // Refresh UI layout
       });
@@ -113,7 +166,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       .addText(text => {
         text.setPlaceholder(placeholderText);
 
-        // Target container to bundle add actions cleanly
         const textEl = text.inputEl;
         const parentSetting = textEl.parentElement?.parentElement;
 
@@ -125,6 +177,11 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             const key = text.getValue().trim();
             if (key && !record[key]) {
               record[key] = picker.value;
+
+              if (syncToVisibility) {
+                this.plugin.settings.visibleCalendars[key] = true;
+              }
+
               await this.plugin.saveSettings();
               this.display();
             }
