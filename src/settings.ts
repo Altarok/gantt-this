@@ -1,4 +1,5 @@
-import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import FantasyGanttPlugin from "./main";
 
 export interface FantasyGanttSettings {
   defaultType: string;
@@ -17,9 +18,9 @@ export const DEFAULT_SETTINGS: FantasyGanttSettings = {
 };
 
 export class FantasyGanttSettingTab extends PluginSettingTab {
-  plugin: any; // Using any here so it interfaces easily with your main plugin instance
+  plugin: FantasyGanttPlugin;
 
-  constructor(app: App, plugin: Plugin) {
+  constructor(app: App, plugin: FantasyGanttPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -170,7 +171,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         const parentSetting = textEl.parentElement?.parentElement;
 
         if (parentSetting) {
-          const picker = parentSetting.createEl('input', { attr: { type: 'color', value: defaultColor }, style: 'margin: 0 10px;' });
+          const picker = parentSetting.createEl('input', { attr: { type: 'color', value: defaultColor, style: 'margin: 0 10px;' }});
           const addBtn = parentSetting.createEl('button', { text: 'Add', cls: 'mod-cta' });
 
           addBtn.addEventListener('click', async () => {

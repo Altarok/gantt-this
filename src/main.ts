@@ -1,4 +1,4 @@
-import { MarkdownPostProcessorContext, MarkdownRenderChild, Plugin, parseYaml, TFile } from 'obsidian';
+import {MarkdownPostProcessorContext, MarkdownRenderChild, Plugin, parseYaml, TFile, Notice} from 'obsidian';
 import { FantasyGanttSettings, DEFAULT_SETTINGS, FantasyGanttSettingTab } from './settings';
 
 // Interface for resolved custom definitions
@@ -52,7 +52,7 @@ class GanttTooltipComponent extends MarkdownRenderChild {
 }
 
 export default class FantasyGanttPlugin extends Plugin {
-  settings: FantasyGanttSettings;
+  settings: FantasyGanttSettings = DEFAULT_SETTINGS;
   private calendarConfigsCache: Map<string, CalendarConfig> = new Map();
 
   async onload() {
@@ -105,8 +105,9 @@ export default class FantasyGanttPlugin extends Plugin {
       const parsed = parseYaml(match[1]) as CalendarConfig;
       this.calendarConfigsCache.set(calendarId, parsed);
       return parsed;
-    } catch (e) {
-      console.error(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}":`, e);
+    } catch (_e) {
+      new Notice(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}"`)
+      // console.error(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}":`, e);
       return null;
     }
   }
@@ -175,49 +176,6 @@ export default class FantasyGanttPlugin extends Plugin {
       display: date.toISOString().split('T')[0]
     };
   }
-
-  // // Converts any date string (Gregorian or Custom positional) to absolute days since Year 0 Gregorian
-  // private parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
-  //   if (!input) return null;
-  //   const cleanInput = input.toString().trim();
-  //
-  //   // Handle positional custom system parsing if definition is available
-  //   if (config && config.type === 'positional' && cleanInput.includes(config.delimiter)) {
-  //     const segments = cleanInput.split(config.delimiter).map(Number);
-  //     let totalDays = 0;
-  //     let valid = true;
-  //
-  //     config.units.forEach((unit, idx) => {
-  //       if (segments[idx] !== undefined && !isNaN(segments[idx])) {
-  //         totalDays += segments[idx] * unit.days;
-  //       } else if (idx < segments.length) {
-  //         valid = false;
-  //       }
-  //     });
-  //
-  //     if (!valid) return null;
-  //
-  //     // Calculate base offset days of this calendar's epoch relative to Gregorian base 0
-  //     const epochDate = new Date(config.epoch_gregorian);
-  //     if (isNaN(epochDate.getTime())) return null;
-  //     const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000));
-  //
-  //     return {
-  //       days: epochDaysOffset + totalDays,
-  //       display: cleanInput
-  //     };
-  //   }
-  //
-  //   // Default to standard Gregorian Date parsing
-  //   const date = new Date(cleanInput);
-  //   if (isNaN(date.getTime())) return null;
-  //
-  //   const daysValue = Math.floor(date.getTime() / (24 * 60 * 60 * 1000));
-  //   return {
-  //     days: daysValue,
-  //     display: date.toISOString().split('T')[0]
-  //   };
-  // }
 
   private async registerCalendar(el: HTMLElement, source: string, ctx: MarkdownPostProcessorContext) {
     const currentFile = this.app.workspace.getActiveFile();
@@ -357,12 +315,12 @@ export default class FantasyGanttPlugin extends Plugin {
 }
 
 class GanttRenderEngine {
-  private svg: SVGElement;
-  private backgroundG: SVGElement;
-  private chartArea: SVGElement;
-  private dataG: SVGElement;
-  private axisG: SVGElement;
-  private clipRect: SVGElement;
+  private svg!: SVGElement;
+  private backgroundG!: SVGElement;
+  private chartArea!: SVGElement;
+  private dataG!: SVGElement;
+  private axisG!: SVGElement;
+  private clipRect!: SVGElement;
 
   private groups: GanttGroup[] = [];
   private activeAxesList: string[] = [];
@@ -572,7 +530,7 @@ class GanttRenderEngine {
         rect.setAttribute('class', i % 2 === 0 ? 'gantt-group-row-even' : 'gantt-group-row-odd');
         groupG.appendChild(rect);
 
-        const text = this.createSVGElement('text');
+        const text: SVGTextContentElement = this.createSVGElement('text');
         text.setAttribute('x', '20');
         text.setAttribute('y', '17');
         text.setAttribute('class', 'gantt-group-text');
