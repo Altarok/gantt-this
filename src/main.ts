@@ -52,59 +52,59 @@ class GanttTooltipComponent extends MarkdownRenderChild {
 }
 
 export default class FantasyGanttPlugin extends Plugin {
-  settings: FantasyGanttSettings = DEFAULT_SETTINGS;
-  private calendarConfigsCache: Map<string, CalendarConfig> = new Map();
+  settings: FantasyGanttSettings = DEFAULT_SETTINGS
+  private calendarConfigsCache: Map<string, CalendarConfig> = new Map()
 
   async onload() {
-    await this.loadSettings();
-    this.addSettingTab(new FantasyGanttSettingTab(this.app, this));
+    await this.loadSettings()
+    this.addSettingTab(new FantasyGanttSettingTab(this.app, this))
 
     this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
-      await this.registerCalendar(el, source, ctx);
-    });
+      await this.registerCalendar(el, source, ctx)
+    })
   }
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
   }
 
   async saveSettings() {
-    await this.saveData(this.settings);
-    this.app.metadataCache.trigger('resolved');
+    await this.saveData(this.settings)
+    this.app.metadataCache.trigger('resolved')
   }
 
   async getCalendarDefinition(calendarId: string): Promise<CalendarConfig | null> {
     if (this.calendarConfigsCache.has(calendarId)) {
-      return this.calendarConfigsCache.get(calendarId) || null;
+      return this.calendarConfigsCache.get(calendarId) || null
     }
 
-    const files = this.app.vault.getMarkdownFiles();
-    let targetFile: TFile | null = null;
+    const files = this.app.vault.getMarkdownFiles()
+    let targetFile: TFile | null = null
 
     for (const file of files) {
-      const cache = this.app.metadataCache.getFileCache(file);
+      const cache = this.app.metadataCache.getFileCache(file)
       if (cache?.frontmatter && cache.frontmatter['gantt-type-definition'] === calendarId) {
-        targetFile = file;
-        break;
+        targetFile = file
+        break
       }
     }
 
     if (!targetFile) {
-      return null;
+      return null
     }
 
-    const content = await this.app.vault.read(targetFile);
-    const yamlRegex = /```yaml\s([\s\S]*?)```/;
-    const match = content.match(yamlRegex);
+    const content = await this.app.vault.read(targetFile)
+    const yamlRegex = /```yaml\s([\s\S]*?)```/
+    const match = content.match(yamlRegex)
 
     if (!match || !match[1]) {
-      return null;
+      return null
     }
 
     try {
       const parsed = parseYaml(match[1]) as CalendarConfig
       this.calendarConfigsCache.set(calendarId, parsed)
-      return parsed;
+      return parsed
     } catch (_e) {
       new Notice(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}"`)
       // console.error(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}":`, e)
@@ -226,8 +226,8 @@ export default class FantasyGanttPlugin extends Plugin {
     const hoverDates = tooltip.createDiv({ cls: 'tooltip-dates' })
     const hoverLink = tooltip.createDiv({ cls: 'tooltip-link', text: 'Click to open active note file' })
 
-    this.calendarConfigsCache.clear(); // Wipe cache to handle real-time modifications
-    let data = await this.getGanttDataFromFolder(targetFolderPath);
+    this.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
+    let data = await this.getGanttDataFromFolder(targetFolderPath)
 
     const renderEngine = new GanttRenderEngine(
       chartContainer,
@@ -381,11 +381,11 @@ class GanttRenderEngine {
   }
 
   public updateData(newData: GanttItem[]) {
-    this.rawData = newData;
-    this.calculateGlobalBounds();
-    this.initLayout();
-    this.initChartStructure();
-    this.handleResize();
+    this.rawData = newData
+    this.calculateGlobalBounds()
+    this.initLayout()
+    this.initChartStructure()
+    this.handleResize()
   }
 
   private calculateStacking(items: GanttItem[]) {
@@ -404,7 +404,7 @@ class GanttRenderEngine {
       }
       if (!placed) {
         lanes.push([item])
-        item.lane = lanes.length - 1;
+        item.lane = lanes.length - 1
       }
     })
     return { processedData: sorted, totalLanes: lanes.length }
@@ -438,7 +438,7 @@ class GanttRenderEngine {
           height: groupHeight,
           lanes: totalLanes
         })
-        currentYOffset += groupHeight;
+        currentYOffset += groupHeight
       })
     } else {
       const { processedData, totalLanes } = this.calculateStacking(activeData)
@@ -465,7 +465,7 @@ class GanttRenderEngine {
   }
 
   private createSVGElement(tag: string): SVGElement {
-    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+    return document.createElementNS('http://www.w3.org/2000/svg', tag)
   }
 
   initChartStructure() {
@@ -537,309 +537,309 @@ class GanttRenderEngine {
         text.textContent = d.name.toUpperCase()
         groupG.appendChild(text)
 
-        const computedLength = (text as any).getComputedTextLength ? (text as any).getComputedTextLength() : 0;
-        const textWidthEstimate = computedLength > 0 ? computedLength : d.name.length * 6.5;
-        const badgeWidth = textWidthEstimate + 20;
-        const badgeHeight = 18;
+        const computedLength = (text as any).getComputedTextLength ? (text as any).getComputedTextLength() : 0
+        const textWidthEstimate = computedLength > 0 ? computedLength : d.name.length * 6.5
+        const badgeWidth = textWidthEstimate + 20
+        const badgeHeight = 18
 
-        const shadowRect = this.createSVGElement('rect');
-        shadowRect.setAttribute('x', '10');
-        shadowRect.setAttribute('y', (5 + badgeHeight).toString());
-        shadowRect.setAttribute('width', badgeWidth.toString());
-        shadowRect.setAttribute('height', '4');
-        shadowRect.setAttribute('class', 'gantt-group-shadow');
+        const shadowRect = this.createSVGElement('rect')
+        shadowRect.setAttribute('x', '10')
+        shadowRect.setAttribute('y', (5 + badgeHeight).toString())
+        shadowRect.setAttribute('width', badgeWidth.toString())
+        shadowRect.setAttribute('height', '4')
+        shadowRect.setAttribute('class', 'gantt-group-shadow')
 
-        const badge = this.createSVGElement('rect');
-        badge.setAttribute('x', '10');
-        badge.setAttribute('y', '5');
-        badge.setAttribute('width', badgeWidth.toString());
-        badge.setAttribute('height', badgeHeight.toString());
-        badge.setAttribute('rx', (badgeHeight / 2).toString());
-        badge.setAttribute('ry', (badgeHeight / 2).toString());
-        badge.setAttribute('class', 'gantt-group-badge');
+        const badge = this.createSVGElement('rect')
+        badge.setAttribute('x', '10')
+        badge.setAttribute('y', '5')
+        badge.setAttribute('width', badgeWidth.toString())
+        badge.setAttribute('height', badgeHeight.toString())
+        badge.setAttribute('rx', (badgeHeight / 2).toString())
+        badge.setAttribute('ry', (badgeHeight / 2).toString())
+        badge.setAttribute('class', 'gantt-group-badge')
 
-        groupG.insertBefore(shadowRect, text);
-        groupG.insertBefore(badge, text);
-        this.backgroundG.appendChild(groupG);
+        groupG.insertBefore(shadowRect, text)
+        groupG.insertBefore(badge, text)
+        this.backgroundG.appendChild(groupG)
       }
-    });
+    })
   }
 
   renderData(width: number) {
-    this.dataG.innerHTML = '';
+    this.dataG.innerHTML = ''
 
     this.groups.forEach(group => {
-      const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0);
+      const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
 
       group.items.forEach((d: GanttItem) => {
         if (d.type === 'bar') {
-          const x1 = this.getXPosition(d.startDays, width);
-          const x2 = this.getXPosition(d.endDays, width);
-          const barWidth = Math.max(2, x2 - x1);
+          const x1 = this.getXPosition(d.startDays, width)
+          const x2 = this.getXPosition(d.endDays, width)
+          const barWidth = Math.max(2, x2 - x1)
 
-          const rect = this.createSVGElement('rect');
-          rect.setAttribute('class', 'gantt-item bar-rect');
-          rect.setAttribute('x', x1.toString());
-          rect.setAttribute('y', (groupYStart + d.lane! * this.config.rowHeight + 4).toString());
-          rect.setAttribute('width', barWidth.toString());
-          rect.setAttribute('height', (this.config.rowHeight - 8).toString());
-          if (d.color) rect.setAttribute('fill', d.color);
-          rect.setAttribute('data-id', d.id.toString());
-          this.dataG.appendChild(rect);
+          const rect = this.createSVGElement('rect')
+          rect.setAttribute('class', 'gantt-item bar-rect')
+          rect.setAttribute('x', x1.toString())
+          rect.setAttribute('y', (groupYStart + d.lane! * this.config.rowHeight + 4).toString())
+          rect.setAttribute('width', barWidth.toString())
+          rect.setAttribute('height', (this.config.rowHeight - 8).toString())
+          if (d.color) rect.setAttribute('fill', d.color)
+          rect.setAttribute('data-id', d.id.toString())
+          this.dataG.appendChild(rect)
         } else if (d.type === 'point') {
-          const cx = this.getXPosition(d.startDays, width);
+          const cx = this.getXPosition(d.startDays, width)
 
-          const circle = this.createSVGElement('circle');
-          circle.setAttribute('class', 'gantt-item point-circle');
-          circle.setAttribute('cx', cx.toString());
-          circle.setAttribute('cy', (groupYStart + d.lane! * this.config.rowHeight + this.config.rowHeight / 2).toString());
-          circle.setAttribute('r', '6');
-          if (d.color) circle.setAttribute('fill', d.color);
-          circle.setAttribute('data-id', d.id.toString());
-          this.dataG.appendChild(circle);
+          const circle = this.createSVGElement('circle')
+          circle.setAttribute('class', 'gantt-item point-circle')
+          circle.setAttribute('cx', cx.toString())
+          circle.setAttribute('cy', (groupYStart + d.lane! * this.config.rowHeight + this.config.rowHeight / 2).toString())
+          circle.setAttribute('r', '6')
+          if (d.color) circle.setAttribute('fill', d.color)
+          circle.setAttribute('data-id', d.id.toString())
+          this.dataG.appendChild(circle)
         }
-      });
-    });
+      })
+    })
   }
 
 // 2. UPDATE THE AXIS LABEL FORMATTER INSIDE THE GANTT RENDER ENGINE CLASS
   private formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
     if (!config) {
-      const dateObj = new Date(days * 24 * 60 * 60 * 1000);
-      return dateObj.toISOString().split('T')[0];
+      const dateObj = new Date(days * 24 * 60 * 60 * 1000)
+      return dateObj.toISOString().split('T')[0]
     }
 
     // STRATEGY A: Reverse Engine Real Gregorian Dates from Day Counts
     if (config.type === 'gregorian') {
-      let remainingDays = days;
+      let remainingDays = days
 
       // Approximate year selection step
-      let year = Math.floor(remainingDays / 365.2425) + 1;
-      let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400);
+      let year = Math.floor(remainingDays / 365.2425) + 1
+      let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
 
       // Micro adjust to pinpoint exact leap layout boundary alignment
       while (totalDaysToYearStart > remainingDays) {
-        year--;
-        totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400);
+        year--
+        totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
       }
 
-      remainingDays -= totalDaysToYearStart;
-      const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-      const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      remainingDays -= totalDaysToYearStart
+      const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
+      const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-      let month = 1;
+      let month = 1
       for (let m = 0; m < 12; m++) {
         if (remainingDays >= monthDays[m]) {
-          remainingDays -= monthDays[m];
-          month++;
+          remainingDays -= monthDays[m]
+          month++
         } else {
-          break;
+          break
         }
       }
-      const day = remainingDays + 1;
+      const day = remainingDays + 1
 
-      return `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`;
+      return `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
     }
 
     // STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.)
-    const epochDate = new Date(config.epoch_gregorian);
-    const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000));
-    let localDays = days - epochDaysOffset;
+    const epochDate = new Date(config.epoch_gregorian)
+    const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+    let localDays = days - epochDaysOffset
 
-    if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`;
+    if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`
 
-    const stringSegments: string[] = [];
+    const stringSegments: string[] = []
     config.units.forEach(unit => {
-      const unitCount = Math.floor(localDays / unit.days);
-      stringSegments.push(unitCount.toString());
-      localDays %= unit.days;
-    });
+      const unitCount = Math.floor(localDays / unit.days)
+      stringSegments.push(unitCount.toString())
+      localDays %= unit.days
+    })
 
-    return stringSegments.join(config.delimiter);
+    return stringSegments.join(config.delimiter)
   }
 
   drawAxes(width: number) {
-    this.axisG.innerHTML = '';
-    const renderWidth = width - this.config.margin.left - this.config.margin.right;
+    this.axisG.innerHTML = ''
+    const renderWidth = width - this.config.margin.left - this.config.margin.right
 
-    const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom;
-    const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale;
+    const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
+    const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
 
-    let stepDays = 1;
-    if (totalDaysSpan > 365 * 3) stepDays = 365;
-    else if (totalDaysSpan > 365) stepDays = 90;
-    else if (totalDaysSpan > 60) stepDays = 30;
-    else if (totalDaysSpan > 20) stepDays = 7;
-    else if (totalDaysSpan > 5) stepDays = 2;
+    let stepDays = 1
+    if (totalDaysSpan > 365 * 3) stepDays = 365
+    else if (totalDaysSpan > 365) stepDays = 90
+    else if (totalDaysSpan > 60) stepDays = 30
+    else if (totalDaysSpan > 20) stepDays = 7
+    else if (totalDaysSpan > 5) stepDays = 2
 
-    const startDaysValue = Math.floor(this.minDays / stepDays) * stepDays - stepDays;
-    const endDaysValue = Math.ceil(this.maxDays / stepDays) * stepDays + stepDays;
+    const startDaysValue = Math.floor(this.minDays / stepDays) * stepDays - stepDays
+    const endDaysValue = Math.ceil(this.maxDays / stepDays) * stepDays + stepDays
 
     this.activeAxesList.forEach((calType, index) => {
-      const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight);
+      const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight)
 
-      const individualAxisG = this.createSVGElement('g');
-      individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`);
+      const individualAxisG = this.createSVGElement('g')
+      individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
 
-      const baseline = this.createSVGElement('line');
-      baseline.setAttribute('x1', '0');
-      baseline.setAttribute('x2', renderWidth.toString());
-      baseline.setAttribute('y1', '0');
-      baseline.setAttribute('y2', '0');
-      baseline.setAttribute('class', 'gantt-axis-baseline');
-      individualAxisG.appendChild(baseline);
+      const baseline = this.createSVGElement('line')
+      baseline.setAttribute('x1', '0')
+      baseline.setAttribute('x2', renderWidth.toString())
+      baseline.setAttribute('y1', '0')
+      baseline.setAttribute('y2', '0')
+      baseline.setAttribute('class', 'gantt-axis-baseline')
+      individualAxisG.appendChild(baseline)
 
-      const label = this.createSVGElement('text');
-      label.setAttribute('x', '10');
-      label.setAttribute('y', '20');
-      label.setAttribute('style', 'font-size: 0.75em; font-weight: bold; fill: var(--text-muted); text-transform: uppercase;');
-      label.textContent = calType;
-      individualAxisG.appendChild(label);
+      const label = this.createSVGElement('text')
+      label.setAttribute('x', '10')
+      label.setAttribute('y', '20')
+      label.setAttribute('style', 'font-size: 0.75em; font-weight: bold; fill: var(--text-muted); text-transform: uppercase;')
+      label.textContent = calType
+      individualAxisG.appendChild(label)
 
-      let lastTextX = -999;
+      let lastTextX = -999
 
       // Access configuration directly via plugin async cache
-      const config = (this.plugin as any).calendarConfigsCache.get(calType) || null;
+      const config = (this.plugin as any).calendarConfigsCache.get(calType) || null
 
       for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
-        const xPos = this.getXPosition(currDays, width);
-        if (xPos < 0 || xPos > renderWidth) continue;
+        const xPos = this.getXPosition(currDays, width)
+        if (xPos < 0 || xPos > renderWidth) continue
 
         if (index === 0) {
-          const gridLine = this.createSVGElement('line');
-          gridLine.setAttribute('x1', xPos.toString());
-          gridLine.setAttribute('x2', xPos.toString());
-          gridLine.setAttribute('y1', `-${itemsAreaHeight}`);
-          gridLine.setAttribute('y2', '0');
-          gridLine.setAttribute('class', 'gantt-axis-gridline');
-          this.axisG.appendChild(gridLine);
+          const gridLine = this.createSVGElement('line')
+          gridLine.setAttribute('x1', xPos.toString())
+          gridLine.setAttribute('x2', xPos.toString())
+          gridLine.setAttribute('y1', `-${itemsAreaHeight}`)
+          gridLine.setAttribute('y2', '0')
+          gridLine.setAttribute('class', 'gantt-axis-gridline')
+          this.axisG.appendChild(gridLine)
         }
 
-        const tick = this.createSVGElement('line');
-        tick.setAttribute('x1', xPos.toString());
-        tick.setAttribute('x2', xPos.toString());
-        tick.setAttribute('y1', '0');
-        tick.setAttribute('y2', '5');
-        tick.setAttribute('class', 'gantt-axis-tick');
-        individualAxisG.appendChild(tick);
+        const tick = this.createSVGElement('line')
+        tick.setAttribute('x1', xPos.toString())
+        tick.setAttribute('x2', xPos.toString())
+        tick.setAttribute('y1', '0')
+        tick.setAttribute('y2', '5')
+        tick.setAttribute('class', 'gantt-axis-tick')
+        individualAxisG.appendChild(tick)
 
         if (xPos - lastTextX > 80) { // Slight padding bump for wider text layouts
-          const text = this.createSVGElement('text');
-          text.setAttribute('x', xPos.toString());
-          text.setAttribute('y', '20');
-          text.setAttribute('text-anchor', 'middle');
-          text.setAttribute('class', 'gantt-axis-text');
+          const text = this.createSVGElement('text')
+          text.setAttribute('x', xPos.toString())
+          text.setAttribute('y', '20')
+          text.setAttribute('text-anchor', 'middle')
+          text.setAttribute('class', 'gantt-axis-text')
 
-          text.textContent = this.formatDaysToCalendarString(currDays, config);
+          text.textContent = this.formatDaysToCalendarString(currDays, config)
 
-          individualAxisG.appendChild(text);
-          lastTextX = xPos;
+          individualAxisG.appendChild(text)
+          lastTextX = xPos
         }
       }
 
-      this.axisG.appendChild(individualAxisG);
-    });
+      this.axisG.appendChild(individualAxisG)
+    })
   }
 
   setupNativeZoomAndPan() {
     this.svg.addEventListener('mousedown', (e: MouseEvent) => {
-      if ((e.target as HTMLElement).classList.contains('gantt-item')) return;
-      this.isDragging = true;
-      this.startX = e.clientX;
-      this.startTranslateX = this.zoomTranslateX;
-    });
+      if ((e.target as HTMLElement).classList.contains('gantt-item')) return
+      this.isDragging = true
+      this.startX = e.clientX
+      this.startTranslateX = this.zoomTranslateX
+    })
 
     window.addEventListener('mousemove', (e: MouseEvent) => {
-      if (!this.isDragging) return;
-      const width = this.container.clientWidth || 800;
-      const deltaX = e.clientX - this.startX;
-      this.zoomTranslateX = this.startTranslateX + deltaX;
-      this.renderData(width);
-      this.drawAxes(width);
-    });
+      if (!this.isDragging) return
+      const width = this.container.clientWidth || 800
+      const deltaX = e.clientX - this.startX
+      this.zoomTranslateX = this.startTranslateX + deltaX
+      this.renderData(width)
+      this.drawAxes(width)
+    })
 
     window.addEventListener('mouseup', () => {
-      this.isDragging = false;
-    });
+      this.isDragging = false
+    })
 
     this.svg.addEventListener('wheel', (e: WheelEvent) => {
-      e.preventDefault();
-      const width = this.container.clientWidth || 800;
-      const rect = this.svg.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left - this.config.margin.left;
+      e.preventDefault()
+      const width = this.container.clientWidth || 800
+      const rect = this.svg.getBoundingClientRect()
+      const mouseX = e.clientX - rect.left - this.config.margin.left
 
-      const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-      const nextScale = Math.min(100, Math.max(0.05, this.zoomScale * zoomFactor));
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
+      const nextScale = Math.min(100, Math.max(0.05, this.zoomScale * zoomFactor))
 
-      this.zoomTranslateX = mouseX - (mouseX - this.zoomTranslateX) * (nextScale / this.zoomScale);
-      this.zoomScale = nextScale;
+      this.zoomTranslateX = mouseX - (mouseX - this.zoomTranslateX) * (nextScale / this.zoomScale)
+      this.zoomScale = nextScale
 
-      this.renderData(width);
-      this.drawAxes(width);
-    }, { passive: false });
+      this.renderData(width)
+      this.drawAxes(width)
+    }, { passive: false })
   }
 
   resetZoom() {
-    this.zoomScale = 1;
-    this.zoomTranslateX = 0;
-    this.handleResize();
+    this.zoomScale = 1
+    this.zoomTranslateX = 0
+    this.handleResize()
   }
 
   updateSettings(newSettings: any) {
-    this.settings = { ...this.settings, ...newSettings };
-    this.initLayout();
-    this.initChartStructure();
-    this.handleResize();
+    this.settings = { ...this.settings, ...newSettings }
+    this.initLayout()
+    this.initChartStructure()
+    this.handleResize()
   }
 
   setupInteractions() {
     const showTooltip = (event: MouseEvent, d: GanttItem) => {
-      this.tooltip.style.opacity = '1';
-      this.tooltip.style.left = `${event.clientX + 15}px`;
-      this.tooltip.style.top = `${event.clientY + 15}px`;
+      this.tooltip.style.opacity = '1'
+      this.tooltip.style.left = `${event.clientX + 15}px`
+      this.tooltip.style.top = `${event.clientY + 15}px`
 
-      this.hoverTitle.textContent = d.name;
-      this.hoverDates.textContent = d.type === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay;
-      this.hoverLink.style.display = d.link ? 'block' : 'none';
-    };
+      this.hoverTitle.textContent = d.name
+      this.hoverDates.textContent = d.type === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
+      this.hoverLink.style.display = d.link ? 'block' : 'none'
+    }
 
     this.svg.addEventListener('mouseover', (event) => {
-      const target = event.target as HTMLElement;
+      const target = event.target as HTMLElement
       if (target && target.classList.contains('gantt-item')) {
-        const id = parseInt(target.getAttribute('data-id') || '');
-        const dataObj = this.rawData.find(d => d.id === id);
-        if (dataObj) showTooltip(event, dataObj);
+        const id = parseInt(target.getAttribute('data-id') || '')
+        const dataObj = this.rawData.find(d => d.id === id)
+        if (dataObj) showTooltip(event, dataObj)
       }
-    });
+    })
 
     this.svg.addEventListener('mousemove', (event) => {
-      const target = event.target as HTMLElement;
+      const target = event.target as HTMLElement
       if (target && target.classList.contains('gantt-item')) {
         if (this.tooltip.style.opacity !== '1') {
-          const id = parseInt(target.getAttribute('data-id') || '');
-          const dataObj = this.rawData.find(d => d.id === id);
-          if (dataObj) showTooltip(event, dataObj);
+          const id = parseInt(target.getAttribute('data-id') || '')
+          const dataObj = this.rawData.find(d => d.id === id)
+          if (dataObj) showTooltip(event, dataObj)
         }
-        this.tooltip.style.left = `${event.clientX + 15}px`;
-        this.tooltip.style.top = `${event.clientY + 15}px`;
+        this.tooltip.style.left = `${event.clientX + 15}px`
+        this.tooltip.style.top = `${event.clientY + 15}px`
       } else {
-        this.tooltip.style.opacity = '0';
+        this.tooltip.style.opacity = '0'
       }
-    });
+    })
 
     this.svg.addEventListener('mouseleave', () => {
-      this.tooltip.style.opacity = '0';
-    });
+      this.tooltip.style.opacity = '0'
+    })
 
     this.svg.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement;
+      const target = event.target as HTMLElement
       if (target && target.classList.contains('gantt-item')) {
-        const id = parseInt(target.getAttribute('data-id') || '');
-        const dataObj = this.rawData.find(d => d.id === id);
+        const id = parseInt(target.getAttribute('data-id') || '')
+        const dataObj = this.rawData.find(d => d.id === id)
         if (dataObj && dataObj.link) {
-          this.plugin.app.workspace.openLinkText(dataObj.link, '', true);
+          this.plugin.app.workspace.openLinkText(dataObj.link, '', true)
         }
       }
-    });
+    })
   }
 }

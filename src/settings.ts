@@ -4,8 +4,8 @@ import FantasyGanttPlugin from './main'
 export interface FantasyGanttSettings {
   defaultType: string
   fallbackColor: string
-  typeColors: Record<string, string>       // Map for calendar type colors (e.g., "iso-8601": "#2e7d32")
-  groupColors: Record<string, string>      // Map for group colors (e.g., "Quest": "#ff8f00")
+  typeColors: Record<string, string>        // Map for calendar type colors (e.g., "iso-8601": "#2e7d32")
+  groupColors: Record<string, string>       // Map for group colors (e.g., "Quest": "#ff8f00")
   visibleCalendars: Record<string, boolean> // Map for tracking calendar visibility toggles
 }
 
