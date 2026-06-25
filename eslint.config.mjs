@@ -1,43 +1,47 @@
-import tsPlugin from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
+// import tsPlugin from "@typescript-eslint/eslint-plugin";
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
 import obsidianmdPlugin from "eslint-plugin-obsidianmd";
-import js from "@eslint/js";
 
 export default [
   {
     ignores: [
-      "coverage/**"
+      "coverage/**",
+      "main.js",
+      "styles.css",
+      "esbuild.config.mjs",
+      ".obsidian/"
     ],
   },
+
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+
   {
+    files: ["src/**/*.ts", "src/**/*.tsx"],
+    plugins: {
+      "obsidianmd": obsidianmdPlugin,
+    },
     languageOptions: {
       globals: {
         process: "readonly",
         window: "readonly",
-        document: "readonly",
+      },
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
       },
     },
   },
   {
-    files: ["src/**/*.ts", "src/**/*.tsx"],
-    languageOptions: {
-      parser: tsParser,
-      sourceType: "module",
-      parserOptions: {
-        project: "./tsconfig.json", // point ESLint to TS-config
-        tsconfigRootDir: import.meta.dirname, // Set correct path independent of OS
-      },
-    },
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-      "obsidianmd": obsidianmdPlugin,
-    },
     rules: {
-      // default settings
-      ...js.configs.recommended.rules,
-      ...tsPlugin.configs.recommended.rules,
-      // Obsidian settings
       ...obsidianmdPlugin.configs.recommended.rules,
-    },
-  },
+      // "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": ["error", {"args": "none"}],
+      // "@typescript-eslint/ban-ts-comment": "off",
+      // "no-prototype-builtins": "off",
+      // "@typescript-eslint/no-empty-function": "off",
+      // "@typescript-eslint/no-explicit-any": "off"
+    }
+  }
 ];
