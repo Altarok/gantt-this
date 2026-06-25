@@ -1,5 +1,5 @@
 import {MarkdownPostProcessorContext, MarkdownRenderChild, Plugin, parseYaml, TFile, Notice} from 'obsidian'
-import { FantasyGanttSettings, DEFAULT_SETTINGS, FantasyGanttSettingTab } from './settings'
+import {FantasyGanttSettings, DEFAULT_SETTINGS, FantasyGanttSettingTab} from './settings'
 
 // Interface for resolved custom definitions
 interface CalendarUnit {
@@ -53,10 +53,11 @@ class GanttTooltipComponent extends MarkdownRenderChild {
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: FantasyGanttSettings = DEFAULT_SETTINGS
-  private calendarConfigsCache: Map<string, CalendarConfig> = new Map()
+  calendarConfigsCache: Map<string, CalendarConfig> = new Map()
 
   async onload() {
     await this.loadSettings()
+
     this.addSettingTab(new FantasyGanttSettingTab(this.app, this))
 
     this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
@@ -105,9 +106,9 @@ export default class FantasyGanttPlugin extends Plugin {
       const parsed = parseYaml(match[1]) as CalendarConfig
       this.calendarConfigsCache.set(calendarId, parsed)
       return parsed
-    } catch (_e) {
+    } catch (error) {
       new Notice(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}"`)
-      // console.error(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}":`, e)
+      // console.error(`Gantt Plugin: Failed to parse YAML for calendar "${calendarId}":`, err)
       return null
     }
   }
@@ -180,7 +181,7 @@ export default class FantasyGanttPlugin extends Plugin {
   private async registerCalendar(el: HTMLElement, source: string, ctx: MarkdownPostProcessorContext) {
     const currentFile = this.app.workspace.getActiveFile()
     if (!currentFile || !currentFile.parent) {
-      el.createEl('pre', { text: 'Error: Could not determine current directory path scope.' })
+      el.createEl('pre', {text: 'Error: Could not determine current directory path scope.'})
       return
     }
 
@@ -201,33 +202,33 @@ export default class FantasyGanttPlugin extends Plugin {
       }
     }
 
-    const mainWrapper = el.createDiv({ cls: 'fantasy-gantt-wrapper' })
-    const toolbar = mainWrapper.createDiv({ cls: 'gantt-toolbar' })
+    const mainWrapper = el.createDiv({cls: 'fantasy-gantt-wrapper'})
+    const toolbar = mainWrapper.createDiv({cls: 'gantt-toolbar'})
 
     const createCheckbox = (label: string, id: string, checked = true) => {
-      const lbl = toolbar.createEl('label', { cls: 'gantt-input-label' })
-      const input = lbl.createEl('input', { attr: { type: 'checkbox', id } })
+      const lbl = toolbar.createEl('label', {cls: 'gantt-input-label'})
+      const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
       input.checked = checked
-      lbl.createEl('span', { text: ` ${label}` })
+      lbl.createEl('span', {text: ` ${label}`})
       return input
     }
 
     const toggleBars = createCheckbox('Show Bars', 'toggle-bars')
     const togglePoints = createCheckbox('Show Points', 'toggle-points')
     const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
-    const resetBtn = toolbar.createEl('button', { text: 'Zoom Reset', cls: 'gantt-btn' })
+    const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: 'gantt-btn'})
 
-    const chartContainer = mainWrapper.createDiv({ cls: 'gantt-chart-container' })
-    const tooltip = document.body.createDiv({ cls: 'gantt-tooltip', attr: { id: 'gantt-tooltip-element' } })
+    const chartContainer = mainWrapper.createDiv({cls: 'gantt-chart-container'})
+    const tooltip = document.body.createDiv({cls: 'gantt-tooltip', attr: {id: 'gantt-tooltip-element'}})
 
     ctx.addChild(new GanttTooltipComponent(el, tooltip))
 
-    const hoverTitle = tooltip.createDiv({ cls: 'tooltip-title' })
-    const hoverDates = tooltip.createDiv({ cls: 'tooltip-dates' })
-    const hoverLink = tooltip.createDiv({ cls: 'tooltip-link', text: 'Click to open active note file' })
+    const hoverTitle = tooltip.createDiv({cls: 'tooltip-title'})
+    const hoverDates = tooltip.createDiv({cls: 'tooltip-dates'})
+    const hoverLink = tooltip.createDiv({cls: 'tooltip-link', text: 'Click to open active note file'})
 
     this.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
-    let data = await this.getGanttDataFromFolder(targetFolderPath)
+    const data = await this.getGanttDataFromFolder(targetFolderPath)
 
     const renderEngine = new GanttRenderEngine(
       chartContainer,
@@ -239,9 +240,9 @@ export default class FantasyGanttPlugin extends Plugin {
       this
     )
 
-    toggleBars.addEventListener('change', (e) => renderEngine.updateSettings({ showBars: (e.target as HTMLInputElement).checked }))
-    togglePoints.addEventListener('change', (e) => renderEngine.updateSettings({ showPoints: (e.target as HTMLInputElement).checked }))
-    toggleGrouping.addEventListener('change', (e) => renderEngine.updateSettings({ enableGrouping: (e.target as HTMLInputElement).checked }))
+    toggleBars.addEventListener('change', (e) => renderEngine.toggleShowBars((e.target as HTMLInputElement).checked))
+    togglePoints.addEventListener('change', (e) => renderEngine.toggleShowPoints((e.target as HTMLInputElement).checked))
+    toggleGrouping.addEventListener('change', (e) => renderEngine.toggleGrouping((e.target as HTMLInputElement).checked))
     resetBtn.addEventListener('click', () => renderEngine.resetZoom())
 
     const updateCallback = async () => {
@@ -267,16 +268,16 @@ export default class FantasyGanttPlugin extends Plugin {
 
     for (const file of targetFiles) {
       const cache = this.app.metadataCache.getFileCache(file)
-      const frontmatter = cache?.frontmatter
+      const frontMatter = cache?.frontmatter
 
-      if (frontmatter && frontmatter['gantt-item'] === true) {
-        const startInput = frontmatter['gantt-start']
-        const endInput = frontmatter['gantt-end']
+      if (frontMatter && frontMatter['gantt-item'] === true) {
+        const startInput = frontMatter['gantt-start']
+        const endInput = frontMatter['gantt-end']
 
         if (startInput === undefined || startInput === null || startInput === '') continue
 
-        const calendarType = (frontmatter['gantt-type'] || this.settings.defaultType).trim()
-        if (this.settings.visibleCalendars[calendarType] === false) continue
+        const calendarType = (frontMatter['gantt-type'] || this.settings.defaultType).trim()
+        if (!this.settings.visibleCalendars[calendarType]) continue
 
         const config = await this.getCalendarDefinition(calendarType)
 
@@ -287,16 +288,16 @@ export default class FantasyGanttPlugin extends Plugin {
         if (!endRes) continue
 
         const calculatedType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
-        const itemGroup = frontmatter['gantt-group'] || 'General'
+        const itemGroup = frontMatter['gantt-group'] || 'General'
 
-        const finalColor = frontmatter['gantt-color'] ||
+        const finalColor = frontMatter['gantt-color'] ||
           this.settings.groupColors[itemGroup] ||
           this.settings.typeColors[calendarType] ||
           this.settings.fallbackColor
 
         items.push({
           id: incrementalId++,
-          name: frontmatter['gantt-name'] || file.basename,
+          name: frontMatter['gantt-name'] || file.basename,
           startDateDisplay: startRes.display,
           endDateDisplay: endRes.display,
           startDays: startRes.days,
@@ -327,12 +328,12 @@ class GanttRenderEngine {
   private totalHeight = 400
   private resizeObserver: ResizeObserver
 
-  private settings = { showBars: true, showPoints: true, enableGrouping: true }
+  private settings = {showBars: true, showPoints: true, enableGrouping: true}
   private config = {
     rowHeight: 24,
     groupHeaderHeight: 25,
     singleAxisHeight: 35,
-    margin: { top: 20, right: 0, bottom: 10, left: 0 }
+    margin: {top: 20, right: 0, bottom: 10, left: 0}
   }
 
   // Bounds tracked in raw day counts rather than standard dates milliseconds
@@ -407,7 +408,7 @@ class GanttRenderEngine {
         item.lane = lanes.length - 1
       }
     })
-    return { processedData: sorted, totalLanes: lanes.length }
+    return {processedData: sorted, totalLanes: lanes.length}
   }
 
   initLayout() {
@@ -429,7 +430,7 @@ class GanttRenderEngine {
       })
 
       groupedMap.forEach((items, groupName) => {
-        const { processedData, totalLanes } = this.calculateStacking(items)
+        const {processedData, totalLanes} = this.calculateStacking(items)
         const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight + this.config.groupHeaderHeight
         this.groups.push({
           name: groupName,
@@ -441,7 +442,7 @@ class GanttRenderEngine {
         currentYOffset += groupHeight
       })
     } else {
-      const { processedData, totalLanes } = this.calculateStacking(activeData)
+      const {processedData, totalLanes} = this.calculateStacking(activeData)
       const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight
       this.groups.push({
         name: 'All',
@@ -530,14 +531,14 @@ class GanttRenderEngine {
         rect.setAttribute('class', i % 2 === 0 ? 'gantt-group-row-even' : 'gantt-group-row-odd')
         groupG.appendChild(rect)
 
-        const text: SVGTextContentElement = this.createSVGElement('text')
+        const text: SVGElement = this.createSVGElement('text')
         text.setAttribute('x', '20')
         text.setAttribute('y', '17')
         text.setAttribute('class', 'gantt-group-text')
         text.textContent = d.name.toUpperCase()
         groupG.appendChild(text)
 
-        const computedLength = (text as any).getComputedTextLength ? (text as any).getComputedTextLength() : 0
+        const computedLength = (text as SVGTextContentElement).getComputedTextLength ? (text as SVGTextContentElement).getComputedTextLength() : 0
         const textWidthEstimate = computedLength > 0 ? computedLength : d.name.length * 6.5
         const badgeWidth = textWidthEstimate + 20
         const badgeHeight = 18
@@ -699,7 +700,7 @@ class GanttRenderEngine {
       let lastTextX = -999
 
       // Access configuration directly via plugin async cache
-      const config = (this.plugin as any).calendarConfigsCache.get(calType) || null
+      const config = this.plugin.calendarConfigsCache.get(calType) || null
 
       for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
         const xPos = this.getXPosition(currDays, width)
@@ -776,7 +777,7 @@ class GanttRenderEngine {
 
       this.renderData(width)
       this.drawAxes(width)
-    }, { passive: false })
+    }, {passive: false})
   }
 
   resetZoom() {
@@ -785,8 +786,22 @@ class GanttRenderEngine {
     this.handleResize()
   }
 
-  updateSettings(newSettings: any) {
-    this.settings = { ...this.settings, ...newSettings }
+  toggleShowBars(val: boolean) {
+    this.settings.showBars = val
+    this.updateSettings()
+  }
+
+  toggleShowPoints(val: boolean) {
+    this.settings.showPoints = val
+    this.updateSettings()
+  }
+
+  toggleGrouping(val: boolean) {
+    this.settings.enableGrouping = val
+    this.updateSettings()
+  }
+
+  updateSettings() {
     this.initLayout()
     this.initChartStructure()
     this.handleResize()
@@ -837,7 +852,7 @@ class GanttRenderEngine {
         const id = parseInt(target.getAttribute('data-id') || '')
         const dataObj = this.rawData.find(d => d.id === id)
         if (dataObj && dataObj.link) {
-          this.plugin.app.workspace.openLinkText(dataObj.link, '', true)
+          void this.plugin.app.workspace.openLinkText(dataObj.link, '', true)
         }
       }
     })
