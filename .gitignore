@@ -7,4 +7,5 @@
 main.js
 
 # Ignore user settings changed by Obsidian
+/examples
 data.json

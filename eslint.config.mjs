@@ -3,7 +3,7 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import obsidianmdPlugin from "eslint-plugin-obsidianmd";
 
-export default [
+export default tseslint.config(
   {
     ignores: [
       "coverage/**",
@@ -32,16 +32,17 @@ export default [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  {
     rules: {
       ...obsidianmdPlugin.configs.recommended.rules,
-      // "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": ["error", {"args": "none"}],
-      // "@typescript-eslint/ban-ts-comment": "off",
-      // "no-prototype-builtins": "off",
-      // "@typescript-eslint/no-empty-function": "off",
-      // "@typescript-eslint/no-explicit-any": "off"
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ],
     }
   }
-];
+);

@@ -65,6 +65,9 @@
 
 /* Tooltip implementation matching Obsidian spec */
 .gantt-tooltip {
+  left: var(--mouse-x);
+  top: var(--mouse-y);
+
   /* background-color: var(--background-primary); */
   border: 1px solid var(--background-modifier-border);
   box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
@@ -74,10 +77,24 @@
   max-width: 250px;
   font-size: var(--font-small-size);
   color: var(--text-normal);
-  opacity: 0;
   position: fixed;
   z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease;
 }
+
+
+.gantt-tooltip.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.gantt-tooltip:not([data-link]),
+.gantt-tooltip[data-link=""] .tooltip-link {
+  display: none;
+}
+
 
 /* Explicit solid background for Dark Mode */
 .theme-dark .gantt-tooltip {
@@ -104,6 +121,7 @@
   margin-top: 6px;
   font-style: italic;
 }
+
 
 /* Break out of Obsidian's readable line width constraints for this specific code block type */
 .markdown-rendered .block-language-fantasy-gantt {
@@ -147,7 +165,7 @@
 }
 
 .gantt-group-text {
-  fill: var(--text-normal);
+  fill: var(--text-accent);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -155,15 +173,24 @@
 }
 
 .gantt-group-badge {
+  x: 10px;
+  y: 5px;
+  height: 18px;
+  rx: 9px; /* half of height for pill shape */
+  ry: 9px;
   fill: var(--background-modifier-border);
   opacity: 0.6;
   pointer-events: none;
 }
 
 .gantt-group-shadow {
+  x: 10px;
+  y: 23px; /* 5px badge offset + 18px badge height */
+  height: 4px;
   fill: url('#header-bottom-shadow');
   pointer-events: none;
 }
+
 
 /* Gridlines and Axis Lines */
 .gantt-axis-baseline {
@@ -200,42 +227,38 @@
   cursor: pointer;
 }
 
+.gantt-item.bar-rect {
+  height: 16px;            /* config.rowHeight (24) - 8 */
+  transform: translateY(4px); /* Pushes it down into the middle of the row track */
+}
+
 /* Fallback fill ONLY if color attribute isn't provided inline via frontmatter */
 .gantt-item.bar-rect:not([fill]) {
   fill: var(--interactive-accent);
+}
+
+.gantt-item.point-circle {
+  r: 6px;
+  transform: translateY(12px); /* Pushes the center down to rowHeight / 2 */
 }
 
 .gantt-item.point-circle:not([fill]) {
   fill: var(--text-accent);
 }
 
-/* Container layout for the chemical drawing */
-.obsidian-smiles-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  margin: 1rem 0;
-  background-color: var(--background-secondary);
-  border-radius: var(--radius-m);
-  border: 1px solid var(--background-modifier-border);
-  overflow: hidden;
+/* ------------ settings ------------ */
+
+.gt-settings-item-description {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
 }
 
-/* Ensure the SVG scales responsively inside the code block area */
-.obsidian-smiles-container svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
+.gantt-axis-label {
+  font-size: 0.75em;
+  font-weight: bold;
+  fill: var(--text-muted);
+  text-transform: uppercase;
 }
 
-/* Error message formatting for broken SMILES syntax */
-.smiles-error-msg {
-  color: var(--text-error);
-  font-family: var(--font-monospace);
-  font-size: var(--font-small);
-  padding: 0.5rem;
-  border-left: 3px solid var(--text-error);
-  background-color: var(--background-message-error);
-  width: 100%;
-}
+
