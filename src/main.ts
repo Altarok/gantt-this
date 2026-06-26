@@ -187,10 +187,17 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const hoverTitle = tooltip.createDiv({cls: 'tooltip-title'})
     const hoverDates = tooltip.createDiv({cls: 'tooltip-dates'})
-    const hoverLink = tooltip.createDiv({cls: 'tooltip-link', text: 'Click to open active note file'})
+    // const hoverLink =
+      tooltip.createDiv({cls: 'tooltip-link', text: 'Click to open active note file'})
 
     this.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
     const data = await this.getGanttDataFromFolder(targetFolderPath)
+
+    // data.forEach(d => {
+    //   if (d.type === 'bar' || d.type === 'point') {
+    //     console.log(`[Gantt Render] Type: ${d.type}, Name: "${d.name}", ID: ${d.id}`);
+    //   }
+    // });
 
     const renderEngine = new GanttRenderEngine(
       chartContainer,
@@ -198,7 +205,6 @@ export default class FantasyGanttPlugin extends Plugin {
       tooltip,
       hoverTitle,
       hoverDates,
-      hoverLink,
       this
     )
 

@@ -38,7 +38,6 @@ export class GanttRenderEngine {
     public readonly tooltip: HTMLElement,
     public readonly hoverTitle: HTMLElement,
     public readonly hoverDates: HTMLElement,
-    public readonly hoverLink: HTMLElement,
     public readonly plugin: FantasyGanttPlugin
   ) {
 
@@ -254,6 +253,14 @@ export class GanttRenderEngine {
 
   renderData(width: number) {
     this.dataG.innerHTML = ''
+
+    this.groups.flatMap(g => g.items).forEach(d => {
+      if (d.type === 'bar' || d.type === 'point') {
+        let dateStr = "INVALID_DATE";
+        try { dateStr = new Date(d.startDays * 86400000).toISOString().split('T')[0]; } catch { dateStr = `Raw Days: ${d.startDays}`; }
+        console.log(`"${d.name}" (${d.type}) -> Start ISO: ${dateStr}`);
+      }
+    });
 
     this.groups.forEach(group => {
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
