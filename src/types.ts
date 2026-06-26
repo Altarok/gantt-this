@@ -34,3 +34,8 @@ export type GanttGroup = {
   height: number
   lanes: number
 }
+
+export type CodeBlockContent = {
+  eventPath: string
+  calendarDefinitionPath: string
+}

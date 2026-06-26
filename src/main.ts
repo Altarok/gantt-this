@@ -1,8 +1,9 @@
-import {MarkdownPostProcessorContext, MarkdownRenderChild, Plugin, parseYaml, TFile, Notice} from 'obsidian'
+import {MarkdownPostProcessorContext, MarkdownRenderChild, Notice, parseYaml, Plugin, TFile} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings-modal'
 import {createSettings, DEFAULT_SETTINGS, FantasyGanttSettings,} from './settings'
-import {CalendarConfig, GanttItem} from './types'
+import {CalendarConfig, CodeBlockContent, GanttItem} from './types'
 import {GanttRenderEngine} from './svg-drawer'
+import {readCodeBlock} from "./code-block-reader";
 
 
 class GanttTooltipComponent extends MarkdownRenderChild {
@@ -11,9 +12,7 @@ class GanttTooltipComponent extends MarkdownRenderChild {
   }
 
   onunload() {
-    if (this.tooltipEl) {
-      this.tooltipEl.remove()
-    }
+    if (this.tooltipEl) this.tooltipEl.remove()
   }
 }
 
@@ -26,13 +25,12 @@ export default class FantasyGanttPlugin extends Plugin {
 
     this.addSettingTab(new FantasyGanttSettingTab(this.app, this))
 
-    this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) => {
+    this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) =>
       await this.registerCalendar(el, source, ctx)
-    })
+    )
   }
 
   async loadSettings() {
-    // this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
     this.settings = {...DEFAULT_SETTINGS, ...await this.loadData()}
   }
 
@@ -41,7 +39,7 @@ export default class FantasyGanttPlugin extends Plugin {
     this.app.metadataCache.trigger('resolved')
   }
 
-  async getCalendarDefinition(calendarId: string): Promise<CalendarConfig | null> {
+  async getCalendarDefinition(calendarId: string, calendarDefinitionPath: string): Promise<CalendarConfig | null> {
     const cached = this.calendarConfigsCache.get(calendarId)
     if (cached) return cached
 
@@ -49,6 +47,7 @@ export default class FantasyGanttPlugin extends Plugin {
     let targetFile: TFile | null = null
 
     for (const file of files) {
+      if (file.parent?.path !== calendarDefinitionPath) continue
       const cache = this.app.metadataCache.getFileCache(file)
       if (cache?.frontmatter && cache.frontmatter['gantt-type-definition'] === calendarId) {
         targetFile = file
@@ -147,22 +146,7 @@ export default class FantasyGanttPlugin extends Plugin {
       return
     }
 
-    let targetFolderPath = currentFile.parent.path
-    const lines = source.split('\n')
-    for (const line of lines) {
-      const match = line.match(/^path:\s*(.+)$/i)
-      if (match) {
-        const pathValue = match[1].trim().toLowerCase()
-        if (pathValue === 'root') {
-          targetFolderPath = '/'
-        } else if (pathValue === 'local') {
-          targetFolderPath = currentFile.parent.path
-        } else {
-          targetFolderPath = match[1].trim()
-        }
-        break
-      }
-    }
+    const codeBlockContent: CodeBlockContent = readCodeBlock(currentFile.parent.path, source)
 
     const mainWrapper = el.createDiv({cls: 'fantasy-gantt-wrapper'})
     const toolbar = mainWrapper.createDiv({cls: 'gantt-toolbar'})
@@ -187,17 +171,10 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const hoverTitle = tooltip.createDiv({cls: 'tooltip-title'})
     const hoverDates = tooltip.createDiv({cls: 'tooltip-dates'})
-    // const hoverLink =
-      tooltip.createDiv({cls: 'tooltip-link', text: 'Click to open active note file'})
+    tooltip.createDiv({cls: 'tooltip-link', text: 'Click to open active note file'})
 
     this.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
-    const data = await this.getGanttDataFromFolder(targetFolderPath)
-
-    // data.forEach(d => {
-    //   if (d.type === 'bar' || d.type === 'point') {
-    //     console.log(`[Gantt Render] Type: ${d.type}, Name: "${d.name}", ID: ${d.id}`);
-    //   }
-    // });
+    const data = await this.getGanttDataFromFolder(codeBlockContent)
 
     const renderEngine = new GanttRenderEngine(
       chartContainer,
@@ -215,7 +192,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const updateCallback = async () => {
       this.calendarConfigsCache.clear()
-      const updatedData = await this.getGanttDataFromFolder(targetFolderPath)
+      const updatedData = await this.getGanttDataFromFolder(codeBlockContent)
       renderEngine.updateData(updatedData)
     }
 
@@ -223,22 +200,22 @@ export default class FantasyGanttPlugin extends Plugin {
     this.registerEvent(this.app.metadataCache.on('resolved', updateCallback))
   }
 
-  private async getGanttDataFromFolder(folderPath: string): Promise<GanttItem[]> {
+  private async getGanttDataFromFolder(codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
     const items: GanttItem[] = []
     let incrementalId = 1
     const files = this.app.vault.getMarkdownFiles()
 
     const targetFiles = files.filter(f => {
       if (!f.parent) return false
-      if (folderPath === '/') return true
-      return f.parent.path === folderPath
+      if (codeBlockContent.eventPath === '/') return true
+      return f.parent.path === codeBlockContent.eventPath
     })
 
     for (const file of targetFiles) {
       const cache = this.app.metadataCache.getFileCache(file)
       const frontMatter = cache?.frontmatter
 
-      if (frontMatter && frontMatter['gantt-item'] === true) {
+      if (frontMatter?.['gantt-item'] === true) {
         const startInput = frontMatter['gantt-start']
         const endInput = frontMatter['gantt-end']
 
@@ -247,7 +224,7 @@ export default class FantasyGanttPlugin extends Plugin {
         const calendarType = (frontMatter['gantt-type'] || this.settings.defaultType).trim()
         if (!this.settings.visibleCalendars[calendarType]) continue
 
-        const config = await this.getCalendarDefinition(calendarType)
+        const config = await this.getCalendarDefinition(calendarType, codeBlockContent.calendarDefinitionPath)
 
         const startRes = this.parseToAbsoluteDays(startInput, config)
         if (!startRes) continue
