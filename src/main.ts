@@ -3,7 +3,7 @@ import {FantasyGanttSettingTab} from './settings-modal'
 import {createSettings, DEFAULT_SETTINGS, FantasyGanttSettings,} from './settings'
 import {CalendarConfig, CodeBlockContent, GanttItem} from './types'
 import {GanttRenderEngine} from './svg-drawer'
-import {readCodeBlock} from "./code-block-reader";
+import {readCodeBlock} from './code-block-reader'
 
 
 class GanttTooltipComponent extends MarkdownRenderChild {

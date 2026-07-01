@@ -1,4 +1,4 @@
-import {CodeBlockContent} from "./types";
+import {CodeBlockContent} from './types'
 
 export function readCodeBlock(currentFolder: string, source: string): CodeBlockContent {
 
