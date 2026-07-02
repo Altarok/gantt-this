@@ -1,11 +1,16 @@
+# Node dependencies and build tracking
 /node_modules
-
-# IDE data
-.idea
-
-# Ignore compiled main.js, upload to GitHub release instead.
+.npm
+# IDE
+.idea/
+.vscode/
+coverage/
+# Plugin files
 main.js
-
-# Ignore user settings changed by Obsidian
-/examples
 data.json
+# dev junk
+.env
+*.log
+# system junk
+.DS_Store
+Thumbs.db
