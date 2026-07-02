@@ -1,13 +1,33 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "baseUrl": "src",
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "module": "ESNext",
+    "target": "ES6",
+    "allowJs": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    /* Strict Type-Checking Guard Rails */
     "strict": true,
-    "skipLibCheck": true
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "useUnknownInCatchVariables": true,
+
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "tests/**/*.ts"
   ]
 }
