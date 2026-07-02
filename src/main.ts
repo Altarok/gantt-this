@@ -18,7 +18,7 @@ class GanttTooltipComponent extends MarkdownRenderChild {
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: FantasyGanttSettings = createSettings()
-  calendarConfigsCache: Map<string, CalendarConfig> = new Map()
+  calendarConfigsCache = new Map<string, CalendarConfig>()
 
   async onload() {
     await this.loadSettings()
@@ -31,7 +31,8 @@ export default class FantasyGanttPlugin extends Plugin {
   }
 
   async loadSettings() {
-    this.settings = {...DEFAULT_SETTINGS, ...await this.loadData()}
+    let loadedData: Partial<FantasyGanttSettings> = (await this.loadData()) as Partial<FantasyGanttSettings> || {}
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData || {})
   }
 
   async saveSettings() {
@@ -49,7 +50,7 @@ export default class FantasyGanttPlugin extends Plugin {
     for (const file of files) {
       if (file.parent?.path !== calendarDefinitionPath) continue
       const cache = this.app.metadataCache.getFileCache(file)
-      if (cache?.frontmatter && cache.frontmatter['gantt-type-definition'] === calendarId) {
+      if (cache?.frontmatter?.['gantt-type-definition'] === calendarId) {
         targetFile = file
         break
       }
@@ -59,7 +60,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const content = await this.app.vault.read(targetFile)
     const yamlRegex = /```yaml\s([\s\S]*?)```/
-    const match = content.match(yamlRegex)
+    const match = yamlRegex.exec(content)
 
     if (!match?.[1]) return null
 
@@ -80,11 +81,13 @@ export default class FantasyGanttPlugin extends Plugin {
     const cleanInput = input.toString().trim()
 
     // STRATEGY A: Handle True Gregorian / ISO-8601 Calendar Logic
-    if (config && config.type === 'gregorian') {
+    if (config?.type === 'gregorian') {
       const segments = cleanInput.split(config.delimiter).map(Number)
       if (segments.length < 3 || segments.some(isNaN)) return null
 
       const [year, month, day] = segments
+
+      if (!year || !month || !day) return null
 
       // Calculate leap years elapsed up to this point dynamically
       let totalDays = (year - 1) * 365
@@ -94,8 +97,8 @@ export default class FantasyGanttPlugin extends Plugin {
       const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
       const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-      for (let m = 0; m < month - 1; m++) {
-        totalDays += monthDays[m]
+      for (let m = 0; m < month - 1 ; m++) {
+        totalDays += monthDays[m]!
       }
       totalDays += (day - 1)
 
@@ -106,7 +109,7 @@ export default class FantasyGanttPlugin extends Plugin {
     }
 
     // STRATEGY B: Handle Custom Positional Tier Multipliers (Mayan, etc.)
-    if (config && config.type === 'positional' && cleanInput.includes(config.delimiter)) {
+    if (config?.type === 'positional' && cleanInput.includes(config.delimiter)) {
       const segments = cleanInput.split(config.delimiter).map(Number)
       let totalDays = 0
       let valid = true
@@ -135,13 +138,13 @@ export default class FantasyGanttPlugin extends Plugin {
     if (isNaN(date.getTime())) return null
     return {
       days: Math.floor(date.getTime() / (24 * 60 * 60 * 1000)),
-      display: date.toISOString().split('T')[0]
+      display: date.toISOString().split('T')[0]! // TODO remove '!'?
     }
   }
 
   private async registerCalendar(el: HTMLElement, source: string, ctx: MarkdownPostProcessorContext) {
     const currentFile = this.app.workspace.getActiveFile()
-    if (!currentFile || !currentFile.parent) {
+    if (!currentFile?.parent) {
       el.createEl('pre', {text: 'Error: Could not determine current directory path scope.'})
       return
     }
@@ -165,7 +168,7 @@ export default class FantasyGanttPlugin extends Plugin {
     const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: 'gantt-btn'})
 
     const chartContainer = mainWrapper.createDiv({cls: 'gantt-chart-container'})
-    const tooltip = document.body.createDiv({cls: 'gantt-tooltip', attr: {id: 'gantt-tooltip-element'}})
+    const tooltip = window.document.body.createDiv({cls: 'gantt-tooltip', attr: {id: 'gantt-tooltip-element'}})
 
     ctx.addChild(new GanttTooltipComponent(el, tooltip))
 
@@ -216,12 +219,12 @@ export default class FantasyGanttPlugin extends Plugin {
       const frontMatter = cache?.frontmatter
 
       if (frontMatter?.['gantt-item'] === true) {
-        const startInput = frontMatter['gantt-start']
-        const endInput = frontMatter['gantt-end']
+        const startInput = frontMatter['gantt-start'] as string
+        const endInput = frontMatter['gantt-end'] as string
 
         if (startInput === undefined || startInput === null || startInput === '') continue
 
-        const calendarType = (frontMatter['gantt-type'] || this.settings.defaultType).trim()
+        const calendarType = (frontMatter['gantt-type'] as string || this.settings.defaultType).trim()
         if (!this.settings.visibleCalendars[calendarType]) continue
 
         const config = await this.getCalendarDefinition(calendarType, codeBlockContent.calendarDefinitionPath)
@@ -233,16 +236,16 @@ export default class FantasyGanttPlugin extends Plugin {
         if (!endRes) continue
 
         const calculatedType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
-        const itemGroup = frontMatter['gantt-group'] || 'General'
+        const itemGroup = frontMatter['gantt-group'] as string || 'General'
 
-        const finalColor = frontMatter['gantt-color'] ||
-          this.settings.groupColors[itemGroup] ||
-          this.settings.typeColors[calendarType] ||
+        const finalColor = frontMatter['gantt-color'] as string ??
+          this.settings.groupColors[itemGroup] ??
+          this.settings.typeColors[calendarType] ??
           this.settings.fallbackColor
 
         items.push({
           id: incrementalId++,
-          name: frontMatter['gantt-name'] || file.basename,
+          name: frontMatter['gantt-name'] as string || file.basename,
           startDateDisplay: startRes.display,
           endDateDisplay: endRes.display,
           startDays: startRes.days,

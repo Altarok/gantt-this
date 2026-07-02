@@ -11,27 +11,31 @@ export function readCodeBlock(currentFolder: string, source: string): CodeBlockC
 
   for (const line of lines) {
 
-    const match1 = line.match(/^path: *(.+)$/i)
+    const match1 = /^path: *(.+)$/i.exec(line)
     if (match1) {
-      const pathValue = match1[1].trim().toLowerCase()
-      if (pathValue === 'root') {
+      const pathValue = match1[1]?.trim()
+      if (pathValue === undefined) {
         codeBlockContent.eventPath = '/'
-      } else if (pathValue === 'local') {
+      } else if (pathValue.toLowerCase() === 'root') {
+        codeBlockContent.eventPath = '/'
+      } else if (pathValue.toLowerCase() === 'local') {
         codeBlockContent.eventPath = currentFolder
       } else {
-        codeBlockContent.eventPath = match1[1].trim()
+        codeBlockContent.eventPath = pathValue
       }
     }
 
-    const match2 = line.match(/^calendar-definitions: *(.+)$/i)
+    const match2 = /^calendar-definitions: *(.+)$/i.exec(line)
     if (match2) {
-      const pathValue = match2[1].trim().toLowerCase()
-      if (pathValue === 'root') {
+      const pathValue = match2[1]?.trim()
+      if (pathValue === undefined) {
         codeBlockContent.calendarDefinitionPath = '/'
-      } else if (pathValue === 'local') {
+      } else if (pathValue.toLowerCase() === 'root') {
+        codeBlockContent.calendarDefinitionPath = '/'
+      } else if (pathValue.toLowerCase() === 'local') {
         codeBlockContent.calendarDefinitionPath = currentFolder
       } else {
-        codeBlockContent.calendarDefinitionPath = match2[1].trim()
+        codeBlockContent.calendarDefinitionPath = pathValue
       }
     }
 

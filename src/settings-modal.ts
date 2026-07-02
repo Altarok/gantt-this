@@ -1,8 +1,11 @@
 import {App, PluginSettingTab, Setting} from 'obsidian'
 import FantasyGanttPlugin from './main'
 
-
+/*
+ * TODO needs complete rework, use expandable
+ */
 export class FantasyGanttSettingTab extends PluginSettingTab {
+
   constructor(app: App, public readonly plugin: FantasyGanttPlugin) {
     super(app, plugin)
   }
@@ -86,20 +89,30 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     definedTypes.forEach(typeKey => {
       // Ensure state is initialized in the record
-      if (this.plugin.settings.visibleCalendars[typeKey] === undefined) {
-        this.plugin.settings.visibleCalendars[typeKey] = true
-      }
+
+      const {visibleCalendars} = this.plugin.settings
+
+      /*
+      * TODO debugger: what does ??= do
+       */
+      // debugger
+
+      visibleCalendars[typeKey] ??= true;
 
       new Setting(container)
       .setName(`Show "${typeKey}" Calendar`)
       .setDesc(`Toggle visibility for files using gantt-type: "${typeKey}"`)
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.visibleCalendars[typeKey])
+      .setValue(visibleCalendars[typeKey]!)
       .onChange(async (value) => {
-        this.plugin.settings.visibleCalendars[typeKey] = value
+        visibleCalendars[typeKey] = value
         await this.plugin.saveSettings()
       }))
     })
+  }
+
+  private saveSettings(){
+    void this.plugin.saveSettings() // TODO await this
   }
 
   /**
@@ -124,20 +137,24 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       row.createEl('span', {text: key, attr: {style: 'flex-grow: 1; font-weight: bold;'}})
 
       const picker = row.createEl('input', {attr: {type: 'color', value: colorValue}})
-      picker.addEventListener('change', async (e) => {
-        record[key] = (e.target as HTMLInputElement).value
-        await this.plugin.saveSettings()
-      })
+      picker.addEventListener('change',
+        (e) => {
+          record[key] = (e.target as HTMLInputElement).value
+          this.saveSettings() // TODO await this
+        }
+      )
 
       const deleteBtn = row.createEl('button', {text: 'Delete', cls: 'mod-warning'})
-      deleteBtn.addEventListener('click', async () => {
-        delete record[key]
-        if (syncToVisibility && this.plugin.settings.visibleCalendars[key] !== undefined) {
-          delete this.plugin.settings.visibleCalendars[key]
+      deleteBtn.addEventListener('click',
+         () => {
+          delete record[key]
+          if (syncToVisibility && this.plugin.settings.visibleCalendars[key] !== undefined) {
+            delete this.plugin.settings.visibleCalendars[key]
+          }
+          this.saveSettings() // TODO await this
+          this.display() // Refresh gui
         }
-        await this.plugin.saveSettings()
-        this.display() // Refresh gui
-      })
+      )
     })
 
     // Add new row UI block

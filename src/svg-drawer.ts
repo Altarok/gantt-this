@@ -42,8 +42,8 @@ export class GanttRenderEngine {
   ) {
 
     window.addEventListener('mousemove', (e) => {
-      document.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
-      document.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
+      window.document.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
+      window.document.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
     })
 
     this.calculateGlobalBounds()
@@ -86,9 +86,13 @@ export class GanttRenderEngine {
     sorted.forEach(item => {
       let placed = false
       for (let i = 0; i < lanes.length; i++) {
-        const lastItem = lanes[i][lanes[i].length - 1]
-        if (lastItem.endDays < item.startDays - 1) {
-          lanes[i].push(item)
+        const lane = lanes[i]
+        if (!lane) continue
+
+        const lastItem = lane[lane.length - 1]
+
+        if (lastItem && lastItem.endDays < item.startDays - 1) {
+          lane?.push(item)
           item.lane = i
           placed = true
           break
@@ -157,7 +161,7 @@ export class GanttRenderEngine {
   }
 
   private createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K): SVGElementTagNameMap[K] {
-    return document.createElementNS('http://www.w3.org/2000/svg', tag)
+    return window.document.createElementNS('http://www.w3.org/2000/svg', tag)
   }
 
   initChartStructure() {
@@ -254,13 +258,18 @@ export class GanttRenderEngine {
   renderData(width: number) {
     this.dataG.innerHTML = ''
 
-    this.groups.flatMap(g => g.items).forEach(d => {
-      if (d.type === 'bar' || d.type === 'point') {
-        let dateStr = "INVALID_DATE"
-        try { dateStr = new Date(d.startDays * 86400000).toISOString().split('T')[0]; } catch { dateStr = `Raw Days: ${d.startDays}`; }
-        console.log(`"${d.name}" (${d.type}) -> Start ISO: ${dateStr}`)
-      }
-    })
+    this.groups.flatMap(g => g.items)
+    // .forEach(d => {
+    //   if (d.type === 'bar' || d.type === 'point') {
+    //     let dateStr: string | undefined //  = "INVALID_DATE"
+    //     try {
+    //       dateStr = new Date(d.startDays * 86400000).toISOString().split('T')[0] ?? undefined
+    //     } catch {
+    //       dateStr = `Raw Days: ${d.startDays}`
+    //     }
+    // console.debug(`"${d.name}" (${d.type}) -> Start ISO: ${dateStr}`)
+    //   }
+    // })
 
     this.groups.forEach(group => {
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
@@ -302,7 +311,7 @@ export class GanttRenderEngine {
   private formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
     if (!config) {
       const dateObj = new Date(days * 24 * 60 * 60 * 1000)
-      return dateObj.toISOString().split('T')[0]
+      return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
     }
 
     // STRATEGY A: Reverse Engine Real Gregorian Dates from Day Counts
@@ -325,8 +334,8 @@ export class GanttRenderEngine {
 
       let month = 1
       for (let m = 0; m < 12; m++) {
-        if (remainingDays >= monthDays[m]) {
-          remainingDays -= monthDays[m]
+        if (remainingDays >= monthDays[m]!) {
+          remainingDays -= monthDays[m]! // TODO remove '!'?
           month++
         } else {
           break
@@ -396,7 +405,7 @@ export class GanttRenderEngine {
       let lastTextX = -999
 
       // Access configuration directly via plugin async cache
-      const config = this.plugin.calendarConfigsCache.get(calType) || null
+      const config = this.plugin.calendarConfigsCache.get(calType) ?? null
 
       for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
         const xPos = this.getXPosition(currDays, width)
@@ -519,20 +528,20 @@ export class GanttRenderEngine {
     this.svg.addEventListener('mouseover', (event) => {
       const target = event.target as HTMLElement
       if (target?.classList.contains('gantt-item')) {
-        const id = +(target.getAttribute('data-id') || 0)
+        const id = +(target.getAttribute('data-id') ?? 0)
         const dataObj = this.rawData.find(d => d.id === id)
         if (dataObj) showTooltip(event, dataObj)
       }
     })
 
     this.svg.addEventListener('mousemove', (event) => {
-      document.documentElement.style.setProperty('--mouse-x', `${event.clientX + 15}px`)
-      document.documentElement.style.setProperty('--mouse-y', `${event.clientY + 15}px`)
+      window.document.documentElement.style.setProperty('--mouse-x', `${event.clientX + 15}px`)
+      window.document.documentElement.style.setProperty('--mouse-y', `${event.clientY + 15}px`)
 
       const target = event.target as HTMLElement
       if (target?.classList.contains('gantt-item')) {
         if (!this.tooltip.classList.contains('is-active')) {
-          const id = +(target.getAttribute('data-id') || 0)
+          const id = +(target.getAttribute('data-id') ?? 0)
           const dataObj = this.rawData.find(d => d.id === id)
           if (dataObj) showTooltip(event, dataObj)
         }
@@ -548,7 +557,7 @@ export class GanttRenderEngine {
     this.svg.addEventListener('click', (event) => {
       const target = event.target as HTMLElement
       if (target?.classList.contains('gantt-item')) {
-        const id = +(target.getAttribute('data-id') || 0)
+        const id = +(target.getAttribute('data-id') ?? 0)
         const dataObj = this.rawData.find(d => d.id === id)
         if (dataObj?.link) {
           void this.plugin.app.workspace.openLinkText(dataObj.link, '', true)
