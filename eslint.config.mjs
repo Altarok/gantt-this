@@ -1,39 +1,59 @@
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 import obsidianmdPlugin from "eslint-plugin-obsidianmd";
+import js from "@eslint/js";
 
-export default tseslint.config(
+export default [
   {
     ignores: [
       "coverage/**",
-      "main.js",
-      "styles.css",
-      "esbuild.config.mjs",
-      ".obsidian/"
+      "main.js"
     ],
   },
-
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-
   {
-    files: ["src/**/*.ts", "src/**/*.tsx"],
-    plugins: {
-      "obsidianmd": obsidianmdPlugin,
-    },
     languageOptions: {
       globals: {
         process: "readonly",
         window: "readonly",
       },
+    },
+  },
+  {
+    files: ["src/**/*.ts", "src/**/*.tsx"],
+    languageOptions: {
+      parser: tsParser,
+      sourceType: "module",
       parserOptions: {
-        project: "./tsconfig.json",
-        tsconfigRootDir: import.meta.dirname,
+        project: "./tsconfig.json", // point ESLint to TS-config
+        tsconfigRootDir: import.meta.dirname, // Set correct path independent of OS
       },
     },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+      "obsidianmd": obsidianmdPlugin,
+    },
     rules: {
+      // default settings
+      ...js.configs.recommended.rules,
+
+      // LEVEL 11: Switch from basic recommended to strict type-aware rules
+      ...tsPlugin.configs["recommended-type-checked"].rules,
+      ...tsPlugin.configs["stylistic-type-checked"].rules,
+
+      // Obsidian settings
       ...obsidianmdPlugin.configs.recommended.rules,
-      "no-unused-vars": "off",
+
+      // Prevent shipping floating asynchronous operations inside your timer loops
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/await-thenable": "error",
+
+      // Enforce clean, modernized type structures
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // Nullish-coalescing guard rails (perfect for your UI state evaluations)
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
@@ -41,7 +61,8 @@ export default tseslint.config(
           "varsIgnorePattern": "^_",
           "caughtErrorsIgnorePattern": "^_"
         }
-      ],
+      ]
+
     }
   }
-);
+];
