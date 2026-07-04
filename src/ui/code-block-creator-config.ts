@@ -74,9 +74,14 @@ function defineInput(_pluginSettings: FantasyGanttSettings): OptionalInput[] {
 
   return [
     {
-      type: 'path', prompt: 'Where to read timeline events',
-      key: 'path',
-      mandatory: false // , current: '/'
+      type: 'path', prompt: 'Where to read timeline events from.',
+      key: 'eventPath',
+      mandatory: false
+    },
+    {
+      type: 'boolean', prompt: 'Search subfolders?',
+      key: 'eventPathRecursive',
+      mandatory: false, current: 'true
     },
     {
       type: 'expandable', prompt: 'Colors', mandatory: false,
