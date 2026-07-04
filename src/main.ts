@@ -4,6 +4,7 @@ import {createSettings, DEFAULT_SETTINGS, FantasyGanttSettings,} from './setting
 import {CalendarConfig, CodeBlockContent, GanttItem} from './types'
 import {GanttRenderEngine} from './svg-drawer'
 import {readCodeBlock} from './code-block-reader'
+import {CodeBlockCreatorModal} from "./ui/code-block-creator-config";
 
 
 class GanttTooltipComponent extends MarkdownRenderChild {
@@ -28,8 +29,14 @@ export default class FantasyGanttPlugin extends Plugin {
     this.registerMarkdownCodeBlockProcessor('fantasy-gantt', async (source, el, ctx) =>
       await this.registerCalendar(el, source, ctx)
     )
-  }
 
+    this.addRibbonIcon('lucide-blocks', 'Fantasy Ganntt: Open code block creator', () => {
+      this.showCodeBlockCreator()
+    })
+  }
+  private showCodeBlockCreator() {
+    new CodeBlockCreatorModal(this.app, this).open()
+  }
   async loadSettings() {
     let loadedData: Partial<FantasyGanttSettings> = (await this.loadData()) as Partial<FantasyGanttSettings> || {}
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData || {})

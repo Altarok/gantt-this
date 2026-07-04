@@ -9,6 +9,7 @@ coverage/
 main.js
 data.json
 # dev junk
+/src/external
 .env
 *.log
 # system junk
