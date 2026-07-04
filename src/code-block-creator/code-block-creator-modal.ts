@@ -21,15 +21,25 @@ import {
 interface ObsidianWindow extends Window {
   app: App
 }
+function getApp(): App {
+  return (window as unknown as ObsidianWindow).app
+}
+type CurrentPaths = {
+  pathsInVault: string[],
+  pathOfOpenFile?: string
+}
 
+function getPaths(): CurrentPaths {
+  return {
+    pathsInVault: getApp().vault.getAllFolders(false).map(f => f.path).filter(Boolean)
+      .sort((a, b) => (a > b ? -1 : 1)),
+    pathOfOpenFile: getApp().workspace.getActiveFile()?.parent?.path ?? undefined
+  }
+}
 
 function toRecord(strings: readonly string[] | Record<string, string>): Record<string, string> {
-  if (Array.isArray(strings)) return Object.fromEntries(strings.map(s
-:
-  string => [s, s]
-))
-else
-  return strings as Record<string, string>
+  if (Array.isArray(strings)) return Object.fromEntries(strings.map(s => [s, s]))
+  else return strings as Record<string, string>
 }
 
 const SelectorRegistry: Record<string, (ctx: SelectorContext) => Selector> = {
@@ -38,6 +48,7 @@ const SelectorRegistry: Record<string, (ctx: SelectorContext) => Selector> = {
   conditional: ctx => new ConditionalSelector(ctx),
   dropdown: ctx => new DropdownSelector(ctx),
   dropdownMulti: ctx => new DropdownMultiSelector(ctx),
+  path: ctx => new PathSelector(ctx),
   slider: ctx => new SliderSelector(ctx),
   string: ctx => new StringSelector(ctx)
 }
@@ -91,7 +102,7 @@ abstract class Selector<T extends MandatoryInput = MandatoryInput> {
   addResetButton2(setting: Setting) {
     if (!this.isOptional) return
     const backupValue: string = typeof this.data.current === 'boolean' || this.data.current ? `${this.data.current}` : 'none'
-    let tooltip: string = `Reset to: ${backupValue}`
+    let tooltip = `Reset to: ${backupValue}`
     setting.addExtraButton(eb =>
       eb.setIcon('lucide-rotate-ccw')
         .setTooltip(tooltip, {delay: -1})
@@ -205,7 +216,7 @@ class DropdownSelector extends Selector<DropdownInput> {
 
 class DropdownMultiSelector extends Selector<DropdownMultiInput> {
   private selections: string[] = []
-  private separator: string = ',' // add data.separator to type?
+  private separator = ',' // add data.separator to type?
   dropdownComponent?: DropdownComponent
 
   draw() {
@@ -236,8 +247,8 @@ class DropdownMultiSelector extends Selector<DropdownMultiInput> {
 }
 
 class ExpandableSelector {
-  private toggleActive: boolean = false
-  private hasBuilt: boolean = false
+  private toggleActive = false
+  private hasBuilt = false
   private bc?: ExtraButtonComponent
   private wrapperEl!: HTMLDivElement
 
@@ -322,6 +333,32 @@ class ExpandableSelector {
 
 }
 
+class PathSelector extends Selector<StringInput> {
+  private dropdownOptions: Record<string,string>
+
+  constructor(ctx: SelectorContext) {
+    super(ctx)
+    const paths: CurrentPaths = getPaths()
+    this.dropdownOptions = {'/': '/ (root)', ...toRecord(paths.pathsInVault)}
+    this.data.current = paths.pathOfOpenFile ?? '/'
+    this.data.tooltip = 'Pre-set to path of currently open file.'
+  }
+
+  draw() {
+    const {setting, data} = this
+    setting.clear()
+    super.addName()
+    setting.addDropdown(dd => this.resettableComponent =
+      dd.addOptions(toRecord(this.dropdownOptions))
+
+        .setValue(data.current)
+        .onChange((value: string) => this.write(value))
+    ).setTooltip(this.data.tooltip!, {delay: -1})
+    this.addResetButton()
+  }
+}
+
+
 class SliderSelector extends Selector<SliderInput> {
   draw() {
     const {setting, data} = this
@@ -364,7 +401,7 @@ export class GenericModal {
   private isEditableMarkdownFile: boolean
 
   constructor(public contentEl: HTMLElement, public data: GenericModalInput) {
-    const localApp = (window as unknown as ObsidianWindow).app
+    const localApp = getApp()
     this.isEditableMarkdownFile = localApp.workspace.activeEditor?.file?.extension == 'md'
       && localApp.workspace.getActiveViewOfType(MarkdownView)?.getState().mode === 'source'
   }
@@ -432,7 +469,7 @@ export class GenericModal {
         .setTooltip('Copy code block to clipboard', {'delay': -1})
       ).addExtraButton(bc => bc
           .setIcon(this.isEditableMarkdownFile ? 'save' : 'save-off')
-          .onClick(async () => this.saveToOpenFile())
+          .onClick(() => this.saveToOpenFile())
           .setTooltip(this.isEditableMarkdownFile ? 'Save to note' : 'Can only save to editable Markdown note', {'delay': -1})
         // .setDisabled(!this.isEditableMarkdownFile)
       )
@@ -475,12 +512,12 @@ export class GenericModal {
     try {
       await window.navigator.clipboard.writeText(codeBlockContent)
       new Notice('Code block copied to clipboard.')
-    } catch (error) {
-      new Notice('Copy to clipboard failed. ' + error)
+    } catch {
+      new Notice('Copy to clipboard failed.')
     }
   }
 
-  private async saveToOpenFile() {
+  private saveToOpenFile() {
     if (!this.isEditableMarkdownFile) {
       new Notice('Can only save to editable Markdown note!')
       return
@@ -488,10 +525,10 @@ export class GenericModal {
 
     const codeBlockContent = this.createCodeBlock()
 
-    const localApp = (window as unknown as ObsidianWindow).app
+    const localApp = getApp()
     const activeView = localApp.workspace.getActiveViewOfType(MarkdownView)
 
-    if (activeView && activeView.editor) {
+    if (activeView?.editor) {
       activeView.editor.replaceSelection(`\n${codeBlockContent}\n`)
       new Notice('Saved code block to open file.')
     }

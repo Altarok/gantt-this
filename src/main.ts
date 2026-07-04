@@ -30,7 +30,7 @@ export default class FantasyGanttPlugin extends Plugin {
       await this.registerCalendar(el, source, ctx)
     )
 
-    this.addRibbonIcon('lucide-blocks', 'Fantasy Ganntt: Open code block creator', () => {
+    this.addRibbonIcon('lucide-chart-bar-stacked', 'Fantasy Ganntt: Open code block creator', () => {
       this.showCodeBlockCreator()
     })
   }

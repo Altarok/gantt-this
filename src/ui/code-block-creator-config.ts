@@ -1,8 +1,8 @@
 import RubikCubeAlgos from '../main'
 import {App, Modal} from 'obsidian'
-import {GenericModal, OptionalInput, OutputData} from '@Altarok/obsidian-dev-utils/src'
 import {FantasyGanttSettings} from "../settings";
-import {GenericModalInput} from "../code-block-creator/code-block-creator-types";
+import {GenericModalInput, OptionalInput, OutputData} from "../code-block-creator/code-block-creator-types";
+import {GenericModal} from "../code-block-creator/code-block-creator-modal";
 
 // npm update @Altarok/obsidian-dev-utils
 export class CodeBlockCreatorModal extends Modal {
@@ -17,12 +17,12 @@ export class CodeBlockCreatorModal extends Modal {
     const output: Record<string, OutputData> = {}
 
     // const mandatoryInput: Readonly<MandatoryInput>[] = createMandatoryInput()
-    const optionalInput: Readonly<OptionalInput>[] = createOptionalInput(this.plugin.settings)
+    const optionalInput: Readonly<OptionalInput>[] = defineInput(this.plugin.settings)
 
     const onUpdatePreview = (_previewEl: HTMLElement): void => {
       // previewEl.empty()
       // if (!output.id) {
-      //   previewEl.createDiv({ text: 'Please select algorithm.' })
+      //   previewEl.createDiv({ text: 'Please select algorithm.'})
       //   return
       // }
       //
@@ -52,12 +52,11 @@ export class CodeBlockCreatorModal extends Modal {
     }
 
     const input: GenericModalInput = {
-      pluginName: `Rubik's Cube algorithms`,
-      codeBlockId: 'rubikCube',
-      // mandatory: mandatoryInput,
-      optional: optionalInput,
-      output,
-      onUpdatePreview
+      pluginName: 'Gantt This',
+      codeBlockId: 'fantasy-gantt',
+      input: optionalInput,
+      onUpdatePreview,
+      output
     }
 
     new GenericModal(contentEl, input).display()
@@ -71,15 +70,20 @@ export class CodeBlockCreatorModal extends Modal {
 }
 
 
-function createOptionalInput(pluginSettings: FantasyGanttSettings): Readonly<OptionalInput>[] {
+function defineInput(_pluginSettings: FantasyGanttSettings): OptionalInput[] {
 
   return [
     {
-      type: 'expandable', prompt: 'Colors',
+      type: 'path', prompt: 'Where to read timeline events',
+      key: 'path',
+      mandatory: false // , current: '/'
+    },
+    {
+      type: 'expandable', prompt: 'Colors', mandatory: false,
       nestedInput: []
     },
     {
-      type: 'expandable', prompt: 'Advanced',
+      type: 'expandable', prompt: 'Advanced', mandatory: false,
       nestedInput: []
     },
   ]
