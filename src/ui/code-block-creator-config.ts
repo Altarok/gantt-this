@@ -1,12 +1,12 @@
-import RubikCubeAlgos from '../main'
 import {App, Modal} from 'obsidian'
-import {FantasyGanttSettings} from "../settings";
-import {GenericModalInput, OptionalInput, OutputData} from "../code-block-creator/code-block-creator-types";
-import {GenericModal} from "../code-block-creator/code-block-creator-modal";
+import {FantasyGanttSettings} from '../settings'
+import {GenericModal,GenericModalInput, OptionalInput, OutputData} from '@Altarok/obsidian-dev-utils'
+import FantasyGanttPlugin from "../main";
 
 // npm update @Altarok/obsidian-dev-utils
+// npm link @Altarok/obsidian-dev-utils
 export class CodeBlockCreatorModal extends Modal {
-  constructor(public readonly app: App, public readonly plugin: RubikCubeAlgos) {
+  constructor(public readonly app: App, public readonly plugin: FantasyGanttPlugin) {
     super(app)
   }
 
@@ -14,10 +14,9 @@ export class CodeBlockCreatorModal extends Modal {
     const {contentEl} = this
     contentEl.empty()
 
-    const output: Record<string, OutputData> = {}
 
-    // const mandatoryInput: Readonly<MandatoryInput>[] = createMandatoryInput()
-    const optionalInput: Readonly<OptionalInput>[] = defineInput(this.plugin.settings)
+    const input: Readonly<OptionalInput>[] = defineInput(this.plugin.settings)
+    const output: Record<string, OutputData> = {}
 
     const onUpdatePreview = (_previewEl: HTMLElement): void => {
       // previewEl.empty()
@@ -51,15 +50,15 @@ export class CodeBlockCreatorModal extends Modal {
       // new GenericMarkdownProcessor(pseudoCodeBlockContent, this.plugin, previewEl).display() // IgnoringErrors(true)
     }
 
-    const input: GenericModalInput = {
+    const modalInput: GenericModalInput = {
       pluginName: 'Gantt This',
       codeBlockId: 'fantasy-gantt',
-      input: optionalInput,
+      input,
       onUpdatePreview,
       output
     }
 
-    new GenericModal(contentEl, input).display()
+    new GenericModal(contentEl, modalInput).display()
 
     contentEl.focus()
   }
@@ -74,22 +73,22 @@ function defineInput(_pluginSettings: FantasyGanttSettings): OptionalInput[] {
 
   return [
     {
-      type: 'path', prompt: 'Where to read timeline events from.',
+      type: 'path', prompt: 'Folder to search for timeline events.',
       key: 'eventPath',
-      mandatory: false
+      mandatory: true
     },
     {
       type: 'boolean', prompt: 'Search subfolders?',
       key: 'eventPathRecursive',
-      mandatory: false, current: 'true
+      mandatory: false, current: true
     },
-    {
-      type: 'expandable', prompt: 'Colors', mandatory: false,
-      nestedInput: []
-    },
-    {
-      type: 'expandable', prompt: 'Advanced', mandatory: false,
-      nestedInput: []
-    },
+    // {
+    //   type: 'expandable', prompt: 'Colors', mandatory: false,
+    //   nestedInput: []
+    // },
+    // {
+    //   type: 'expandable', prompt: 'Advanced', mandatory: false,
+    //   nestedInput: []
+    // },
   ]
 }

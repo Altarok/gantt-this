@@ -15,7 +15,7 @@ export function readCodeBlock(currentFolder: string, source: string): CodeBlockC
     if (match1) {
       const pathValue = match1[1]?.trim()
       if (pathValue === undefined) {
-        codeBlockContent.eventPath = '/'
+        codeBlockContent.eventPath = currentFolder
       } else if (pathValue.toLowerCase() === 'root') {
         codeBlockContent.eventPath = '/'
       } else if (pathValue.toLowerCase() === 'local') {
