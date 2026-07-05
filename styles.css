@@ -84,17 +84,21 @@
   transition: opacity 0.1s ease;
 }
 
-
 .gantt-tooltip.is-active {
   opacity: 1;
   visibility: visible;
+}
+
+.tooltip-link {
+  color: var(--link-color);
+  margin-top: 6px;
+  font-style: italic;
 }
 
 .gantt-tooltip:not([data-link]),
 .gantt-tooltip[data-link=""] .tooltip-link {
   display: none;
 }
-
 
 /* Explicit solid background for Dark Mode */
 .theme-dark .gantt-tooltip {
@@ -114,12 +118,6 @@
 
 .tooltip-dates {
   color: var(--text-muted);
-}
-
-.tooltip-link {
-  color: var(--link-color);
-  margin-top: 6px;
-  font-style: italic;
 }
 
 
@@ -228,7 +226,7 @@
 }
 
 .gantt-item.bar-rect {
-  height: 16px;            /* config.rowHeight (24) - 8 */
+  height: 16px; /* config.rowHeight (24) - 8 */
   transform: translateY(4px); /* Pushes it down into the middle of the row track */
 }
 
