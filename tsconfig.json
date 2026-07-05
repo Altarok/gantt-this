@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": "src",
+    "paths": {
+      "@Altarok/utils": [
+        "../../obsidian-dev-utils/src/index.ts"
+      ]
+    },
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
@@ -17,12 +22,11 @@
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": true,
-
     "lib": [
       "DOM",
       "DOM.Iterable",
       "ES2022"
-    ],
+    ]
   },
   "include": [
     "src/**/*.ts"
