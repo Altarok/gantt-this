@@ -69,19 +69,35 @@ export class CodeBlockCreatorModal extends Modal {
 }
 
 
-function defineInput(_pluginSettings: FantasyGanttSettings): OptionalInput[] {
+function defineInput(pluginSettings: FantasyGanttSettings): OptionalInput[] {
 
   return [
     {
-      type: 'path', prompt: 'Folder to search for timeline events.',
-      key: 'eventPath',
-      mandatory: true
-    },
-    {
-      type: 'boolean', prompt: 'Search subfolders?',
-      key: 'eventPathRecursive',
-      mandatory: false, current: true
-    },
+      type: 'expandable', prompt: 'Data sources', mandatory: false,
+      openOnStart: true,
+      nestedInput: [
+        {
+          type: 'path', prompt: 'Folder to search for timeline events.',
+          key: 'eventPath',
+          mandatory: true
+        },
+        {
+          type: 'boolean', prompt: 'Search subfolders?',
+          key: 'eventPathRecursive',
+          mandatory: false, current: pluginSettings.eventPathSearchRecursive
+        },
+        {
+          type: 'path', prompt: 'Folder to search for calendar definitions.',
+          key: 'calendarPath',
+          mandatory: true
+        },
+        {
+          type: 'boolean', prompt: 'Search subfolders?',
+          key: 'calendarPathSearchRecursive',
+          mandatory: false, current: pluginSettings.calendarPathSearchRecursive
+        }
+      ]
+    }
     // {
     //   type: 'expandable', prompt: 'Colors', mandatory: false,
     //   nestedInput: []
