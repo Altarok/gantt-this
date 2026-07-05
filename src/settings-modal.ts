@@ -48,25 +48,25 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private addColorSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Global Fallback Color')
-    .setDesc('Used when no color is defined in the item front-matter, its group, or its calendar type.')
-    .addColorPicker(color => color
-    .setValue(this.plugin.settings.fallbackColor)
-    .onChange(async (value) => {
-      this.plugin.settings.fallbackColor = value
-      await this.plugin.saveSettings()
-    }))
+      .setDesc('Used when no color is defined in the item front-matter, its group, or its calendar type.')
+      .addColorPicker(color => color
+        .setValue(this.plugin.settings.fallbackColor)
+        .onChange(async (value) => {
+          this.plugin.settings.fallbackColor = value
+          await this.plugin.saveSettings()
+        }))
   }
 
   private addCalendarSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default Timestamp Type')
-    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
-    .addText(text => text
-    .setPlaceholder('iso-8601')
-    .setValue(this.plugin.settings.defaultType)
-    .onChange(async (value) => {
-      this.plugin.settings.defaultType = value.trim() || 'iso-8601'
-      await this.plugin.saveSettings()
-    }))
+      .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
+      .addText(text => text
+        .setPlaceholder('iso-8601')
+        .setValue(this.plugin.settings.defaultType)
+        .onChange(async (value) => {
+          this.plugin.settings.defaultType = value.trim() || 'iso-8601'
+          await this.plugin.saveSettings()
+        }))
   }
 
   /**
@@ -100,18 +100,18 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       visibleCalendars[typeKey] ??= true;
 
       new Setting(container)
-      .setName(`Show "${typeKey}" Calendar`)
-      .setDesc(`Toggle visibility for files using gantt-type: "${typeKey}"`)
-      .addToggle(toggle => toggle
-      .setValue(visibleCalendars[typeKey]!)
-      .onChange(async (value) => {
-        visibleCalendars[typeKey] = value
-        await this.plugin.saveSettings()
-      }))
+        .setName(`Show "${typeKey}" Calendar`)
+        .setDesc(`Toggle visibility for files using gantt-type: "${typeKey}"`)
+        .addToggle(toggle => toggle
+          .setValue(visibleCalendars[typeKey]!)
+          .onChange(async (value) => {
+            visibleCalendars[typeKey] = value
+            await this.plugin.saveSettings()
+          }))
     })
   }
 
-  private saveSettings(){
+  private saveSettings() {
     void this.plugin.saveSettings() // TODO await this
   }
 
@@ -146,7 +146,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       const deleteBtn = row.createEl('button', {text: 'Delete', cls: 'mod-warning'})
       deleteBtn.addEventListener('click',
-         () => {
+        () => {
           delete record[key]
           if (syncToVisibility && this.plugin.settings.visibleCalendars[key] !== undefined) {
             delete this.plugin.settings.visibleCalendars[key]
@@ -163,28 +163,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     let calendarColor = defaultColor
 
     new Setting(container)
-    .setName('Add Assignment')
-    .setDesc('Add a new key and assign its default color.')
-    .addText(text =>
-      text.setPlaceholder(placeholderText)
-      .onChange(val => calendarName = val.trim())
-    )
-    .addColorPicker(cp =>
-      cp.setValue(defaultColor)
-      .onChange(val => calendarColor = val)
-    )
-    .addExtraButton(eb => eb.setIcon('save')
-      .onClick(async () => {
-          if (calendarName && !record[calendarName]) {
-            record[calendarName] = calendarColor
-
-            if (syncToVisibility) this.plugin.settings.visibleCalendars[calendarName] = true
-
-            await this.plugin.saveSettings()
-            this.display()
-          }
-        }
+      .setName('Add Assignment')
+      .setDesc('Add a new key and assign its default color.')
+      .addText(text =>
+        text.setPlaceholder(placeholderText)
+          .onChange(val => calendarName = val.trim())
       )
-    )
+      .addColorPicker(cp =>
+        cp.setValue(defaultColor)
+          .onChange(val => calendarColor = val)
+      )
+      .addExtraButton(eb => eb.setIcon('save')
+        .onClick(async () => {
+            if (calendarName && !record[calendarName]) {
+              record[calendarName] = calendarColor
+
+              if (syncToVisibility) this.plugin.settings.visibleCalendars[calendarName] = true
+
+              await this.plugin.saveSettings()
+              this.display()
+            }
+          }
+        )
+      )
   }
 }

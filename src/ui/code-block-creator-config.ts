@@ -1,7 +1,7 @@
 import {App, Modal} from 'obsidian'
 import {FantasyGanttSettings} from '../settings'
-import {GenericModal,GenericModalInput, OptionalInput, OutputData} from '@Altarok/obsidian-dev-utils'
-import FantasyGanttPlugin from "../main";
+import {GenericModal, GenericModalInput, OptionalInput, OutputData} from '@Altarok/utils'
+import FantasyGanttPlugin from '../main'
 
 // npm update @Altarok/obsidian-dev-utils
 // npm link @Altarok/obsidian-dev-utils

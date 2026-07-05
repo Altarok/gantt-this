@@ -34,9 +34,7 @@ export default class FantasyGanttPlugin extends Plugin {
       this.showCodeBlockCreator()
     })
   }
-  private showCodeBlockCreator() {
-    new CodeBlockCreatorModal(this.app, this).open()
-  }
+
   async loadSettings() {
     let loadedData: Partial<FantasyGanttSettings> = (await this.loadData()) as Partial<FantasyGanttSettings> || {}
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData || {})
@@ -82,6 +80,10 @@ export default class FantasyGanttPlugin extends Plugin {
     }
   }
 
+  private showCodeBlockCreator() {
+    new CodeBlockCreatorModal(this.app, this).open()
+  }
+
   // 1. UPDATE THE PARSER INSIDE THE PLUGIN CLASS
   private parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
     if (!input) return null
@@ -104,7 +106,7 @@ export default class FantasyGanttPlugin extends Plugin {
       const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
       const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-      for (let m = 0; m < month - 1 ; m++) {
+      for (let m = 0; m < month - 1; m++) {
         totalDays += monthDays[m]!
       }
       totalDays += (day - 1)

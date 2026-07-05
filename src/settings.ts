@@ -9,5 +9,5 @@ export const DEFAULT_SETTINGS = {
 export type FantasyGanttSettings = typeof DEFAULT_SETTINGS
 
 export function createSettings(): FantasyGanttSettings {
-  return { ...DEFAULT_SETTINGS }
+  return {...DEFAULT_SETTINGS}
 }

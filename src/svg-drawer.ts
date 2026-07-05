@@ -56,54 +56,12 @@ export class GanttRenderEngine {
     this.resizeObserver.observe(this.container)
   }
 
-  private calculateGlobalBounds() {
-    if (this.rawData.length === 0) {
-      const todayDays = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
-      this.minDays = todayDays - 15
-      this.maxDays = todayDays + 15
-      return
-    }
-
-    const startValues = this.rawData.map(d => d.startDays)
-    const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
-
-    const paddingDays = 15
-    this.minDays = Math.min(...startValues) - paddingDays
-    this.maxDays = Math.max(...endValues) + paddingDays
-  }
-
   public updateData(newData: GanttItem[]) {
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
     this.handleResize()
-  }
-
-  private calculateStacking(items: GanttItem[]) {
-    const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
-    const lanes: GanttItem[][] = []
-    sorted.forEach(item => {
-      let placed = false
-      for (let i = 0; i < lanes.length; i++) {
-        const lane = lanes[i]
-        if (!lane) continue
-
-        const lastItem = lane[lane.length - 1]
-
-        if (lastItem && lastItem.endDays < item.startDays - 1) {
-          lane?.push(item)
-          item.lane = i
-          placed = true
-          break
-        }
-      }
-      if (!placed) {
-        lanes.push([item])
-        item.lane = lanes.length - 1
-      }
-    })
-    return {processedData: sorted, totalLanes: lanes.length}
   }
 
   initLayout() {
@@ -152,16 +110,6 @@ export class GanttRenderEngine {
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
     this.container.style.height = `${this.totalHeight}px`
-  }
-
-  private getXPosition(days: number, width: number): number {
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
-    const percentage = (days - this.minDays) / (this.maxDays - this.minDays)
-    return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
-  }
-
-  private createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K): SVGElementTagNameMap[K] {
-    return window.document.createElementNS('http://www.w3.org/2000/svg', tag)
   }
 
   initChartStructure() {
@@ -305,62 +253,6 @@ export class GanttRenderEngine {
         }
       })
     })
-  }
-
-// 2. UPDATE THE AXIS LABEL FORMATTER INSIDE THE GANTT RENDER ENGINE CLASS
-  private formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
-    if (!config) {
-      const dateObj = new Date(days * 24 * 60 * 60 * 1000)
-      return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
-    }
-
-    // STRATEGY A: Reverse Engine Real Gregorian Dates from Day Counts
-    if (config.type === 'gregorian') {
-      let remainingDays = days
-
-      // Approximate year selection step
-      let year = Math.floor(remainingDays / 365.2425) + 1
-      let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-
-      // Micro adjust to pinpoint exact leap layout boundary alignment
-      while (totalDaysToYearStart > remainingDays) {
-        year--
-        totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-      }
-
-      remainingDays -= totalDaysToYearStart
-      const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
-      const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-      let month = 1
-      for (let m = 0; m < 12; m++) {
-        if (remainingDays >= monthDays[m]!) {
-          remainingDays -= monthDays[m]! // TODO remove '!'?
-          month++
-        } else {
-          break
-        }
-      }
-      const day = remainingDays + 1
-
-      return `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
-    }
-
-    // STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.)
-    const epochDate = new Date(config.epochGregorian)
-    const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    let localDays = days - epochDaysOffset
-
-    if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`
-
-    const stringSegments: string[] = []
-    config.units.forEach(unit => {
-      const unitCount = Math.floor(localDays / unit.days)
-      stringSegments.push(unitCount.toString())
-      localDays %= unit.days
-    })
-
-    return stringSegments.join(config.delimiter)
   }
 
   drawAxes(width: number) {
@@ -564,5 +456,113 @@ export class GanttRenderEngine {
         }
       }
     })
+  }
+
+  private calculateGlobalBounds() {
+    if (this.rawData.length === 0) {
+      const todayDays = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+      this.minDays = todayDays - 15
+      this.maxDays = todayDays + 15
+      return
+    }
+
+    const startValues = this.rawData.map(d => d.startDays)
+    const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
+
+    const paddingDays = 15
+    this.minDays = Math.min(...startValues) - paddingDays
+    this.maxDays = Math.max(...endValues) + paddingDays
+  }
+
+  private calculateStacking(items: GanttItem[]) {
+    const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
+    const lanes: GanttItem[][] = []
+    sorted.forEach(item => {
+      let placed = false
+      for (let i = 0; i < lanes.length; i++) {
+        const lane = lanes[i]
+        if (!lane) continue
+
+        const lastItem = lane[lane.length - 1]
+
+        if (lastItem && lastItem.endDays < item.startDays - 1) {
+          lane?.push(item)
+          item.lane = i
+          placed = true
+          break
+        }
+      }
+      if (!placed) {
+        lanes.push([item])
+        item.lane = lanes.length - 1
+      }
+    })
+    return {processedData: sorted, totalLanes: lanes.length}
+  }
+
+  private getXPosition(days: number, width: number): number {
+    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    const percentage = (days - this.minDays) / (this.maxDays - this.minDays)
+    return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
+  }
+
+  private createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K): SVGElementTagNameMap[K] {
+    return window.document.createElementNS('http://www.w3.org/2000/svg', tag)
+  }
+
+// 2. UPDATE THE AXIS LABEL FORMATTER INSIDE THE GANTT RENDER ENGINE CLASS
+  private formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
+    if (!config) {
+      const dateObj = new Date(days * 24 * 60 * 60 * 1000)
+      return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
+    }
+
+    // STRATEGY A: Reverse Engine Real Gregorian Dates from Day Counts
+    if (config.type === 'gregorian') {
+      let remainingDays = days
+
+      // Approximate year selection step
+      let year = Math.floor(remainingDays / 365.2425) + 1
+      let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+
+      // Micro adjust to pinpoint exact leap layout boundary alignment
+      while (totalDaysToYearStart > remainingDays) {
+        year--
+        totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+      }
+
+      remainingDays -= totalDaysToYearStart
+      const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
+      const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+      let month = 1
+      for (let m = 0; m < 12; m++) {
+        if (remainingDays >= monthDays[m]!) {
+          remainingDays -= monthDays[m]! // TODO remove '!'?
+          month++
+        } else {
+          break
+        }
+      }
+      const day = remainingDays + 1
+
+      return `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
+    }
+
+    // STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.)
+    const epochDate = new Date(config.epochGregorian)
+    const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+    let localDays = days - epochDaysOffset
+
+    if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`
+
+    const stringSegments: string[] = []
+    config.units.forEach(unit => {
+      const unitCount = Math.floor(localDays / unit.days)
+      stringSegments.push(unitCount.toString())
+      localDays %= unit.days
+    })
+
+    return stringSegments.join(config.delimiter)
   }
 }
