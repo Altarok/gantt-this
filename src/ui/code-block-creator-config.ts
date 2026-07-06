@@ -1,7 +1,7 @@
 import {App, Modal} from 'obsidian'
-import {FantasyGanttSettings} from '../settings'
-import {GenericModal, GenericModalInput, OptionalInput, OutputData} from '@Altarok/utils'
 import FantasyGanttPlugin from '../main'
+import {FantasyGanttSettings} from '../settings'
+import {GenericModal, GenericModalInput, UserInput, OutputData} from '@Altarok/utils'
 
 // npm update @Altarok/obsidian-dev-utils
 // npm link @Altarok/obsidian-dev-utils
@@ -15,16 +15,12 @@ export class CodeBlockCreatorModal extends Modal {
     contentEl.empty()
 
 
-    const input: Readonly<OptionalInput>[] = defineInput(this.plugin.settings)
+    const input: Readonly<UserInput>[] = defineInput(this.plugin.settings)
     const output: Record<string, OutputData> = {}
 
-    const onUpdatePreview = (_previewEl: HTMLElement): void => {
-      // previewEl.empty()
-      // if (!output.id) {
-      //   previewEl.createDiv({ text: 'Please select algorithm.'})
-      //   return
-      // }
-      //
+    const onUpdatePreview = (previewEl: HTMLElement): void => {
+      previewEl.empty()
+
       // let pseudoCodeBlockContent = ''
       //
       // const allFlatInputs = optionalInput.flatMap(i => i.type === 'expandable' ? i.nestedInput : [i])
@@ -68,8 +64,8 @@ export class CodeBlockCreatorModal extends Modal {
   }
 }
 
+function defineInput(pluginSettings: FantasyGanttSettings): UserInput[] {
 
-function defineInput(pluginSettings: FantasyGanttSettings): OptionalInput[] {
 
   return [
     {
@@ -79,32 +75,45 @@ function defineInput(pluginSettings: FantasyGanttSettings): OptionalInput[] {
         {
           type: 'path', prompt: 'Folder to search for timeline events.',
           key: 'eventPath',
-          mandatory: true
-        },
-        {
+          current: pluginSettings.eventPath
+        }, {
           type: 'boolean', prompt: 'Search subfolders?',
           key: 'eventPathRecursive',
-          mandatory: false, current: pluginSettings.eventPathSearchRecursive
-        },
-        {
+          current: pluginSettings.eventPathSearchRecursive
+        }, {
           type: 'path', prompt: 'Folder to search for calendar definitions.',
           key: 'calendarPath',
-          mandatory: true
-        },
-        {
+          current: pluginSettings.calendarPath
+        }, {
           type: 'boolean', prompt: 'Search subfolders?',
           key: 'calendarPathSearchRecursive',
-          mandatory: false, current: pluginSettings.calendarPathSearchRecursive
+          current: pluginSettings.calendarPathSearchRecursive
         }
       ]
+    },       {
+      type: 'color', prompt: 'Ne Farbe.',
+      key: 'neFarbe2',
+      current: '#000000'
+    },
+    {
+      type: 'expandable', prompt: 'Advanced', mandatory: false,
+      openOnStart: false,
+      nestedInput: [
+        {
+          type: 'color', prompt: 'Ne Farbe.',
+          key: 'neFarbe',
+          current: '#000000'
+        },
+        {
+          type: 'slider', prompt: 'Ne Zahl zwischen 1 und 7',
+          key: 'neZahl',
+          from: 1, to: 7, current: 3, step: 1
+        }
+      ]
+    },  {
+      type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70',  mandatory: true,
+      key: 'neZahl2',
+      from: 10, to: 70, current: 30, step: 5
     }
-    // {
-    //   type: 'expandable', prompt: 'Colors', mandatory: false,
-    //   nestedInput: []
-    // },
-    // {
-    //   type: 'expandable', prompt: 'Advanced', mandatory: false,
-    //   nestedInput: []
-    // },
   ]
 }
