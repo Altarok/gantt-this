@@ -1,6 +1,6 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {FantasyGanttSettings} from '../settings'
+import {PluginSettings} from '../types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 
 // npm update @Altarok/obsidian-dev-utils
@@ -14,12 +14,15 @@ export class CodeBlockCreatorModal extends Modal {
     const {contentEl} = this
     contentEl.empty()
 
-
+    // const globalSettings: Readonly<PluginSettings> = Object.assign({}, this.plugin.settings)
     const input: Readonly<UserInput>[] = defineInput(this.plugin.settings)
     const output: Record<string, OutputData> = {}
 
     const onUpdatePreview = (previewEl: HTMLElement): void => {
       previewEl.empty()
+
+      const overwriteSettings = this.mergeSettings( output)
+
 
       // let pseudoCodeBlockContent = ''
       //
@@ -59,14 +62,39 @@ export class CodeBlockCreatorModal extends Modal {
     contentEl.focus()
   }
 
+  /**
+   * @param globalSettings - global plugin settings
+   * @param localSettings - subset of plugin settings user chose to overwrite with code block creator
+   */
+  private mergeSettings( localSettings: Record<string, string | boolean | number | undefined>) {
+    const globalSettings: Readonly<PluginSettings> =  this.plugin.settings
+    const mergedSettings: PluginSettings = Object.assign({},globalSettings)
+
+    const setSettingProperty = <K extends keyof PluginSettings>(key: K, val: PluginSettings[K]) => {
+      /* AI written helper method for type compliance */
+      mergedSettings[key] = val
+    }
+
+    for (const key of Object.keys(globalSettings) as (keyof PluginSettings)[]) {
+      const localValue = localSettings[key]
+      if (localValue === undefined) continue
+
+      const globalValue = globalSettings[key]
+
+      if (globalValue !== localValue && typeof globalValue === typeof localValue) {
+        setSettingProperty(key, localValue)
+      }
+    }
+
+    return mergedSettings
+  }
+
   onClose() {
     this.contentEl.empty()
   }
 }
 
-function defineInput(pluginSettings: FantasyGanttSettings): UserInput[] {
-
-
+function defineInput(pluginSettings: PluginSettings): UserInput[] {
   return [
     {
       type: 'expandable', prompt: 'Data sources', mandatory: false,
@@ -76,21 +104,25 @@ function defineInput(pluginSettings: FantasyGanttSettings): UserInput[] {
           type: 'path', prompt: 'Folder to search for timeline events.',
           key: 'eventPath',
           current: pluginSettings.eventPath
-        }, {
+        },
+        {
           type: 'boolean', prompt: 'Search subfolders?',
           key: 'eventPathRecursive',
           current: pluginSettings.eventPathSearchRecursive
-        }, {
+        },
+        {
           type: 'path', prompt: 'Folder to search for calendar definitions.',
           key: 'calendarPath',
           current: pluginSettings.calendarPath
-        }, {
+        },
+        {
           type: 'boolean', prompt: 'Search subfolders?',
           key: 'calendarPathSearchRecursive',
           current: pluginSettings.calendarPathSearchRecursive
         }
       ]
-    }, {
+    },
+    {
       type: 'color', prompt: 'Ne Farbe.',
       key: 'neFarbe2',
       current: '#000000'
@@ -110,7 +142,8 @@ function defineInput(pluginSettings: FantasyGanttSettings): UserInput[] {
           from: 1, to: 7, current: 3, step: 1
         }
       ]
-    }, {
+    },
+    {
       type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70', mandatory: true,
       key: 'neZahl2',
       from: 10, to: 70, current: 30, step: 5

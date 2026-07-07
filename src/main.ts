@@ -1,7 +1,6 @@
 import {MarkdownPostProcessorContext, MarkdownRenderChild, Notice, parseYaml, Plugin, TFile} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings-modal'
-import {createSettings, DEFAULT_SETTINGS, FantasyGanttSettings,} from './settings'
-import {CalendarConfig, CodeBlockContent, GanttItem} from './types'
+import {CalendarConfig, CodeBlockContent, DEFAULT_SETTINGS, GanttItem, PluginSettings} from './types'
 import {GanttRenderEngine} from './svg-drawer'
 import {readCodeBlock} from './code-block-reader'
 import {CodeBlockCreatorModal} from "./ui/code-block-creator-config";
@@ -18,7 +17,7 @@ class GanttTooltipComponent extends MarkdownRenderChild {
 }
 
 export default class FantasyGanttPlugin extends Plugin {
-  settings: FantasyGanttSettings = createSettings()
+  settings: PluginSettings = DEFAULT_SETTINGS
   calendarConfigsCache = new Map<string, CalendarConfig>()
 
   async onload() {
@@ -36,7 +35,7 @@ export default class FantasyGanttPlugin extends Plugin {
   }
 
   async loadSettings() {
-    let loadedData: Partial<FantasyGanttSettings> = (await this.loadData()) as Partial<FantasyGanttSettings> || {}
+    let loadedData: Partial<PluginSettings> = (await this.loadData()) as Partial<PluginSettings> || {}
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData || {})
   }
 
@@ -158,7 +157,7 @@ export default class FantasyGanttPlugin extends Plugin {
       return
     }
 
-    const codeBlockContent: CodeBlockContent = readCodeBlock(currentFile.parent.path, source)
+    const codeBlockContent: CodeBlockContent = readCodeBlock(this.settings,currentFile.parent.path, source)
 
     const mainWrapper = el.createDiv({cls: Css.wrapper})
     const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
@@ -177,13 +176,13 @@ export default class FantasyGanttPlugin extends Plugin {
     const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: Css.btn})
 
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
-    const tooltip = window.document.body.createDiv({cls: Css.tooltip, attr: {id: 'gantt-tooltip-element'}})
+    const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: 'gantt-tooltip-element'}})
 
     ctx.addChild(new GanttTooltipComponent(el, tooltip))
 
-    const hoverTitle = tooltip.createDiv({cls: Css.tooltipTitle})
-    const hoverDates = tooltip.createDiv({cls: Css.tooltipDates})
-    tooltip.createDiv({ text: 'Click to open active note file', cls: Css.tooltipLink})
+    const hoverTitle = tooltip.createDiv({cls: Css.tooltip.title})
+    const hoverDates = tooltip.createDiv({cls: Css.tooltip.dates})
+    tooltip.createDiv({text: 'Click to open active note file', cls: Css.tooltip.link})
 
     this.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
     const data = await this.getGanttDataFromFolder(codeBlockContent)
@@ -236,7 +235,7 @@ export default class FantasyGanttPlugin extends Plugin {
         const calendarType = (frontMatter['gantt-type'] as string || this.settings.defaultType).trim()
         if (!this.settings.visibleCalendars[calendarType]) continue
 
-        const config = await this.getCalendarDefinition(calendarType, codeBlockContent.calendarDefinitionPath)
+        const config = await this.getCalendarDefinition(calendarType, codeBlockContent.calendarPath)
 
         const startRes = this.parseToAbsoluteDays(startInput, config)
         if (!startRes) continue

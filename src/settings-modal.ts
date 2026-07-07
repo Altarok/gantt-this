@@ -1,5 +1,6 @@
 import {App, PluginSettingTab, Setting} from 'obsidian'
 import FantasyGanttPlugin from './main'
+import {Css} from "./const/strings";
 
 /*
  * TODO needs complete rework, use expandable
@@ -23,16 +24,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     containerEl.createEl('p', {
       text: 'Control which calendar types are visible on your timelines. If a calendar type is turned off here,' +
         ' items belonging to that calendar type will be hidden.',
-      cls: 'gt-setting-item-description'
+      cls: Css.settings.itemDescription
     })
 
-    const visibilityContainer = containerEl.createDiv({cls: 'gantt-settings-visibility-list'})
+    const visibilityContainer = containerEl.createDiv({cls: Css.settings.visibilityList})
     this.renderVisibilitySettings(visibilityContainer)
 
     // 3. Calendar/Timestamp Type Colors Section
     containerEl.createEl('h3', {text: 'Default Colors for Timestamp Types (Calendars)'})
 
-    const typeContainer = containerEl.createDiv({cls: 'gantt-settings-container'})
+    const typeContainer = containerEl.createDiv({cls: Css.settings.container})
     this.renderMapSettings(typeContainer, this.plugin.settings.typeColors,
       'New type (e.g., mayan)', '#2e7d32', true
     )
@@ -40,7 +41,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     // 4. Group Colors Section
     containerEl.createEl('h3', {text: 'Default Colors for Groups'})
 
-    const groupContainer = containerEl.createDiv({cls: 'gantt-settings-container'})
+    const groupContainer = containerEl.createDiv({cls: Css.settings.container})
     this.renderMapSettings(groupContainer, this.plugin.settings.groupColors,
       'New group (e.g., Quest)', '#ff8f00', false
     )
@@ -125,12 +126,12 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     defaultColor: string,
     syncToVisibility: boolean
   ) {
-    const listEl = container.createDiv({cls: 'gantt-settings-list'})
+    const listEl = container.createDiv({cls: Css.settings.list})
 
     // Render existing records
     Object.entries(record).forEach(([key, colorValue]) => {
       const row = listEl.createDiv({
-        cls: 'gantt-settings-row',
+        cls: Css.settings.row,
         attr: {style: 'display: flex; gap: 10px; margin-bottom: 5px; align-items: center;'}
       })
 
@@ -144,7 +145,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         }
       )
 
-      const deleteBtn = row.createEl('button', {text: 'Delete', cls: 'mod-warning'})
+      const deleteBtn = row.createEl('button', {text: 'Delete', cls: Css.modWarning})
       deleteBtn.addEventListener('click',
         () => {
           delete record[key]

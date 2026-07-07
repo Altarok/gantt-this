@@ -1,46 +1,33 @@
-import {CodeBlockContent} from './types'
+import {PluginSettings} from "./types";
 
-export function readCodeBlock(currentFolder: string, source: string): CodeBlockContent {
+function toEventPath(value: string, currentFolder: string, pluginSettings: PluginSettings): void {
+  if (!value) return
+  else if (value.toLowerCase() === 'root') pluginSettings.eventPath = '/'
+  else if (value.toLowerCase() === 'local') pluginSettings.eventPath = currentFolder
+  else pluginSettings.eventPath = value
+}
 
-  const codeBlockContent: CodeBlockContent = {
-    eventPath: currentFolder,
-    calendarDefinitionPath: currentFolder
-  }
+function toCalendarPath(value: string, currentFolder: string, pluginSettings: PluginSettings): void {
+  if (!value) return
+  else if (value.toLowerCase() === 'root') pluginSettings.calendarPath = '/'
+  else if (value.toLowerCase() === 'local') pluginSettings.calendarPath = currentFolder
+  else pluginSettings.calendarPath = value
+}
 
-  const lines = source.split('\n')
+export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: string, source: string): PluginSettings {
+
+  let settings: PluginSettings = Object.assign({}, pluginSettings)
+  const lines = source.split('\n').filter(Boolean)
 
   for (const line of lines) {
-
-    const match1 = /^path: *(.+)$/i.exec(line)
-    if (match1) {
-      const pathValue = match1[1]?.trim()
-      if (pathValue === undefined) {
-        codeBlockContent.eventPath = currentFolder
-      } else if (pathValue.toLowerCase() === 'root') {
-        codeBlockContent.eventPath = '/'
-      } else if (pathValue.toLowerCase() === 'local') {
-        codeBlockContent.eventPath = currentFolder
-      } else {
-        codeBlockContent.eventPath = pathValue
-      }
-    }
-
-    const match2 = /^calendar-definitions: *(.+)$/i.exec(line)
-    if (match2) {
-      const pathValue = match2[1]?.trim()
-      if (pathValue === undefined) {
-        codeBlockContent.calendarDefinitionPath = '/'
-      } else if (pathValue.toLowerCase() === 'root') {
-        codeBlockContent.calendarDefinitionPath = '/'
-      } else if (pathValue.toLowerCase() === 'local') {
-        codeBlockContent.calendarDefinitionPath = currentFolder
-      } else {
-        codeBlockContent.calendarDefinitionPath = pathValue
-      }
-    }
-
-
+    if (!line.contains(':')) continue
+    let split = line.split(':', 2);
+    const key = split[0]?.trim()
+    const value = split[1]?.trim()
+    if (!key || !value) continue
+    if (key === 'eventPath') toEventPath(value, currentFolder, settings)
+    if (key === 'calendarPath') toCalendarPath(value, currentFolder, settings)
   }
 
-  return codeBlockContent
+  return settings
 }

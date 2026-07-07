@@ -1,5 +1,8 @@
 import {CalendarConfig, GanttGroup, GanttItem} from './types'
 import FantasyGanttPlugin from './main'
+import {Css} from "./const/strings";
+
+const css = 'class'
 
 export class GanttRenderEngine {
   private svg!: SVGElement
@@ -118,7 +121,7 @@ export class GanttRenderEngine {
     this.svg = this.createSVGElement('svg')
     this.svg.setAttribute('width', '100%')
     this.svg.setAttribute('height', this.totalHeight.toString())
-    this.svg.setAttribute('class', 'gantt-svg-canvas')
+    this.svg.setAttribute(css, Css.svg.canvas)
     this.container.appendChild(this.svg)
 
     this.backgroundG = this.createSVGElement('g')
@@ -171,13 +174,13 @@ export class GanttRenderEngine {
         const rect = this.createSVGElement('rect')
         rect.setAttribute('width', width.toString())
         rect.setAttribute('height', d.height.toString())
-        rect.setAttribute('class', i % 2 === 0 ? 'gantt-group-row-even' : 'gantt-group-row-odd')
+        rect.setAttribute(css, i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd)
         groupG.appendChild(rect)
 
         const text = this.createSVGElement('text')
         text.setAttribute('x', '20')
         text.setAttribute('y', '17')
-        text.setAttribute('class', 'gantt-group-text')
+        text.setAttribute(css, Css.group.text)
         text.textContent = d.name.toUpperCase()
         groupG.appendChild(text)
 
@@ -188,12 +191,12 @@ export class GanttRenderEngine {
         const shadowRect = this.createSVGElement('rect')
         shadowRect.setAttribute('x', '10')
         shadowRect.setAttribute('width', badgeWidth)
-        shadowRect.setAttribute('class', 'gantt-group-shadow')
+        shadowRect.setAttribute(css, Css.group.shadow)
 
         const badge = this.createSVGElement('rect')
         badge.setAttribute('x', '10')
         badge.setAttribute('width', badgeWidth)
-        badge.setAttribute('class', 'gantt-group-badge')
+        badge.setAttribute(css,  Css.group.badge)
 
         groupG.insertBefore(shadowRect, text)
         groupG.insertBefore(badge, text)
@@ -231,7 +234,7 @@ export class GanttRenderEngine {
           const barWidth = Math.max(2, x2 - x1)
 
           const rect = this.createSVGElement('rect')
-          rect.setAttribute('class', 'gantt-item bar-rect')
+          rect.setAttribute(css, Css.item.bar)
           rect.setAttribute('x', x1.toString())
           rect.setAttribute('y', (laneY).toString())
           rect.setAttribute('width', barWidth.toString())
@@ -243,7 +246,7 @@ export class GanttRenderEngine {
           const cx = this.getXPosition(d.startDays, width)
 
           const circle = this.createSVGElement('circle')
-          circle.setAttribute('class', 'gantt-item point-circle')
+          circle.setAttribute(css, Css.item.point)
           circle.setAttribute('cx', cx.toString())
           circle.setAttribute('cy', (laneY).toString())
           // circle.setAttribute('r', '6')
@@ -283,14 +286,14 @@ export class GanttRenderEngine {
       baseline.setAttribute('x2', renderWidth.toString())
       baseline.setAttribute('y1', '0')
       baseline.setAttribute('y2', '0')
-      baseline.setAttribute('class', 'gantt-axis-baseline')
+      baseline.setAttribute(css, Css.axis.baseline)
       individualAxisG.appendChild(baseline)
 
       const label = this.createSVGElement('text')
       label.setAttribute('x', '10')
       label.setAttribute('y', '20')
       // label.setAttribute('style', 'font-size: 0.75em; font-weight: bold; fill: var(--text-muted); text-transform: uppercase;')
-      label.setAttribute('class', 'gantt-axis-label')
+      label.setAttribute(css, Css.axis.label)
       label.textContent = calType
       individualAxisG.appendChild(label)
 
@@ -309,7 +312,7 @@ export class GanttRenderEngine {
           gridLine.setAttribute('x2', xPos.toString())
           gridLine.setAttribute('y1', `-${itemsAreaHeight}`)
           gridLine.setAttribute('y2', '0')
-          gridLine.setAttribute('class', 'gantt-axis-gridline')
+          gridLine.setAttribute(css, Css.axis.gridline)
           this.axisG.appendChild(gridLine)
         }
 
@@ -318,7 +321,7 @@ export class GanttRenderEngine {
         tick.setAttribute('x2', xPos.toString())
         tick.setAttribute('y1', '0')
         tick.setAttribute('y2', '5')
-        tick.setAttribute('class', 'gantt-axis-tick')
+        tick.setAttribute(css, Css.axis.tick)
         individualAxisG.appendChild(tick)
 
         if (xPos - lastTextX > 80) { // Slight padding bump for wider text layouts
@@ -326,7 +329,7 @@ export class GanttRenderEngine {
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
           text.setAttribute('text-anchor', 'middle')
-          text.setAttribute('class', 'gantt-axis-text')
+          text.setAttribute(css, Css.axis.text)
 
           text.textContent = this.formatDaysToCalendarString(currDays, config)
 
@@ -431,7 +434,7 @@ export class GanttRenderEngine {
       window.document.documentElement.style.setProperty('--mouse-y', `${event.clientY + 15}px`)
 
       const target = event.target as HTMLElement
-      if (target?.classList.contains('gantt-item')) {
+      if (target?.classList.contains(Css.item.item)) {
         if (!this.tooltip.classList.contains('is-active')) {
           const id = +(target.getAttribute('data-id') ?? 0)
           const dataObj = this.rawData.find(d => d.id === id)
