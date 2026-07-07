@@ -1,7 +1,7 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {FantasyGanttSettings} from '../settings'
-import {GenericModal, GenericModalInput, UserInput, OutputData} from '@Altarok/utils'
+import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 
 // npm update @Altarok/obsidian-dev-utils
 // npm link @Altarok/obsidian-dev-utils
@@ -90,7 +90,7 @@ function defineInput(pluginSettings: FantasyGanttSettings): UserInput[] {
           current: pluginSettings.calendarPathSearchRecursive
         }
       ]
-    },       {
+    }, {
       type: 'color', prompt: 'Ne Farbe.',
       key: 'neFarbe2',
       current: '#000000'
@@ -110,8 +110,8 @@ function defineInput(pluginSettings: FantasyGanttSettings): UserInput[] {
           from: 1, to: 7, current: 3, step: 1
         }
       ]
-    },  {
-      type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70',  mandatory: true,
+    }, {
+      type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70', mandatory: true,
       key: 'neZahl2',
       from: 10, to: 70, current: 30, step: 5
     }

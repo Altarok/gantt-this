@@ -120,7 +120,6 @@
   color: var(--text-muted);
 }
 
-
 /* Break out of Obsidian's readable line width constraints for this specific code block type */
 .markdown-rendered .block-language-fantasy-gantt {
   width: 100% !important;

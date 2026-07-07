@@ -5,7 +5,7 @@ import {CalendarConfig, CodeBlockContent, GanttItem} from './types'
 import {GanttRenderEngine} from './svg-drawer'
 import {readCodeBlock} from './code-block-reader'
 import {CodeBlockCreatorModal} from "./ui/code-block-creator-config";
-
+import {Css} from "./const/strings";
 
 class GanttTooltipComponent extends MarkdownRenderChild {
   constructor(containerEl: HTMLElement, private tooltipEl: HTMLElement) {
@@ -160,11 +160,11 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const codeBlockContent: CodeBlockContent = readCodeBlock(currentFile.parent.path, source)
 
-    const mainWrapper = el.createDiv({cls: 'fantasy-gantt-wrapper'})
-    const toolbar = mainWrapper.createDiv({cls: 'gantt-toolbar'})
+    const mainWrapper = el.createDiv({cls: Css.wrapper})
+    const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
 
     const createCheckbox = (label: string, id: string, checked = true) => {
-      const lbl = toolbar.createEl('label', {cls: 'gantt-input-label'})
+      const lbl = toolbar.createEl('label', {cls: Css.inputLabel})
       const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
       input.checked = checked
       lbl.createEl('span', {text: ` ${label}`})
@@ -174,16 +174,16 @@ export default class FantasyGanttPlugin extends Plugin {
     const toggleBars = createCheckbox('Show Bars', 'toggle-bars')
     const togglePoints = createCheckbox('Show Points', 'toggle-points')
     const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
-    const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: 'gantt-btn'})
+    const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: Css.btn})
 
-    const chartContainer = mainWrapper.createDiv({cls: 'gantt-chart-container'})
-    const tooltip = window.document.body.createDiv({cls: 'gantt-tooltip', attr: {id: 'gantt-tooltip-element'}})
+    const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+    const tooltip = window.document.body.createDiv({cls: Css.tooltip, attr: {id: 'gantt-tooltip-element'}})
 
     ctx.addChild(new GanttTooltipComponent(el, tooltip))
 
-    const hoverTitle = tooltip.createDiv({cls: 'tooltip-title'})
-    const hoverDates = tooltip.createDiv({cls: 'tooltip-dates'})
-    tooltip.createDiv({cls: 'tooltip-link', text: 'Click to open active note file'})
+    const hoverTitle = tooltip.createDiv({cls: Css.tooltipTitle})
+    const hoverDates = tooltip.createDiv({cls: Css.tooltipDates})
+    tooltip.createDiv({ text: 'Click to open active note file', cls: Css.tooltipLink})
 
     this.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
     const data = await this.getGanttDataFromFolder(codeBlockContent)
