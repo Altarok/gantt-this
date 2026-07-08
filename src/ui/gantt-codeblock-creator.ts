@@ -14,9 +14,10 @@ export class CodeBlockCreatorModal extends Modal {
     const {contentEl} = this
     contentEl.empty()
 
+    const output: Record<string, OutputData> = {}
+
     // const globalSettings: Readonly<PluginSettings> = Object.assign({}, this.plugin.settings)
     const input: Readonly<UserInput>[] = defineInput(this.plugin.settings)
-    const output: Record<string, OutputData> = {}
 
     const onUpdatePreview = (previewEl: HTMLElement): void => {
       previewEl.empty()

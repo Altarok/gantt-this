@@ -9,14 +9,13 @@ export const Css = {
 
   chartContainer: 'gantt-chart-container',
 
-
   axis: {
-    baseline: 'gantt-axis-baseline',
-    gridline: 'gantt-axis-gridline',
-    label: 'gantt-axis-label',
-    text: 'gantt-axis-text',
-    tick: 'gantt-axis-tick',
-    tickMinor: 'gantt-axis-tick-minor',
+    baseline: 'gt-axis-baseline',
+    gridline: 'gt-axis-gridline',
+    label: 'gt-axis-label',
+    text: 'gt-axis-text',
+    tick: 'gt-axis-tick',
+    tickMinor: 'gt-axis-tick-minor',
   },
   item: {
     item: 'gantt-item',
@@ -27,7 +26,7 @@ export const Css = {
     badge: 'gantt-group-badge',
     rowEven: 'gantt-group-row-even',
     rowOdd: 'gantt-group-row-odd',
-    text: 'gantt-group-text',
+    text: 'gt-group-text',
     shadow: 'gantt-group-shadow',
   },
 
@@ -47,7 +46,7 @@ export const Css = {
     visibilityList: 'gantt-settings-visibility-list',  // todo missing
   },
   svg: {
-    canvas: 'gantt-svg-canvas',
+    canvas: 'gt-svg-canvas',
   },
 
   theme: {

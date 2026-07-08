@@ -1,3 +1,45 @@
+/* Gridlines and Axis Lines */
+.gt-axis-baseline {
+  stroke: var(--background-modifier-border);
+}
+
+.gt-axis-gridline {
+  stroke: var(--background-modifier-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.gt-axis-label {
+  font-size: 0.75em;
+  font-weight: bold;
+  fill: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.gt-axis-text {
+  /*y: 20;*/
+  /*text-anchor: middle;*/
+  font-size: 11px;
+  user-select: none;
+  font-weight: 500;
+  fill: var(--text-muted);
+}
+
+.gt-axis-tick {
+  /*y1: 0;*/
+  /*y2: 5;*/
+  stroke: var(--text-muted);
+}
+
+.gt-axis-tick-minor {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+
 .fantasy-gantt-wrapper {
   position: relative;
   background-color: var(--background-primary);
@@ -139,12 +181,13 @@
 }
 
 /* Core SVG & Canvas properties */
-.gantt-svg-canvas {
+.gt-svg-canvas {
+  /*width: 100%;*/
   cursor: grab;
   display: block;
 }
 
-.gantt-svg-canvas:active {
+.gt-svg-canvas:active {
   cursor: grabbing;
 }
 
@@ -161,7 +204,9 @@
   pointer-events: none;
 }
 
-.gantt-group-text {
+.gt-group-text {
+  /*x : 20px;*/
+  /*y: 17px;*/
   fill: var(--text-accent);
   font-size: 10px;
   font-weight: 600;
@@ -188,36 +233,6 @@
   pointer-events: none;
 }
 
-
-/* Gridlines and Axis Lines */
-.gantt-axis-baseline {
-  stroke: var(--background-modifier-border);
-}
-
-.gantt-axis-gridline {
-  stroke: var(--background-modifier-border);
-  stroke-width: 1;
-  stroke-dasharray: 4 4;
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.gantt-axis-tick {
-  stroke: var(--text-muted);
-}
-
-.gantt-axis-tick-minor {
-  stroke: var(--text-muted);
-  stroke-width: 1;
-  opacity: 0.7;
-}
-
-.gantt-axis-text {
-  font-size: 11px;
-  user-select: none;
-  font-weight: 500;
-  fill: var(--text-muted);
-}
 
 /* Interactive Timeline Elements */
 .gantt-item {
@@ -249,13 +264,6 @@
   font-size: 0.9em;
   color: var(--text-muted);
   margin-bottom: 10px;
-}
-
-.gantt-axis-label {
-  font-size: 0.75em;
-  font-weight: bold;
-  fill: var(--text-muted);
-  text-transform: uppercase;
 }
 
 
