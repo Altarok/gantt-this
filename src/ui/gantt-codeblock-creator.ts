@@ -1,6 +1,6 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {PluginSettings} from '../types'
+import {PluginSettings, PluginSettingsAlreadyUsedInCode} from '../types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 
 // npm update @Altarok/obsidian-dev-utils
@@ -21,8 +21,8 @@ export class CodeBlockCreatorModal extends Modal {
     const onUpdatePreview = (previewEl: HTMLElement): void => {
       previewEl.empty()
 
-      const globalSettings: Readonly<PluginSettings> =  this.plugin.settings
-      const overwriteSettings = mergeSettings( globalSettings, output)
+      const globalSettings: Readonly<PluginSettings> = this.plugin.settings
+      const overwriteSettings = mergeSettings(globalSettings, output)
 
       // let pseudoCodeBlockContent = ''
       //
@@ -63,7 +63,6 @@ export class CodeBlockCreatorModal extends Modal {
   }
 
 
-
   onClose() {
     this.contentEl.empty()
   }
@@ -73,16 +72,16 @@ export class CodeBlockCreatorModal extends Modal {
  * @param globalSettings - global plugin settings
  * @param localSettings - subset of plugin settings user chose to overwrite with code block creator
  */
-function mergeSettings(globalSettings: Readonly<PluginSettings> , localSettings: Record<string, string | boolean | number | undefined>) {
+function mergeSettings(globalSettings: Readonly<PluginSettings>, localSettings: Record<string, string | boolean | number | undefined>) {
 
-  const mergedSettings: PluginSettings = Object.assign({},globalSettings)
+  const mergedSettings: PluginSettingsAlreadyUsedInCode = Object.assign({}, globalSettings)
 
-  const setSettingProperty = <K extends keyof PluginSettings>(key: K, val: PluginSettings[K]) => {
+  const setSettingProperty = <K extends keyof PluginSettingsAlreadyUsedInCode>(key: K, val: PluginSettingsAlreadyUsedInCode[K]) => {
     /* AI written helper method for type compliance */
     mergedSettings[key] = val
   }
 
-  for (const key of Object.keys(globalSettings) as (keyof PluginSettings)[]) {
+  for (const key of Object.keys(globalSettings) as (keyof PluginSettingsAlreadyUsedInCode)[]) {
     const localValue = localSettings[key]
     if (localValue === undefined) continue
 

@@ -42,14 +42,15 @@ export type GanttGroup = {
 // TODO merge with PluginSettings as soon as code is able to work with it
 export type PluginSettingsAlreadyUsedInCode = { // usable by code
   eventPath: string
+  eventPathSearchRecursive: boolean
   calendarPath: string
+  calendarPathSearchRecursive: boolean
+  placeholder: number
 }
 
 export type PluginSettings = PluginSettingsAlreadyUsedInCode & {
   defaultType: string
   fallbackColor: string
-  eventPathSearchRecursive: boolean
-  calendarPathSearchRecursive: boolean
   typeColors: Record<string, string>
   groupColors: Record<string, string>
   visibleCalendars: Record<string, boolean>
@@ -64,6 +65,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   calendarPathSearchRecursive: false,
   typeColors: {} as Record<string, string>,
   groupColors: {} as Record<string, string>,
-  visibleCalendars: {} as Record<string, boolean>
+  visibleCalendars: {} as Record<string, boolean>,
+  placeholder: 0
 }
 
