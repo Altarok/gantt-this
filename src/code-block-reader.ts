@@ -7,11 +7,21 @@ function toEventPath(value: string, currentFolder: string, pluginSettings: Plugi
   else pluginSettings.eventPath = value
 }
 
+function toEventPathSearchRecursive(value: string, pluginSettings: PluginSettings): void {
+  if (!value) return
+  pluginSettings.eventPathSearchRecursive = value.toLowerCase() === 'true'
+}
+
 function toCalendarPath(value: string, currentFolder: string, pluginSettings: PluginSettings): void {
   if (!value) return
   else if (value.toLowerCase() === 'root') pluginSettings.calendarPath = '/'
   else if (value.toLowerCase() === 'local') pluginSettings.calendarPath = currentFolder
   else pluginSettings.calendarPath = value
+}
+
+function toCalendarPathSearchRecursive(value: string, pluginSettings: PluginSettings): void {
+  if (!value) return
+  pluginSettings.calendarPathSearchRecursive = value.toLowerCase() === 'true'
 }
 
 export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: string, source: string): PluginSettings {
@@ -26,7 +36,9 @@ export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: str
     const value = split[1]?.trim()
     if (!key || !value) continue
     if (key === 'eventPath') toEventPath(value, currentFolder, settings)
+    if (key === 'eventPathSearchRecursive') toEventPathSearchRecursive(value, settings)
     if (key === 'calendarPath') toCalendarPath(value, currentFolder, settings)
+    if (key === 'calendarPathSearchRecursive') toCalendarPathSearchRecursive(value, settings)
   }
 
   return settings

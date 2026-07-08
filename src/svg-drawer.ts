@@ -163,7 +163,7 @@ export class GanttRenderEngine {
     this.drawAxes(width)
   }
 
-  drawGroupBackgrounds(width: number) {
+  private drawGroupBackgrounds(width: number) {
     this.backgroundG.innerHTML = ''
 
     this.groups.forEach((d, i) => {
@@ -196,7 +196,7 @@ export class GanttRenderEngine {
         const badge = this.createSVGElement('rect')
         badge.setAttribute('x', '10')
         badge.setAttribute('width', badgeWidth)
-        badge.setAttribute(css,  Css.group.badge)
+        badge.setAttribute(css, Css.group.badge)
 
         groupG.insertBefore(shadowRect, text)
         groupG.insertBefore(badge, text)
@@ -206,7 +206,7 @@ export class GanttRenderEngine {
     })
   }
 
-  renderData(width: number) {
+  private renderData(width: number) {
     this.dataG.innerHTML = ''
 
     this.groups.flatMap(g => g.items)
@@ -258,7 +258,7 @@ export class GanttRenderEngine {
     })
   }
 
-  drawAxes(width: number) {
+  private drawAxes(width: number) {
     this.axisG.innerHTML = ''
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 
@@ -342,7 +342,7 @@ export class GanttRenderEngine {
     })
   }
 
-  setupNativeZoomAndPan() {
+  private setupNativeZoomAndPan() {
     this.svg.addEventListener('mousedown', (e: MouseEvent) => {
       if ((e.target as HTMLElement).classList.contains('gantt-item')) return
       this.isDragging = true

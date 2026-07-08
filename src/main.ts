@@ -1,6 +1,6 @@
 import {MarkdownPostProcessorContext, MarkdownRenderChild, Notice, parseYaml, Plugin, TFile} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings-modal'
-import {CalendarConfig, CodeBlockContent, DEFAULT_SETTINGS, GanttItem, PluginSettings} from './types'
+import {CalendarConfig, PluginSettingsAlreadyUsedInCode, DEFAULT_SETTINGS, GanttItem, PluginSettings} from './types'
 import {GanttRenderEngine} from './svg-drawer'
 import {readCodeBlock} from './code-block-reader'
 import {CodeBlockCreatorModal} from "./ui/gantt-codeblock-creator";
@@ -157,7 +157,7 @@ export default class FantasyGanttPlugin extends Plugin {
       return
     }
 
-    const codeBlockContent: CodeBlockContent = readCodeBlock(this.settings,currentFile.parent.path, source)
+    const codeBlockContent: PluginSettingsAlreadyUsedInCode = readCodeBlock(this.settings,currentFile.parent.path, source)
 
     const mainWrapper = el.createDiv({cls: Css.wrapper})
     const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
@@ -211,7 +211,7 @@ export default class FantasyGanttPlugin extends Plugin {
     this.registerEvent(this.app.metadataCache.on('resolved', updateCallback))
   }
 
-  private async getGanttDataFromFolder(codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
+  private async getGanttDataFromFolder(codeBlockContent: PluginSettingsAlreadyUsedInCode): Promise<GanttItem[]> {
     const items: GanttItem[] = []
     let incrementalId = 1
     const files = this.app.vault.getMarkdownFiles()
