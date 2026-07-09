@@ -1,8 +1,8 @@
-import { Css } from "const/strings";
-import {GanttItem, PluginSettingsAlreadyUsedInCode} from "../types";
-import {MarkdownPostProcessorContext, MarkdownRenderChild} from "obsidian";
-import {GanttRenderEngine} from "../svg-drawer";
-import FantasyGanttPlugin from "../main";
+import { Css } from 'const/strings'
+import {GanttItem, PluginSettingsAlreadyUsedInCode} from '../types'
+import {MarkdownPostProcessorContext, MarkdownRenderChild} from 'obsidian'
+import {GanttRenderEngine} from '../svg-drawer'
+import FantasyGanttPlugin from '../main'
 
 class GanttTooltipComponent extends MarkdownRenderChild {
   constructor(containerEl: HTMLElement, private tooltipEl: HTMLElement) {

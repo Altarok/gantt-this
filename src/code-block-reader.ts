@@ -1,4 +1,4 @@
-import {PluginSettings} from "./types";
+import {PluginSettings} from './types'
 
 function toEventPath(value: string, currentFolder: string, pluginSettings: PluginSettings): void {
   if (!value) return
@@ -31,7 +31,7 @@ export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: str
 
   for (const line of lines) {
     if (!line.contains(':')) continue
-    let split = line.split(':', 2);
+    let split = line.split(':', 2)
     const key = split[0]?.trim()
     const value = split[1]?.trim()
     if (!key || !value) continue

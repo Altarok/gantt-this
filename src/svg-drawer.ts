@@ -1,6 +1,6 @@
 import {CalendarConfig, GanttGroup, GanttItem} from './types'
 import FantasyGanttPlugin from './main'
-import {Css} from "./const/strings";
+import {Css} from './const/strings'
 
 const css = 'class'
 
@@ -292,7 +292,6 @@ export class GanttRenderEngine {
       const label = this.createSVGElement('text')
       label.setAttribute('x', '10')
       label.setAttribute('y', '20')
-      // label.setAttribute('style', 'font-size: 0.75em; font-weight: bold; fill: var(--text-muted); text-transform: uppercase;')
       label.setAttribute(css, Css.axis.label)
       label.textContent = calType
       individualAxisG.appendChild(label)
@@ -328,7 +327,6 @@ export class GanttRenderEngine {
           const text = this.createSVGElement('text')
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
-          text.setAttribute('text-anchor', 'middle')
           text.setAttribute(css, Css.axis.text)
 
           text.textContent = this.formatDaysToCalendarString(currDays, config)

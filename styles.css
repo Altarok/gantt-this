@@ -19,8 +19,7 @@
 }
 
 .gt-axis-text {
-  /*y: 20;*/
-  /*text-anchor: middle;*/
+  text-anchor: middle;
   font-size: 11px;
   user-select: none;
   font-weight: 500;
@@ -28,8 +27,6 @@
 }
 
 .gt-axis-tick {
-  /*y1: 0;*/
-  /*y2: 5;*/
   stroke: var(--text-muted);
 }
 

@@ -63,9 +63,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   eventPathSearchRecursive: true,
   calendarPath: '/',
   calendarPathSearchRecursive: false,
-  typeColors: {} as Record<string, string>,
-  groupColors: {} as Record<string, string>,
-  visibleCalendars: {} as Record<string, boolean>,
+  typeColors: {},
+  groupColors: {},
+  visibleCalendars: {},
   placeholder: 0
 }
 

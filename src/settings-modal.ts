@@ -1,6 +1,6 @@
 import {App, PluginSettingTab, Setting} from 'obsidian'
 import FantasyGanttPlugin from './main'
-import {Css} from "./const/strings";
+import {Css} from './const/strings'
 
 /*
  * TODO needs complete rework, use expandable
@@ -98,7 +98,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
        */
       // debugger
 
-      visibleCalendars[typeKey] ??= true;
+      visibleCalendars[typeKey] ??= true
 
       new Setting(container)
         .setName(`Show "${typeKey}" Calendar`)

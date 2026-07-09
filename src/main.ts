@@ -2,9 +2,9 @@ import {MarkdownPostProcessorContext, Notice, parseYaml, Plugin, TFile} from 'ob
 import {FantasyGanttSettingTab} from './settings-modal'
 import {CalendarConfig, DEFAULT_SETTINGS, PluginSettings, PluginSettingsAlreadyUsedInCode} from './types'
 import {readCodeBlock} from './code-block-reader'
-import {CodeBlockCreatorModal} from "./ui/gantt-codeblock-creator";
-import {CodeBlock} from "./const/strings";
-import {GanttRender} from "./ui/svg-drawer-prestep";
+import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
+import {CodeBlock} from './const/strings'
+import {GanttRender} from './ui/svg-drawer-prestep'
 
 
 export default class FantasyGanttPlugin extends Plugin {

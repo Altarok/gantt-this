@@ -2,8 +2,8 @@ import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {PluginSettings, PluginSettingsAlreadyUsedInCode} from '../types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
-import {CodeBlock} from "../const/strings";
-import {GanttRender} from "./svg-drawer-prestep";
+import {CodeBlock} from '../const/strings'
+import {GanttRender} from './svg-drawer-prestep'
 
 // npm update @Altarok/obsidian-dev-utils
 // npm link @Altarok/obsidian-dev-utils
@@ -87,7 +87,7 @@ function defineInput(pluginSettings: PluginSettings): UserInput[] {
       nestedInput: [
         {
           type: 'path', prompt: 'Folder to search for timeline events.',
-          key: 'eventPath',
+          key: 'eventPath',  mandatory: true,
           current: pluginSettings.eventPath
         },
         {
