@@ -2,6 +2,8 @@ import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {PluginSettings, PluginSettingsAlreadyUsedInCode} from '../types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
+import {CodeBlock} from "../const/strings";
+import {GanttRender} from "./svg-drawer-prestep";
 
 // npm update @Altarok/obsidian-dev-utils
 // npm link @Altarok/obsidian-dev-utils
@@ -23,36 +25,17 @@ export class CodeBlockCreatorModal extends Modal {
       previewEl.empty()
 
       const globalSettings: Readonly<PluginSettings> = this.plugin.settings
-      const overwriteSettings = mergeSettings(globalSettings, output)
+      const codeBlockContent: PluginSettingsAlreadyUsedInCode = mergeSettings(globalSettings, output)
 
-      // let pseudoCodeBlockContent = ''
-      //
-      // const allFlatInputs = optionalInput.flatMap(i => i.type === 'expandable' ? i.nestedInput : [i])
-      //
-      // for (const key in output) {
-      //   if (Object.prototype.hasOwnProperty.call(output, key)) {
-      //     const value = output[key]
-      //
-      //     // Guard against undefined values to satisfy noUncheckedIndexedAccess
-      //     if (value !== undefined && value !== null) {
-      //       const matchingInputDefinition = allFlatInputs.find(input => input.key === key)
-      //       const ignoreKey = matchingInputDefinition?.ignoreKeyInCodeBlock === true
-      //
-      //       if (ignoreKey) {
-      //         pseudoCodeBlockContent += `${String(value)}\n`
-      //       } else {
-      //         pseudoCodeBlockContent += `${key}: ${String(value)}\n`
-      //       }
-      //     }
-      //   }
-      // }
-      //
-      // new GenericMarkdownProcessor(pseudoCodeBlockContent, this.plugin, previewEl).display() // IgnoringErrors(true)
+      const render = new GanttRender(this.plugin)
+
+      void render.renderGantt(previewEl, codeBlockContent)
+
     }
 
     const modalInput: GenericModalInput = {
       pluginName: 'Gantt This',
-      codeBlockId: 'fantasy-gantt',
+      codeBlockId: CodeBlock.id,
       input,
       onUpdatePreview,
       output

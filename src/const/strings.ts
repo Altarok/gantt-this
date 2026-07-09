@@ -59,6 +59,7 @@ export const Css = {
 } as const
 
 export const CodeBlock = {
+  id: 'gantt-this',
   eventPath: 'eventPath',
   calendarPath: 'calendarPath',
 }
