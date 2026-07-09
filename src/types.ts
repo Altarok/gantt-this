@@ -60,7 +60,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   defaultType: 'iso-8601',
   fallbackColor: '#1565c0',
   eventPath: '/',
-  eventPathSearchRecursive: true,
+  eventPathSearchRecursive: false,
   calendarPath: '/',
   calendarPathSearchRecursive: false,
   typeColors: {},

@@ -30,7 +30,6 @@ export class CodeBlockCreatorModal extends Modal {
       const render = new GanttRender(this.plugin)
 
       void render.renderGantt(previewEl, codeBlockContent)
-
     }
 
     const modalInput: GenericModalInput = {

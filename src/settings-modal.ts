@@ -2,6 +2,10 @@ import {App, PluginSettingTab, Setting} from 'obsidian'
 import FantasyGanttPlugin from './main'
 import {Css} from './const/strings'
 
+// function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin) {
+//
+// }
+
 /*
  * TODO needs complete rework, use expandable
  */
@@ -15,6 +19,11 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   display(): void {
     const {containerEl} = this
     containerEl.empty()
+
+    // containerEl.createEl('h2', {text: 'I/O'})
+    //
+    // addEventPathSelection(containerEl, this.plugin)
+
     containerEl.createEl('h2', {text: 'Fantasy Gantt Plugin Settings'})
 
     this.addCalendarSelection(containerEl)
