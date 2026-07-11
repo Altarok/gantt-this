@@ -342,7 +342,7 @@ export class GanttRenderEngine {
 
   private setupNativeZoomAndPan() {
     this.svg.addEventListener('mousedown', (e: MouseEvent) => {
-      if ((e.target as HTMLElement).classList.contains('gantt-item')) return
+      if ((e.target as HTMLElement).classList.contains(Css.item.item)) return
       this.isDragging = true
       this.startX = e.clientX
       this.startTranslateX = this.zoomTranslateX
@@ -409,7 +409,7 @@ export class GanttRenderEngine {
     const showTooltip = (event: MouseEvent, d: GanttItem) => {
       this.hoverTitle.textContent = d.name
       this.hoverDates.textContent = d.type === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
-      this.tooltip.classList.add('is-active')
+      this.tooltip.classList.add(Css.tooltip.isActive)
 
       if (d.link) {
         this.tooltip.setAttribute('data-link', d.link)
@@ -420,7 +420,7 @@ export class GanttRenderEngine {
 
     this.svg.addEventListener('mouseover', (event) => {
       const target = event.target as HTMLElement
-      if (target?.classList.contains('gantt-item')) {
+      if (target?.classList.contains(Css.item.item)) {
         const id = +(target.getAttribute('data-id') ?? 0)
         const dataObj = this.rawData.find(d => d.id === id)
         if (dataObj) showTooltip(event, dataObj)
@@ -433,23 +433,23 @@ export class GanttRenderEngine {
 
       const target = event.target as HTMLElement
       if (target?.classList.contains(Css.item.item)) {
-        if (!this.tooltip.classList.contains('is-active')) {
+        if (!this.tooltip.classList.contains(Css.tooltip.isActive)) {
           const id = +(target.getAttribute('data-id') ?? 0)
           const dataObj = this.rawData.find(d => d.id === id)
           if (dataObj) showTooltip(event, dataObj)
         }
       } else {
-        this.tooltip.classList.remove('is-active')
+        this.tooltip.classList.remove(Css.tooltip.isActive)
       }
     })
 
     this.svg.addEventListener('mouseleave', () => {
-      this.tooltip.classList.remove('is-active')
+      this.tooltip.classList.remove(Css.tooltip.isActive)
     })
 
     this.svg.addEventListener('click', (event) => {
       const target = event.target as HTMLElement
-      if (target?.classList.contains('gantt-item')) {
+      if (target?.classList.contains(Css.item.item)) {
         const id = +(target.getAttribute('data-id') ?? 0)
         const dataObj = this.rawData.find(d => d.id === id)
         if (dataObj?.link) {

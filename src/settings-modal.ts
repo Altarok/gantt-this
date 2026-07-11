@@ -1,10 +1,7 @@
-import {App, PluginSettingTab, Setting} from 'obsidian'
+import {App, PluginSettingTab, Setting, TFolder} from 'obsidian'
 import FantasyGanttPlugin from './main'
 import {Css} from './const/strings'
 
-// function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin) {
-//
-// }
 
 /*
  * TODO needs complete rework, use expandable
@@ -20,9 +17,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     const {containerEl} = this
     containerEl.empty()
 
-    // containerEl.createEl('h2', {text: 'I/O'})
-    //
-    // addEventPathSelection(containerEl, this.plugin)
+    addDataSourceSettings(containerEl, this.plugin)
+
 
     containerEl.createEl('h2', {text: 'Fantasy Gantt Plugin Settings'})
 
@@ -198,3 +194,75 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       )
   }
 }
+
+function addDataSourceSettings(containerEl: HTMLElement, plugin: FantasyGanttPlugin) {
+  containerEl.createEl('h2', {text: 'Event source'})
+
+  const folders:  Record<string, string> = getAllPaths(plugin)
+
+  addEventPathSelection(containerEl, plugin, folders)
+  addCalendarPathSelection(containerEl, plugin, folders)
+}
+
+function getAllPaths( plugin: FantasyGanttPlugin) {
+  const folders = plugin.app.vault.getAllLoadedFiles()
+    .filter(file => file instanceof TFolder)
+    .map(file => file.path)
+
+  folders.sort((a, b) => a.localeCompare(b, undefined,
+    {numeric: true, sensitivity: 'base'}));
+
+  const options: Record<string, string> = {}
+  options['/'] = '[root]'
+  folders.filter(f => f !== '/').forEach(f => options[f] = f === '/' ? '[root]' : f)
+
+  return options
+}
+
+function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders:  Record<string, string>) {
+
+  new Setting(containerEl)
+    .setName('Folder to search for timeline events.')
+    .setDesc('Folder can be searched recursively.')
+    .addDropdown(dd => dd
+      .addOptions(folders)
+      .setValue(plugin.settings.eventPath || '/')
+      .onChange(async (value) => {
+        plugin.settings.eventPath = value
+        await plugin.saveSettings()
+      })
+    )
+    .addToggle(tt => tt
+      .setValue( plugin.settings.eventPathSearchRecursive)
+      .setTooltip('Search recursively?', {delay: -1})
+      .onChange(async (value) => {
+        plugin.settings.eventPathSearchRecursive = value
+        await plugin.saveSettings()
+      })
+    )
+}
+
+function addCalendarPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders:  Record<string, string>) {
+
+  new Setting(containerEl)
+    .setName('Folder to search for calendar definitions.')
+    .setDesc('Folder can be searched recursively.')
+    .addDropdown(dd => dd
+      .addOptions(folders)
+      .setValue(plugin.settings.calendarPath || '/')
+      .onChange(async (value) => {
+        plugin.settings.calendarPath = value
+        await plugin.saveSettings()
+      })
+    )
+    .addToggle(tt => tt
+      .setValue( plugin.settings.calendarPathSearchRecursive)
+      .setTooltip('Search recursively?', {delay: -1})
+      .onChange(async (value) => {
+        plugin.settings.calendarPathSearchRecursive = value
+        await plugin.saveSettings()
+      })
+    )
+}
+
+
