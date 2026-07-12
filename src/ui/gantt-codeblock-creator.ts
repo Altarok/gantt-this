@@ -1,6 +1,6 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {PluginSettings, PluginSettingsAlreadyUsedInCode} from '../types'
+import {PluginSettings, PluginSettingsAlreadyUsedInCode} from '../const/types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 import {CodeBlock} from '../const/strings'
 import {GanttRender} from './svg-drawer-prestep'
@@ -106,31 +106,31 @@ function defineInput(pluginSettings: PluginSettings): UserInput[] {
         }
       ]
     },
-    {
-      type: 'color', prompt: 'Ne Farbe.',
-      key: 'neFarbe2',
-      current: '#000000'
-    },
-    {
-      type: 'expandable', prompt: 'Advanced', mandatory: false,
-      openOnStart: false,
-      nestedInput: [
-        {
-          type: 'color', prompt: 'Ne Farbe.',
-          key: 'neFarbe',
-          current: '#000000'
-        },
-        {
-          type: 'slider', prompt: 'Ne Zahl zwischen 1 und 7',
-          key: 'neZahl',
-          from: 1, to: 7, current: 3, step: 1
-        }
-      ]
-    },
-    {
-      type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70', mandatory: true,
-      key: 'neZahl2',
-      from: 10, to: 70, current: 30, step: 5
-    }
+    // {
+    //   type: 'color', prompt: 'Ne Farbe.',
+    //   key: 'neFarbe2',
+    //   current: '#000000'
+    // },
+    // {
+    //   type: 'expandable', prompt: 'Advanced', mandatory: false,
+    //   openOnStart: false,
+    //   nestedInput: [
+    //     {
+    //       type: 'color', prompt: 'Ne Farbe.',
+    //       key: 'neFarbe',
+    //       current: '#000000'
+    //     },
+    //     {
+    //       type: 'slider', prompt: 'Ne Zahl zwischen 1 und 7',
+    //       key: 'neZahl',
+    //       from: 1, to: 7, current: 3, step: 1
+    //     }
+    //   ]
+    // },
+    // {
+    //   type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70', mandatory: true,
+    //   key: 'neZahl2',
+    //   from: 10, to: 70, current: 30, step: 5
+    // }
   ]
 }

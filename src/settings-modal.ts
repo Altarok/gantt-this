@@ -19,7 +19,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     addDataSourceSettings(containerEl, this.plugin)
 
-
     containerEl.createEl('h2', {text: 'Fantasy Gantt Plugin Settings'})
 
     this.addCalendarSelection(containerEl)
@@ -198,13 +197,13 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 function addDataSourceSettings(containerEl: HTMLElement, plugin: FantasyGanttPlugin) {
   containerEl.createEl('h2', {text: 'Event source'})
 
-  const folders:  Record<string, string> = getAllPaths(plugin)
+  const folders: Record<string, string> = getAllPaths(plugin)
 
   addEventPathSelection(containerEl, plugin, folders)
   addCalendarPathSelection(containerEl, plugin, folders)
 }
 
-function getAllPaths( plugin: FantasyGanttPlugin) {
+function getAllPaths(plugin: FantasyGanttPlugin) {
   const folders = plugin.app.vault.getAllLoadedFiles()
     .filter(file => file instanceof TFolder)
     .map(file => file.path)
@@ -219,7 +218,7 @@ function getAllPaths( plugin: FantasyGanttPlugin) {
   return options
 }
 
-function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders:  Record<string, string>) {
+function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders: Record<string, string>) {
 
   new Setting(containerEl)
     .setName('Folder to search for timeline events.')
@@ -233,7 +232,7 @@ function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlu
       })
     )
     .addToggle(tt => tt
-      .setValue( plugin.settings.eventPathSearchRecursive)
+      .setValue(plugin.settings.eventPathSearchRecursive)
       .setTooltip('Search recursively?', {delay: -1})
       .onChange(async (value) => {
         plugin.settings.eventPathSearchRecursive = value
@@ -242,7 +241,7 @@ function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlu
     )
 }
 
-function addCalendarPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders:  Record<string, string>) {
+function addCalendarPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders: Record<string, string>) {
 
   new Setting(containerEl)
     .setName('Folder to search for calendar definitions.')
@@ -256,7 +255,7 @@ function addCalendarPathSelection(containerEl: HTMLElement, plugin: FantasyGantt
       })
     )
     .addToggle(tt => tt
-      .setValue( plugin.settings.calendarPathSearchRecursive)
+      .setValue(plugin.settings.calendarPathSearchRecursive)
       .setTooltip('Search recursively?', {delay: -1})
       .onChange(async (value) => {
         plugin.settings.calendarPathSearchRecursive = value

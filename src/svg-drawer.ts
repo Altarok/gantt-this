@@ -1,6 +1,7 @@
-import {CalendarConfig, GanttGroup, GanttItem} from './types'
+import {CalendarConfig, GanttGroup, GanttItem} from './const/types'
 import FantasyGanttPlugin from './main'
 import {Css} from './const/strings'
+import {Gregorian} from "./calc/gregorian";
 
 const css = 'class'
 
@@ -329,7 +330,7 @@ export class GanttRenderEngine {
           text.setAttribute('y', '20')
           text.setAttribute(css, Css.axis.text)
 
-          text.textContent = this.formatDaysToCalendarString(currDays, config)
+          text.textContent = Gregorian.formatDaysToCalendarString(currDays, config)
 
           individualAxisG.appendChild(text)
           lastTextX = xPos
@@ -511,59 +512,5 @@ export class GanttRenderEngine {
     return window.document.createElementNS('http://www.w3.org/2000/svg', tag)
   }
 
-// 2. UPDATE THE AXIS LABEL FORMATTER INSIDE THE GANTT RENDER ENGINE CLASS
-  private formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
-    if (!config) {
-      const dateObj = new Date(days * 24 * 60 * 60 * 1000)
-      return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
-    }
 
-    // STRATEGY A: Reverse Engine Real Gregorian Dates from Day Counts
-    if (config.type === 'gregorian') {
-      let remainingDays = days
-
-      // Approximate year selection step
-      let year = Math.floor(remainingDays / 365.2425) + 1
-      let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-
-      // Micro adjust to pinpoint exact leap layout boundary alignment
-      while (totalDaysToYearStart > remainingDays) {
-        year--
-        totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-      }
-
-      remainingDays -= totalDaysToYearStart
-      const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
-      const monthDays = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-      let month = 1
-      for (let m = 0; m < 12; m++) {
-        if (remainingDays >= monthDays[m]!) {
-          remainingDays -= monthDays[m]! // TODO remove '!'?
-          month++
-        } else {
-          break
-        }
-      }
-      const day = remainingDays + 1
-
-      return `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
-    }
-
-    // STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.)
-    const epochDate = new Date(config.epochGregorian)
-    const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    let localDays = days - epochDaysOffset
-
-    if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`
-
-    const stringSegments: string[] = []
-    config.units.forEach(unit => {
-      const unitCount = Math.floor(localDays / unit.days)
-      stringSegments.push(unitCount.toString())
-      localDays %= unit.days
-    })
-
-    return stringSegments.join(config.delimiter)
-  }
 }

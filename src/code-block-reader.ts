@@ -1,4 +1,4 @@
-import {PluginSettings} from './types'
+import {PluginSettings} from './const/types'
 
 function toEventPath(value: string, currentFolder: string, pluginSettings: PluginSettings): void {
   if (!value) return

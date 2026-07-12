@@ -1,8 +1,9 @@
 import { Css } from 'const/strings'
-import {GanttItem, PluginSettingsAlreadyUsedInCode} from '../types'
+import {GanttItem, PluginSettingsAlreadyUsedInCode} from '../const/types'
 import {MarkdownPostProcessorContext, MarkdownRenderChild} from 'obsidian'
 import {GanttRenderEngine} from '../svg-drawer'
 import FantasyGanttPlugin from '../main'
+import {Gregorian} from "../calc/gregorian";
 
 class GanttTooltipComponent extends MarkdownRenderChild {
   constructor(containerEl: HTMLElement, private tooltipEl: HTMLElement) {
@@ -97,10 +98,10 @@ export class GanttRender {
 
         const config = await this.plugin.getCalendarDefinition(calendarType, codeBlockContent.calendarPath)
 
-        const startRes = this.plugin.parseToAbsoluteDays(startInput, config)
+        const startRes = Gregorian.parseToAbsoluteDays(startInput, config)
         if (!startRes) continue
 
-        const endRes = endInput ? this.plugin.parseToAbsoluteDays(endInput, config) : startRes
+        const endRes = endInput ? Gregorian.parseToAbsoluteDays(endInput, config) : startRes
         if (!endRes) continue
 
         const calculatedType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
@@ -130,5 +131,5 @@ export class GanttRender {
     return items
   }
 
-
 }
+
