@@ -1,7 +1,7 @@
-import {CalendarConfig, GanttGroup, GanttItem} from './const/types'
+import {GanttGroup, GanttItem} from './const/types'
 import FantasyGanttPlugin from './main'
 import {Css} from './const/strings'
-import {Gregorian} from "./calc/gregorian";
+import {Gregorian} from './calc/gregorian'
 
 const css = 'class'
 

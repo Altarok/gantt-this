@@ -1,5 +1,5 @@
 // 1. UPDATE THE PARSER INSIDE THE PLUGIN CLASS
-import {CalendarConfig} from "../const/types";
+import {CalendarConfig} from '../const/types'
 
 const isLeapYear = (year: number) =>
   (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
@@ -80,7 +80,7 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null):
 function formatDaysToCalendarString(days: number, config: CalendarConfig | null):
   string {
 
-  debugger
+  // debugger
 
   if (!config) {
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
