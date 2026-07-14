@@ -1,18 +1,15 @@
-// 1. UPDATE THE PARSER INSIDE THE PLUGIN CLASS
 import {CalendarConfig} from '../const/types'
 
 const isLeapYear = (year: number) =>
   (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
 
-function parseToAbsoluteDays(input: string, config: CalendarConfig | null):
-  { days: number; display: string } | null {
+function parseToAbsoluteDays(input: string, config: CalendarConfig | null):  { days: number; display: string } | null {
 
   // debugger
 
   if (!input) return null
   const cleanInput = input.toString().trim()
 
-  // STRATEGY A: Handle True Gregorian / ISO-8601 Calendar Logic
   /*
    * TODO merge with fallback at end of method
    */
@@ -44,6 +41,9 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null):
 
   // STRATEGY B: Handle Custom Positional Tier Multipliers (Mayan, etc.)
   if (config?.type === 'positional' && cleanInput.includes(config.delimiter)) {
+
+    // debugger
+
     const segments = cleanInput.split(config.delimiter).map(Number)
     let totalDays = 0
     let valid = true
@@ -76,18 +76,14 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null):
   }
 }
 
-// 2. UPDATE THE AXIS LABEL FORMATTER INSIDE THE GANTT RENDER ENGINE CLASS
-function formatDaysToCalendarString(days: number, config: CalendarConfig | null):
-  string {
-
-  // debugger
+// 2. Update the axis label formatter inside the gantt render engine class
+function formatDaysToCalendarString(days: number, config: CalendarConfig | null):  string {
 
   if (!config) {
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
     return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
   }
 
-  // STRATEGY A: Reverse Engine Real Gregorian Dates from Day Counts
   if (config.type === 'gregorian') {
     let remainingDays = days
 

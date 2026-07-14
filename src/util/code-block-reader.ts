@@ -1,0 +1,58 @@
+import {PluginSettings} from '../const/types'
+import {StringUtils} from "../const/strings";
+
+/**
+ * Reads given code block content and returns values in a new copy of the plugin's settings.
+ *
+ * @param pluginSettings
+ * @param currentFolder set to setting values 'eventPath' and 'calendarPath' if their respective value equals 'local'
+ * @param source code block content
+ */
+export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: string, source: string): PluginSettings {
+
+  const settings: PluginSettings = {...pluginSettings}
+
+  const lines = source.split('\n').filter(Boolean)
+
+  for (const line of lines) {
+    if (!line.contains(':')) continue
+    const {left: key, right: value} = StringUtils.splitOnce(line, ':')
+    if (!key || !value) continue
+
+    switch (key) {
+      case 'eventPath':
+        settings.eventPath = resolvePath(value, currentFolder);
+        break
+      case 'calendarPath':
+        settings.calendarPath = resolvePath(value, currentFolder)
+        break
+      case 'eventPathSearchRecursive':
+        settings.eventPathSearchRecursive = parseBoolean(value)
+        break
+      case 'calendarPathSearchRecursive':
+        settings.calendarPathSearchRecursive = parseBoolean(value)
+        break
+    }
+  }
+
+  return settings
+}
+
+/**
+ * Helper to resolve dynamic folder path keywords
+ */
+function resolvePath(value: string, currentFolder: string): string {
+  const normalized = value.toLowerCase()
+  if (normalized === 'root') return '/'
+  if (normalized === 'local') return currentFolder
+  return value
+}
+
+/**
+ * Helper to parse boolean inputs
+ */
+function parseBoolean(value: string): boolean {
+  return value.toLowerCase() === 'true'
+}
+
+

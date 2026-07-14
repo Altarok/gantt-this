@@ -1,7 +1,7 @@
-import {GanttGroup, GanttItem} from './const/types'
-import FantasyGanttPlugin from './main'
-import {Css} from './const/strings'
-import {Gregorian} from './calc/gregorian'
+import {GanttGroup, GanttItem} from '../const/types'
+import FantasyGanttPlugin from '../main'
+import {Css} from '../const/strings'
+import {Gregorian} from '../util/gregorian'
 
 const css = 'class'
 

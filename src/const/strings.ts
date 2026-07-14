@@ -1,13 +1,9 @@
 export const Css = {
-  wrapper: 'fantasy-gantt-wrapper',
-
-
-  toolbar: 'gantt-toolbar',
-  inputLabel: 'gantt-input-label',
-  btn: 'gantt-btn',
-  btnHover: 'ganttBtnHover',
-
-  chartContainer: 'gantt-chart-container',
+  wrapper: 'gt-wrapper',
+  toolbar: 'gt-toolbar',
+  inputLabel: 'gt-input-label',
+  btn: 'gt-btn',
+  chartContainer: 'gt-chart-container',
 
   axis: {
     baseline: 'gt-axis-baseline',
@@ -18,43 +14,45 @@ export const Css = {
     tickMinor: 'gt-axis-tick-minor',
   },
   item: {
-    item: 'gantt-item',
-    bar: 'gantt-item bar-rect',
-    point: 'gantt-item point-circle',
+    item: 'gt-item',
+    bar: 'gt-item bar-rect',
+    point: 'gt-item point-circle',
   },
   group: {
-    badge: 'gantt-group-badge',
-    rowEven: 'gantt-group-row-even',
-    rowOdd: 'gantt-group-row-odd',
+    badge: 'gt-group-badge',
+    rowEven: 'gt-group-row-even',
+    rowOdd: 'gt-group-row-odd',
     text: 'gt-group-text',
-    shadow: 'gantt-group-shadow',
+    shadow: 'gt-group-shadow',
   },
-
   tooltip: {
-    tooltip: 'gantt-tooltip',
-    dates: 'tooltip-dates',
+    tooltip: 'gt-tooltip',
+    dates: 'gt-tooltip-dates',
     isActive:'is-active',
-    link: 'tooltip-link',
-    title: 'tooltip-title',
+    link: 'gt-tooltip-link',
+    title: 'gt-tooltip-title',
   },
-
   settings: {
-    row: 'gantt-settings-row', // todo missing
-    list: 'gantt-settings-list',  // todo missing
-    container: 'gantt-settings-container',  // todo missing
+    container: 'gt-settings-container',
+    row: 'gt-settings-row',
+    list: 'gt-settings-list',  // todo missing
     itemDescription: 'gt-settings-item-description',
-    visibilityList: 'gantt-settings-visibility-list',  // todo missing
+    visibilityList: 'gt-settings-visibility-list',  // todo missing
+    emptyNotice:'gt-settings-empty-notice'
   },
   svg: {
     canvas: 'gt-svg-canvas',
   },
 
+
+  // obsidian native classes
   theme: {
     dark: 'theme-dark',
     light: 'theme-light',
   },
 
-  modWarning: 'mod-warning',
+  // obsidian native classes
+  modWarning: 'is-destructive',
 
 } as const
 
@@ -62,4 +60,25 @@ export const CodeBlock = {
   id: 'gantt-this',
   eventPath: 'eventPath',
   calendarPath: 'calendarPath',
+}
+
+export const StringUtils = {
+  /**
+   * Splits given string, but only at first appearance of the separator.<br>
+   * Call like this:
+   * <code>const {left: key, right: value} = StringUtils.splitOnce(line, ':')</code><br>
+   * If the separator isn't found, returns the whole string as 'left' and an empty 'right'
+   * @param splitMe string to be split
+   * @param separator
+   * @return <code>{left:string, right:string}</code>. Every returned value is trimmed.
+   */
+  splitOnce : (splitMe:string, separator:string): {left:string, right:string}=> {
+    const index = splitMe.indexOf(separator)
+    if (index === -1) {
+      return { left: splitMe.trim(), right: '' }
+    }
+    const left = splitMe.slice(0, index).trim()
+    const right = splitMe.slice(index + 1).trim()
+    return {left, right}
+  }
 }

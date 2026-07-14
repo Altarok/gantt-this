@@ -14,8 +14,13 @@ export type CalendarConfig = {
   units: CalendarUnit[]
 }
 
+/** Calendar event type */
 export type GanttItemType = 'bar' | 'point'
 
+export type CalendarIdentifier = CalendarConfigType | 'iso-8601' | string
+
+
+/** Calendar event */
 export type GanttItem = {
   id: number
   name: string
@@ -25,7 +30,7 @@ export type GanttItem = {
   endDays: number
   group: string
   type: GanttItemType
-  calendarType: string
+  calendarType: CalendarIdentifier
   color?: string
   link?: string
   lane?: number
@@ -39,30 +44,26 @@ export type GanttGroup = {
   lanes: number
 }
 
-// TODO merge with PluginSettings as soon as code is able to work with it
-export type PluginSettingsAlreadyUsedInCode = { // usable by code
+export type PluginSettings = { // usable by code
   eventPath: string
   eventPathSearchRecursive: boolean
   calendarPath: string
   calendarPathSearchRecursive: boolean
-  placeholder: number
-}
-
-export type PluginSettings = PluginSettingsAlreadyUsedInCode & {
   defaultType: string
   fallbackColor: string
   typeColors: Record<string, string>
   groupColors: Record<string, string>
   visibleCalendars: Record<string, boolean>
+  placeholder: number
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
-  defaultType: 'iso-8601',
-  fallbackColor: '#1565c0',
   eventPath: '/',
   eventPathSearchRecursive: false,
   calendarPath: '/',
   calendarPathSearchRecursive: false,
+  defaultType: 'iso-8601',
+  fallbackColor: '#1565c0',
   typeColors: {},
   groupColors: {},
   visibleCalendars: {},

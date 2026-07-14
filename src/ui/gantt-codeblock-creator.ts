@@ -1,6 +1,6 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {PluginSettings, PluginSettingsAlreadyUsedInCode} from '../const/types'
+import {PluginSettings} from '../const/types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 import {CodeBlock} from '../const/strings'
 import {GanttRender} from './svg-drawer-prestep'
@@ -25,7 +25,7 @@ export class CodeBlockCreatorModal extends Modal {
       previewEl.empty()
 
       const globalSettings: Readonly<PluginSettings> = this.plugin.settings
-      const codeBlockContent: PluginSettingsAlreadyUsedInCode = mergeSettings(globalSettings, output)
+      const codeBlockContent: PluginSettings = mergeSettings(globalSettings, output)
 
       const render = new GanttRender(this.plugin)
 
@@ -57,14 +57,14 @@ export class CodeBlockCreatorModal extends Modal {
  */
 function mergeSettings(globalSettings: Readonly<PluginSettings>, localSettings: Record<string, string | boolean | number | undefined>) {
 
-  const mergedSettings: PluginSettingsAlreadyUsedInCode = Object.assign({}, globalSettings)
+  const mergedSettings: PluginSettings = Object.assign({}, globalSettings)
 
-  const setSettingProperty = <K extends keyof PluginSettingsAlreadyUsedInCode>(key: K, val: PluginSettingsAlreadyUsedInCode[K]) => {
+  const setSettingProperty = <K extends keyof PluginSettings>(key: K, val: PluginSettings[K]) => {
     /* AI written helper method for type compliance */
     mergedSettings[key] = val
   }
 
-  for (const key of Object.keys(globalSettings) as (keyof PluginSettingsAlreadyUsedInCode)[]) {
+  for (const key of Object.keys(globalSettings) as (keyof PluginSettings)[]) {
     const localValue = localSettings[key]
     if (localValue === undefined) continue
 
@@ -91,7 +91,7 @@ function defineInput(pluginSettings: PluginSettings): UserInput[] {
         },
         {
           type: 'boolean', prompt: 'Search subfolders?',
-          key: 'eventPathRecursive',
+          key: 'eventPathSearchRecursive',
           current: pluginSettings.eventPathSearchRecursive
         },
         {

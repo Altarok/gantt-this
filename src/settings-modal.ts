@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, Setting, TFolder} from 'obsidian'
+import {App, Notice, PluginSettingTab, Setting, TFolder} from 'obsidian'
 import FantasyGanttPlugin from './main'
 import {Css} from './const/strings'
 
@@ -17,7 +17,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     const {containerEl} = this
     containerEl.empty()
 
-    addDataSourceSettings(containerEl, this.plugin)
+    this.addDataSourceSettings(containerEl)
 
     containerEl.createEl('h2', {text: 'Fantasy Gantt Plugin Settings'})
 
@@ -53,25 +53,25 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private addColorSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Global Fallback Color')
-      .setDesc('Used when no color is defined in the item front-matter, its group, or its calendar type.')
-      .addColorPicker(color => color
-        .setValue(this.plugin.settings.fallbackColor)
-        .onChange(async (value) => {
-          this.plugin.settings.fallbackColor = value
-          await this.plugin.saveSettings()
-        }))
+    .setDesc('Used when no color is defined in the item front-matter, its group, or its calendar type.')
+    .addColorPicker(color => color
+    .setValue(this.plugin.settings.fallbackColor)
+    .onChange(async (value) => {
+      this.plugin.settings.fallbackColor = value
+      await this.plugin.saveSettings()
+    }))
   }
 
   private addCalendarSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default Timestamp Type')
-      .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
-      .addText(text => text
-        .setPlaceholder('iso-8601')
-        .setValue(this.plugin.settings.defaultType)
-        .onChange(async (value) => {
-          this.plugin.settings.defaultType = value.trim() || 'iso-8601'
-          await this.plugin.saveSettings()
-        }))
+    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
+    .addText(text => text
+    .setPlaceholder('iso-8601')
+    .setValue(this.plugin.settings.defaultType)
+    .onChange(async (value) => {
+      this.plugin.settings.defaultType = value.trim() || 'iso-8601'
+      await this.plugin.saveSettings()
+    }))
   }
 
   /**
@@ -87,7 +87,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     if (definedTypes.length === 0) {
       container.createEl('span', {
         text: 'No custom calendar types added yet. Add an assignment below to filter visibility.',
-        attr: {style: 'font-style: italic; color: var(--text-muted);'}
+        cls: Css.settings.emptyNotice
       })
       return
     }
@@ -97,27 +97,19 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       const {visibleCalendars} = this.plugin.settings
 
-      /*
-      * TODO debugger: what does ??= do
-       */
-      // debugger
-
+      // Logical Nullish Assignment. Only assigns a value if left side is (null or undefined)
       visibleCalendars[typeKey] ??= true
 
       new Setting(container)
-        .setName(`Show "${typeKey}" Calendar`)
-        .setDesc(`Toggle visibility for files using gantt-type: "${typeKey}"`)
-        .addToggle(toggle => toggle
-          .setValue(visibleCalendars[typeKey]!)
-          .onChange(async (value) => {
-            visibleCalendars[typeKey] = value
-            await this.plugin.saveSettings()
-          }))
+      .setName(`Show "${typeKey}" Calendar`)
+      .setDesc(`Toggle visibility for files using gantt-type: "${typeKey}"`)
+      .addToggle(toggle => toggle
+      .setValue(visibleCalendars[typeKey]!)
+      .onChange(async (value) => {
+        visibleCalendars[typeKey] = value
+        await this.plugin.saveSettings()
+      }))
     })
-  }
-
-  private saveSettings() {
-    void this.plugin.saveSettings() // TODO await this
   }
 
   /**
@@ -134,32 +126,24 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     // Render existing records
     Object.entries(record).forEach(([key, colorValue]) => {
-      const row = listEl.createDiv({
-        cls: Css.settings.row,
-        attr: {style: 'display: flex; gap: 10px; margin-bottom: 5px; align-items: center;'}
-      })
+      const row = listEl.createDiv({cls: Css.settings.row})
 
-      row.createEl('span', {text: key, attr: {style: 'flex-grow: 1; font-weight: bold;'}})
+      row.createEl('span', {text: key})
 
       const picker = row.createEl('input', {attr: {type: 'color', value: colorValue}})
-      picker.addEventListener('change',
-        (e) => {
-          record[key] = (e.target as HTMLInputElement).value
-          this.saveSettings() // TODO await this
-        }
-      )
+      picker.addEventListener('change', (e) => {
+        record[key] = (e.target as HTMLInputElement).value
+        this.plugin.saveSettings().catch(err => new Notice('Failed to save color' + err))
+      })
 
       const deleteBtn = row.createEl('button', {text: 'Delete', cls: Css.modWarning})
-      deleteBtn.addEventListener('click',
-        () => {
-          delete record[key]
-          if (syncToVisibility && this.plugin.settings.visibleCalendars[key] !== undefined) {
-            delete this.plugin.settings.visibleCalendars[key]
-          }
-          this.saveSettings() // TODO await this
-          this.display() // Refresh gui
+      deleteBtn.addEventListener('click', () => {
+        delete record[key]
+        if (syncToVisibility && this.plugin.settings.visibleCalendars[key] !== undefined) {
+          delete this.plugin.settings.visibleCalendars[key]
         }
-      )
+        this.plugin.saveSettings().then(() => this.display()).catch(err => new Notice('Failed to save color' + err))
+      })
     })
 
     // Add new row UI block
@@ -168,100 +152,103 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     let calendarColor = defaultColor
 
     new Setting(container)
-      .setName('Add Assignment')
-      .setDesc('Add a new key and assign its default color.')
-      .addText(text =>
-        text.setPlaceholder(placeholderText)
-          .onChange(val => calendarName = val.trim())
-      )
-      .addColorPicker(cp =>
-        cp.setValue(defaultColor)
-          .onChange(val => calendarColor = val)
-      )
-      .addExtraButton(eb => eb.setIcon('save')
-        .onClick(async () => {
-            if (calendarName && !record[calendarName]) {
-              record[calendarName] = calendarColor
+    .setName('Add Assignment')
+    .setDesc('Add a new key and assign its default color.')
+    .addText(text =>
+      text.setPlaceholder(placeholderText)
+      .onChange(val => calendarName = val.trim())
+    )
+    .addColorPicker(cp =>
+      cp.setValue(defaultColor)
+      .onChange(val => calendarColor = val)
+    )
+    .addExtraButton(eb => eb.setIcon('save')
+      .onClick(async () => {
+          if (calendarName && !record[calendarName]) {
+            record[calendarName] = calendarColor
 
-              if (syncToVisibility) this.plugin.settings.visibleCalendars[calendarName] = true
+            if (syncToVisibility) this.plugin.settings.visibleCalendars[calendarName] = true
 
-              await this.plugin.saveSettings()
-              this.display()
-            }
+            await this.plugin.saveSettings()
+            this.display()
           }
-        )
+        }
       )
+    )
   }
-}
 
-function addDataSourceSettings(containerEl: HTMLElement, plugin: FantasyGanttPlugin) {
-  containerEl.createEl('h2', {text: 'Event source'})
 
-  const folders: Record<string, string> = getAllPaths(plugin)
+  private addDataSourceSettings(containerEl: HTMLElement) {
+    containerEl.createEl('h2', {text: 'Event source'})
 
-  addEventPathSelection(containerEl, plugin, folders)
-  addCalendarPathSelection(containerEl, plugin, folders)
-}
+    const folders: Record<string, string> = this.getAllPaths()
 
-function getAllPaths(plugin: FantasyGanttPlugin) {
-  const folders = plugin.app.vault.getAllLoadedFiles()
+    this.addEventPathSelection(containerEl, folders)
+    this.addCalendarPathSelection(containerEl, folders)
+  }
+
+  private getAllPaths() {
+    const folders = this.plugin.app.vault.getAllLoadedFiles()
     .filter(file => file instanceof TFolder)
     .map(file => file.path)
 
-  folders.sort((a, b) => a.localeCompare(b, undefined,
-    {numeric: true, sensitivity: 'base'}));
+    folders.sort((a, b) => a.localeCompare(b, undefined,
+      {numeric: true, sensitivity: 'base'}));
 
-  const options: Record<string, string> = {}
-  options['/'] = '[root]'
-  folders.filter(f => f !== '/').forEach(f => options[f] = f === '/' ? '[root]' : f)
+    // Modern syntax mapping
+    return {
+      '/': '[root]',
+      ...Object.fromEntries(folders.filter(f => f !== '/').map(f => [f, f]))
+    }
+  }
 
-  return options
-}
 
-function addEventPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders: Record<string, string>) {
+  private addEventPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
-  new Setting(containerEl)
+    new Setting(containerEl)
     .setName('Folder to search for timeline events.')
     .setDesc('Folder can be searched recursively.')
     .addDropdown(dd => dd
       .addOptions(folders)
-      .setValue(plugin.settings.eventPath || '/')
+      .setValue(this.plugin.settings.eventPath || '/')
       .onChange(async (value) => {
-        plugin.settings.eventPath = value
-        await plugin.saveSettings()
+        this.plugin.settings.eventPath = value
+        await this.plugin.saveSettings()
       })
     )
     .addToggle(tt => tt
-      .setValue(plugin.settings.eventPathSearchRecursive)
+      .setValue(this.plugin.settings.eventPathSearchRecursive)
       .setTooltip('Search recursively?', {delay: -1})
       .onChange(async (value) => {
-        plugin.settings.eventPathSearchRecursive = value
-        await plugin.saveSettings()
+        this.plugin.settings.eventPathSearchRecursive = value
+        await this.plugin.saveSettings()
       })
     )
-}
+  }
 
-function addCalendarPathSelection(containerEl: HTMLElement, plugin: FantasyGanttPlugin, folders: Record<string, string>) {
 
-  new Setting(containerEl)
+  private addCalendarPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
+
+    new Setting(containerEl)
     .setName('Folder to search for calendar definitions.')
     .setDesc('Folder can be searched recursively.')
     .addDropdown(dd => dd
       .addOptions(folders)
-      .setValue(plugin.settings.calendarPath || '/')
+      .setValue(this.plugin.settings.calendarPath || '/')
       .onChange(async (value) => {
-        plugin.settings.calendarPath = value
-        await plugin.saveSettings()
+        this.plugin.settings.calendarPath = value
+        await this.plugin.saveSettings()
       })
     )
     .addToggle(tt => tt
-      .setValue(plugin.settings.calendarPathSearchRecursive)
+      .setValue(this.plugin.settings.calendarPathSearchRecursive)
       .setTooltip('Search recursively?', {delay: -1})
       .onChange(async (value) => {
-        plugin.settings.calendarPathSearchRecursive = value
-        await plugin.saveSettings()
+        this.plugin.settings.calendarPathSearchRecursive = value
+        await this.plugin.saveSettings()
       })
     )
+  }
+
+
 }
-
-

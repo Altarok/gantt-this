@@ -1,24 +1,44 @@
-import { Css } from 'const/strings'
-import {GanttItem, PluginSettingsAlreadyUsedInCode} from '../const/types'
-import {MarkdownPostProcessorContext, MarkdownRenderChild} from 'obsidian'
-import {GanttRenderEngine} from '../svg-drawer'
+import {MarkdownPostProcessorContext, MarkdownRenderChild, EventRef} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {Gregorian} from "../calc/gregorian";
+import {Css} from '../const/strings'
+import {PluginSettings} from '../const/types'
+import {GanttRenderEngine} from './svg-drawer'
+import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
 
-class GanttTooltipComponent extends MarkdownRenderChild {
-  constructor(containerEl: HTMLElement, private tooltipEl: HTMLElement) {
+class GanttLifecycleComponent extends MarkdownRenderChild {
+  private events: EventRef[] = []
+
+  constructor(
+    containerEl: HTMLElement,
+    private tooltipEl: HTMLElement,
+    private plugin: FantasyGanttPlugin,
+    private updateCallback: () => void
+  ) {
     super(containerEl)
   }
 
+  onload() {
+    // Register listeners with reference tracking
+    this.events.push(this.plugin.app.metadataCache.on('changed', this.updateCallback))
+    this.events.push(this.plugin.app.metadataCache.on('resolved', this.updateCallback))
+  }
+
   onunload() {
-    if (this.tooltipEl) this.tooltipEl.remove()
+    // Remove the DOM tooltip element
+    if (this.tooltipEl) {
+      this.tooltipEl.remove()
+    }
+    // Cleanly unbind listeners from the global event loop when code block is closed
+    this.events.forEach(eventRef => this.plugin.app.metadataCache.offref(eventRef))
+    this.events = []
   }
 }
 
 export class GanttRender {
-  constructor(readonly plugin: FantasyGanttPlugin) {  }
+  constructor(readonly plugin: FantasyGanttPlugin) {
+  }
 
-  async renderGantt(el: HTMLElement, codeBlockContent: PluginSettingsAlreadyUsedInCode, ctx?: MarkdownPostProcessorContext) {
+  async renderGantt(el: HTMLElement, codeBlockContent: PluginSettings, ctx?: MarkdownPostProcessorContext) {
     const mainWrapper = el.createDiv({cls: Css.wrapper})
     const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
 
@@ -38,16 +58,35 @@ export class GanttRender {
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: 'gantt-tooltip-element'}})
 
-    ctx?.addChild(new GanttTooltipComponent(el, tooltip))
-
     const hoverTitle = tooltip.createDiv({cls: Css.tooltip.title})
     const hoverDates = tooltip.createDiv({cls: Css.tooltip.dates})
     tooltip.createDiv({text: 'Click to open active note file', cls: Css.tooltip.link})
 
-    this.plugin.calendarConfigsCache.clear() // Wipe cache to handle real-time modifications
-    const data = await this.getGanttDataFromFolder(codeBlockContent)
+    // 1. Declare the renderEngine variable so the callback can reference its reference scope
+    let renderEngine: GanttRenderEngine | null = null
 
-    const renderEngine = new GanttRenderEngine(
+    // 2. Define the callback synchronously
+    const updateCallback = () => {
+      console.info('!')
+      this.plugin.calendarConfigsCache.clear()
+      getGanttDataFromFolder(this.plugin, codeBlockContent)
+      .then(updatedData => {
+        if (renderEngine) renderEngine.updateData(updatedData)
+      })
+      .catch(err => console.error(err))
+    }
+
+    // 3. Register the child lifecycle component synchronously before ANY 'await'
+    if (ctx) {
+      ctx.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin, updateCallback))
+    }
+
+    // 4. Perform your async data load
+    this.plugin.calendarConfigsCache.clear()
+    const data = await getGanttDataFromFolder(this.plugin, codeBlockContent)
+
+    // 5. Instantiate the engine
+    renderEngine = new GanttRenderEngine(
       chartContainer,
       data,
       tooltip,
@@ -60,76 +99,6 @@ export class GanttRender {
     togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))
     toggleGrouping.addEventListener('change', () => renderEngine.toggleGrouping(toggleGrouping.checked))
     resetBtn.addEventListener('click', () => renderEngine.resetZoom())
-
-    const updateCallback = async () => {
-      this.plugin.calendarConfigsCache.clear()
-      const updatedData = await this.getGanttDataFromFolder(codeBlockContent)
-      renderEngine.updateData(updatedData)
-    }
-
-    this.plugin.registerEvent(this.plugin.app.metadataCache.on('changed', updateCallback))
-    this.plugin.registerEvent(this.plugin.app.metadataCache.on('resolved', updateCallback))
-  }
-
-
-  private async   getGanttDataFromFolder(codeBlockContent: PluginSettingsAlreadyUsedInCode): Promise<GanttItem[]> {
-    const items: GanttItem[] = []
-    let incrementalId = 1
-    const files = this.plugin.app.vault.getMarkdownFiles()
-
-    const targetFiles = files.filter(f => {
-      if (!f.parent) return false
-      if (codeBlockContent.eventPath === '/') return true
-      return f.parent.path === codeBlockContent.eventPath
-    })
-
-    for (const file of targetFiles) {
-      const cache = this.plugin.app.metadataCache.getFileCache(file)
-      const frontMatter = cache?.frontmatter
-
-      if (frontMatter?.['gantt-item'] === true) {
-        const startInput = frontMatter['gantt-start'] as string
-        const endInput = frontMatter['gantt-end'] as string
-
-        if (startInput === undefined || startInput === null || startInput === '') continue
-
-        const calendarType = (frontMatter['gantt-type'] as string || this.plugin.settings.defaultType).trim()
-        if (!this.plugin.settings.visibleCalendars[calendarType]) continue
-
-        const config = await this.plugin.getCalendarDefinition(calendarType, codeBlockContent.calendarPath)
-
-        const startRes = Gregorian.parseToAbsoluteDays(startInput, config)
-        if (!startRes) continue
-
-        const endRes = endInput ? Gregorian.parseToAbsoluteDays(endInput, config) : startRes
-        if (!endRes) continue
-
-        const calculatedType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
-        const itemGroup = frontMatter['gantt-group'] as string || 'General'
-
-        const finalColor = frontMatter['gantt-color'] as string ??
-          this.plugin.settings.groupColors[itemGroup] ??
-          this.plugin.settings.typeColors[calendarType] ??
-          this.plugin.settings.fallbackColor
-
-        items.push({
-          id: incrementalId++,
-          name: frontMatter['gantt-name'] as string || file.basename,
-          startDateDisplay: startRes.display,
-          endDateDisplay: endRes.display,
-          startDays: startRes.days,
-          endDays: endRes.days,
-          group: itemGroup,
-          type: calculatedType,
-          calendarType,
-          color: finalColor,
-          link: file.path
-        })
-      }
-    }
-
-    return items
   }
 
 }
-
