@@ -35,9 +35,9 @@ export const Css = {
   settings: {
     container: 'gt-settings-container',
     row: 'gt-settings-row',
-    list: 'gt-settings-list',  // todo missing
+    list: 'gt-settings-list',
     itemDescription: 'gt-settings-item-description',
-    visibilityList: 'gt-settings-visibility-list',  // todo missing
+    visibilityList: 'gt-settings-visibility-list',
     emptyNotice:'gt-settings-empty-notice'
   },
   svg: {

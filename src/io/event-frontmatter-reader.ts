@@ -33,7 +33,10 @@ export async function getGanttDataFromFolder(
     if (startInput === undefined || startInput === null || startInput === '') continue
 
     const calendarType = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
-    if (!plugin.settings.visibleCalendars[calendarType]) continue
+    if (!calendarType || !plugin.settings.visibleCalendars[calendarType]) {
+      // debugger
+      continue
+    }
 
     const config = await getCalendarDefinition(plugin, calendarType, partialPluginSettings)
 

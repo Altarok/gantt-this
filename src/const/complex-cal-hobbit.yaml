@@ -6,6 +6,10 @@ delimiter: "-"
 
 ruleBasedDetails:
   daysInStandardYear: 365
+  format:
+    - 'year'
+    - 'month'
+    - 'day'
   leapYearRule:
     ruleType: interval
     intervalYears: 4

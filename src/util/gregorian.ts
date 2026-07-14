@@ -11,7 +11,7 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
   let totalDays = 0
   let valid = true
 
-  config.units.forEach((unit, idx) => {
+  config.positionalUnits?.forEach((unit, idx) => {
     if (segments[idx] !== undefined && !isNaN(segments[idx])) {
       totalDays += segments[idx] * unit.days
     } else if (idx < segments.length) {
@@ -68,29 +68,31 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { da
   }
 
   if (config?.type === 'rule-based') {
-    return RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config, config.delimiter)
+    return RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config.ruleBasedDetails!, config.delimiter)
   }
 
+  return null
 
   // Fallback default: standard browser JS date parsing
-  const date = new Date(cleanInput)
-  if (isNaN(date.getTime())) return null
-  return {
-    days: Math.floor(date.getTime() / (24 * 60 * 60 * 1000)),
-    display: date.toISOString().split('T')[0]!
-  }
+  // const date = new Date(cleanInput)
+  // if (isNaN(date.getTime())) return null
+  // return {
+  //   days: Math.floor(date.getTime() / (24 * 60 * 60 * 1000)),
+  //   display: date.toISOString().split('T')[0]!
+  // }
 }
 
-
-// 2. Update the axis label formatter inside the gantt render engine class
+// 2. Update the axis label formatter inside the Gantt render engine class
 function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
+
+  debugger
 
   if (!config) {
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
     return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
   }
 
-  if (config.type === 'gregorian') {
+  if (config.type === 'rule-based') { // gregorian ?
     let remainingDays = days
 
     // Approximate year selection step
@@ -129,7 +131,7 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
   if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`
 
   const stringSegments: string[] = []
-  config.units.forEach(unit => {
+  config.positionalUnits?.forEach(unit => {
     const unitCount = Math.floor(localDays / unit.days)
     stringSegments.push(unitCount.toString())
     localDays %= unit.days
