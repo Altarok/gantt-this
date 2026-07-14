@@ -3,7 +3,7 @@ export type CalendarUnit = {
   days: number
 }
 
-export type CalendarConfigType = 'positional' | 'gregorian'
+export type CalendarConfigType = 'positional' | 'gregorian' | 'rule-based'
 
 export type CalendarConfig = {
   id: string
@@ -18,7 +18,6 @@ export type CalendarConfig = {
 export type GanttItemType = 'bar' | 'point'
 
 export type CalendarIdentifier = CalendarConfigType | 'iso-8601' | string
-
 
 /** Calendar event */
 export type GanttItem = {

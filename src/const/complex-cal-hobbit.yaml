@@ -1,0 +1,54 @@
+id: shire
+name: Shire Reckoning
+epochGregorian: "0001-01-01"
+type: rule-based
+delimiter: "-"
+
+ruleBasedDetails:
+  daysInStandardYear: 365
+  leapYearRule:
+    ruleType: interval
+    intervalYears: 4
+    extraDays: 1
+    applyToMonthIndex: 7 # Applied directly to Overlithe, right after Midyear's Day
+
+  # A complete year tracking sequence in the Shire
+  months:
+    - name: 2Yule
+      days: 1
+      isIntercalary: true # New Year's Day (Day outside of any month)
+    - name: Afteryule
+      days: 30
+    - name: Solmath
+      days: 30
+    - name: Rethe
+      days: 30
+    - name: Astron
+      days: 30
+    - name: Thrimidge
+      days: 30
+    - name: Forelithe
+      days: 30
+    - name: 1Lithe
+      days: 1
+      isIntercalary: true # Midsummer Eve celebration
+    - name: Midyear
+      days: 1
+      isIntercalary: true # Midsummer Day (The absolute center of the year)
+    # Note: In a leap year, an extra day called 'Overlithe' gets slotted here via code
+    - name: 2Lithe
+      days: 1
+      isIntercalary: true # Midsummer Day After celebration
+    - name: Wedmath
+      days: 30
+    - name: Halimath
+      days: 30
+    - name: Winterfilth
+      days: 30
+    - name: Blotmath
+      days: 30
+    - name: Foreyule
+      days: 30
+    - name: 1Yule
+      days: 1
+      isIntercalary: true # New Year's Eve (The final day of the year)

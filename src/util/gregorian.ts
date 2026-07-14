@@ -1,71 +1,76 @@
 import {CalendarConfig} from '../const/types'
+import {RuleBasedCalendarParser} from "./rule-based-calendar-parser";
 
 const isLeapYear = (year: number) =>
   (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
 
-function parseToAbsoluteDays(input: string, config: CalendarConfig | null):  { days: number; display: string } | null {
+function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfig) {
+  if (!cleanInput.includes(config.delimiter)) return null
+
+  const segments = cleanInput.split(config.delimiter).map(Number)
+  let totalDays = 0
+  let valid = true
+
+  config.units.forEach((unit, idx) => {
+    if (segments[idx] !== undefined && !isNaN(segments[idx])) {
+      totalDays += segments[idx] * unit.days
+    } else if (idx < segments.length) {
+      valid = false
+    }
+  })
+
+  if (!valid) return null
+
+  // Relative offset logic to safely tie positional calendars to the master track
+  const epochDate = new Date(config.epochGregorian)
+  const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+  return {
+    days: epochDaysOffset + totalDays,
+    display: cleanInput
+  }
+}
+
+// function parseRuleBaseCalendarToAbsoluteDays(cleanInput: string, config: CalendarConfig) {
+//   const segments = cleanInput.split(config.delimiter).map(Number)
+//   if (segments.length < 3 || segments.some(isNaN)) return null
+//
+//   const [year, month, day] = segments
+//
+//   if (!year || !month || !day) return null
+//
+//   // Calculate leap years elapsed up to this point dynamically
+//   let totalDays = (year - 1) * 365
+//   totalDays += Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+//
+//   // Dynamic month day allocations matching reality
+//   const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+//
+//   for (let m = 0; m < month - 1; m++) {
+//     totalDays += monthDays[m]!
+//   }
+//   totalDays += (day - 1)
+//
+//   return {
+//     days: totalDays,
+//     display: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+//   }
+// }
+
+function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
 
   // debugger
 
-  if (!input) return null
+  if (!input || !config) return null
   const cleanInput = input.toString().trim()
 
-  /*
-   * TODO merge with fallback at end of method
-   */
-  if (config?.type === 'gregorian') {
-    const segments = cleanInput.split(config.delimiter).map(Number)
-    if (segments.length < 3 || segments.some(isNaN)) return null
-
-    const [year, month, day] = segments
-
-    if (!year || !month || !day) return null
-
-    // Calculate leap years elapsed up to this point dynamically
-    let totalDays = (year - 1) * 365
-    totalDays += Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-
-    // Dynamic month day allocations matching reality
-    const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-    for (let m = 0; m < month - 1; m++) {
-      totalDays += monthDays[m]!
-    }
-    totalDays += (day - 1)
-
-    return {
-      days: totalDays,
-      display: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-    }
+  if (config?.type === 'positional') {
+    return parsePositionalToAbsoluteDays(cleanInput, config)
   }
 
-  // STRATEGY B: Handle Custom Positional Tier Multipliers (Mayan, etc.)
-  if (config?.type === 'positional' && cleanInput.includes(config.delimiter)) {
-
-    // debugger
-
-    const segments = cleanInput.split(config.delimiter).map(Number)
-    let totalDays = 0
-    let valid = true
-
-    config.units.forEach((unit, idx) => {
-      if (segments[idx] !== undefined && !isNaN(segments[idx])) {
-        totalDays += segments[idx] * unit.days
-      } else if (idx < segments.length) {
-        valid = false
-      }
-    })
-
-    if (!valid) return null
-
-    // Relative offset logic to safely tie positional calendars to the master track
-    const epochDate = new Date(config.epochGregorian)
-    const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    return {
-      days: epochDaysOffset + totalDays,
-      display: cleanInput
-    }
+  if (config?.type === 'rule-based') {
+    return RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config, config.delimiter)
   }
+
 
   // Fallback default: standard browser JS date parsing
   const date = new Date(cleanInput)
@@ -76,8 +81,9 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null):  { d
   }
 }
 
+
 // 2. Update the axis label formatter inside the gantt render engine class
-function formatDaysToCalendarString(days: number, config: CalendarConfig | null):  string {
+function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
 
   if (!config) {
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
