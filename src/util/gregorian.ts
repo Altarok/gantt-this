@@ -58,20 +58,20 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
 
 function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
 
-  // debugger
+  debugger
 
   if (!input || !config) return null
   const cleanInput = input.toString().trim()
 
+  let result: { days: number; display: string } | null = null
+
   if (config?.type === 'positional') {
-    return parsePositionalToAbsoluteDays(cleanInput, config)
+    result = parsePositionalToAbsoluteDays(cleanInput, config)
+  } else if (config?.type === 'rule-based') {
+    result = RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config.ruleBasedDetails!, config.delimiter)
   }
 
-  if (config?.type === 'rule-based') {
-    return RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config.ruleBasedDetails!, config.delimiter)
-  }
-
-  return null
+  return result
 
   // Fallback default: standard browser JS date parsing
   // const date = new Date(cleanInput)
@@ -85,7 +85,7 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { da
 // 2. Update the axis label formatter inside the Gantt render engine class
 function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
 
-  debugger
+  // debugger
 
   if (!config) {
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
@@ -107,6 +107,9 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
 
     remainingDays -= totalDaysToYearStart
 
+    /*
+    FIXME read this from the config
+     */
     const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     let month = 1
@@ -120,7 +123,8 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
     }
     const day = remainingDays + 1
 
-    return `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
+    const s = `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`;
+    return s
   }
 
   // STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.)

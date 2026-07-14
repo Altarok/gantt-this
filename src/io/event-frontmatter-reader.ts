@@ -14,7 +14,7 @@ export async function getGanttDataFromFolder(
   plugin: FantasyGanttPlugin,
   partialPluginSettings: PluginSettings): Promise<GanttItem[]> {
 
-  // debugger
+  debugger
 
   const items: GanttItem[] = []
   let incrementalId = 0
@@ -45,6 +45,8 @@ export async function getGanttDataFromFolder(
 
     items.push(ganttItem)
   }
+
+  debugger
 
   return items
 }
