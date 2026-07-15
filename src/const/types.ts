@@ -3,7 +3,7 @@ export type CalendarUnit = {
   days: number
 }
 
-export type CalendarConfigType = 'positional' | 'rule-based'
+export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
