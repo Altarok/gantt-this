@@ -93,6 +93,100 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { da
   // }
 }
 
+function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
+  let remainingDays = days
+
+  // Approximate year selection step
+  let year = Math.floor((remainingDays -1) / 365.2425) + 1
+  let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+
+  // Micro adjust to pinpoint exact leap layout boundary alignment
+  while (totalDaysToYearStart >= remainingDays) {
+    year--
+    totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+  }
+
+  // Calculate 1-based day of the year (e.g., Jan 1st is Day 1)
+  remainingDays -= totalDaysToYearStart
+
+  const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+  let month = 1
+  for (let m = 0; m < 12; m++) {
+    if (remainingDays > monthDays[m]!) {
+      remainingDays -= monthDays[m]!
+      month++
+    } else break
+  }
+  const day = remainingDays
+
+  const s = `${year.toString().padStart(4, '0')}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`;
+  return s
+}
+
+function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) {
+  const details = config.ruleBasedDetails
+  if (!details) return `Error: No details found for ${config.id}`
+
+  let remainingDays = days
+  let year = 1
+
+  // 1. Determine the Year
+  while (true) {
+    // Calculate the length of the current year being evaluated
+    const isLeap = isCustomLeapYear(year, details.leapYearRule)
+    const daysInYear = details.daysInStandardYear +
+      (isLeap ? (details.leapYearRule.extraDays ?? 1) : 0)
+
+    if (remainingDays > daysInYear) {
+      remainingDays -= daysInYear
+      year++
+    } else {
+      break
+    }
+  }
+
+  // At this point, remainingDays represents the day offset inside the current 'year' (1-indexed base)
+  // If remainingDays was 0 (which shouldn't happen with 1-based days), we default it to 1
+  if (remainingDays <= 0) remainingDays = 1
+
+  // 2. Determine the Month and Day
+  let monthName = ''
+  let dayOfPeriod = 1
+  const isLeap = isCustomLeapYear(year, details.leapYearRule)
+
+  for (let m = 0; m < details.months.length; m++) {
+    const monthDef = details.months[m]!
+    let monthDays = monthDef.days
+
+    // Apply leap year day adjustments to the matching month/holiday index
+    if (isLeap && details.leapYearRule.applyToMonthIndex === m) {
+      monthDays += (details.leapYearRule.extraDays ?? 1)
+    }
+
+    if (remainingDays > monthDays) {
+      remainingDays -= monthDays
+    } else {
+      monthName = monthDef.name
+      dayOfPeriod = remainingDays
+      break
+    }
+  }
+
+  // 3. Construct the dynamic string based on details.format (e.g. ['year', 'month', 'day'])
+  const format = details.format || ['year', 'month', 'day']
+  const outputParts = format.map(component => {
+    if (component === 'year') return year.toString()
+    if (component === 'month') return monthName
+    if (component === 'day') return dayOfPeriod.toString()
+    return ''
+  })
+
+  const s1 = outputParts.filter(Boolean).join(config.delimiter);
+  debugger
+  return s1
+}
+
 // 2. Update the axis label formatter inside the Gantt render engine class
 function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
 
@@ -116,94 +210,9 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
 
   if (config.type === 'rule-based') {
     if (config.id === 'gregorian' || config.id === 'iso-8601') {
-      let remainingDays = days
-
-      // Approximate year selection step
-      let year = Math.floor(remainingDays / 365.2425) + 1
-      let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-
-      // Micro adjust to pinpoint exact leap layout boundary alignment
-      while (totalDaysToYearStart > remainingDays) {
-        year--
-        totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-      }
-
-      remainingDays -= totalDaysToYearStart
-
-      const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-      let month = 1
-      for (let m = 0; m < 12; m++) {
-        if (remainingDays >= monthDays[m]!) {
-          remainingDays -= monthDays[m]!
-          month++
-        } else break
-      }
-      const day = remainingDays + 1
-
-      const s = `${year}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`;
-      return s
+      return parseDaysToGregorianDateString(days, config);
     } else {
-      const details = config.ruleBasedDetails
-      if (!details) return `Error: No details found for ${config.id}`
-
-      let remainingDays = days
-      let year = 1
-
-      // 1. Determine the Year
-      while (true) {
-        // Calculate the length of the current year being evaluated
-        const isLeap = isCustomLeapYear(year, details.leapYearRule)
-        const daysInYear = details.daysInStandardYear +
-          (isLeap ? (details.leapYearRule.extraDays ?? 1) : 0)
-
-        if (remainingDays > daysInYear) {
-          remainingDays -= daysInYear
-          year++
-        } else {
-          break
-        }
-      }
-
-      // At this point, remainingDays represents the day offset inside the current 'year' (1-indexed base)
-      // If remainingDays was 0 (which shouldn't happen with 1-based days), we default it to 1
-      if (remainingDays <= 0) remainingDays = 1
-
-      // 2. Determine the Month and Day
-      let monthName = ''
-      let dayOfPeriod = 1
-      const isLeap = isCustomLeapYear(year, details.leapYearRule)
-
-      for (let m = 0; m < details.months.length; m++) {
-        const monthDef = details.months[m]!
-        let monthDays = monthDef.days
-
-        // Apply leap year day adjustments to the matching month/holiday index
-        if (isLeap && details.leapYearRule.applyToMonthIndex === m) {
-          monthDays += (details.leapYearRule.extraDays ?? 1)
-        }
-
-        if (remainingDays > monthDays) {
-          remainingDays -= monthDays
-        } else {
-          monthName = monthDef.name
-          dayOfPeriod = remainingDays
-          break
-        }
-      }
-
-      // 3. Construct the dynamic string based on details.format (e.g. ['year', 'month', 'day'])
-      const format = details.format || ['year', 'month', 'day']
-      const outputParts = format.map(component => {
-        if (component === 'year') return year.toString()
-        if (component === 'month') return monthName
-        if (component === 'day') return dayOfPeriod.toString()
-        return ''
-      })
-
-      const s1 = outputParts.filter(Boolean).join(config.delimiter);
-      debugger
-      return s1
+      return parseDaysToNonGregorianDatString(days, config);
     }
   }
 
@@ -226,5 +235,7 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
 
 export const Gregorian = {
   parseToAbsoluteDays,
+  parseDaysToGregorianDateString,
+  parseDaysToNonGregorianDatString,
   formatDaysToCalendarString
 }
