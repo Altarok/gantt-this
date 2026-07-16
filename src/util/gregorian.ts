@@ -1,13 +1,12 @@
 import {CalendarConfig, LeapYearRule} from '../const/types'
 import {RuleBasedCalendarParser} from "./rule-based-calendar-parser";
 
-// const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
 
-function isLeapYear(year: number): boolean {
+export function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
 }
 
-function isCustomLeapYear(year: number, rule: LeapYearRule): boolean {
+export function isCustomLeapYear(year: number, rule: LeapYearRule): boolean {
   if (rule.ruleType === 'none') return false
   if (rule.ruleType === 'interval' && rule.intervalYears) return year % rule.intervalYears === 0
   if (rule.ruleType === 'gregorian') return isLeapYear(year)
@@ -97,7 +96,7 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   let remainingDays = days
 
   // Approximate year selection step
-  let year = Math.floor((remainingDays -1) / 365.2425) + 1
+  let year = Math.floor((remainingDays - 1) / 365.2425) + 1
   let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
 
   // Micro adjust to pinpoint exact leap layout boundary alignment
@@ -112,9 +111,9 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
   let month = 1
-  for (let m = 0; m < 12; m++) {
-    if (remainingDays > monthDays[m]!) {
-      remainingDays -= monthDays[m]!
+  for (const daysInMonth of monthDays) {
+    if (remainingDays > daysInMonth) {
+      remainingDays -= daysInMonth
       month++
     } else break
   }
@@ -131,6 +130,25 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
   let remainingDays = days
   let year = 1
 
+  /*
+  * TODO block entfernen?
+   */
+  // Fast-forward large day counts safely if using an interval rule
+  if (details.leapYearRule.ruleType === 'interval' && details.leapYearRule.intervalYears) {
+    const interval = details.leapYearRule.intervalYears
+    const extra = details.leapYearRule.extraDays ?? 1
+
+    // Calculate average days in one full interval cycle (e.g., 4 years)
+    const daysInCycle = (details.daysInStandardYear * interval) + extra
+
+    if (remainingDays > daysInCycle) {
+      const cycles = Math.floor(remainingDays / daysInCycle)
+      year += cycles * interval
+      remainingDays -= cycles * daysInCycle
+    }
+  }
+
+
   // 1. Determine the Year
   while (true) {
     // Calculate the length of the current year being evaluated
@@ -141,9 +159,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     if (remainingDays > daysInYear) {
       remainingDays -= daysInYear
       year++
-    } else {
-      break
-    }
+    } else break
   }
 
   // At this point, remainingDays represents the day offset inside the current 'year' (1-indexed base)
@@ -156,7 +172,8 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
   const isLeap = isCustomLeapYear(year, details.leapYearRule)
 
   for (let m = 0; m < details.months.length; m++) {
-    const monthDef = details.months[m]!
+    const monthDef = details.months[m]
+    if (!monthDef) break
     let monthDays = monthDef.days
 
     // Apply leap year day adjustments to the matching month/holiday index
