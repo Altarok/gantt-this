@@ -37,5 +37,8 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "dependencies": {
+    "vitest": "^4.1.10"
   }
 }
