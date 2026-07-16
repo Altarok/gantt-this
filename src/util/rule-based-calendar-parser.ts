@@ -30,7 +30,7 @@ export class RuleBasedCalendarParser {
       } else if (componentType === 'day') {
         day = parseInt(partValue, 10)
       } else if (componentType === 'month') {
-        monthName = /\d*/.exec(partValue) ? parseInt(partValue, 10) : partValue
+        monthName = /^\d+$/.exec(partValue) ? parseInt(partValue, 10) : partValue
       }
     }
 

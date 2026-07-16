@@ -1,4 +1,4 @@
-import {CalendarConfig} from '../const/types'
+import {CalendarConfig, LeapYearRule} from '../const/types'
 import {RuleBasedCalendarParser} from "./rule-based-calendar-parser";
 
 // const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
@@ -68,6 +68,7 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
 
 function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
 
+  // eslint-disable-next-line no-debugger
   debugger
 
   if (!input || !config) return null
@@ -98,12 +99,23 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
   debugger
 
   if (!config) {
+    // const dateObj = new Date(Date.UTC(1, 0, 1)); // Start at Jan 1, Year 1 UTC
+    // dateObj.setUTCDate(dateObj.getUTCDate() + (days - 1));
+    //
+    // const yyyy = String(dateObj.getUTCFullYear()).padStart(4, '0');
+    // const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+    // const dd = String(dateObj.getUTCDate()).padStart(2, '0');
+    //
+    // return `${yyyy}-${mm}-${dd}`;
+
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
-    return dateObj.toISOString().split('T')[0]! // TODO remove '!'?
+    const s2 = dateObj.toISOString().split('T')[0]!  // TODO remove '!'?
+    debugger
+    return s2
   }
 
   if (config.type === 'rule-based') {
-    if (config.id === 'gregorian') {
+    if (config.id === 'gregorian' || config.id === 'iso-8601') {
       let remainingDays = days
 
       // Approximate year selection step
@@ -118,15 +130,12 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
 
       remainingDays -= totalDaysToYearStart
 
-      /*
-      FIXME read this from the config
-       */
       const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
       let month = 1
       for (let m = 0; m < 12; m++) {
         if (remainingDays >= monthDays[m]!) {
-          remainingDays -= monthDays[m]! // TODO remove '!'?
+          remainingDays -= monthDays[m]!
           month++
         } else break
       }
@@ -192,7 +201,9 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
         return ''
       })
 
-      return outputParts.filter(Boolean).join(config.delimiter)
+      const s1 = outputParts.filter(Boolean).join(config.delimiter);
+      debugger
+      return s1
     }
   }
 

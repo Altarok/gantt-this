@@ -19,8 +19,8 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
 
   onload() {
     // Register listeners with reference tracking
-    this.events.push(this.plugin.app.metadataCache.on('changed', this.updateCallback))
-    this.events.push(this.plugin.app.metadataCache.on('resolved', this.updateCallback))
+    // this.events.push(this.plugin.app.metadataCache.on('changed', this.updateCallback))
+    // this.events.push(this.plugin.app.metadataCache.on('resolved', this.updateCallback))
   }
 
   onunload() {
@@ -65,15 +65,34 @@ export class GanttRender {
     // 1. Declare the renderEngine variable so the callback can reference its reference scope
     let renderEngine: GanttRenderEngine | null = null
 
+    let updateTimeout: number | null = null;
+
     // 2. Define the callback synchronously
     const updateCallback = () => {
-      console.info('!')
-      this.plugin.calendarConfigsCache.clear()
-      getGanttDataFromFolder(this.plugin, codeBlockContent)
-      .then(updatedData => {
-        if (renderEngine) renderEngine.updateData(updatedData)
-      })
-      .catch(err => console.error(err))
+      if (updateTimeout) {
+        window.clearTimeout(updateTimeout);
+      }
+
+      // Debounce by 500ms to let Obsidian's internal indexing finish completely
+      updateTimeout = window.setTimeout(() => {
+        console.info('Cache change detected. Re-rendering Gantt...');
+        this.plugin.calendarConfigsCache.clear();
+        getGanttDataFromFolder(this.plugin, codeBlockContent)
+        .then(updatedData => {
+          if (renderEngine) {
+            renderEngine.updateData(updatedData);
+          }
+        })
+        .catch(err => console.error(err));
+      }, 500);
+
+      // console.info('!')
+      // this.plugin.calendarConfigsCache.clear()
+      // getGanttDataFromFolder(this.plugin, codeBlockContent)
+      // .then(updatedData => {
+      //   if (renderEngine) renderEngine.updateData(updatedData)
+      // })
+      // .catch(err => console.error(err))
     }
 
     // 3. Register the child lifecycle component synchronously before ANY 'await'
