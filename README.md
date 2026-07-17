@@ -1,3 +1,3 @@
 # That other timeline
 
-Ignore this. It's a proof of concept
+Ignore this. It's a proof of concept.
