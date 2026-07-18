@@ -214,14 +214,14 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
   })
 
   const s1 = outputParts.filter(Boolean).join(config.delimiter);
-  debugger
+  // debugger
   return s1
 }
 
 // 2. Update the axis label formatter inside the Gantt render engine class
 function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
 
-  debugger
+  // debugger
 
   if (!config) {
     // const dateObj = new Date(Date.UTC(1, 0, 1)); // Start at Jan 1, Year 1 UTC
@@ -235,7 +235,7 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
 
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
     const s2 = dateObj.toISOString().split('T')[0]!  // TODO remove '!'?
-    debugger
+    // debugger
     return s2
   }
 

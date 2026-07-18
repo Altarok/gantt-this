@@ -5,6 +5,8 @@ export type CalendarUnit = {
 
 export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
 
+export type CalendarIdentifier = CalendarConfigType | 'iso-8601' // | string
+
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type MonthDefinition = {
@@ -54,8 +56,6 @@ export type CalendarConfig = {
 
 /** Calendar event type */
 export type GanttItemType = 'bar' | 'point'
-
-export type CalendarIdentifier = CalendarConfigType | 'iso-8601' | string
 
 /** Calendar event */
 export type GanttItem = {

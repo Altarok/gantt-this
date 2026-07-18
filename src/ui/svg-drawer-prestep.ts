@@ -1,4 +1,4 @@
-import {MarkdownPostProcessorContext, MarkdownRenderChild, EventRef} from 'obsidian'
+import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {PluginSettings} from '../const/types'
@@ -75,15 +75,15 @@ export class GanttRender {
 
       // Debounce by 500ms to let Obsidian's internal indexing finish completely
       updateTimeout = window.setTimeout(() => {
-        console.info('Cache change detected. Re-rendering Gantt...');
+        new Notice('Cache change detected. Re-rendering Gantt...');
         this.plugin.calendarConfigsCache.clear();
         getGanttDataFromFolder(this.plugin, codeBlockContent)
-        .then(updatedData => {
-          if (renderEngine) {
-            renderEngine.updateData(updatedData);
-          }
-        })
-        .catch(err => console.error(err));
+          .then(updatedData => {
+            if (renderEngine) {
+              renderEngine.updateData(updatedData);
+            }
+          })
+          .catch(err => new Notice('Failed: ' + err));
       }, 500);
 
       // console.info('!')

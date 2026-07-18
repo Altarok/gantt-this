@@ -302,7 +302,7 @@ export class GanttRenderEngine {
       // Access configuration directly via plugin async cache
       const config = this.plugin.calendarConfigsCache.get(calType) ?? null
 
-      debugger
+      // debugger
 
       for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
         const xPos = this.getXPosition(currDays, width)

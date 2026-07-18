@@ -53,7 +53,7 @@ export class RuleBasedCalendarParser {
 
     // 3. Handle Standard/Intercalary Month Dates
     const months = details.months
-    const monthIndex = typeof (monthName) === 'number' ? monthName -1 : months.findIndex(m => m.name.toLowerCase() === monthName!.toLowerCase())
+    const monthIndex = typeof (monthName) === 'number' ? monthName -1 : months.findIndex(m => m.name.toLowerCase() === monthName.toLowerCase())
     if (monthIndex === -1) return null
 
     let allowedDays = months[monthIndex]!.days
