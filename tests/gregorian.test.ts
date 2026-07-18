@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest'
 import {Gregorian, isCustomLeapYear, isLeapYear} from '../src/util/gregorian'
 import {gregorianConfig, mayanConfig, shireConfig} from "./test-configs";
 
-const gregorianPhase = 400 * 396 + 97
+// const gregorianPhase = 400 * 396 + 97
 
 function dateToDaysGreg(input: string) {
   const parseToAbsoluteDays: { days: number, display: string } = Gregorian.parseToAbsoluteDays(input, gregorianConfig)
