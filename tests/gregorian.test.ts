@@ -1,33 +1,45 @@
 import {describe, expect, it} from 'vitest'
 import {Gregorian, isCustomLeapYear, isLeapYear} from '../src/util/gregorian'
 import {gregorianConfig, mayanConfig, shireConfig} from "./test-configs";
+import {CalendarConfig} from "../src/const/types";
+
+const gregorianPhase = 400 * 396 + 97
+
+function dateToDaysGreg(input: string) {
+  const parseToAbsoluteDays:{days: number, display: string} = Gregorian.parseToAbsoluteDays(input, gregorianConfig)
+  expect(parseToAbsoluteDays.display).toBe( input)
+  return parseToAbsoluteDays.days
+}
 
 
 describe('Parse date format to days', () => {
 
   it('gregorian', () => {
-    expect(Gregorian.parseToAbsoluteDays('0001-01-01', gregorianConfig)).toStrictEqual({days: 1, display: '0001-01-01'})
-    expect(Gregorian.parseToAbsoluteDays('0001-12-31', gregorianConfig)).toStrictEqual({days: 365, display: '0001-12-31'})
+    expect(dateToDaysGreg('0001-01-01')).toBe( 1)
+    expect(dateToDaysGreg('0001-12-31')).toBe( 365)
   })
 
   it('shire', () => {
-    expect(Gregorian.parseToAbsoluteDays('0001-Afteryule-9', shireConfig)).toStrictEqual({days: 10, display: '0001-Afteryule-9'})
+    expect(Gregorian.parseToAbsoluteDays('0001-Afteryule-9', shireConfig)).toStrictEqual({
+      days: 10,
+      display: '0001-Afteryule-9'
+    })
   })
 
-  it('have identical output (121548)' , () => {
-    expect(Gregorian.parseToAbsoluteDays('333-10-15', gregorianConfig).days).toBe(121548)
+  it('have identical output (121548)', () => {
+    expect(dateToDaysGreg('333-10-15')).toBe(121548)
     expect(Gregorian.parseToAbsoluteDays('333-Blotmath-11', shireConfig).days).toBe(121548)
     expect(Gregorian.parseToAbsoluteDays('8.14.16.6.10', mayanConfig).days).toBe(121548)
   })
 
-  it('have identical output (443556)' , () => {
-    expect(Gregorian.parseToAbsoluteDays('1215-06-01', gregorianConfig).days).toBe(443556)
+  it('have identical output (443556)', () => {
+    expect(dateToDaysGreg('1215-06-01')).toBe(443556)
     expect(Gregorian.parseToAbsoluteDays('1215-Thrimidge-22', shireConfig).days).toBe(443556)
     expect(Gregorian.parseToAbsoluteDays('10.19.10.14.18', mayanConfig).days).toBe(443556)
   })
 
-  it('have identical output (725957)' , () => {
-    expect(Gregorian.parseToAbsoluteDays('1988-08-08', gregorianConfig).days).toBe(725957)
+  it('have identical output (725957)', () => {
+    expect(dateToDaysGreg('1988-08-08')).toBe(725957)
     expect(Gregorian.parseToAbsoluteDays('1988-Forelithe-25', shireConfig).days).toBe(725957)
     expect(Gregorian.parseToAbsoluteDays('12.18.15.4.19', mayanConfig).days).toBe(725957)
   })
