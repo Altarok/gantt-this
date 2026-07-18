@@ -7,6 +7,7 @@ describe('Parse date format to days', () => {
 
   it('gregorian', () => {
     expect(Gregorian.parseToAbsoluteDays('0001-01-01', gregorianConfig)).toStrictEqual({days: 1, display: '0001-01-01'})
+    expect(Gregorian.parseToAbsoluteDays('0001-12-31', gregorianConfig)).toStrictEqual({days: 365, display: '0001-12-31'})
   })
 
   it('shire', () => {
