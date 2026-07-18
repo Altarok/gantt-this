@@ -1,28 +1,58 @@
 import {describe, expect, it} from 'vitest'
 import {Gregorian, isCustomLeapYear, isLeapYear} from '../src/util/gregorian'
 import {gregorianConfig, mayanConfig, shireConfig} from "./test-configs";
-import {CalendarConfig} from "../src/const/types";
 
 const gregorianPhase = 400 * 396 + 97
 
 function dateToDaysGreg(input: string) {
-  const parseToAbsoluteDays:{days: number, display: string} = Gregorian.parseToAbsoluteDays(input, gregorianConfig)
-  expect(parseToAbsoluteDays.display).toBe( input)
+  const parseToAbsoluteDays: { days: number, display: string } = Gregorian.parseToAbsoluteDays(input, gregorianConfig)
+  expect(parseToAbsoluteDays.display).toBe(input)
   return parseToAbsoluteDays.days
 }
 
+describe('Parse date to days', () => {
 
-describe('Parse date format to days', () => {
+  it('calc base offset', () => {
+      let epochDate = new Date('01-01-1970')
+      let epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+      expect(epochDaysOffset).toBe(0)
+
+      epochDate = new Date('01-30-1970')
+      epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+      expect(epochDaysOffset).toBe(29)
+
+      epochDate = new Date('01-05-1970')
+      epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+      expect(epochDaysOffset).toBe(4)
+
+      epochDate = new Date('12-28-1969')
+      epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+      expect(epochDaysOffset).toBe(-4)
+
+      // Explicitly pass year, monthIndex (0 = Jan), day
+      epochDate = new Date();
+    epochDate.setFullYear(1,0,1)
+      epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+      expect(epochDaysOffset).toBe(-719162)
+    }
+  )
 
   it('gregorian', () => {
-    expect(dateToDaysGreg('0001-01-01')).toBe( 1)
-    expect(dateToDaysGreg('0001-12-31')).toBe( 365)
+    expect(dateToDaysGreg('0001-01-01')).toBe(1)
+    expect(dateToDaysGreg('0001-12-31')).toBe(365)
   })
 
   it('shire', () => {
     expect(Gregorian.parseToAbsoluteDays('0001-Afteryule-9', shireConfig)).toStrictEqual({
       days: 10,
       display: '0001-Afteryule-9'
+    })
+  })
+
+  it('should match epoch offset for zero dates', () => {
+    expect(Gregorian.parseToAbsoluteDays('0.0.0.0.1', mayanConfig)).toStrictEqual({
+      days: -1137141,
+      display: '0.0.0.0.1'
     })
   })
 

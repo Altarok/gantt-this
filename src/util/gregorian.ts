@@ -20,21 +20,35 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
   let totalDays = 0
   let valid = true
 
-  config.positionalUnits?.forEach((unit, idx) => {
-    if (segments[idx] !== undefined && !isNaN(segments[idx])) {
-      totalDays += segments[idx] * unit.days
+  const units = config.positionalUnits ?? []
+  if (units.length === 0) return null
+
+  units.forEach((unit, idx) => {
+    const val = segments[idx]
+    if (val !== undefined && !isNaN(val)) {
+      totalDays += val * unit.days
     } else if (idx < segments.length) {
       valid = false
     }
   })
 
-  if (!valid) return null
+  if (!valid || segments.length !== units.length) return null
 
   // Relative offset logic to safely tie positional calendars to the master track
+  // let epochDaysOffset = 1
+
   const epochDate = new Date(config.epochGregorian)
   const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
+
+  // if (config.epochGregorian !== '0001-01-01') {
+  //   // For your Mayan epoch '-003114-08-11', this needs to resolve to -1137141
+  //   const parsedEpoch = Gregorian.parseToAbsoluteDays(config.epochGregorian, gregorianConfig)
+  //   if (!parsedEpoch) return null
+  //   epochDaysOffset = parsedEpoch.days
+  // }
+
   return {
-    days: epochDaysOffset + totalDays,
+    days: epochDaysOffset + totalDays + 719162,
     display: cleanInput
   }
 }
