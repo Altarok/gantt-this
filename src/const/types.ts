@@ -5,7 +5,10 @@ export type CalendarUnit = {
 
 export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
 
-export type CalendarIdentifier = CalendarConfigType | 'iso-8601' // | string
+/*
+ * TODO string:  unused
+ */
+export type CalendarIdentifier = CalendarConfigType | 'iso-8601' | string
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 

@@ -12,7 +12,10 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
     containerEl: HTMLElement,
     private tooltipEl: HTMLElement,
     private plugin: FantasyGanttPlugin,
-    // private updateCallback: () => void
+    /*
+     * TODO unused
+     */
+    private updateCallback: () => void
   ) {
     super(containerEl)
   }
