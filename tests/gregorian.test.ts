@@ -31,7 +31,7 @@ describe('Parse date to days', () => {
 
       // Explicitly pass year, monthIndex (0 = Jan), day
       epochDate = new Date();
-    epochDate.setFullYear(1,0,1)
+      epochDate.setFullYear(1, 0, 1)
       epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
       expect(epochDaysOffset).toBe(-719162)
     }
@@ -57,21 +57,40 @@ describe('Parse date to days', () => {
   })
 
   it('have identical output (121548)', () => {
-    expect(dateToDaysGreg('333-10-15')).toBe(121548)
-    expect(Gregorian.parseToAbsoluteDays('333-Blotmath-11', shireConfig).days).toBe(121548)
-    expect(Gregorian.parseToAbsoluteDays('8.14.16.6.10', mayanConfig).days).toBe(121548)
+    const expected2 = 121548
+    expect(dateToDaysGreg('333-10-15')).toBe(expected2)
+    expect(Gregorian.parseToAbsoluteDays('333-Blotmath-11', shireConfig).days).toBe(expected2)
+    expect(Gregorian.parseToAbsoluteDays('8.14.16.6.10', mayanConfig).days).toBe(expected2)
   })
 
   it('have identical output (443556)', () => {
-    expect(dateToDaysGreg('1215-06-01')).toBe(443556)
-    expect(Gregorian.parseToAbsoluteDays('1215-Thrimidge-22', shireConfig).days).toBe(443556)
-    expect(Gregorian.parseToAbsoluteDays('10.19.10.14.18', mayanConfig).days).toBe(443556)
+    const expected1 = 443556
+    expect(dateToDaysGreg('1215-06-01')).toBe(expected1)
+    expect(Gregorian.parseToAbsoluteDays('1215-Thrimidge-22', shireConfig).days).toBe(expected1)
+    expect(Gregorian.parseToAbsoluteDays('10.19.10.14.18', mayanConfig).days).toBe(expected1)
   })
 
   it('have identical output (725957)', () => {
-    expect(dateToDaysGreg('1988-08-08')).toBe(725957)
-    expect(Gregorian.parseToAbsoluteDays('1988-Forelithe-25', shireConfig).days).toBe(725957)
-    expect(Gregorian.parseToAbsoluteDays('12.18.15.4.19', mayanConfig).days).toBe(725957)
+    const expected: number = 725957
+    let actual: number
+
+    actual = dateToDaysGreg('1988-08-08')
+    expect(actual).toBe(expected)
+
+    actual = Gregorian.parseToAbsoluteDays('1988-Wedmath-21', shireConfig).days
+    expect(actual).toBe(expected)
+
+    actual = Gregorian.parseToAbsoluteDays('12.18.15.04.19', mayanConfig).days
+    expect(actual).toBe(expected)
+  })
+
+  it('have reversable in- and output', () => {
+    const expected: number = dateToDaysGreg('1970-01-01')
+
+    const s = Gregorian.parseDaysToNonGregorianDatString(expected, gregorianConfig)
+
+    expect(s).toBe('1970-January-1')
+
   })
 
 })

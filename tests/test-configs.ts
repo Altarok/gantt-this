@@ -166,7 +166,7 @@ export const shireConfig: CalendarConfig = {
 export const mayanConfig: CalendarConfig = {
   "id": "mayan",
   "name": "Mayan Long Count",
-  "epochGregorian": "-003114-08-11", // -1,137,141$
+  "epochGregorian": "-003113-08-12", // -1,137,141
   "type": "positional",
   "delimiter": ".",
   "positionalUnits": [

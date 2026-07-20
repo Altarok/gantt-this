@@ -133,8 +133,7 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   }
   const day = remainingDays
 
-  const s = `${year.toString().padStart(4, '0')}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`;
-  return s
+  return `${year.toString().padStart(4, '0')}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`;
 }
 
 function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) {
@@ -213,9 +212,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     return ''
   })
 
-  const s1 = outputParts.filter(Boolean).join(config.delimiter);
-  // debugger
-  return s1
+  return outputParts.filter(Boolean).join(config.delimiter);
 }
 
 // 2. Update the axis label formatter inside the Gantt render engine class
@@ -234,9 +231,7 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
     // return `${yyyy}-${mm}-${dd}`;
 
     const dateObj = new Date(days * 24 * 60 * 60 * 1000)
-    const s2 = dateObj.toISOString().split('T')[0]!  // TODO remove '!'?
-    // debugger
-    return s2
+    return dateObj.toISOString().split('T')[0]!  // TODO remove '!'?
   }
 
   if (config.type === 'rule-based') {
