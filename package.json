@@ -18,6 +18,9 @@
     "lint:css": "stylelint \"styles.css\"",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
+  "dependencies": {
+    "@Altarok/obsidian-dev-utils": "github:Altarok/obsidian-dev-utils"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.0.0",

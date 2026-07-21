@@ -1,7 +1,7 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {PluginSettings} from '../const/types'
-import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
+import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
 import {CodeBlock} from '../const/strings'
 import {GanttRender} from './svg-drawer-prestep'
 
