@@ -15,8 +15,6 @@ export async function getCalendarDefinition(
   calendarId: string,
   partialPluginSettings: PluginSettings): Promise<CalendarConfig | null> {
 
-  // debugger
-
   if (!calendarId || !partialPluginSettings) return null
 
   const cachedCalendarConfig = plugin.calendarConfigsCache.get(calendarId)
@@ -34,9 +32,6 @@ export async function getCalendarDefinition(
 
   try {
     const parsed = parseYaml(match[1]) as CalendarConfig
-
-    // debugger
-
     plugin.calendarConfigsCache.set(calendarId, parsed)
     return parsed
   } catch (_error) {

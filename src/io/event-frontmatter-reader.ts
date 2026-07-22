@@ -20,8 +20,6 @@ export async function getGanttDataFromFolder(
   plugin: FantasyGanttPlugin,
   partialPluginSettings: PluginSettings): Promise<GanttItem[]> {
 
-  // debugger
-
   const items: GanttItem[] = []
   let incrementalId = 0
 
@@ -38,23 +36,19 @@ export async function getGanttDataFromFolder(
 
     if (startInput === undefined || startInput === null || startInput === '') continue
 
-    const calendarTypeRaw: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
-    const calendarType: CalendarIdentifier = isCalendarIdentifier(calendarTypeRaw) ? calendarTypeRaw : plugin.settings.defaultType
+    const calendarDefinitionName: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
 
-    if (!calendarType || !plugin.settings.visibleCalendars[calendarType]) {
-      // debugger
+    if (!calendarDefinitionName || !plugin.settings.visibleCalendars[calendarDefinitionName]) {
       continue
     }
 
-    const config = await getCalendarDefinition(plugin, calendarType, partialPluginSettings)
+    const config = await getCalendarDefinition(plugin, calendarDefinitionName, partialPluginSettings)
 
-    const ganttItem: GanttItem | null = createItem(plugin, startInput, endInput, calendarType, config, file, frontMatter, ++incrementalId)
+    const ganttItem: GanttItem | null = createItem(plugin, startInput, endInput, calendarDefinitionName, config, file, frontMatter, ++incrementalId)
     if (!ganttItem) continue
 
     items.push(ganttItem)
   }
-
-  // debugger
 
   return items
 }
@@ -63,7 +57,7 @@ function createItem(
   plugin: FantasyGanttPlugin,
   startInput: string,
   endInput: string,
-  calendarType: CalendarIdentifier,
+  calendarType: string,
   config: CalendarConfig | null,
   file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
 

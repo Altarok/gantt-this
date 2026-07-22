@@ -8,8 +8,6 @@ export class RuleBasedCalendarParser {
     delimiter: string
   ): { days: number; display: string } | null {
 
-    // debugger
-
     const parts = input.split(delimiter).map(p => p.trim())
     const format = details.format
 

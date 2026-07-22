@@ -81,9 +81,6 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
 
 function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
 
-  // eslint-disable-next-line no-debugger
-  debugger
-
   if (!input || !config) return null
   const cleanInput = input.toString().trim()
 
@@ -217,8 +214,6 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
 
 // 2. Update the axis label formatter inside the Gantt render engine class
 function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
-
-  // debugger
 
   if (!config) {
     // const dateObj = new Date(Date.UTC(1, 0, 1)); // Start at Jan 1, Year 1 UTC
