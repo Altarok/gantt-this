@@ -1,6 +1,7 @@
 import {App, Notice, PluginSettingTab, Setting, TFolder} from 'obsidian'
 import FantasyGanttPlugin from './main'
 import {Css} from './const/strings'
+import {isCalendarIdentifier} from "./const/types";
 
 
 /*
@@ -69,7 +70,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     .setPlaceholder('iso-8601')
     .setValue(this.plugin.settings.defaultType)
     .onChange(async (value) => {
-      this.plugin.settings.defaultType = value.trim() || 'iso-8601'
+      const v = value.trim()
+      this.plugin.settings.defaultType = isCalendarIdentifier(v) ? v : 'iso-8601'
       await this.plugin.saveSettings()
     }))
   }

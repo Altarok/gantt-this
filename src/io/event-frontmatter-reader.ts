@@ -1,4 +1,10 @@
-import {CalendarConfig, GanttItem, GanttItemType, PluginSettings} from '../const/types'
+import {
+  CalendarConfig,
+  CalendarIdentifier,
+  GanttItem,
+  GanttItemType, isCalendarIdentifier,
+  PluginSettings
+} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import {Gregorian} from '../util/gregorian'
 import FantasyGanttPlugin from '../main'
@@ -32,7 +38,9 @@ export async function getGanttDataFromFolder(
 
     if (startInput === undefined || startInput === null || startInput === '') continue
 
-    const calendarType = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
+    const calendarTypeRaw: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
+    const calendarType: CalendarIdentifier = isCalendarIdentifier(calendarTypeRaw) ? calendarTypeRaw : plugin.settings.defaultType
+
     if (!calendarType || !plugin.settings.visibleCalendars[calendarType]) {
       // debugger
       continue
@@ -55,7 +63,7 @@ function createItem(
   plugin: FantasyGanttPlugin,
   startInput: string,
   endInput: string,
-  calendarType: string,
+  calendarType: CalendarIdentifier,
   config: CalendarConfig | null,
   file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
 

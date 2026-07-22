@@ -3,12 +3,19 @@ export type CalendarUnit = {
   days: number
 }
 
-export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
+export const CALENDAR_IDENTIFIERS = [
+  'positional',
+  'rule-based',
+  'gregorian', // same as 'iso-8601'
+  'iso-8601', // default
+] as const
 
-/*
- * TODO string: unused, remove type string
- */
-export type CalendarIdentifier = CalendarConfigType | 'iso-8601' | string
+// export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
+export type CalendarIdentifier = (typeof CALENDAR_IDENTIFIERS)[number]
+
+export function isCalendarIdentifier(value: string): value is CalendarIdentifier {
+  return (CALENDAR_IDENTIFIERS as readonly string[]).includes(value)
+}
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
@@ -44,11 +51,8 @@ export type CalendarConfig = {
   id: string
   name: string
   epochGregorian: string
-  type: CalendarConfigType
+  type: CalendarIdentifier
   delimiter: string
-  // units: CalendarUnit[]
-
-  // Used if type === 'positional'
   positionalUnits?: {
     name: string
     days: number
@@ -90,7 +94,7 @@ export type PluginSettings = { // usable by code
   eventPathSearchRecursive: boolean
   calendarPath: string
   calendarPathSearchRecursive: boolean
-  defaultType: string
+  defaultType: CalendarIdentifier
   fallbackColor: string
   typeColors: Record<string, string>
   groupColors: Record<string, string>
