@@ -1,0 +1,49 @@
+name: Release Obsidian plugin
+
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: 'npm'
+
+      - name: Build plugin
+        run: |
+          npm install obsidian-dev-utils@git+https://github.com/Altarok/obsidian-dev-utils.git --no-save
+          npm ci
+          npm run build
+
+      - name: Generate build attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            main.js
+            styles.css
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+
+          # Create the release draft first
+          gh release create "$tag" --title "$tag" --draft --generate-notes
+
+          # Upload the assets separately
+          gh release upload "$tag" main.js manifest.json styles.css

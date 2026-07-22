@@ -1,0 +1,30 @@
+name: Node.js build
+
+on:
+    push:
+        branches: ["**"]
+    pull_request:
+        branches: ["**"]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js "24"
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "24"
+                  cache: "npm"
+
+            - name: Inject Remote Util Dependency
+              run: npm install obsidian-dev-utils@git+https://github.com/Altarok/obsidian-dev-utils.git --no-save --force
+
+            - run: npm ci
+            - run: npm run build --if-present
+            - run: npm run lint
+
