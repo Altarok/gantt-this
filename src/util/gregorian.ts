@@ -6,8 +6,8 @@ export function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
 }
 
-export function isCustomLeapYear(year: number, rule: LeapYearRule): boolean {
-  if (rule.ruleType === 'none') return false
+export function isCustomLeapYear(year: number, rule?: LeapYearRule): boolean {
+  if (!rule || rule.ruleType === 'none') return false
   if (rule.ruleType === 'interval' && rule.intervalYears) return year % rule.intervalYears === 0
   if (rule.ruleType === 'gregorian') return isLeapYear(year)
   return false
@@ -147,7 +147,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
   * TODO block entfernen?
    */
   // Fast-forward large day counts safely if using an interval rule
-  if (details.leapYearRule.ruleType === 'interval' && details.leapYearRule.intervalYears) {
+  if (details.leapYearRule?.ruleType === 'interval' && details.leapYearRule.intervalYears) {
     const interval = details.leapYearRule.intervalYears
     const extra = details.leapYearRule.extraDays ?? 1
 
@@ -167,7 +167,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     // Calculate the length of the current year being evaluated
     const isLeap = isCustomLeapYear(year, details.leapYearRule)
     const daysInYear = details.daysInStandardYear +
-      (isLeap ? (details.leapYearRule.extraDays ?? 1) : 0)
+      (isLeap ? (details.leapYearRule?.extraDays ?? 1) : 0)
 
     if (remainingDays > daysInYear) {
       remainingDays -= daysInYear
@@ -190,7 +190,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     let monthDays = monthDef.days
 
     // Apply leap year day adjustments to the matching month/holiday index
-    if (isLeap && details.leapYearRule.applyToMonthIndex === m) {
+    if (isLeap && details.leapYearRule?.applyToMonthIndex === m) {
       monthDays += (details.leapYearRule.extraDays ?? 1)
     }
 

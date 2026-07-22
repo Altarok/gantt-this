@@ -6,7 +6,7 @@ export type CalendarUnit = {
 export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
 
 /*
- * TODO string:  unused
+ * TODO string: unused, remove type string
  */
 export type CalendarIdentifier = CalendarConfigType | 'iso-8601' | string
 
@@ -14,6 +14,7 @@ export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type MonthDefinition = {
   name: string
+  shortname?: string
   days: number
   // For calendars like the Hobbit/Shire calendar where mid-year festivals or Yule days sit between months and don't belong to any month.
   isIntercalary?: boolean
@@ -29,7 +30,7 @@ export type LeapYearRule = {
 
 export type RuleBasedDetails = {
   months: MonthDefinition[]
-  leapYearRule: LeapYearRule
+  leapYearRule?: LeapYearRule
   daysInStandardYear: number
   /**
    * Defines the order of elements in the date string.

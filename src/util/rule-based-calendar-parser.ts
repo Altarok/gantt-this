@@ -42,7 +42,7 @@ export class RuleBasedCalendarParser {
 
     // 2. Handle Ordinal Dates (No month block in the format)
     if (!monthName) {
-      const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule.extraDays ?? 1)) : details.daysInStandardYear
+      const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
       if (day < 1 || day > maxDays) return null
 
       return {
@@ -53,11 +53,11 @@ export class RuleBasedCalendarParser {
 
     // 3. Handle Standard/Intercalary Month Dates
     const months = details.months
-    const monthIndex = typeof (monthName) === 'number' ? monthName -1 : months.findIndex(m => m.name.toLowerCase() === monthName.toLowerCase())
+    const monthIndex = typeof (monthName) === 'number' ? monthName - 1 : months.findIndex(m => m.name.toLowerCase() === monthName.toLowerCase())
     if (monthIndex === -1) return null
 
     let allowedDays = months[monthIndex]!.days
-    if (isLeap && details.leapYearRule.applyToMonthIndex === monthIndex) {
+    if (isLeap && details.leapYearRule?.applyToMonthIndex === monthIndex) {
       allowedDays += (details.leapYearRule.extraDays ?? 1)
     }
 
@@ -66,7 +66,7 @@ export class RuleBasedCalendarParser {
     let daysFromCurrentYearMonths = 0
     for (let i = 0; i < monthIndex; i++) {
       daysFromCurrentYearMonths += months[i]!.days
-      if (isLeap && details.leapYearRule.applyToMonthIndex === i) {
+      if (isLeap && details.leapYearRule?.applyToMonthIndex === i) {
         daysFromCurrentYearMonths += (details.leapYearRule.extraDays ?? 1)
       }
     }
@@ -82,16 +82,18 @@ export class RuleBasedCalendarParser {
     const {leapYearRule, daysInStandardYear} = details
     let totalDays = upToYear * daysInStandardYear
 
-    if (leapYearRule.ruleType === 'interval' && leapYearRule.intervalYears) {
-      totalDays += Math.floor(upToYear / leapYearRule.intervalYears) * (leapYearRule.extraDays ?? 1)
-    } else if (leapYearRule.ruleType === 'gregorian') {
-      totalDays += Math.floor(upToYear / 4) - Math.floor(upToYear / 100) + Math.floor(upToYear / 400)
+    if (leapYearRule) {
+      if (leapYearRule.ruleType === 'interval' && leapYearRule.intervalYears) {
+        totalDays += Math.floor(upToYear / leapYearRule.intervalYears) * (leapYearRule.extraDays ?? 1)
+      } else if (leapYearRule.ruleType === 'gregorian') {
+        totalDays += Math.floor(upToYear / 4) - Math.floor(upToYear / 100) + Math.floor(upToYear / 400)
+      }
     }
     return totalDays
   }
 
-  private static isLeapYear(year: number, rule: LeapYearRule): boolean {
-    if (rule.ruleType === 'none') return false
+  private static isLeapYear(year: number, rule?: LeapYearRule): boolean {
+    if (!rule || rule.ruleType === 'none') return false
     if (rule.ruleType === 'interval' && rule.intervalYears) return year % rule.intervalYears === 0
     if (rule.ruleType === 'gregorian') return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
     return false
