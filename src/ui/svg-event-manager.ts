@@ -1,11 +1,13 @@
-import { GanttItem } from '../const/types'
-import { Css } from '../const/strings'
-import { GanttRenderEngine } from './svg-drawer'
+import {GanttItem} from '../const/types'
+import {Css} from '../const/strings'
+import {GanttRenderEngine} from './svg-drawer'
 
 export class GanttEventManager {
   private isDragging = false
   private startX = 0
   private startTranslateX = 0
+  private rafId: number | null = null
+  private currentSvg: SVGElement | null = null
 
   // Bound handler references for clean removal
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -16,8 +18,6 @@ export class GanttEventManager {
   private readonly boundSvgMouseMove: (e: MouseEvent) => void
   private readonly boundSvgMouseLeave: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
-
-  private currentSvg: SVGElement | null = null
 
   constructor(private engine: GanttRenderEngine) {
     // Bind all handlers once
@@ -39,40 +39,51 @@ export class GanttEventManager {
     window.addEventListener('mouseup', this.boundWindowMouseUp)
   }
 
-  private attachSvgListeners() {
+  public attachSvgListeners() {
+    // Clean up old SVG listeners if attached
+    if (this.currentSvg) {
+      this.currentSvg.removeEventListener('mousedown', this.boundSvgMouseDown)
+      this.currentSvg.removeEventListener('wheel', this.boundSvgWheel)
+      this.currentSvg.removeEventListener('mouseover', this.boundSvgMouseOver)
+      this.currentSvg.removeEventListener('mousemove', this.boundSvgMouseMove)
+      this.currentSvg.removeEventListener('mouseleave', this.boundSvgMouseLeave)
+      this.currentSvg.removeEventListener('click', this.boundSvgClick)
+    }
+
     this.currentSvg = this.engine.svg
     if (!this.currentSvg) return
 
     this.currentSvg.addEventListener('mousedown', this.boundSvgMouseDown)
-    this.currentSvg.addEventListener('wheel', this.boundSvgWheel, { passive: false })
+    this.currentSvg.addEventListener('wheel', this.boundSvgWheel, {passive: false})
     this.currentSvg.addEventListener('mouseover', this.boundSvgMouseOver)
     this.currentSvg.addEventListener('mousemove', this.boundSvgMouseMove)
     this.currentSvg.addEventListener('mouseleave', this.boundSvgMouseLeave)
     this.currentSvg.addEventListener('click', this.boundSvgClick)
   }
 
-  // --- Handlers ---
+
 
   private handleWindowMouseMove(e: MouseEvent) {
     window.document.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
     window.document.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
 
     if (this.isDragging) {
-      const width = this.engine.container.clientWidth || 800
       const deltaX = e.clientX - this.startX
       this.engine.zoomTranslateX = this.startTranslateX + deltaX
 
-      this.engine.renderData(width)
-      this.engine.drawAxes(width)
+      this.rafId ??= window.requestAnimationFrame(() => {
+        const width = this.engine.container.clientWidth || 800
+        this.engine.renderData(width)
+        this.engine.drawAxes(width)
+        this.rafId = null
+      })
     }
   }
 
-  private handleWindowMouseUp() {
-    this.isDragging = false
-  }
 
   private handleSvgMouseDown(e: MouseEvent) {
-    if ((e.target as HTMLElement).classList.contains(Css.item.item)) return
+    // if ((e.target as HTMLElement).classList.contains(Css.item.item)) return
+    if ((e.target as HTMLElement).hasAttribute('data-id')) return
     this.isDragging = true
     this.startX = e.clientX
     this.startTranslateX = this.engine.zoomTranslateX
@@ -98,8 +109,10 @@ export class GanttEventManager {
 
   private handleSvgMouseOver(event: MouseEvent) {
     const target = event.target as HTMLElement
-    if (target?.classList.contains(Css.item.item)) {
-      const id = +(target.getAttribute('data-id') ?? 0)
+    if (target?.hasAttribute('data-id')) {
+      const rawId = target.getAttribute('data-id')
+      if (rawId === null) return
+      const id = Number(rawId)
       const dataObj = this.engine.rawData.find(d => d.id === id)
       if (dataObj) this.showTooltip(dataObj)
     }
@@ -107,9 +120,12 @@ export class GanttEventManager {
 
   private handleSvgMouseMove(event: MouseEvent) {
     const target = event.target as HTMLElement
-    if (target?.classList.contains(Css.item.item)) {
+    if (target?.hasAttribute('data-id')) {
+      /* classList.contains() throws a runtime exception on strings containing spaces */
       if (!this.engine.tooltip.classList.contains(Css.tooltip.isActive)) {
-        const id = +(target.getAttribute('data-id') ?? 0)
+        const rawId = target.getAttribute('data-id')
+        if (rawId === null) return
+        const id = Number(rawId)
         const dataObj = this.engine.rawData.find(d => d.id === id)
         if (dataObj) this.showTooltip(dataObj)
       }
@@ -124,8 +140,11 @@ export class GanttEventManager {
 
   private handleSvgClick(event: MouseEvent) {
     const target = event.target as HTMLElement
-    if (target?.classList.contains(Css.item.item)) {
-      const id = +(target.getAttribute('data-id') ?? 0)
+    // if (target?.classList.contains(Css.item.item)) {
+    if (target?.hasAttribute('data-id')) {
+      const rawId = target.getAttribute('data-id')
+      if (rawId === null) return
+      const id = Number(rawId)
       const dataObj = this.engine.rawData.find(d => d.id === id)
       if (dataObj?.link) {
         void this.engine.plugin.app.workspace.openLinkText(dataObj.link, '', true)
@@ -148,10 +167,21 @@ export class GanttEventManager {
     }
   }
 
-  /**
-   * Fully unhooks all window and SVG listeners to prevent leaks
-   */
+  private handleWindowMouseUp() {
+    this.isDragging = false
+    if (this.rafId !== null) {
+      window.cancelAnimationFrame(this.rafId)
+      this.rafId = null
+    }
+  }
+
+  /** Fully unhook and release all window and SVG listeners to prevent leaks */
   public destroy() {
+    if (this.rafId !== null) {
+      window.cancelAnimationFrame(this.rafId)
+      this.rafId = null
+    }
+
     // Unhook window listeners
     window.removeEventListener('mousemove', this.boundWindowMouseMove)
     window.removeEventListener('mouseup', this.boundWindowMouseUp)

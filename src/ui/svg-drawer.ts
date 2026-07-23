@@ -11,6 +11,7 @@ export class GanttRenderEngine {
   svg!: SVGElement
   private backgroundG!: SVGElement
   private chartArea!: SVGElement
+  private gridG!: SVGElement
   private dataG!: SVGElement
   private axisG!: SVGElement
   private clipRect!: SVGElement
@@ -128,6 +129,10 @@ export class GanttRenderEngine {
     this.chartArea.setAttribute('transform', `translate(${this.config.margin.left}, 0)`)
     this.svg.appendChild(this.chartArea)
 
+    // Dedicated grid container behind bars and points
+    this.gridG = this.createSVGElement('g')
+    this.chartArea.appendChild(this.gridG)
+
     const defs = this.createSVGElement('defs')
     const clipPath = this.createSVGElement('clipPath')
     clipPath.setAttribute('id', 'gantt-clip')
@@ -178,7 +183,7 @@ export class GanttRenderEngine {
         text.setAttribute('y', '17')
         text.setAttribute(css, Css.group.text)
         text.textContent = d.name.toUpperCase()
-        groupG.appendChild(text)
+        // groupG.appendChild(text)
 
         const computedLength = text.getComputedTextLength()
         const textWidthEstimate = computedLength || d.name.length * 6.5
@@ -194,8 +199,12 @@ export class GanttRenderEngine {
         badge.setAttribute('width', badgeWidth)
         badge.setAttribute(css, Css.group.badge)
 
-        groupG.insertBefore(shadowRect, text)
-        groupG.insertBefore(badge, text)
+        // groupG.insertBefore(shadowRect, text)
+        // groupG.insertBefore(badge, text)
+
+        groupG.appendChild(shadowRect)
+        groupG.appendChild(badge)
+        groupG.appendChild(text)
 
         this.backgroundG.appendChild(groupG)
       }
@@ -219,7 +228,7 @@ export class GanttRenderEngine {
           const rect = this.createSVGElement('rect')
           rect.setAttribute(css, Css.item.bar)
           rect.setAttribute('x', x1.toString())
-          rect.setAttribute('y', (laneY).toString())
+          rect.setAttribute('y', laneY.toString())
           rect.setAttribute('width', barWidth.toString())
           if (d.color) rect.setAttribute('fill', d.color)
           rect.setAttribute('data-id', d.id.toString())
@@ -230,7 +239,7 @@ export class GanttRenderEngine {
           const circle = this.createSVGElement('circle')
           circle.setAttribute(css, Css.item.point)
           circle.setAttribute('cx', cx.toString())
-          circle.setAttribute('cy', (laneY).toString())
+          circle.setAttribute('cy', laneY.toString())
           if (d.color) circle.setAttribute('fill', d.color)
           circle.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(circle)
@@ -241,6 +250,7 @@ export class GanttRenderEngine {
 
   drawAxes(width: number) {
     this.axisG.innerHTML = ''
+    this.gridG.innerHTML = ''
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
@@ -281,14 +291,15 @@ export class GanttRenderEngine {
         const xPos = this.getXPosition(currDays, width)
         if (xPos < 0 || xPos > renderWidth) continue
 
+        // Draw vertical gridlines into dedicated grid container
         if (index === 0) {
           const gridLine = this.createSVGElement('line')
           gridLine.setAttribute('x1', xPos.toString())
           gridLine.setAttribute('x2', xPos.toString())
-          gridLine.setAttribute('y1', `-${itemsAreaHeight}`)
-          gridLine.setAttribute('y2', '0')
+          gridLine.setAttribute('y1', '0') // `-${itemsAreaHeight}`)
+          gridLine.setAttribute('y2', itemsAreaHeight.toString()) // '0')
           gridLine.setAttribute(css, Css.axis.gridline)
-          this.axisG.appendChild(gridLine)
+          this.gridG.appendChild(gridLine)
         }
 
         const tick = this.createSVGElement('line')
@@ -324,10 +335,8 @@ export class GanttRenderEngine {
 
       // Calculate width accurately off-screen with explicit uppercase padding
       const textWidth = this.measureTextWidth(calType)
-      const badgePadding = 12 // 6px left and right
-      const exactWidth = //Math.max(28,
-        textWidth + badgePadding
-      // )
+      const badgePadding = 12
+      const exactWidth = textWidth + badgePadding
 
       badge.setAttribute('width', exactWidth.toFixed(1))
       headerG.appendChild(badge)
@@ -338,17 +347,7 @@ export class GanttRenderEngine {
       label.setAttribute(css, Css.axis.label)
       label.textContent = calType
 
-      // Append text first to compute exact bounding width from SVG context
       headerG.appendChild(label)
-
-      // const computedLength = label.getComputedTextLength()
-      // const badgePadding = 12 // 6px padding on left/right
-      // const exactWidth = computedLength > 0
-      //   ? computedLength + badgePadding
-      //   : calType.length * 7 + badgePadding
-      //
-      // badge.setAttribute('width', exactWidth.toFixed(1))
-      // headerG.insertBefore(badge, label)
 
       this.axisG.appendChild(individualAxisG)
     })
@@ -357,13 +356,13 @@ export class GanttRenderEngine {
   private measureTextWidth(text: string): number {
     const canvas = window.document.createElement('canvas')
     const context = canvas.getContext('2d')
-    if (!context) return text.length * 10
+    if (!context) return text.length * 8
 
     // Match: font-size: 0.75em (~12px in default Obsidian), font-weight: bold
-    context.font = 'bold 12px var(--font-interface, sans-serif)'
+    context.font = 'bold 12px sans-serif'
 
     // Explicitly measure uppercase because CSS applies text-transform: uppercase
-    return context.measureText(text.toUpperCase()).width * 1.2
+    return context.measureText(text.toUpperCase()).width
   }
 
   resetZoom() {
