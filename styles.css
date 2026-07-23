@@ -14,20 +14,16 @@
 .gt-axis-label {
   font-size: 0.75em;
   font-weight: bold;
-  fill: rgb(0,0,0,1);
-    /*var(--text-muted);*/
+  fill: rgb(0 0 0);
   text-transform: uppercase;
   pointer-events: none;
 }
 
 .gt-axis-label-badge {
-  /*x: 10px;*/
-  /*y: 5px;*/
-  /*height: 18px;*/
-  rx: 8px; /* half of height for pill shape */
+  height: 16px;
+  rx: 8px;
   ry: 8px;
-  fill: rgb(255,255,255,255);
-    /*var(--background-secondary);*/
+  fill: rgb(255 255 255);
   opacity: 1;
   pointer-events: none;
 }
@@ -193,6 +189,7 @@
 .gt-svg-canvas {
   cursor: grab;
   display: block;
+  width: 100%;
 }
 
 .gt-svg-canvas:active {
@@ -229,15 +226,17 @@
   fill: var(--background-modifier-border);
   opacity: 0.6;
   pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 100%));
 }
 
+/*
 .gt-group-shadow {
   x: 10px;
-  y: 23px; /* 5px badge offset + 18px badge height */
+  y: 23px;
   height: 4px;
   fill: url('#header-bottom-shadow');
   pointer-events: none;
-}
+} */
 
 /* Interactive Timeline Elements */
 .gt-item {

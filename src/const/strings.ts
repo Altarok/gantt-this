@@ -9,6 +9,7 @@ export const Css = {
     baseline: 'gt-axis-baseline',
     gridline: 'gt-axis-gridline',
     label: 'gt-axis-label',
+    labelBadge: 'gt-axis-label-badge',
     text: 'gt-axis-text',
     tick: 'gt-axis-tick',
     tickMinor: 'gt-axis-tick-minor',
@@ -19,11 +20,10 @@ export const Css = {
     point: 'gt-item point-circle',
   },
   group: {
+    text: 'gt-group-text',
     badge: 'gt-group-badge',
     rowEven: 'gt-group-row-even',
     rowOdd: 'gt-group-row-odd',
-    text: 'gt-group-text',
-    shadow: 'gt-group-shadow',
   },
   tooltip: {
     tooltip: 'gt-tooltip',

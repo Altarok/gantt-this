@@ -106,7 +106,7 @@ export class GanttRenderEngine {
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
-    this.container.style.height = `${this.totalHeight}px`
+    this.container.style.height = '100%'// `${this.totalHeight}px`
   }
 
   initChartStructure() {
@@ -117,9 +117,8 @@ export class GanttRenderEngine {
     this.container.innerHTML = ''
 
     this.svg = this.createSVGElement('svg')
-    this.svg.setAttribute('width', '100%')
-    this.svg.setAttribute('height', this.totalHeight.toString())
     this.svg.setAttribute(css, Css.svg.canvas)
+    this.svg.setAttribute('height', this.totalHeight.toString())
     this.container.appendChild(this.svg)
 
     this.backgroundG = this.createSVGElement('g')
@@ -169,6 +168,8 @@ export class GanttRenderEngine {
 
     this.groups.forEach((d, i) => {
       if (this.settings.enableGrouping) {
+
+
         const groupG = this.createSVGElement('g')
         groupG.setAttribute('transform', `translate(0, ${d.yOffset})`)
 
@@ -178,35 +179,18 @@ export class GanttRenderEngine {
         rect.setAttribute(css, i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd)
         groupG.appendChild(rect)
 
-        const text = this.createSVGElement('text')
-        text.setAttribute('x', '20')
-        text.setAttribute('y', '17')
-        text.setAttribute(css, Css.group.text)
+
+        this.backgroundG.appendChild(groupG)
+
+        const badge = groupG.createSvg('rect', {attr: {x: 10, class: Css.group.badge}})
+        const text = groupG.createSvg('text', { attr: {x: 20, y: 17, class: Css.group.text}})
         text.textContent = d.name.toUpperCase()
-        // groupG.appendChild(text)
 
         const computedLength = text.getComputedTextLength()
         const textWidthEstimate = computedLength || d.name.length * 6.5
         const badgeWidth = (textWidthEstimate + 20).toString()
 
-        const shadowRect = this.createSVGElement('rect')
-        shadowRect.setAttribute('x', '10')
-        shadowRect.setAttribute('width', badgeWidth)
-        shadowRect.setAttribute(css, Css.group.shadow)
-
-        const badge = this.createSVGElement('rect')
-        badge.setAttribute('x', '10')
         badge.setAttribute('width', badgeWidth)
-        badge.setAttribute(css, Css.group.badge)
-
-        // groupG.insertBefore(shadowRect, text)
-        // groupG.insertBefore(badge, text)
-
-        groupG.appendChild(shadowRect)
-        groupG.appendChild(badge)
-        groupG.appendChild(text)
-
-        this.backgroundG.appendChild(groupG)
       }
     })
   }
@@ -328,10 +312,9 @@ export class GanttRenderEngine {
       individualAxisG.appendChild(headerG)
 
       const badge = this.createSVGElement('rect')
-      badge.setAttribute(css, 'gt-axis-label-badge')
+      badge.setAttribute(css, Css.axis.labelBadge)
       badge.setAttribute('x', '8')
       badge.setAttribute('y', '7')
-      badge.setAttribute('height', '16')
 
       // Calculate width accurately off-screen with explicit uppercase padding
       const textWidth = this.measureTextWidth(calType)
