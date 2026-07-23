@@ -14,8 +14,22 @@
 .gt-axis-label {
   font-size: 0.75em;
   font-weight: bold;
-  fill: var(--text-muted);
+  fill: rgb(0,0,0,1);
+    /*var(--text-muted);*/
   text-transform: uppercase;
+  pointer-events: none;
+}
+
+.gt-axis-label-badge {
+  /*x: 10px;*/
+  /*y: 5px;*/
+  /*height: 18px;*/
+  rx: 8px; /* half of height for pill shape */
+  ry: 8px;
+  fill: rgb(255,255,255,255);
+    /*var(--background-secondary);*/
+  opacity: 1;
+  pointer-events: none;
 }
 
 .gt-axis-text {
@@ -35,7 +49,6 @@
   stroke-width: 1;
   opacity: 0.7;
 }
-
 
 .gt-wrapper {
   position: relative;
@@ -178,7 +191,6 @@
 
 /* Core SVG & Canvas properties */
 .gt-svg-canvas {
-  /*width: 100%;*/
   cursor: grab;
   display: block;
 }
@@ -201,8 +213,6 @@
 }
 
 .gt-group-text {
-  /*x : 20px;*/
-  /*y: 17px;*/
   fill: var(--text-accent);
   font-size: 10px;
   font-weight: 600;

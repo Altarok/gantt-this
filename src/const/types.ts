@@ -3,7 +3,7 @@ export type CalendarUnit = {
   days: number
 }
 
-export const CALENDAR_IDENTIFIERS = [
+export const CALENDAR_CONFIG_TYPES = [
   'positional',
   'rule-based',
   'gregorian', // same as 'iso-8601'
@@ -11,10 +11,10 @@ export const CALENDAR_IDENTIFIERS = [
 ] as const
 
 // export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
-export type CalendarIdentifier = (typeof CALENDAR_IDENTIFIERS)[number]
+export type CalendarConfigType = (typeof CALENDAR_CONFIG_TYPES)[number]
 
-export function isCalendarIdentifier(value: string): value is CalendarIdentifier {
-  return (CALENDAR_IDENTIFIERS as readonly string[]).includes(value)
+export function isCalendarIdentifier(value: string): value is CalendarConfigType {
+  return (CALENDAR_CONFIG_TYPES as readonly string[]).includes(value)
 }
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
@@ -51,7 +51,7 @@ export type CalendarConfig = {
   id: string
   name: string
   epochGregorian: string
-  type: CalendarIdentifier
+  type: CalendarConfigType
   delimiter: string
   positionalUnits?: {
     name: string
@@ -63,7 +63,7 @@ export type CalendarConfig = {
 }
 
 /** Calendar event type */
-export type GanttItemType = 'bar' | 'point'
+export type GanttItemDisplayType = 'bar' | 'point' // | 'vertical-line'
 
 /** Calendar event */
 export type GanttItem = {
@@ -74,8 +74,8 @@ export type GanttItem = {
   startDays: number // Quantized timeline tracking unit: Days from default point zero
   endDays: number
   group: string
-  type: GanttItemType
-  calendarType: CalendarIdentifier
+  displayType: GanttItemDisplayType
+  calendarType: string
   color?: string
   link?: string
   lane?: number
@@ -94,7 +94,7 @@ export type PluginSettings = { // usable by code
   eventPathSearchRecursive: boolean
   calendarPath: string
   calendarPathSearchRecursive: boolean
-  defaultType: CalendarIdentifier
+  defaultType: CalendarConfigType
   fallbackColor: string
   typeColors: Record<string, string>
   groupColors: Record<string, string>

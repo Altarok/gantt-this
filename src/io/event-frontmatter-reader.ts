@@ -1,8 +1,7 @@
 import {
   CalendarConfig,
-  CalendarIdentifier,
   GanttItem,
-  GanttItemType, isCalendarIdentifier,
+  GanttItemDisplayType,
   PluginSettings
 } from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
@@ -36,15 +35,15 @@ export async function getGanttDataFromFolder(
 
     if (startInput === undefined || startInput === null || startInput === '') continue
 
-    const calendarDefinitionName: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
+    const calendarId: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
 
-    if (!calendarDefinitionName || !plugin.settings.visibleCalendars[calendarDefinitionName]) {
+    if (!calendarId || !plugin.settings.visibleCalendars[calendarId]) {
       continue
     }
 
-    const config = await getCalendarDefinition(plugin, calendarDefinitionName, partialPluginSettings)
+    const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings)
 
-    const ganttItem: GanttItem | null = createItem(plugin, startInput, endInput, calendarDefinitionName, config, file, frontMatter, ++incrementalId)
+    const ganttItem: GanttItem | null = createItem(plugin, startInput, endInput, calendarId, config, file, frontMatter, ++incrementalId)
     if (!ganttItem) continue
 
     items.push(ganttItem)
@@ -57,7 +56,8 @@ function createItem(
   plugin: FantasyGanttPlugin,
   startInput: string,
   endInput: string,
-  calendarType: string,
+  /** Calendar to use for event */
+  calendarId: string,
   config: CalendarConfig | null,
   file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
 
@@ -68,9 +68,9 @@ function createItem(
   const endRes = endInput ? Gregorian.parseToAbsoluteDays(endInput, config) : startRes
   if (!endRes) return null
 
-  const type: GanttItemType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
+  const displayType: GanttItemDisplayType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
   const group = frontMatter['gantt-group'] as string || 'General'
-  const color = getItemColor(frontMatter, plugin, group, calendarType)
+  const color = getItemColor(frontMatter, plugin, group, calendarId)
 
   return {
     id,
@@ -80,8 +80,8 @@ function createItem(
     startDays: startRes.days,
     endDays: endRes.days,
     group,
-    type,
-    calendarType,
+    displayType,
+    calendarType: calendarId,
     color,
     link: file.path
   }
@@ -108,9 +108,9 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
 
 
 /**
- * Returns event item color. In priority, if given, returns ..
- * * color read from file's frontmatter or ..
- * * color defined for event group or ..
+ * Returns event item color. In priority, if given, returns ...
+ * * color read from file's FrontMatter or ...
+ * * color defined for event group or ...
  * * color
  * * global fallback color
  * @param frontMatter

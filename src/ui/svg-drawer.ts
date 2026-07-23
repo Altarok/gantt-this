@@ -2,11 +2,13 @@ import {GanttGroup, GanttItem} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
+import {GanttEventManager} from './svg-event-manager'
 
 const css = 'class'
 
 export class GanttRenderEngine {
-  private svg!: SVGElement
+  private eventManager?: GanttEventManager
+  svg!: SVGElement
   private backgroundG!: SVGElement
   private chartArea!: SVGElement
   private dataG!: SVGElement
@@ -19,22 +21,18 @@ export class GanttRenderEngine {
   private resizeObserver: ResizeObserver
 
   private settings = {showBars: true, showPoints: true, enableGrouping: true}
-  private config = {
+  config = {
     rowHeight: 24,
     groupHeaderHeight: 25,
     singleAxisHeight: 35,
     margin: {top: 20, right: 0, bottom: 10, left: 0}
   }
 
-  // Bounds tracked in raw day counts rather than standard dates milliseconds
+  // Bounds tracked in raw day counts
   private minDays = 0
   private maxDays = 0
-  private zoomScale = 1
-  private zoomTranslateX = 0
-
-  private isDragging = false
-  private startX = 0
-  private startTranslateX = 0
+  zoomScale = 1
+  zoomTranslateX = 0
 
   constructor(
     public readonly container: HTMLElement,
@@ -44,12 +42,6 @@ export class GanttRenderEngine {
     public readonly hoverDates: HTMLElement,
     public readonly plugin: FantasyGanttPlugin
   ) {
-
-    window.addEventListener('mousemove', (e) => {
-      window.document.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
-      window.document.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
-    })
-
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
@@ -70,8 +62,8 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeData: GanttItem[] = []
-    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => d.type === 'bar'))
-    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.type === 'point'))
+    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'bar'))
+    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'point'))
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
 
@@ -117,6 +109,10 @@ export class GanttRenderEngine {
   }
 
   initChartStructure() {
+    if (this.eventManager) {
+      this.eventManager.destroy()
+    }
+
     this.container.innerHTML = ''
 
     this.svg = this.createSVGElement('svg')
@@ -151,8 +147,7 @@ export class GanttRenderEngine {
     this.axisG = this.createSVGElement('g')
     this.chartArea.appendChild(this.axisG)
 
-    this.setupNativeZoomAndPan()
-    this.setupInteractions()
+    this.eventManager = new GanttEventManager(this)
   }
 
   handleResize() {
@@ -207,21 +202,8 @@ export class GanttRenderEngine {
     })
   }
 
-  private renderData(width: number) {
+  renderData(width: number) {
     this.dataG.innerHTML = ''
-
-    this.groups.flatMap(g => g.items)
-    // .forEach(d => {
-    //   if (d.type === 'bar' || d.type === 'point') {
-    //     let dateStr: string | undefined //  = "INVALID_DATE"
-    //     try {
-    //       dateStr = new Date(d.startDays * 86400000).toISOString().split('T')[0] ?? undefined
-    //     } catch {
-    //       dateStr = `Raw Days: ${d.startDays}`
-    //     }
-    // console.debug(`"${d.name}" (${d.type}) -> Start ISO: ${dateStr}`)
-    //   }
-    // })
 
     this.groups.forEach(group => {
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
@@ -229,7 +211,7 @@ export class GanttRenderEngine {
       group.items.forEach((d: GanttItem) => {
         const laneY = groupYStart + d.lane! * this.config.rowHeight
 
-        if (d.type === 'bar') {
+        if (d.displayType === 'bar') {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
@@ -239,18 +221,16 @@ export class GanttRenderEngine {
           rect.setAttribute('x', x1.toString())
           rect.setAttribute('y', (laneY).toString())
           rect.setAttribute('width', barWidth.toString())
-          // rect.setAttribute('height', (this.config.rowHeight - 8).toString())
           if (d.color) rect.setAttribute('fill', d.color)
           rect.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(rect)
-        } else if (d.type === 'point') {
+        } else if (d.displayType === 'point') {
           const cx = this.getXPosition(d.startDays, width)
 
           const circle = this.createSVGElement('circle')
           circle.setAttribute(css, Css.item.point)
           circle.setAttribute('cx', cx.toString())
           circle.setAttribute('cy', (laneY).toString())
-          // circle.setAttribute('r', '6')
           if (d.color) circle.setAttribute('fill', d.color)
           circle.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(circle)
@@ -259,7 +239,7 @@ export class GanttRenderEngine {
     })
   }
 
-  private drawAxes(width: number) {
+  drawAxes(width: number) {
     this.axisG.innerHTML = ''
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 
@@ -282,24 +262,19 @@ export class GanttRenderEngine {
       const individualAxisG = this.createSVGElement('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
 
+      // Layer 1: Ticks, baseline, and dates (rendered underneath)
+      const ticksG = this.createSVGElement('g')
+      individualAxisG.appendChild(ticksG)
+
       const baseline = this.createSVGElement('line')
       baseline.setAttribute('x1', '0')
       baseline.setAttribute('x2', renderWidth.toString())
       baseline.setAttribute('y1', '0')
       baseline.setAttribute('y2', '0')
       baseline.setAttribute(css, Css.axis.baseline)
-      individualAxisG.appendChild(baseline)
-
-      const label = this.createSVGElement('text')
-      label.setAttribute('x', '10')
-      label.setAttribute('y', '20')
-      label.setAttribute(css, Css.axis.label)
-      label.textContent = calType
-      individualAxisG.appendChild(label)
+      ticksG.appendChild(baseline)
 
       let lastTextX = -999
-
-      // Access configuration directly via plugin async cache
       const config = this.plugin.calendarConfigsCache.get(calType) ?? null
 
       for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
@@ -322,9 +297,9 @@ export class GanttRenderEngine {
         tick.setAttribute('y1', '0')
         tick.setAttribute('y2', '5')
         tick.setAttribute(css, Css.axis.tick)
-        individualAxisG.appendChild(tick)
+        ticksG.appendChild(tick)
 
-        if (xPos - lastTextX > 80) { // Slight padding bump for wider text layouts
+        if (xPos - lastTextX > 80) {
           const text = this.createSVGElement('text')
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
@@ -332,51 +307,63 @@ export class GanttRenderEngine {
 
           text.textContent = Gregorian.formatDaysToCalendarString(currDays, config)
 
-          individualAxisG.appendChild(text)
+          ticksG.appendChild(text)
           lastTextX = xPos
         }
       }
+
+      // Layer 2: Badge and label (rendered on top so ticks scroll beneath them)
+      const headerG = this.createSVGElement('g')
+      individualAxisG.appendChild(headerG)
+
+      const badge = this.createSVGElement('rect')
+      badge.setAttribute(css, 'gt-axis-label-badge')
+      badge.setAttribute('x', '8')
+      badge.setAttribute('y', '7')
+      badge.setAttribute('height', '16')
+
+      // Calculate width accurately off-screen with explicit uppercase padding
+      const textWidth = this.measureTextWidth(calType)
+      const badgePadding = 12 // 6px left and right
+      const exactWidth = //Math.max(28,
+        textWidth + badgePadding
+      // )
+
+      badge.setAttribute('width', exactWidth.toFixed(1))
+      headerG.appendChild(badge)
+
+      const label = this.createSVGElement('text')
+      label.setAttribute('x', '14')
+      label.setAttribute('y', '19')
+      label.setAttribute(css, Css.axis.label)
+      label.textContent = calType
+
+      // Append text first to compute exact bounding width from SVG context
+      headerG.appendChild(label)
+
+      // const computedLength = label.getComputedTextLength()
+      // const badgePadding = 12 // 6px padding on left/right
+      // const exactWidth = computedLength > 0
+      //   ? computedLength + badgePadding
+      //   : calType.length * 7 + badgePadding
+      //
+      // badge.setAttribute('width', exactWidth.toFixed(1))
+      // headerG.insertBefore(badge, label)
 
       this.axisG.appendChild(individualAxisG)
     })
   }
 
-  private setupNativeZoomAndPan() {
-    this.svg.addEventListener('mousedown', (e: MouseEvent) => {
-      if ((e.target as HTMLElement).classList.contains(Css.item.item)) return
-      this.isDragging = true
-      this.startX = e.clientX
-      this.startTranslateX = this.zoomTranslateX
-    })
+  private measureTextWidth(text: string): number {
+    const canvas = window.document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    if (!context) return text.length * 10
 
-    window.addEventListener('mousemove', (e: MouseEvent) => {
-      if (!this.isDragging) return
-      const width = this.container.clientWidth || 800
-      const deltaX = e.clientX - this.startX
-      this.zoomTranslateX = this.startTranslateX + deltaX
-      this.renderData(width)
-      this.drawAxes(width)
-    })
+    // Match: font-size: 0.75em (~12px in default Obsidian), font-weight: bold
+    context.font = 'bold 12px var(--font-interface, sans-serif)'
 
-    window.addEventListener('mouseup', () => {
-      this.isDragging = false
-    })
-
-    this.svg.addEventListener('wheel', (e: WheelEvent) => {
-      e.preventDefault()
-      const width = this.container.clientWidth || 800
-      const rect = this.svg.getBoundingClientRect()
-      const mouseX = e.clientX - rect.left - this.config.margin.left
-
-      const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-      const nextScale = Math.min(100, Math.max(0.05, this.zoomScale * zoomFactor))
-
-      this.zoomTranslateX = mouseX - (mouseX - this.zoomTranslateX) * (nextScale / this.zoomScale)
-      this.zoomScale = nextScale
-
-      this.renderData(width)
-      this.drawAxes(width)
-    }, {passive: false})
+    // Explicitly measure uppercase because CSS applies text-transform: uppercase
+    return context.measureText(text.toUpperCase()).width * 1.2
   }
 
   resetZoom() {
@@ -406,58 +393,9 @@ export class GanttRenderEngine {
     this.handleResize()
   }
 
-  setupInteractions() {
-    const showTooltip = (event: MouseEvent, d: GanttItem) => {
-      this.hoverTitle.textContent = d.name
-      this.hoverDates.textContent = d.type === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
-      this.tooltip.classList.add(Css.tooltip.isActive)
-
-      if (d.link) {
-        this.tooltip.setAttribute('data-link', d.link)
-      } else {
-        this.tooltip.removeAttribute('data-link')
-      }
-    }
-
-    this.svg.addEventListener('mouseover', (event) => {
-      const target = event.target as HTMLElement
-      if (target?.classList.contains(Css.item.item)) {
-        const id = +(target.getAttribute('data-id') ?? 0)
-        const dataObj = this.rawData.find(d => d.id === id)
-        if (dataObj) showTooltip(event, dataObj)
-      }
-    })
-
-    this.svg.addEventListener('mousemove', (event) => {
-      window.document.documentElement.style.setProperty('--mouse-x', `${event.clientX + 15}px`)
-      window.document.documentElement.style.setProperty('--mouse-y', `${event.clientY + 15}px`)
-
-      const target = event.target as HTMLElement
-      if (target?.classList.contains(Css.item.item)) {
-        if (!this.tooltip.classList.contains(Css.tooltip.isActive)) {
-          const id = +(target.getAttribute('data-id') ?? 0)
-          const dataObj = this.rawData.find(d => d.id === id)
-          if (dataObj) showTooltip(event, dataObj)
-        }
-      } else {
-        this.tooltip.classList.remove(Css.tooltip.isActive)
-      }
-    })
-
-    this.svg.addEventListener('mouseleave', () => {
-      this.tooltip.classList.remove(Css.tooltip.isActive)
-    })
-
-    this.svg.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement
-      if (target?.classList.contains(Css.item.item)) {
-        const id = +(target.getAttribute('data-id') ?? 0)
-        const dataObj = this.rawData.find(d => d.id === id)
-        if (dataObj?.link) {
-          void this.plugin.app.workspace.openLinkText(dataObj.link, '', true)
-        }
-      }
-    })
+  public destroy() {
+    this.resizeObserver.disconnect()
+    this.eventManager?.destroy()
   }
 
   private calculateGlobalBounds() {
@@ -511,6 +449,4 @@ export class GanttRenderEngine {
   private createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K): SVGElementTagNameMap[K] {
     return window.document.createElementNS('http://www.w3.org/2000/svg', tag)
   }
-
-
 }
