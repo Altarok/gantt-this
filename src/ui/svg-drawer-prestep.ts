@@ -106,7 +106,7 @@ export class GanttRender {
 
       // Debounce by 500ms to let Obsidian's internal indexing finish completely
       updateTimeout = window.setTimeout(() => {
-        new Notice('Cache change detected. Re-rendering Gantt...')
+        new Notice('Re-rendering Gantt...')
         this.plugin.calendarConfigsCache.clear();
         getGanttDataFromFolder(this.plugin, codeBlockContent)
         .then(updatedData => {
@@ -119,9 +119,7 @@ export class GanttRender {
     }
 
     // 3. Register the child lifecycle component synchronously before ANY 'await'
-    if (ctx) {
-      ctx.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin, updateCallback))
-    }
+    ctx?.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin, updateCallback))
 
     // 4. Perform data load in async way
     this.plugin.calendarConfigsCache.clear()
@@ -137,7 +135,7 @@ export class GanttRender {
       this.plugin
     )
 
-    reloadBtn.addEventListener("click",  () => updateCallback())
+    reloadBtn.addEventListener("click", () => updateCallback())
 
     toggleBars.addEventListener('change', () => renderEngine.toggleShowBars(toggleBars.checked))
     togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))
