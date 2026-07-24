@@ -1,4 +1,12 @@
-import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, sanitizeHTMLToDom, setIcon, Platform} from 'obsidian'
+import {
+  EventRef,
+  MarkdownPostProcessorContext,
+  MarkdownRenderChild,
+  Notice,
+  sanitizeHTMLToDom,
+  setIcon,
+  Platform
+} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {PluginSettings} from '../const/types'
@@ -41,14 +49,11 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
   }
 }
 
-function createIconButton(
-  parentEl: HTMLElement,
-  icon: string, // see lucide.dev
-  title: string, // used as tooltip
-): HTMLButtonElement {
-  const btn = parentEl.createEl("button", { cls: Css.button.icon, title });
+/* See lucide.dev for icons, */
+function createIconButton(parentEl: HTMLElement, icon: string, title: string,): HTMLButtonElement {
+  const btn = parentEl.createEl("button", {cls: Css.button.icon, title})
   setIcon(btn, icon)
-  return btn;
+  return btn
 }
 
 export class GanttRender {
@@ -67,16 +72,17 @@ export class GanttRender {
       return input
     }
 
+    const reloadBtn = createIconButton(toolbar, 'refresh-cw', 'Reload data')
     const toggleBars = createCheckbox('Show Bars', 'toggle-bars')
     const togglePoints = createCheckbox('Show Points', 'toggle-points')
     const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
 
 
-    const zoomGroupEl = toolbar.createEl("div", { cls: 'gt-toolbar-zoom-group' });
+    const zoomGroupEl = toolbar.createEl("div", {cls: 'gt-toolbar-zoom-group'});
 
     const panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
-    const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out' )
-    const zoomResetBtn = zoomGroupEl.createEl('button', { cls: Css.button.icon, title: 'Reset zoom' })
+    const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
+    const zoomResetBtn = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset zoom'})
     zoomResetBtn.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
     const zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
     const panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
@@ -96,29 +102,21 @@ export class GanttRender {
     // 2. Define the callback synchronously
     const updateCallback = () => {
       if (updateTimeout) {
-        window.clearTimeout(updateTimeout);
+        window.clearTimeout(updateTimeout)
       }
 
       // Debounce by 500ms to let Obsidian's internal indexing finish completely
       updateTimeout = window.setTimeout(() => {
-        new Notice('Cache change detected. Re-rendering Gantt...');
+        new Notice('Cache change detected. Re-rendering Gantt...')
         this.plugin.calendarConfigsCache.clear();
         getGanttDataFromFolder(this.plugin, codeBlockContent)
-          .then(updatedData => {
-            if (renderEngine) {
-              renderEngine.updateData(updatedData);
-            }
-          })
-          .catch(err => new Notice('Failed: ' + err));
-      }, 500);
-
-      // console.info('!')
-      // this.plugin.calendarConfigsCache.clear()
-      // getGanttDataFromFolder(this.plugin, codeBlockContent)
-      // .then(updatedData => {
-      //   if (renderEngine) renderEngine.updateData(updatedData)
-      // })
-      // .catch(err => console.error(err))
+        .then(updatedData => {
+          if (renderEngine) {
+            renderEngine.updateData(updatedData)
+          }
+        })
+        .catch(err => new Notice('Failed: ' + err))
+      }, 500)
     }
 
     // 3. Register the child lifecycle component synchronously before ANY 'await'
@@ -140,6 +138,8 @@ export class GanttRender {
       this.plugin
     )
 
+    reloadBtn.addEventListener("click",  () => updateCallback())
+
     toggleBars.addEventListener('change', () => renderEngine.toggleShowBars(toggleBars.checked))
     togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))
     toggleGrouping.addEventListener('change', () => renderEngine.toggleGrouping(toggleGrouping.checked))
@@ -150,5 +150,24 @@ export class GanttRender {
     zoomInBtn.addEventListener('click', () => renderEngine.zoomIn())
     panRightBtn.addEventListener('click', () => renderEngine.panRight(step))
   }
+
+
+  // async handleReload(updateCallback) {
+  //   // 1. Show optional visual feedback (Obsidian Notice)
+  //   new Notice("Reloading Gantt chart...")
+  //
+  //   try {
+  //     // 2. Re-fetch or re-parse your data source
+  //     const freshData = await this.plugin.loadGanttDataFromSource()
+  //
+  //     // 3. Push the fresh data into your existing engine instance
+  //     renderEngine.updateData(freshData)
+  //
+  //     new Notice("Gantt chart reloaded successfully.")
+  //   } catch (error) {
+  //     console.error("Failed to reload Gantt chart data:", error)
+  //     new Notice("Failed to reload Gantt chart. Check console.")
+  //   }
+  // }
 
 }

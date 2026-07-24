@@ -387,22 +387,22 @@ export class GanttRenderEngine {
     this.handleResize()
   }
 
+  /** Shift view left by moving translateX positive */
   panLeft(percentage = 0.25) {
     if (this.eventManager?.isDragging) return
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 
-    // Shift view left by moving translateX positive
     this.zoomTranslateX += renderWidth * percentage
     this.handleResize()
   }
 
+  /** Shift view right by moving translateX negative */
   panRight(percentage = 0.25) {
     if (this.eventManager?.isDragging) return
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 
-    // Shift view right by moving translateX negative
     this.zoomTranslateX -= renderWidth * percentage
     this.handleResize()
   }
