@@ -232,7 +232,11 @@
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
+
+  /* prevent any interaction (x3) */
   pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gt-group-badge {
@@ -243,8 +247,12 @@
   ry: 9px;
   fill: var(--background-modifier-border);
   opacity: 0.6;
-  pointer-events: none;
   filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%))); /* Replaced rgb(0 0 0 / 100%) */
+
+  /* prevent any interaction (x3) */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /*
