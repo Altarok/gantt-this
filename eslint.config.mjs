@@ -43,15 +43,15 @@ export default [
       // Obsidian settings
       ...obsidianmdPlugin.configs.recommended.rules,
 
-      // Prevent shipping floating asynchronous operations inside your timer loops
+      // Prevent shipping floating asynchronous operations
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/await-thenable": "error",
 
-      // Enforce clean, modernized type structures
+      // Enforce clean, modernized type structure
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/no-explicit-any": "warn",
 
-      // Nullish-coalescing guard rails (perfect for your UI state evaluations)
+      // Nullish-coalescing guard rails for UI state evaluation
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
 
       "@typescript-eslint/no-unused-vars": [

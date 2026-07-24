@@ -34,50 +34,14 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
 
   if (!valid || segments.length !== units.length) return null
 
-  // Relative offset logic to safely tie positional calendars to the master track
-  // let epochDaysOffset = 1
-
   const epochDate = new Date(config.epochGregorian)
   const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
-
-  // if (config.epochGregorian !== '0001-01-01') {
-  //   // For your Mayan epoch '-003114-08-11', this needs to resolve to -1137141
-  //   const parsedEpoch = Gregorian.parseToAbsoluteDays(config.epochGregorian, gregorianConfig)
-  //   if (!parsedEpoch) return null
-  //   epochDaysOffset = parsedEpoch.days
-  // }
 
   return {
     days: epochDaysOffset + totalDays + 719162,
     display: cleanInput
   }
 }
-
-// function parseRuleBaseCalendarToAbsoluteDays(cleanInput: string, config: CalendarConfig) {
-//   const segments = cleanInput.split(config.delimiter).map(Number)
-//   if (segments.length < 3 || segments.some(isNaN)) return null
-//
-//   const [year, month, day] = segments
-//
-//   if (!year || !month || !day) return null
-//
-//   // Calculate leap years elapsed up to this point dynamically
-//   let totalDays = (year - 1) * 365
-//   totalDays += Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-//
-//   // Dynamic month day allocations matching reality
-//   const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-//
-//   for (let m = 0; m < month - 1; m++) {
-//     totalDays += monthDays[m]!
-//   }
-//   totalDays += (day - 1)
-//
-//   return {
-//     days: totalDays,
-//     display: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-//   }
-// }
 
 function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
 
@@ -93,14 +57,6 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { da
   }
 
   return result
-
-  // Fallback default: standard browser JS date parsing
-  // const date = new Date(cleanInput)
-  // if (isNaN(date.getTime())) return null
-  // return {
-  //   days: Math.floor(date.getTime() / (24 * 60 * 60 * 1000)),
-  //   display: date.toISOString().split('T')[0]!
-  // }
 }
 
 function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {

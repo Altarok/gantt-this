@@ -14,7 +14,6 @@ import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
 import {ManualSvg} from './manual-svg-util'
 
-// Inside your toolbar event handler:
 const step = Platform.isMobile ? 0.4 : 0.25;
 
 class GanttLifecycleComponent extends MarkdownRenderChild {
@@ -124,7 +123,7 @@ export class GanttRender {
       ctx.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin, updateCallback))
     }
 
-    // 4. Perform your async data load
+    // 4. Perform data load in async way
     this.plugin.calendarConfigsCache.clear()
     const data = await getGanttDataFromFolder(this.plugin, codeBlockContent)
 
@@ -150,24 +149,5 @@ export class GanttRender {
     zoomInBtn.addEventListener('click', () => renderEngine.zoomIn())
     panRightBtn.addEventListener('click', () => renderEngine.panRight(step))
   }
-
-
-  // async handleReload(updateCallback) {
-  //   // 1. Show optional visual feedback (Obsidian Notice)
-  //   new Notice("Reloading Gantt chart...")
-  //
-  //   try {
-  //     // 2. Re-fetch or re-parse your data source
-  //     const freshData = await this.plugin.loadGanttDataFromSource()
-  //
-  //     // 3. Push the fresh data into your existing engine instance
-  //     renderEngine.updateData(freshData)
-  //
-  //     new Notice("Gantt chart reloaded successfully.")
-  //   } catch (error) {
-  //     console.error("Failed to reload Gantt chart data:", error)
-  //     new Notice("Failed to reload Gantt chart. Check console.")
-  //   }
-  // }
 
 }
