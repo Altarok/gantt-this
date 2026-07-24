@@ -1,9 +1,9 @@
 {
-  "id": "gantt-this",
-  "name": "Gantt this",
-  "version": "0.2.2",
-  "minAppVersion": "1.12.7",
-  "description": "Proof of concept for TTRPG Gantt timeline",
-  "author": "Altarok",
-  "isDesktopOnly": false
+	"id": "gantt-this",
+	"name": "Gantt this",
+	"version": "0.2.3",
+	"minAppVersion": "1.12.7",
+	"description": "Proof of concept for TTRPG Gantt timeline",
+	"author": "Altarok",
+	"isDesktopOnly": false
 }
