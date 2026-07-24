@@ -1,10 +1,9 @@
 /* Gridlines and Axis Lines */
-.gt-axis-baseline {
+.gt-axis-gridline, .gt-axis-baseline {
   stroke: var(--background-modifier-border);
 }
 
 .gt-axis-gridline {
-  stroke: var(--background-modifier-border);
   stroke-width: 1;
   stroke-dasharray: 4 4;
   opacity: 0.4;
@@ -14,7 +13,7 @@
 .gt-axis-label {
   font-size: 0.75em;
   font-weight: bold;
-  fill: rgb(0 0 0);
+  fill: var(--background-modifier-border);
   text-transform: uppercase;
   pointer-events: none;
 }
@@ -23,9 +22,10 @@
   height: 16px;
   rx: 8px;
   ry: 8px;
-  fill: rgb(255 255 255);
+  fill:var(--text-accent);
   opacity: 1;
   pointer-events: none;
+  filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%)));
 }
 
 .gt-axis-text {
@@ -116,7 +116,7 @@
   left: var(--mouse-x);
   top: var(--mouse-y);
   border: 1px solid var(--background-modifier-border);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
+  box-shadow: var(--shadow-s); /* 0 4px 12px Replaced rgb(0 0 0 / 30%) */
   padding: 10px;
   border-radius: 6px;
   pointer-events: none; /* Prevents tooltip from breaking hover states */
@@ -145,16 +145,6 @@
 .gt-tooltip:not([data-link]),
 .gt-tooltip[data-link=""] .gt-tooltip-link {
   display: none;
-}
-
-/* Explicit solid background for Dark Mode */
-.theme-dark .gt-tooltip {
-  background-color: #1e1e1e; /* Solid dark grey */
-}
-
-/* Explicit solid background for Light Mode */
-.theme-light .gt-tooltip {
-  background-color: #fff;
 }
 
 .gt-tooltip-title {
@@ -226,7 +216,7 @@
   fill: var(--background-modifier-border);
   opacity: 0.6;
   pointer-events: none;
-  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 100%));
+  filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%))); /* Replaced rgb(0 0 0 / 100%) */
 }
 
 /*
