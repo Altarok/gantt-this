@@ -5,6 +5,8 @@ export const Css = {
   btn: 'gt-btn',
   chartContainer: 'gt-chart-container',
 
+
+
   axis: {
     baseline: 'gt-axis-baseline',
     gridline: 'gt-axis-gridline',
@@ -13,6 +15,9 @@ export const Css = {
     text: 'gt-axis-text',
     tick: 'gt-axis-tick',
     tickMinor: 'gt-axis-tick-minor',
+  },
+  button :{
+    icon: 'gt-btn-icon',
   },
   item: {
     item: 'gt-item',

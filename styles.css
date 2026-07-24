@@ -22,7 +22,7 @@
   height: 16px;
   rx: 8px;
   ry: 8px;
-  fill:var(--text-accent);
+  fill: var(--text-accent);
   opacity: 1;
   pointer-events: none;
   filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%)));
@@ -54,22 +54,34 @@
   padding: 0;
   margin: 0;
   overflow: hidden;
-
-  /* New rules to span 100% of the active note area */
-  width: 100% !important;
+  width: 100%; /* span 100% of the active note area */
   box-sizing: border-box;
 }
 
+/* Base Toolbar Layout */
 .gt-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  background-color: var(--background-secondary);
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin: 0; /* Added side margins so UI controls don't touch the screen edge */
-  gap: 12px;
+  gap: 12px; /* 12 */
+}
 
-  /* margin-bottom: 10px; */
+.gt-toolbar-zoom-group {
+  display: flex;
+  gap: 6px;
+}
+
+/* Force the zoom buttons to take full row width on mobile */
+.is-mobile .gt-toolbar-zoom-group
+@media (width <= 768px) {
+  .gt-toolbar-zoom-group {
+    flex-basis: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+  }
 }
 
 .gt-input-label {
@@ -79,8 +91,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-
-  /* font-size: 12px; */
 }
 
 .gt-btn {
@@ -203,7 +213,7 @@
   fill: var(--text-accent);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   pointer-events: none;
 }
 
@@ -238,7 +248,7 @@
   transform: translateY(4px); /* Pushes it down into the middle of the row track */
 }
 
-/* Fallback fill ONLY if color attribute isn't provided inline via frontmatter */
+/* Fallback fill ONLY if color attribute isn't provided inline via frontMatter */
 .gt-item.bar-rect:not([fill]) {
   fill: var(--interactive-accent);
 }
@@ -296,3 +306,55 @@
   padding-left: 6px;
   margin-bottom: 18px;
 }
+
+/* --------- icon-only buttons --------- */
+
+.gt-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--interactive-normal);
+  color: var(--text-muted);
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  -webkit-tap-highlight-color: transparent; /* Prevent gray tap highlight on mobile devices */
+  touch-action: manipulation;
+}
+
+.gt-btn-icon:hover {
+  background-color: var(--interactive-hover);
+  color: var(--text-normal);
+}
+
+.gt-btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.is-mobile .gt-btn-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.is-mobile .gt-btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (width <= 768px) {
+  .gt-btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gt-btn-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+

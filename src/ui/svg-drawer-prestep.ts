@@ -1,9 +1,13 @@
-import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice} from 'obsidian'
+import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, sanitizeHTMLToDom, setIcon, Platform} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
+import {ManualSvg} from './manual-svg-util'
+
+// Inside your toolbar event handler:
+const step = Platform.isMobile ? 0.4 : 0.25;
 
 class GanttLifecycleComponent extends MarkdownRenderChild {
   private events: EventRef[] = []
@@ -37,6 +41,16 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
   }
 }
 
+function createIconButton(
+  parentEl: HTMLElement,
+  icon: string, // see lucide.dev
+  title: string, // used as tooltip
+): HTMLButtonElement {
+  const btn = parentEl.createEl("button", { cls: Css.button.icon, title });
+  setIcon(btn, icon)
+  return btn;
+}
+
 export class GanttRender {
   constructor(readonly plugin: FantasyGanttPlugin) {
   }
@@ -56,7 +70,16 @@ export class GanttRender {
     const toggleBars = createCheckbox('Show Bars', 'toggle-bars')
     const togglePoints = createCheckbox('Show Points', 'toggle-points')
     const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
-    const resetBtn = toolbar.createEl('button', {text: 'Zoom Reset', cls: Css.btn})
+
+
+    const zoomGroupEl = toolbar.createEl("div", { cls: 'gt-toolbar-zoom-group' });
+
+    const panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
+    const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out' )
+    const zoomResetBtn = zoomGroupEl.createEl('button', { cls: Css.button.icon, title: 'Reset zoom' })
+    zoomResetBtn.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
+    const zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
+    const panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
 
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: 'gantt-tooltip-element'}})
@@ -120,7 +143,12 @@ export class GanttRender {
     toggleBars.addEventListener('change', () => renderEngine.toggleShowBars(toggleBars.checked))
     togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))
     toggleGrouping.addEventListener('change', () => renderEngine.toggleGrouping(toggleGrouping.checked))
-    resetBtn.addEventListener('click', () => renderEngine.resetZoom())
+
+    panLeftBtn.addEventListener('click', () => renderEngine.panLeft(step))
+    zoomOutBtn.addEventListener('click', () => renderEngine.zoomOut())
+    zoomResetBtn.addEventListener('click', () => renderEngine.resetZoom())
+    zoomInBtn.addEventListener('click', () => renderEngine.zoomIn())
+    panRightBtn.addEventListener('click', () => renderEngine.panRight(step))
   }
 
 }

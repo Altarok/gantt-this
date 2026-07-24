@@ -354,6 +354,54 @@ export class GanttRenderEngine {
     this.handleResize()
   }
 
+  zoomOut(factor = 1.25) {
+    const width = this.container.clientWidth || 800
+    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    const centerX = renderWidth / 2
+
+    const oldScale = this.zoomScale
+    const newScale = Math.max(oldScale / factor, 0.5) // Min zoom floor
+
+    // Focal point zoom: adjust translateX so center point stays pinned
+    this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
+    this.zoomScale = newScale
+
+    this.handleResize()
+  }
+
+  zoomIn(factor = 1.25) {
+    const width = this.container.clientWidth || 800
+    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    const centerX = renderWidth / 2
+
+    const oldScale = this.zoomScale
+    const newScale = Math.min(oldScale * factor, 50) // Max zoom cap
+
+    // Focal point zoom: adjust translateX so center point stays pinned
+    this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
+    this.zoomScale = newScale
+
+    this.handleResize()
+  }
+
+  panLeft(percentage = 0.25) {
+    const width = this.container.clientWidth || 800
+    const renderWidth = width - this.config.margin.left - this.config.margin.right
+
+    // Shift view left by moving translateX positive
+    this.zoomTranslateX += renderWidth * percentage
+    this.handleResize()
+  }
+
+  panRight(percentage = 0.25) {
+    const width = this.container.clientWidth || 800
+    const renderWidth = width - this.config.margin.left - this.config.margin.right
+
+    // Shift view right by moving translateX negative
+    this.zoomTranslateX -= renderWidth * percentage
+    this.handleResize()
+  }
+
   toggleShowBars(val: boolean) {
     this.settings.showBars = val
     this.updateSettings()
