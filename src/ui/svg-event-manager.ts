@@ -99,7 +99,7 @@ export class GanttEventManager {
     const mouseX = e.clientX - rect.left - this.engine.config.margin.left
 
     const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-    const nextScale = Math.min(100, Math.max(0.05, this.engine.zoomScale * zoomFactor))
+    const nextScale = this.engine.zoomScale * zoomFactor
 
     this.engine.zoomTranslateX = mouseX - (mouseX - this.engine.zoomTranslateX) * (nextScale / this.engine.zoomScale)
     this.engine.zoomScale = nextScale

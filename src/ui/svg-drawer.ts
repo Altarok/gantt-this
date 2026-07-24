@@ -183,7 +183,7 @@ export class GanttRenderEngine {
         this.backgroundG.appendChild(groupG)
 
         const badge = groupG.createSvg('rect', {attr: {x: 10, class: Css.group.badge}})
-        const text = groupG.createSvg('text', { attr: {x: 20, y: 17, class: Css.group.text}})
+        const text = groupG.createSvg('text', {attr: {x: 20, y: 17, class: Css.group.text}})
         text.textContent = d.name.toUpperCase()
 
         const computedLength = text.getComputedTextLength()
@@ -241,9 +241,11 @@ export class GanttRenderEngine {
     const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
 
     let stepDays = 1
-    if (totalDaysSpan > 365 * 3) stepDays = 365
+    if (totalDaysSpan > 365 * 50) stepDays = 365 * 10
+    else if (totalDaysSpan > 365 * 10) stepDays = 365 * 2
+    else if (totalDaysSpan > 365 * 3) stepDays = 365
     else if (totalDaysSpan > 365) stepDays = 90
-    else if (totalDaysSpan > 60) stepDays = 30
+    else if (totalDaysSpan > 60) stepDays = 20
     else if (totalDaysSpan > 20) stepDays = 7
     else if (totalDaysSpan > 5) stepDays = 2
 
@@ -357,12 +359,13 @@ export class GanttRenderEngine {
 
   zoomOut(factor = 1.25) {
     if (this.eventManager?.isDragging) return
+
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
-    const newScale = Math.max(oldScale / factor, 0.5) // Min zoom floor
+    const newScale = oldScale / factor // Math.max(oldScale / factor, 0.5) // Min zoom floor
 
     // Focal point zoom: adjust translateX so center point stays pinned
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
@@ -373,12 +376,13 @@ export class GanttRenderEngine {
 
   zoomIn(factor = 1.25) {
     if (this.eventManager?.isDragging) return
+
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
-    const newScale = Math.min(oldScale * factor, 50) // Max zoom cap
+    const newScale = oldScale * factor // Math.min(oldScale * factor, 50) // Max zoom cap
 
     // Focal point zoom: adjust translateX so center point stays pinned
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
