@@ -349,12 +349,14 @@ export class GanttRenderEngine {
   }
 
   resetZoom() {
+    if (this.eventManager?.isDragging) return
     this.zoomScale = 1
     this.zoomTranslateX = 0
     this.handleResize()
   }
 
   zoomOut(factor = 1.25) {
+    if (this.eventManager?.isDragging) return
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const centerX = renderWidth / 2
@@ -370,6 +372,7 @@ export class GanttRenderEngine {
   }
 
   zoomIn(factor = 1.25) {
+    if (this.eventManager?.isDragging) return
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const centerX = renderWidth / 2
@@ -385,6 +388,7 @@ export class GanttRenderEngine {
   }
 
   panLeft(percentage = 0.25) {
+    if (this.eventManager?.isDragging) return
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 
@@ -394,6 +398,7 @@ export class GanttRenderEngine {
   }
 
   panRight(percentage = 0.25) {
+    if (this.eventManager?.isDragging) return
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
 

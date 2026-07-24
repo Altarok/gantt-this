@@ -3,7 +3,8 @@ import {Css} from '../const/strings'
 import {GanttRenderEngine} from './svg-drawer'
 
 export class GanttEventManager {
-  private isDragging = false
+  public isDragging = false
+
   private startX = 0
   private startTranslateX = 0
   private rafId: number | null = null

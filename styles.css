@@ -15,7 +15,11 @@
   font-weight: bold;
   fill: var(--background-modifier-border);
   text-transform: uppercase;
+
+  /* prevent any interaction (x3) */
   pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gt-axis-label-badge {
@@ -24,16 +28,24 @@
   ry: 8px;
   fill: var(--text-accent);
   opacity: 1;
-  pointer-events: none;
   filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%)));
+
+  /* prevent any interaction (x3) */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gt-axis-text {
   text-anchor: middle;
   font-size: 11px;
-  user-select: none;
   font-weight: 500;
   fill: var(--text-muted);
+
+  /* prevent any interaction (x3) */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gt-axis-tick {
@@ -120,6 +132,12 @@
   height: auto;
   display: block;
 }
+
+.gt-chart-container svg g {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 
 /* Tooltip implementation matching Obsidian spec */
 .gt-tooltip {
