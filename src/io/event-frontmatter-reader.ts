@@ -37,7 +37,7 @@ export async function getGanttDataFromFolder(
 
     const calendarId: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultType).trim()
 
-    if (!calendarId || !plugin.settings.visibleCalendars[calendarId]) {
+    if (!calendarId || !plugin.settings.calendars[calendarId]?.visible) {
       continue
     }
 
@@ -121,6 +121,6 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
 function getItemColor(frontMatter: FrontMatterCache, plugin: FantasyGanttPlugin, group: string, calendarType: string) {
   return frontMatter['gantt-color'] as string ??
     plugin.settings.groupColors[group] ??
-    plugin.settings.typeColors[calendarType] ??
+    plugin.settings.calendars[calendarType]?.color ??
     plugin.settings.fallbackColor
 }

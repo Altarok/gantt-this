@@ -4,9 +4,6 @@ export const Css = {
   inputLabel: 'gt-input-label',
   btn: 'gt-btn',
   chartContainer: 'gt-chart-container',
-
-
-
   axis: {
     baseline: 'gt-axis-baseline',
     gridline: 'gt-axis-gridline',
@@ -42,7 +39,7 @@ export const Css = {
     row: 'gt-settings-row',
     list: 'gt-settings-list',
     itemDescription: 'gt-settings-item-description',
-    visibilityList: 'gt-settings-visibility-list',
+    calendarControl: 'gt-settings-visibility-list',
     emptyNotice:'gt-settings-empty-notice'
   },
   svg: {

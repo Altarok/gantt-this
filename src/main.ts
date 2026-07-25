@@ -1,5 +1,5 @@
 import {MarkdownPostProcessorContext, Plugin} from 'obsidian'
-import {FantasyGanttSettingTab} from './settings-modal'
+import {FantasyGanttSettingTab} from './settings-view'
 import {CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
 import {readCodeBlock} from './util/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
@@ -30,9 +30,9 @@ export default class FantasyGanttPlugin extends Plugin {
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...loadedData,
-      typeColors: {...DEFAULT_SETTINGS.typeColors, ...loadedData?.typeColors},
+      // typeColors: {...DEFAULT_SETTINGS.typeColors, ...loadedData?.typeColors},
       groupColors: {...DEFAULT_SETTINGS.groupColors, ...loadedData?.groupColors},
-      visibleCalendars: {...DEFAULT_SETTINGS.visibleCalendars, ...loadedData?.visibleCalendars}
+      calendars: {...DEFAULT_SETTINGS.calendars, ...loadedData?.calendars}
     }
   }
 

@@ -89,16 +89,22 @@ export type GanttGroup = {
   lanes: number
 }
 
-export type PluginSettings = { // usable by code
+export type CalendarSettings = {
+  visible?: boolean
+  color?: string
+  priority?: number
+}
+
+  export type PluginSettings = { // usable by code
   eventPath: string
   eventPathSearchRecursive: boolean
   calendarPath: string
   calendarPathSearchRecursive: boolean
   defaultType: CalendarConfigType
   fallbackColor: string
-  typeColors: Record<string, string>
   groupColors: Record<string, string>
-  visibleCalendars: Record<string, boolean>
+  calendars: Record<string, CalendarSettings>
+  priorityGroups: string[]
   placeholder: number
 }
 
@@ -109,9 +115,10 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   calendarPathSearchRecursive: false,
   defaultType: 'iso-8601',
   fallbackColor: '#1565c0',
-  typeColors: {},
   groupColors: {},
-  visibleCalendars: {},
+  priorityGroups: ['iso-8601'],
+  calendars: {'iso-8601': {"visible": true, "color": "#1565c0", "priority": 0},
+  },
   placeholder: 0
 }
 
