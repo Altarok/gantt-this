@@ -30,9 +30,8 @@ export default class FantasyGanttPlugin extends Plugin {
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...loadedData,
-      // typeColors: {...DEFAULT_SETTINGS.typeColors, ...loadedData?.typeColors},
-      groupColors: {...DEFAULT_SETTINGS.groupColors, ...loadedData?.groupColors},
-      calendars: {...DEFAULT_SETTINGS.calendars, ...loadedData?.calendars}
+      calendars: {...DEFAULT_SETTINGS.calendars, ...loadedData?.calendars},
+      groups: {...DEFAULT_SETTINGS.groups, ...loadedData?.groups},
     }
   }
 

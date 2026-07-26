@@ -1,13 +1,7 @@
-export type CalendarUnit = {
-  name: string
-  days: number
-}
-
 export const CALENDAR_CONFIG_TYPES = [
   'positional',
   'rule-based',
-  'gregorian', // same as 'iso-8601'
-  'iso-8601', // default
+  'gregorian' // default
 ] as const
 
 // export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
@@ -94,17 +88,20 @@ export type CalendarSettings = {
   color?: string
   priority?: number
 }
+export type GroupSettings = {
+  color?: string
+  priority?: number
+}
 
-  export type PluginSettings = { // usable by code
+export type PluginSettings = { // usable by code
   eventPath: string
   eventPathSearchRecursive: boolean
   calendarPath: string
   calendarPathSearchRecursive: boolean
-  defaultType: CalendarConfigType
+  defaultCalendar: string
   fallbackColor: string
-  groupColors: Record<string, string>
   calendars: Record<string, CalendarSettings>
-  priorityGroups: string[]
+  groups: Record<string, GroupSettings>
   placeholder: number
 }
 
@@ -113,12 +110,12 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   eventPathSearchRecursive: false,
   calendarPath: '/',
   calendarPathSearchRecursive: false,
-  defaultType: 'iso-8601',
+  defaultCalendar: 'gregorian',
   fallbackColor: '#1565c0',
-  groupColors: {},
-  priorityGroups: ['iso-8601'],
-  calendars: {'iso-8601': {"visible": true, "color": "#1565c0", "priority": 0},
+  calendars: {
+    'gregorian': {"visible": true, "color": "#1565c0", "priority": 0},
   },
+  groups: {},
   placeholder: 0
 }
 

@@ -1,7 +1,7 @@
 import {CalendarConfig} from '../src/const/types'
 
 export const gregorianConfig: CalendarConfig = {
-  "id": "iso-8601",
+  "id": "gregorian",
   "name": "Gregorian Calendar",
   "epochGregorian": "0001-01-01",
   "type": "rule-based",

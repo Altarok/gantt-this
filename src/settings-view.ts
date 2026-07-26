@@ -40,7 +40,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     // containerEl.createEl('h3', {text: 'Default Colors for Timestamp Types (Calendars)'})
     //
     // const typeContainer = containerEl.createDiv({cls: Css.settings.container})
-    // this.renderMapSettings(typeContainer, this.plugin.settings.typeColors,
+    // this.renderMapSettings(typeContainer, this.plugin.settings.,
     //   'New type (e.g., mayan)', '#2e7d32', true
     // )
 
@@ -48,7 +48,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     // containerEl.createEl('h3', {text: 'Default Colors for Groups'})
     //
     // const groupContainer = containerEl.createDiv({cls: Css.settings.container})
-    // this.renderMapSettings(groupContainer, this.plugin.settings.groupColors,
+    // this.renderMapSettings(groupContainer, this.plugin.settings.groups,
     //   'New group (e.g., Quest)', '#ff8f00', false
     // )
   }
@@ -70,10 +70,10 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
       .addText(text => text
         .setPlaceholder('gregorian')
-        .setValue(this.plugin.settings.defaultType)
+        .setValue(this.plugin.settings.defaultCalendar)
         .onChange(async (value) => {
           const v = value.trim()
-          this.plugin.settings.defaultType = isCalendarIdentifier(v) ? v : 'gregorian'
+          this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
           await this.plugin.saveSettings()
         }))
   }
@@ -82,10 +82,10 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
    * Renders a list of checkbox toggles for each calendar type found in typeColors
    */
   private async renderVisibilitySettings(containerEl: HTMLElement) {
-    const container = containerEl.createDiv({cls: Css.settings.calendarControl})
+    const mainCalendarContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
 
     let calendars: Record<string, CalendarSettings> = this.plugin.settings.calendars!
-    const defaultType = this.plugin.settings.defaultType!
+    const defaultType = this.plugin.settings.defaultCalendar!
 
     const definedTypes = Object.keys(calendars)
 
@@ -96,28 +96,30 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     const prios: { minPrio: number, maxPrio: number } = await this.fixPrioritiesIfNecessary(calendars)
 
-    // if (definedTypes.length === 0) {
-    //   container.createEl('span', {
-    //     text: 'No custom calendar types added yet. Add an assignment below to filter visibility.',
-    //     cls: Css.settings.emptyNotice
-    //   })
-    //   return
-    // }
+    // debugger
 
-    definedTypes.forEach((typeKey, value) => {
+    const sortedCalendarList: [string, CalendarSettings][] = Object.entries(calendars)
+      .sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity));
 
-      const calendar: CalendarSettings = calendars[typeKey]!
+    // debugger
+
+    for (const [id, calendar] of sortedCalendarList) {
+
+      // const calendar: CalendarSettings = calendars[typeKey]!
       if (undefined === calendar.visible) calendar.visible = false
 
       let clrPicker: ColorComponent
       const currPrio: number = calendar.priority!
+      const isDefaultCalendar: boolean = id === this.plugin.settings.defaultCalendar
+      const isHighestPrio = currPrio <= prios.minPrio
+      const isLowestPrio =
+        currPrio >= prios.maxPrio
 
-      new Setting(container)
-        .setName(`Calendar "${typeKey}"`)
+      new Setting(mainCalendarContainer)
+        .setName(`Calendar "${id}"`)
         .setDesc('Change visibility, color and priority')
 
-        .addButton(btn => btn
-          .setIcon(calendar.visible ? 'eye' : 'eye-off')
+        .addButton(btn => btn.setIcon(calendar.visible ? 'eye' : 'eye-off')
           .setTooltip('Click to toggle visibility', {delay: -1})
           .onClick(async () => {
             calendar.visible = !calendar.visible
@@ -132,9 +134,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings()
           }))
 
-        .addButton(btn => btn
-          .setIcon('rotate-ccw')
-          .setTooltip('Reset color', {delay: -1})
+        .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
           .onClick(async () => {
             calendar.color = undefined
             clrPicker.setValue(this.plugin.settings.fallbackColor)
@@ -143,15 +143,12 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
         ////////
 
-        .addButton(btn => btn
-          .setIcon('chevron-down')
-          .setTooltip('Lower priority by 1', {delay: -1})
-          .setDisabled(currPrio >= prios.maxPrio)
+        .addButton(btn => btn.setIcon('chevron-down')
+          .setTooltip(isLowestPrio ? 'Can not lower further' : 'Lower priority by 1', {delay: -1})
+          .setDisabled(isLowestPrio)
           .onClick(async () => {
 
-            const calendarSettings = Object.values(calendars).filter(x => x.priority = currPrio + 1);
-
-            debugger
+            const calendarSettings = Object.values(calendars).filter(x => x.priority === currPrio + 1);
 
             if (calendarSettings?.length === 1) {
               const temp = currPrio
@@ -160,18 +157,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
 
             await this.plugin.saveSettings()
-            this.display()
+            mainCalendarContainer.empty()
+            this.renderVisibilitySettings(containerEl)
           }))
 
-        .addButton(btn => btn
-          .setIcon('chevron-up')
-          .setTooltip('Raise priority by 1', {delay: -1})
-          .setDisabled(currPrio <= prios.minPrio)
+        .addButton(btn => btn.setIcon('chevron-up')
+          .setTooltip(isHighestPrio ? 'Can not raise further' : 'Raise priority by 1', {delay: -1})
+          .setDisabled(isHighestPrio)
           .onClick(async () => {
 
-            const calendarSettings = Object.values(calendars).filter(x => x.priority = currPrio - 1);
-
-            debugger
+            const calendarSettings = Object.values(calendars).filter(x => x.priority === currPrio - 1);
 
             if (calendarSettings?.length === 1) {
               const temp = currPrio
@@ -180,9 +175,24 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
 
             await this.plugin.saveSettings()
-            this.display()
+            mainCalendarContainer.empty()
+            this.renderVisibilitySettings(containerEl)
           }))
-    })
+
+        ////////
+
+        .addButton(btn => btn.setIcon('trash-2').setWarning()
+          .setTooltip(isDefaultCalendar ? 'Can not delete defaut calendar' : 'Delete', {delay: -1})
+          .setDisabled(isDefaultCalendar)
+          .onClick(async () => {
+            delete this.plugin.settings.calendars[id]
+
+            await this.plugin.saveSettings()
+            mainCalendarContainer.empty()
+            this.renderVisibilitySettings(containerEl)
+          }))
+
+    }
   }
 
   // /**
@@ -318,10 +328,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       )
   }
 
-  private async fixPrioritiesIfNecessary(calendars: Record<string, CalendarSettings>): Promise<{ minPrio: number, maxPrio: number }> {
-
-
-    debugger
+  private async fixPrioritiesIfNecessary(calendars: Record<string, CalendarSettings>):
+    Promise<{ minPrio: number, maxPrio: number }> {
+    // debugger
 
     let min: number | undefined = undefined
     let max: number | undefined = undefined
@@ -330,12 +339,12 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
 
     Object.values(calendars).forEach(cal => {
-      if (!cal.priority || priorities.contains(cal.priority)) {
+      if (cal.priority === undefined || cal.priority === null || priorities.contains(cal.priority)) {
         valid = false
       } else {
         priorities.push(cal.priority)
-        if (!min || cal.priority < min) min = cal.priority
-        if (!max || cal.priority > max) max = cal.priority
+        if (min === undefined || cal.priority < min) min = cal.priority
+        if (max === undefined || cal.priority > max) max = cal.priority
       }
     })
 
@@ -353,7 +362,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings()
     }
 
-    debugger
+    // debugger
 
     return {minPrio: min ?? 0, maxPrio: max ?? 0}
   }

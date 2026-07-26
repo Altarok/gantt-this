@@ -186,7 +186,7 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
   }
 
   if (config.type === 'rule-based') {
-    if (config.id === 'gregorian' || config.id === 'iso-8601') {
+    if (config.id === 'gregorian') {
       return parseDaysToGregorianDateString(days, config);
     } else {
       return parseDaysToNonGregorianDatString(days, config);

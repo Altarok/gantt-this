@@ -1,4 +1,4 @@
-id: iso-8601
+id: gregorian
 name: Gregorian Calendar
 epochGregorian: "0000-01-01"
 type: rule-based

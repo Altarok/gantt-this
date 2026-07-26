@@ -1,4 +1,4 @@
-import {GanttGroup, GanttItem} from '../const/types'
+import {CalendarSettings, GanttGroup, GanttItem} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
@@ -67,6 +67,12 @@ export class GanttRenderEngine {
     if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'point'))
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
+
+    // const sortedCalendarList: [string, CalendarSettings][] = Object.entries(calendars)
+    const calendars: Record<string, CalendarSettings> = this.plugin.settings.calendars
+    this.activeAxesList.sort((a, b) => (calendars[a]?.priority ?? Infinity) - (calendars[b]?.priority ?? Infinity));
+
+    debugger
 
     this.groups = []
     let currentYOffset = this.config.margin.top
@@ -178,7 +184,6 @@ export class GanttRenderEngine {
         rect.setAttribute('height', d.height.toString())
         rect.setAttribute(css, i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd)
         groupG.appendChild(rect)
-
 
         this.backgroundG.appendChild(groupG)
 
