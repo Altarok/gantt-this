@@ -1,6 +1,6 @@
 {
   "name": "gantt-this",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "private": true,
   "description": "Proof of concept for TTRPG Gantt timeline",
   "keywords": [
