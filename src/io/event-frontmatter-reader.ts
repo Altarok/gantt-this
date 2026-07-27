@@ -120,19 +120,8 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
  */
 function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
 
-  debugger
-
-  if (frontMatter['gantt-color'])
-    return frontMatter['gantt-color'] as string
-  else if (settings.groups[group.toLowerCase()]?.color)
-    return settings.groups[group.toLowerCase()]?.color
-  else if (settings.calendars[calendar.toLowerCase()]?.color)
-    return settings.calendars[calendar.toLowerCase()]?.color
-  else
-    return settings.fallbackColor
-
-  // return frontMatter['gantt-color'] as string ??
-  //   plugin.settings.groups[group]?.color ??
-  //   plugin.settings.calendars[calendarType]?.color ??
-  //   plugin.settings.fallbackColor
+  return frontMatter['gantt-color'] as string ??
+    settings.groups[group]?.color ??
+    settings.calendars[calendar]?.color ??
+    settings.fallbackColor
 }

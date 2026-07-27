@@ -149,10 +149,17 @@ export class GanttRender {
     panRightBtn.addEventListener('click', () => renderEngine.panRight(step))
 
     settingsBtn.addEventListener('click', () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        (this.plugin.app as any).setting?.open()
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        (this.plugin.app as any).setting?.openTabById(this.plugin.manifest.id)
+        const settingApi = (this.plugin.app as unknown as {
+          setting: {
+            open(): void
+            openTabById(id: string): void
+          }
+        }).setting
+
+        if (settingApi) {
+          settingApi.open()
+          settingApi.openTabById(this.plugin.manifest.id)
+        }
       }
     )
   }
