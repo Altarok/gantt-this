@@ -3,7 +3,7 @@ import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {GroupOrCalendarSettings, isCalendarIdentifier} from '../const/types'
 import {
-  addColorPickerFollowedByResetButton, addCreateSetting, addDeleteButton,
+  addColorPickerFollowedByResetButton, addCreateSetting, addDeleteButton, addDeleteButton2,
   addVerticalMovementButtonsForPriority, addVisibilityToggleButton, sortGroupOrCalendarSettingsByPriority
 } from './settings-util'
 
@@ -34,7 +34,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       cls: Css.settings.itemDescription
     })
 
-    void this.renderCalendarSettings(containerEl)
+    void this.renderCalendarSettings(containerEl.createDiv({cls: Css.settings.calendarControl}))
 
     containerEl.createEl('h3', {text: 'Group control'})
     containerEl.createEl('div', {
@@ -42,7 +42,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       cls: Css.settings.itemDescription
     })
 
-    void this.renderGroupSettings(containerEl)
+    void this.renderGroupSettings(containerEl.createDiv({cls: Css.settings.calendarControl}))
 
   }
 
@@ -71,9 +71,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     }))
   }
 
-  private async renderCalendarSettings(containerEl: HTMLElement) {
+  private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
 
-    const mainCalendarContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
+    // const mainCalendarContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
 
     /**
      * Saves settings, then empties and redraws the calendar overview table
@@ -81,7 +81,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     const saveSettingsAndReRenderCalendarSettings = async (): Promise<void> => {
       await this.plugin.saveSettings()
       mainCalendarContainer.empty()
-      await this.renderCalendarSettings(containerEl)
+      await this.renderCalendarSettings(mainCalendarContainer)
     }
 
     const {settings: pluginSettings} = this.plugin
@@ -170,9 +170,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   } // end of calendar setting group
 
-   private async renderGroupSettings(containerEl: HTMLElement) {
+  private async renderGroupSettings(mainGroupContainer: HTMLElement) {
 
-    const mainGroupContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
+    // const mainGroupContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
 
     /**
      * Saves settings, then empties and redraws the calendar overview table
@@ -180,7 +180,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     const saveSettingsAndReRenderGroupSettings = async (): Promise<void> => {
       await this.plugin.saveSettings()
       mainGroupContainer.empty()
-      await this.renderGroupSettings(containerEl)
+      await this.renderGroupSettings(mainGroupContainer)
     }
 
     const {settings: pluginSettings} = this.plugin
@@ -198,23 +198,23 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isHighestPriority = currPriority <= priorities.min
       const isLowestPriority = currPriority >= priorities.max
 
-      const calSetting = new Setting(mainGroupContainer).setName(`Group "${id}"`)
+      const groupSetting = new Setting(mainGroupContainer).setName(`Group "${id}"`)
       .setDesc('Change visibility, color and order or appearance')
 
-      addVisibilityToggleButton(calSetting, group.visible, async (value: boolean) => {
-        group.visible = value
+      addVisibilityToggleButton(groupSetting, group.visible, async (value: boolean) => {
+          group.visible = value
           await this.plugin.saveSettings()
         }
       )
 
-      addColorPickerFollowedByResetButton(calSetting, group.color ?? pluginSettings.fallbackColor, pluginSettings.fallbackColor,
+      addColorPickerFollowedByResetButton(groupSetting, group.color ?? pluginSettings.fallbackColor, pluginSettings.fallbackColor,
         async (value?: string) => {
           group.color = value
           await this.plugin.saveSettings()
         }
       )
 
-      addVerticalMovementButtonsForPriority(calSetting, isLowestPriority, isHighestPriority,
+      addVerticalMovementButtonsForPriority(groupSetting, isLowestPriority, isHighestPriority,
         async () => {
           const groupSettings = Object.values(groups).filter(x => x.priority === currPriority + 1);
 
@@ -234,10 +234,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           }
         })
 
-      const isDefaultCalendar: boolean = id === pluginSettings.defaultCalendar
-
-      addDeleteButton(calSetting, !isDefaultCalendar, 'Can not delete default calendar', async () => {
-          delete pluginSettings.calendars[id]
+      addDeleteButton(groupSetting, true, '', async () => {
+          delete pluginSettings.groups[id]
           await saveSettingsAndReRenderGroupSettings()
         }
       )
@@ -257,8 +255,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     )
 
   }
-
-
 
 
   private addDataSourceSettings(containerEl: HTMLElement) {
