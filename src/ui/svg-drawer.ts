@@ -67,9 +67,7 @@ export class GanttRenderEngine {
     const {groups, calendars} = this.plugin.settings
 
     if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d =>
-    {
-      return d.displayType === 'bar' && (!groups[d.group] || groups[d.group]?.visible) && calendars[d.calendarType]?.visible
-    }
+        d.displayType === 'bar' && (!groups[d.group] || groups[d.group]?.visible) && calendars[d.calendarType]?.visible
       )
     )
     if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d =>
@@ -83,8 +81,6 @@ export class GanttRenderEngine {
      */
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     this.activeAxesList.sort((a, b) => (calendars[a]?.priority ?? Infinity) - (calendars[b]?.priority ?? Infinity));
-
-    // debugger
 
     this.groups = []
     let currentYOffset = this.config.margin.top

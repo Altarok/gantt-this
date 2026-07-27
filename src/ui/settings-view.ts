@@ -110,7 +110,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isHighestPriority = currPriority <= priorities.min
       const isLowestPriority = currPriority >= priorities.max
 
-      const calSetting = new Setting(mainContainer).setName(`Group "${id}"`)
+      const calSetting = new Setting(mainContainer).setName(`Calendar "${id}"`)
       .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
