@@ -99,9 +99,6 @@ export class GanttRenderEngine {
         })
         currentYOffset += groupHeight
       })
-
-
-
     } else {
       const {processedData, totalLanes} = this.calculateStacking(activeData)
       const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight
@@ -114,6 +111,11 @@ export class GanttRenderEngine {
       })
       currentYOffset += groupHeight
     }
+
+    /* Before going on, we have to sort groups by their respective priority */
+
+    const {groups} = this.plugin.settings
+    this.groups.sort((a, b) => (groups[a.name]?.priority ?? Infinity) - (groups[b.name]?.priority ?? Infinity));
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom

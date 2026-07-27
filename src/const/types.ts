@@ -83,7 +83,6 @@ export type GanttGroup = {
   lanes: number
 }
 
-
 export type GroupOrCalendarSettings = {
   visible?: boolean
   color?: string

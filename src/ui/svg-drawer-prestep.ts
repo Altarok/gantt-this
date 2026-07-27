@@ -85,6 +85,7 @@ export class GanttRender {
     zoomResetBtn.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
     const zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
     const panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
+    const settingsBtn = createIconButton(zoomGroupEl, 'settings', 'Plugin settings')
 
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: 'gantt-tooltip-element'}})
@@ -146,6 +147,14 @@ export class GanttRender {
     zoomResetBtn.addEventListener('click', () => renderEngine.resetZoom())
     zoomInBtn.addEventListener('click', () => renderEngine.zoomIn())
     panRightBtn.addEventListener('click', () => renderEngine.panRight(step))
+
+    settingsBtn.addEventListener('click', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        (this.plugin.app as any).setting?.open()
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        (this.plugin.app as any).setting?.openTabById(this.plugin.manifest.id)
+      }
+    )
   }
 
 }

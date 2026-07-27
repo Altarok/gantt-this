@@ -79,7 +79,7 @@ export function addCreateSetting(setting: Setting, createWhat: string, saveSetti
   setting.setName(`Add ${createWhat}`).setDesc('Default color will be assigned.')
   .addText(text => text
     .setPlaceholder('New name')
-    .onChange(val => currentInput = val.trim())
+    .onChange(val => currentInput = val.trim().toLowerCase())
   )
   .addExtraButton(eb => eb.setIcon('save')
     .onClick(async () => {
