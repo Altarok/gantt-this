@@ -73,14 +73,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private async renderCalendarSettings(containerEl: HTMLElement) {
 
-    const mainContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
+    const mainCalendarContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
 
     /**
      * Saves settings, then empties and redraws the calendar overview table
      */
     const saveSettingsAndReRenderCalendarSettings = async (): Promise<void> => {
       await this.plugin.saveSettings()
-      mainContainer.empty()
+      mainCalendarContainer.empty()
       await this.renderCalendarSettings(containerEl)
     }
 
@@ -110,7 +110,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isHighestPriority = currPriority <= priorities.min
       const isLowestPriority = currPriority >= priorities.max
 
-      const calSetting = new Setting(mainContainer).setName(`Calendar "${id}"`)
+      const calSetting = new Setting(mainCalendarContainer).setName(`Calendar "${id}"`)
       .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
@@ -156,7 +156,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     } // end of calendar loop
 
-    addCreateSetting(new Setting(mainContainer), 'calendar', async (calendarName: string) => {
+    addCreateSetting(new Setting(mainCalendarContainer), 'calendar', async (calendarName: string) => {
         if (!calendars[calendarName]) {
           calendars[calendarName] = {
             visible: true,
@@ -172,15 +172,15 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
    private async renderGroupSettings(containerEl: HTMLElement) {
 
-    const mainContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
+    const mainGroupContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
 
     /**
      * Saves settings, then empties and redraws the calendar overview table
      */
     const saveSettingsAndReRenderGroupSettings = async (): Promise<void> => {
       await this.plugin.saveSettings()
-      mainContainer.empty()
-      await this.renderCalendarSettings(containerEl)
+      mainGroupContainer.empty()
+      await this.renderGroupSettings(containerEl)
     }
 
     const {settings: pluginSettings} = this.plugin
@@ -198,7 +198,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isHighestPriority = currPriority <= priorities.min
       const isLowestPriority = currPriority >= priorities.max
 
-      const calSetting = new Setting(mainContainer).setName(`Group "${id}"`)
+      const calSetting = new Setting(mainGroupContainer).setName(`Group "${id}"`)
       .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, group.visible, async (value: boolean) => {
@@ -244,7 +244,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     } // end of calendar loop
 
-    addCreateSetting(new Setting(mainContainer), 'group', async (groupName: string) => {
+    addCreateSetting(new Setting(mainGroupContainer), 'group', async (groupName: string) => {
         if (!groups[groupName]) {
           groups[groupName] = {
             visible: true,
