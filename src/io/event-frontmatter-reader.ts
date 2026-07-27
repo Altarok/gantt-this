@@ -35,7 +35,7 @@ export async function getGanttDataFromFolder(
 
     if (startInput === undefined || startInput === null || startInput === '') continue
 
-    const calendarId: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultCalendar).trim()
+    const calendarId: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultCalendar).trim().toLowerCase()
 
     if (!calendarId || !plugin.settings.calendars[calendarId]?.visible) {
       continue
@@ -69,8 +69,8 @@ function createItem(
   if (!endRes) return null
 
   const displayType: GanttItemDisplayType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
-  const group = frontMatter['gantt-group'] as string || 'General'
-  const color = getItemColor(frontMatter, plugin, group, calendarId)
+  const group = (frontMatter['gantt-group'] as string || 'general').toLowerCase()
+  const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
 
   return {
     id,
@@ -79,7 +79,7 @@ function createItem(
     endDateDisplay: endRes.display,
     startDays: startRes.days,
     endDays: endRes.days,
-    group,
+    group: group,
     displayType,
     calendarType: calendarId,
     color,
@@ -114,13 +114,25 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
  * * color
  * * global fallback color
  * @param frontMatter
- * @param plugin
- * @param group
- * @param calendarType
+ * @param settings this plugin's settings
+ * @param group name of group, e.g. 'historic'
+ * @param calendar name of calendar, e.g. 'mayan'
  */
-function getItemColor(frontMatter: FrontMatterCache, plugin: FantasyGanttPlugin, group: string, calendarType: string) {
-  return frontMatter['gantt-color'] as string ??
-    plugin.settings.groups[group]?.color ??
-    plugin.settings.calendars[calendarType]?.color ??
-    plugin.settings.fallbackColor
+function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
+
+  debugger
+
+  if (frontMatter['gantt-color'])
+    return frontMatter['gantt-color'] as string
+  else if (settings.groups[group.toLowerCase()]?.color)
+    return settings.groups[group.toLowerCase()]?.color
+  else if (settings.calendars[calendar.toLowerCase()]?.color)
+    return settings.calendars[calendar.toLowerCase()]?.color
+  else
+    return settings.fallbackColor
+
+  // return frontMatter['gantt-color'] as string ??
+  //   plugin.settings.groups[group]?.color ??
+  //   plugin.settings.calendars[calendarType]?.color ??
+  //   plugin.settings.fallbackColor
 }
