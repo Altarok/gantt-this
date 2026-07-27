@@ -83,12 +83,9 @@ export type GanttGroup = {
   lanes: number
 }
 
-export type CalendarSettings = {
+
+export type GroupOrCalendarSettings = {
   visible?: boolean
-  color?: string
-  priority?: number
-}
-export type GroupSettings = {
   color?: string
   priority?: number
 }
@@ -100,8 +97,8 @@ export type PluginSettings = { // usable by code
   calendarPathSearchRecursive: boolean
   defaultCalendar: string
   fallbackColor: string
-  calendars: Record<string, CalendarSettings>
-  groups: Record<string, GroupSettings>
+  calendars: Record<string, GroupOrCalendarSettings>
+  groups: Record<string, GroupOrCalendarSettings>
   placeholder: number
 }
 
