@@ -66,6 +66,9 @@ export class GanttRenderEngine {
     if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'bar'))
     if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'point'))
 
+    /*
+     * Calendars to be shown as acis:
+     */
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
 
     const calendars: Record<string, GroupOrCalendarSettings> = this.plugin.settings.calendars
@@ -96,6 +99,9 @@ export class GanttRenderEngine {
         })
         currentYOffset += groupHeight
       })
+
+
+
     } else {
       const {processedData, totalLanes} = this.calculateStacking(activeData)
       const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight
