@@ -1,4 +1,4 @@
-import {GroupOrCalendarSettings, GanttGroup, GanttItem} from '../const/types'
+import {GanttGroup, GanttItem} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
@@ -63,15 +63,25 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeData: GanttItem[] = []
-    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'bar'))
-    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => d.displayType === 'point'))
+
+    const {groups, calendars} = this.plugin.settings
+
+    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d =>
+    {
+      return d.displayType === 'bar' && (!groups[d.group] || groups[d.group]?.visible) && calendars[d.calendarType]?.visible
+    }
+      )
+    )
+    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d =>
+        d.displayType === 'point' && (!groups[d.group] || groups[d.group]?.visible) && calendars[d.calendarType]?.visible
+      )
+    )
+
 
     /*
-     * Calendars to be shown as acis:
+     * Calendars to be shown as axis:
      */
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
-
-    const calendars: Record<string, GroupOrCalendarSettings> = this.plugin.settings.calendars
     this.activeAxesList.sort((a, b) => (calendars[a]?.priority ?? Infinity) - (calendars[b]?.priority ?? Infinity));
 
     // debugger
@@ -113,8 +123,6 @@ export class GanttRenderEngine {
     }
 
     /* Before going on, we have to sort groups by their respective priority */
-
-    const {groups} = this.plugin.settings
     this.groups.sort((a, b) => (groups[a.name]?.priority ?? Infinity) - (groups[b.name]?.priority ?? Infinity));
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
