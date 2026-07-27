@@ -3,8 +3,12 @@ import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {GroupOrCalendarSettings, isCalendarIdentifier} from '../const/types'
 import {
-  addColorPickerFollowedByResetButton, addCreateSetting, addDeleteButton, addDeleteButton2,
-  addVerticalMovementButtonsForPriority, addVisibilityToggleButton, sortGroupOrCalendarSettingsByPriority
+  addColorPickerFollowedByResetButton,
+  addCreateSetting,
+  addDeleteButton,
+  addVerticalMovementButtonsForPriority,
+  addVisibilityToggleButton,
+  sortGroupOrCalendarSettingsByPriority
 } from './settings-util'
 
 
