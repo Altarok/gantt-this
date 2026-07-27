@@ -29,7 +29,7 @@
     "builtin-modules": "^5.2.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.4.0",
-    "eslint-plugin-obsidianmd": "^0.4.0",
+    "eslint-plugin-obsidianmd": "^0.4.1",
     "obsidian": "1.12.3",
     "sort-package-json": "^4.0.0",
     "stylelint": "^17.13.0",

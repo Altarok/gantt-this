@@ -4,15 +4,7 @@ import {GroupOrCalendarSettings} from "../const/types";
 const VISIBLE_ICON = 'eye' // an open eye
 const INVISIBLE_ICON = 'eye-off' // an open eye, but with strike through
 
-/**
- * 0 is the highest priority (as in 'first index of an array').<br>
- * Other priorities are consecutive positive integers.
- *
- * @param objects to sort
- */
-export function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCalendarSettings>): [string, GroupOrCalendarSettings][] {
-  return Object.entries(objects).sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity));
-}
+
 
 export function addVisibilityToggleButton(setting: Setting, initialVisibility: boolean, saveSettingsCallback: (value: boolean) => Promise<void>) {
 

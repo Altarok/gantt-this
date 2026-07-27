@@ -7,9 +7,9 @@ import {
   addCreateSetting,
   addDeleteButton,
   addVerticalMovementButtonsForPriority,
-  addVisibilityToggleButton,
-  sortGroupOrCalendarSettingsByPriority
+  addVisibilityToggleButton
 } from './settings-util'
+import {Priorities} from "../util/priority-util";
 
 
 export class FantasyGanttSettingTab extends PluginSettingTab {
@@ -52,27 +52,27 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private addDefaultColorSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default fallback color')
-    .setDesc('Used when no color is defined in the item front-matter, ' +
-      'its group, or its calendar type.')
-    .addColorPicker(color => color
-    .setValue(this.plugin.settings.fallbackColor)
-    .onChange(async (value) => {
-      this.plugin.settings.fallbackColor = value
-      await this.plugin.saveSettings()
-    }))
+      .setDesc('Used when no color is defined in the item front-matter, ' +
+        'its group, or its calendar type.')
+      .addColorPicker(color => color
+        .setValue(this.plugin.settings.fallbackColor)
+        .onChange(async (value) => {
+          this.plugin.settings.fallbackColor = value
+          await this.plugin.saveSettings()
+        }))
   }
 
   private addDefaultCalendarSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default calendar')
-    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
-    .addText(text => text
-    .setPlaceholder('gregorian')
-    .setValue(this.plugin.settings.defaultCalendar)
-    .onChange(async (value) => {
-      const v = value.trim()
-      this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
-      await this.plugin.saveSettings()
-    }))
+      .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
+      .addText(text => text
+        .setPlaceholder('gregorian')
+        .setValue(this.plugin.settings.defaultCalendar)
+        .onChange(async (value) => {
+          const v = value.trim()
+          this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
+          await this.plugin.saveSettings()
+        }))
   }
 
   private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
@@ -103,8 +103,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     }
 
 
-    const priorities: { min: number, max: number } = await this.fixPrioritiesIfNecessary(calendars)
-    const sortedCalendarList: [string, GroupOrCalendarSettings][] = sortGroupOrCalendarSettingsByPriority(calendars)
+    const priorities: { min: number, max: number, changed: boolean } = Priorities.fixPrioritiesIfNecessary(calendars)
+    if (priorities.changed) await this.plugin.saveSettings()
+    const sortedCalendarList: [string, GroupOrCalendarSettings][] = Priorities.sortGroupOrCalendarSettingsByPriority(calendars)
 
     for (const [id, calendar] of sortedCalendarList) {
 
@@ -115,7 +116,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isLowestPriority = currPriority >= priorities.max
 
       const calSetting = new Setting(mainCalendarContainer).setName(`Calendar "${id}"`)
-      .setDesc('Change visibility, color and order or appearance')
+        .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
           calendar.visible = value
@@ -134,7 +135,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         async () => {
           const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority + 1);
 
-          if (calendarSettings?.length === 1 && switchPriorities(calendar, calendarSettings[0]!)) {
+          if (calendarSettings?.length === 1 && Priorities.switchValues(calendar, calendarSettings[0]!)) {
             await saveSettingsAndReRenderCalendarSettings()
           } else {
             new Notice(`Warn: can not find matching entry with priority '${currPriority + 1}'`)
@@ -143,7 +144,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         async () => {
           const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority - 1);
 
-          if (calendarSettings?.length === 1 && switchPriorities(calendar, calendarSettings[0]!)) {
+          if (calendarSettings?.length === 1 && Priorities.switchValues(calendar, calendarSettings[0]!)) {
             await saveSettingsAndReRenderCalendarSettings()
           } else {
             new Notice(`Warn: can not find matching entry with priority '${currPriority - 1}'`)
@@ -191,8 +192,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     let groups: Record<string, GroupOrCalendarSettings> = pluginSettings.groups
 
-    const priorities: { min: number, max: number } = await this.fixPrioritiesIfNecessary(groups)
-    const sortedGroupList: [string, GroupOrCalendarSettings][] = sortGroupOrCalendarSettingsByPriority(groups)
+    const priorities: { min: number, max: number, changed: boolean } = Priorities.fixPrioritiesIfNecessary(groups)
+    if (priorities.changed) await this.plugin.saveSettings()
+    const sortedGroupList: [string, GroupOrCalendarSettings][] = Priorities.sortGroupOrCalendarSettingsByPriority(groups)
 
     for (const [id, group] of sortedGroupList) {
 
@@ -203,7 +205,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isLowestPriority = currPriority >= priorities.max
 
       const groupSetting = new Setting(mainGroupContainer).setName(`Group "${id}"`)
-      .setDesc('Change visibility, color and order or appearance')
+        .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(groupSetting, group.visible, async (value: boolean) => {
           group.visible = value
@@ -222,7 +224,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         async () => {
           const groupSettings = Object.values(groups).filter(x => x.priority === currPriority + 1);
 
-          if (groupSettings?.length === 1 && switchPriorities(group, groupSettings[0]!)) {
+          if (groupSettings?.length === 1 && Priorities.switchValues(group, groupSettings[0]!)) {
             await saveSettingsAndReRenderGroupSettings()
           } else {
             new Notice(`Warn: can not find matching entry with priority '${currPriority + 1}'`)
@@ -231,7 +233,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         async () => {
           const groupSettings = Object.values(groups).filter(x => x.priority === currPriority - 1);
 
-          if (groupSettings?.length === 1 && switchPriorities(group, groupSettings[0]!)) {
+          if (groupSettings?.length === 1 && Priorities.switchValues(group, groupSettings[0]!)) {
             await saveSettingsAndReRenderGroupSettings()
           } else {
             new Notice(`Warn: can not find matching entry with priority '${currPriority - 1}'`)
@@ -269,8 +271,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private getAllPaths() {
     const folders = this.plugin.app.vault.getAllLoadedFiles()
-    .filter(file => file instanceof TFolder)
-    .map(file => file.path)
+      .filter(file => file instanceof TFolder)
+      .map(file => file.path)
 
     folders.sort((a, b) => a.localeCompare(b, undefined,
       {numeric: true, sensitivity: 'base'}));
@@ -285,96 +287,49 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   private addEventPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
     new Setting(containerEl)
-    .setName('Folder to search for timeline events.')
-    .setDesc('Folder can be searched recursively.')
-    .addDropdown(dd => dd
-      .addOptions(folders)
-      .setValue(this.plugin.settings.eventPath || '/')
-      .onChange(async (value) => {
-        this.plugin.settings.eventPath = value
-        await this.plugin.saveSettings()
-      })
-    )
-    .addToggle(tt => tt
-      .setValue(this.plugin.settings.eventPathSearchRecursive)
-      .setTooltip('Search recursively?', {delay: -1})
-      .onChange(async (value) => {
-        this.plugin.settings.eventPathSearchRecursive = value
-        await this.plugin.saveSettings()
-      })
-    )
+      .setName('Folder to search for timeline events.')
+      .setDesc('Folder can be searched recursively.')
+      .addDropdown(dd => dd
+        .addOptions(folders)
+        .setValue(this.plugin.settings.eventPath || '/')
+        .onChange(async (value) => {
+          this.plugin.settings.eventPath = value
+          await this.plugin.saveSettings()
+        })
+      )
+      .addToggle(tt => tt
+        .setValue(this.plugin.settings.eventPathSearchRecursive)
+        .setTooltip('Search recursively?', {delay: -1})
+        .onChange(async (value) => {
+          this.plugin.settings.eventPathSearchRecursive = value
+          await this.plugin.saveSettings()
+        })
+      )
   }
 
   private addCalendarPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
     new Setting(containerEl)
-    .setName('Folder to search for calendar definitions.')
-    .setDesc('Folder can be searched recursively.')
-    .addDropdown(dd => dd
-      .addOptions(folders)
-      .setValue(this.plugin.settings.calendarPath || '/')
-      .onChange(async (value) => {
-        this.plugin.settings.calendarPath = value
-        await this.plugin.saveSettings()
-      })
-    )
-    .addToggle(tt => tt
-      .setValue(this.plugin.settings.calendarPathSearchRecursive)
-      .setTooltip('Search recursively?', {delay: -1})
-      .onChange(async (value) => {
-        this.plugin.settings.calendarPathSearchRecursive = value
-        await this.plugin.saveSettings()
-      })
-    )
+      .setName('Folder to search for calendar definitions.')
+      .setDesc('Folder can be searched recursively.')
+      .addDropdown(dd => dd
+        .addOptions(folders)
+        .setValue(this.plugin.settings.calendarPath || '/')
+        .onChange(async (value) => {
+          this.plugin.settings.calendarPath = value
+          await this.plugin.saveSettings()
+        })
+      )
+      .addToggle(tt => tt
+        .setValue(this.plugin.settings.calendarPathSearchRecursive)
+        .setTooltip('Search recursively?', {delay: -1})
+        .onChange(async (value) => {
+          this.plugin.settings.calendarPathSearchRecursive = value
+          await this.plugin.saveSettings()
+        })
+      )
   }
 
-  private async fixPrioritiesIfNecessary(calendars: Record<string, GroupOrCalendarSettings>):
-    Promise<{ min: number, max: number }> {
-
-    let min
-      :
-      number | undefined = undefined
-    let max: number | undefined = undefined
-    const priorities: number[] = []
-    let valid = true
-
-
-    Object.values(calendars).forEach(cal => {
-      if (cal.priority === undefined || cal.priority === null || priorities.contains(cal.priority)) {
-        valid = false
-      } else {
-        priorities.push(cal.priority)
-        if (min === undefined || cal.priority < min) min = cal.priority
-        if (max === undefined || cal.priority > max) max = cal.priority
-      }
-    })
-
-    if (!valid) {
-      let i = 0
-      min = i
-      max = i
-
-      /* Just overwrite values now */
-      Object.values(calendars).forEach(cal => {
-        cal.priority = i
-        max = i++
-      })
-
-      await this.plugin.saveSettings()
-    }
-
-    return {min: min ?? 0, max: max ?? 0}
-  }
 
 }
 
-function switchPriorities(a: GroupOrCalendarSettings, b: GroupOrCalendarSettings): boolean {
-
-  if (a.priority === undefined || b.priority == undefined) return false
-
-  const temp = b.priority
-  b.priority = a.priority
-  a.priority = temp
-
-  return true
-}

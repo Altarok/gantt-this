@@ -3,6 +3,7 @@ import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
 import {GanttEventManager} from './svg-event-manager'
+import {Priorities} from "../util/priority-util";
 
 const css = 'class'
 
@@ -64,31 +65,33 @@ export class GanttRenderEngine {
   initLayout() {
     let activeData: GanttItem[] = []
 
-    const {groups, calendars} = this.plugin.settings
+    const {groups: groupSettings, calendars: calendarSettings} = this.plugin.settings
 
     if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d =>
-        d.displayType === 'bar' && (!groups[d.group] || groups[d.group]?.visible) && calendars[d.calendarType]?.visible
+        d.displayType === 'bar' && (!groupSettings[d.group] || groupSettings[d.group]?.visible) && calendarSettings[d.calendarType]?.visible
       )
     )
     if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d =>
-        d.displayType === 'point' && (!groups[d.group] || groups[d.group]?.visible) && calendars[d.calendarType]?.visible
+        d.displayType === 'point' && (!groupSettings[d.group] || groupSettings[d.group]?.visible) && calendarSettings[d.calendarType]?.visible
       )
     )
-
 
     /*
      * Calendars to be shown as axis:
      */
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
-    this.activeAxesList.sort((a, b) => (calendars[a]?.priority ?? Infinity) - (calendars[b]?.priority ?? Infinity));
+    this.activeAxesList.sort((a, b) => (calendarSettings[a]?.priority ?? Infinity) - (calendarSettings[b]?.priority ?? Infinity));
 
+    /*
+     * TODO first collect and sort group names - then map to groups
+     */
     this.groups = []
     let currentYOffset = this.config.margin.top
 
     if (this.settings.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
       activeData.forEach(item => {
-        const gName = item.group || 'General'
+        const gName = item.group || 'general'
         if (!groupedMap.has(gName)) groupedMap.set(gName, [])
         groupedMap.get(gName)?.push(item)
       })
@@ -118,8 +121,15 @@ export class GanttRenderEngine {
       currentYOffset += groupHeight
     }
 
+    // debugger
+
     /* Before going on, we have to sort groups by their respective priority */
-    this.groups.sort((a, b) => (groups[a.name]?.priority ?? Infinity) - (groups[b.name]?.priority ?? Infinity));
+    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, groupSettings)
+
+    Object.values(this.groups).forEach(grp => {
+      // TODO fix y offest
+    })
+    // debugger
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
@@ -214,11 +224,15 @@ export class GanttRenderEngine {
   renderData(width: number) {
     this.dataG.innerHTML = ''
 
+    debugger
+
     this.groups.forEach(group => {
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
 
       group.items.forEach((d: GanttItem) => {
-        const laneY = groupYStart + d.lane! * this.config.rowHeight
+        const lane = d.lane
+        debugger
+        const laneY = groupYStart + lane! * this.config.rowHeight
 
         if (d.displayType === 'bar') {
           const x1 = this.getXPosition(d.startDays, width)
