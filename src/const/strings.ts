@@ -13,7 +13,7 @@ export const Css = {
     tick: 'gt-axis-tick',
     tickMinor: 'gt-axis-tick-minor',
   },
-  button :{
+  button: {
     icon: 'gt-btn-icon',
   },
   item: {
@@ -33,7 +33,7 @@ export const Css = {
   tooltip: {
     tooltip: 'gt-tooltip',
     dates: 'gt-tooltip-dates',
-    isActive:'is-active',
+    isActive: 'is-active',
     link: 'gt-tooltip-link',
     title: 'gt-tooltip-title',
   },
@@ -43,23 +43,25 @@ export const Css = {
     list: 'gt-settings-list',
     itemDescription: 'gt-settings-item-description',
     calendarControl: 'gt-settings-visibility-list',
-    emptyNotice:'gt-settings-empty-notice'
+    emptyNotice: 'gt-settings-empty-notice'
   },
   svg: {
     canvas: 'gt-svg-canvas',
   },
 
 
-  // obsidian native classes
+  /* obsidian native classes */
   theme: {
     dark: 'theme-dark',
     light: 'theme-light',
   },
 
-  // obsidian native classes
+  /* obsidian native classes */
   modWarning: 'is-destructive',
 
 } as const
+
+export const svgUrl = 'http://www.w3.org/2000/svg'
 
 export const CodeBlock = {
   id: 'gantt-this',
@@ -77,10 +79,10 @@ export const StringUtils = {
    * @param separator
    * @return <code>{left:string, right:string}</code>. Every returned value is trimmed.
    */
-  splitOnce : (splitMe:string, separator:string): {left:string, right:string}=> {
+  splitOnce: (splitMe: string, separator: string): { left: string, right: string } => {
     const index = splitMe.indexOf(separator)
     if (index === -1) {
-      return { left: splitMe.trim(), right: '' }
+      return {left: splitMe.trim(), right: ''}
     }
     const left = splitMe.slice(0, index).trim()
     const right = splitMe.slice(index + 1).trim()

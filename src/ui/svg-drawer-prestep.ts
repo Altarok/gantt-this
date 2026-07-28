@@ -14,7 +14,7 @@ import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
 import {ManualSvg} from './manual-svg-util'
 
-const step = Platform.isMobile ? 0.4 : 0.25;
+const step = Platform.isMobile ? 0.4 : 0.25
 
 class GanttLifecycleComponent extends MarkdownRenderChild {
   private events: EventRef[] = []
@@ -32,25 +32,25 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
   }
 
   onload() {
-    // Register listeners with reference tracking
+    /* Register listeners with reference tracking */
     // this.events.push(this.plugin.app.metadataCache.on('changed', this.updateCallback))
     // this.events.push(this.plugin.app.metadataCache.on('resolved', this.updateCallback))
   }
 
   onunload() {
-    // Remove the DOM tooltip element
+    /* Remove the DOM tooltip element */
     if (this.tooltipEl) {
       this.tooltipEl.remove()
     }
-    // Cleanly unbind listeners from the global event loop when code block is closed
+    /* Cleanly unbind listeners from the global event loop when code block is closed */
     this.events.forEach(eventRef => this.plugin.app.metadataCache.offref(eventRef))
     this.events = []
   }
 }
 
-/* See lucide.dev for icons, */
+/* See https://lucide.dev for icons, */
 function createIconButton(parentEl: HTMLElement, icon: string, title: string,): HTMLButtonElement {
-  const btn = parentEl.createEl("button", {cls: Css.button.icon, title})
+  const btn = parentEl.createEl('button', {cls: Css.button.icon, title})
   setIcon(btn, icon)
   return btn
 }
@@ -77,7 +77,7 @@ export class GanttRender {
     const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
 
 
-    const zoomGroupEl = toolbar.createEl("div", {cls: 'gt-toolbar-zoom-group'});
+    const zoomGroupEl = toolbar.createEl('div', {cls: 'gt-toolbar-zoom-group'})
 
     const panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
     const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
@@ -94,21 +94,20 @@ export class GanttRender {
     const hoverDates = tooltip.createDiv({cls: Css.tooltip.dates})
     tooltip.createDiv({text: 'Click to open active note file', cls: Css.tooltip.link})
 
-    // 1. Declare the renderEngine variable so the callback can reference its reference scope
+    /* Declare the renderEngine variable so the callback can reference its reference scope */
     let renderEngine: GanttRenderEngine | null = null
+    let updateTimeout: number | null = null
 
-    let updateTimeout: number | null = null;
-
-    // 2. Define the callback synchronously
+    /* Define the callback synchronously */
     const updateCallback = () => {
       if (updateTimeout) {
         window.clearTimeout(updateTimeout)
       }
 
-      // Debounce by 500ms to let Obsidian's internal indexing finish completely
+      /* Debounce by 500ms to let Obsidian's internal indexing finish completely */
       updateTimeout = window.setTimeout(() => {
         new Notice('Re-rendering Gantt...')
-        this.plugin.calendarConfigsCache.clear();
+        this.plugin.calendarConfigsCache.clear()
         getGanttDataFromFolder(this.plugin, codeBlockContent)
         .then(updatedData => {
           if (renderEngine) {
@@ -119,14 +118,14 @@ export class GanttRender {
       }, 500)
     }
 
-    // 3. Register the child lifecycle component synchronously before ANY 'await'
+    /* Register the child lifecycle component synchronously before ANY 'await' */
     ctx?.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin, updateCallback))
 
-    // 4. Perform data load in async way
+    /* Perform data load in async way */
     this.plugin.calendarConfigsCache.clear()
     const data = await getGanttDataFromFolder(this.plugin, codeBlockContent)
 
-    // 5. Instantiate the engine
+    /* Instantiate the engine */
     renderEngine = new GanttRenderEngine(
       chartContainer,
       data,
@@ -136,7 +135,7 @@ export class GanttRender {
       this.plugin
     )
 
-    reloadBtn.addEventListener("click", () => updateCallback())
+    reloadBtn.addEventListener('click', () => updateCallback())
 
     toggleBars.addEventListener('change', () => renderEngine.toggleShowBars(toggleBars.checked))
     togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))

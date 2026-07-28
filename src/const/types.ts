@@ -1,10 +1,8 @@
 export const CALENDAR_CONFIG_TYPES = [
   'positional',
   'rule-based',
-  'gregorian' // default
+  'gregorian' /* default value */
 ] as const
-
-// export type CalendarConfigType = 'positional' | 'rule-based' | 'gregorian'
 export type CalendarConfigType = (typeof CALENDAR_CONFIG_TYPES)[number]
 
 export function isCalendarIdentifier(value: string): value is CalendarConfigType {
@@ -17,16 +15,18 @@ export type MonthDefinition = {
   name: string
   shortname?: string
   days: number
-  // For calendars like the Hobbit/Shire calendar where mid-year festivals or Yule days sit between months and don't belong to any month.
+  /* For calendars like the Hobbit/Shire calendar where mid-year festivals or Yule days sit between months and don't belong to any month. */
   isIntercalary?: boolean
 }
 
+/*
+ * 'gregorian' rule or a custom fantasy rule frequency like 'every-4-years-except-100'
+ */
 export type LeapYearRule = {
-  // 'gregorian' rule or a custom fantasy rule frequency like 'every-4-years-except-100'
   ruleType: 'gregorian' | 'interval' | 'none'
   intervalYears?: number
   extraDays?: number
-  applyToMonthIndex?: number // Which month gets the leap day (e.g., February / index 1)
+  applyToMonthIndex?: number /* Which month gets the leap day (e.g., February / index 1) */
 }
 
 export type RuleBasedDetails = {
@@ -35,8 +35,8 @@ export type RuleBasedDetails = {
   daysInStandardYear: number
   /**
    * Defines the order of elements in the date string.
-   * For "1420-Afterlithe-21", format is ['year', 'month', 'day']
-   * For "195-2026" (Ordinal), format is ['day', 'year']
+   * For '1420-Afterlithe-21', format is ['year', 'month', 'day']
+   * For '195-2026' (Ordinal), format is ['day', 'year']
    */
   format: DateFormatComponent[]
 }
@@ -52,14 +52,14 @@ export type CalendarConfig = {
     days: number
   }[]
 
-  // Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.)
+  /* Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.) */
   ruleBasedDetails?: RuleBasedDetails
 }
 
 /** Calendar event display type */
 export const GANTT_ITEM_DISPLAY_TYPE = [
-  'bar', 'point', // = default values
-  'icon', // = must be accompanied by a lucide-dev icon
+  'bar', 'point', /* = default values */
+  'icon', /* = must be accompanied by a lucide-dev icon */
   'diamond'] as const
 export type GanttItemDisplayType = (typeof GANTT_ITEM_DISPLAY_TYPE)[number]
 
@@ -71,13 +71,13 @@ export function isGanttItemDisplayType(value: string): value is GanttItemDisplay
 export type GanttItem = {
   id: number
   name: string
-  startDateDisplay: string // human-readable for UI
+  startDateDisplay: string /* human-readable for UI */
   endDateDisplay: string
-  startDays: number // Quantized timeline tracking unit: Days from default point zero
+  startDays: number /* Quantized timeline tracking unit: Days from default point zero */
   endDays: number
   group: string
   displayType: GanttItemDisplayType
-  displayIcon: string // lucide-dev icon
+  displayIcon: string /* lucide-dev icon */
   calendarType: string
   color?: string
   link?: string
@@ -98,7 +98,7 @@ export type GroupOrCalendarSettings = {
   priority?: number
 }
 
-export type PluginSettings = { // usable by code
+export type PluginSettings = {
   eventPath: string
   eventPathSearchRecursive: boolean
   calendarPath: string
@@ -120,7 +120,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   defaultCalendar: 'gregorian',
   fallbackColor: '#1565c0',
   calendars: {
-    'gregorian': {"visible": true, "color": "#1565c0", "priority": 0},
+    'gregorian': {'visible': true, 'color': '#1565c0', 'priority': 0},
   },
   groups: {},
   placeholder: 0,

@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {Gregorian, isCustomLeapYear, isLeapYear} from '../src/util/gregorian'
-import {gregorianConfig, mayanConfig, shireConfig} from "./test-configs";
+import {gregorianConfig, mayanConfig, shireConfig} from './test-configs'
 
 // const gregorianPhase = 400 * 396 + 97
 
@@ -29,8 +29,8 @@ describe('Parse date to days', () => {
       epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
       expect(epochDaysOffset).toBe(-4)
 
-      // Explicitly pass year, monthIndex (0 = Jan), day
-      epochDate = new Date();
+      /* Explicitly pass year, monthIndex (0 = Jan), day  */
+      epochDate = new Date()
       epochDate.setFullYear(1, 0, 1)
       epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
       expect(epochDaysOffset).toBe(-719162)

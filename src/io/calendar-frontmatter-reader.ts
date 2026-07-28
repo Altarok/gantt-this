@@ -21,7 +21,7 @@ export async function getCalendarDefinition(
 
   if (cachedCalendarConfig) return cachedCalendarConfig
 
-  let targetFile = getMatchingMarkdownFile(plugin, partialPluginSettings, calendarId);
+  let targetFile = getMatchingMarkdownFile(plugin, partialPluginSettings, calendarId)
 
   if (!targetFile) return null
 
@@ -52,7 +52,7 @@ function getMatchingMarkdownFile(
   calendarId: string): TFile | null {
 
   const allFiles: TFile[] = plugin.app.vault.getMarkdownFiles()
-// Normalize root path references to handle comparisons reliably
+  /* Normalize root path references */
   const calendarSourcePath = partialPluginSettings.calendarPath === '/' ? '' : partialPluginSettings.calendarPath
 
 

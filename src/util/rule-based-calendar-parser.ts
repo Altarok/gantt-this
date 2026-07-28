@@ -11,10 +11,10 @@ export class RuleBasedCalendarParser {
     const parts = input.split(delimiter).map(p => p.trim())
     const format = details.format
 
-    // Ensure the input has exactly the number of blocks expected by this calendar
+    /* Ensure the input has exactly the number of blocks expected by this calendar */
     if (parts.length !== format.length) return null
 
-    // Dynamically extract values based on the configuration format mapping
+    /* Dynamically extract values based on the configuration format mapping */
     let year = 1
     let day = 1
     let monthName: string | number | null = null
@@ -34,11 +34,11 @@ export class RuleBasedCalendarParser {
 
     if (isNaN(year) || isNaN(day)) return null
 
-    // 1. Calculate days from previous years
+    /* Calculate days from previous years */
     const daysFromYears = this.calculateDaysForYears(year - 1, details)
     const isLeap = this.isLeapYear(year, details.leapYearRule)
 
-    // 2. Handle Ordinal Dates (No month block in the format)
+    /* Handle Ordinal Dates (No month block in the format) */
     if (!monthName) {
       const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
       if (day < 1 || day > maxDays) return null
@@ -49,7 +49,7 @@ export class RuleBasedCalendarParser {
       }
     }
 
-    // 3. Handle Standard/Intercalary Month Dates
+    /* Handle Standard/Intercalary Month Dates */
     const months = details.months
     const monthIndex = typeof (monthName) === 'number' ? monthName - 1 : months.findIndex(m => m.name.toLowerCase() === monthName.toLowerCase())
     if (monthIndex === -1) return null

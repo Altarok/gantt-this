@@ -1,4 +1,4 @@
-import {GanttGroup, GroupOrCalendarSettings} from "../const/types";
+import {GanttGroup, GroupOrCalendarSettings} from '../const/types'
 
 /**
  * 0 is the highest priority (as in 'first index of an array').<br>
@@ -7,7 +7,7 @@ import {GanttGroup, GroupOrCalendarSettings} from "../const/types";
  * @param objects to sort
  */
 function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCalendarSettings>): [string, GroupOrCalendarSettings][] {
-  return Object.entries(objects).sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity));
+  return Object.entries(objects).sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity))
 }
 
 function sortCalendarAxisByPriority(calendars: string[], calendarSettings: Record<string, GroupOrCalendarSettings>): void {
@@ -18,14 +18,12 @@ function sortGroupAxisByPriority(groups: string[], groupSettings: Record<string,
   groups.sort((a, b) => (groupSettings[a]?.priority ?? Infinity) - (groupSettings[b]?.priority ?? Infinity))
 }
 
-// { min: number, max: number, changed: boolean }
 function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], groupSettings: Record<string, GroupOrCalendarSettings>): void {
 
   groups.sort((a, b) => {
     const pa = groupSettings[a.name]?.priority ?? Infinity
     const pb = groupSettings[b.name]?.priority ?? Infinity
-    return pa - pb
-    // a - b yields an ascending sort. // b - a yields a descending sort.
+    return pa - pb /* a - b -> ASC -- b - a -> DESC */
   })
 
   let i = 0

@@ -9,7 +9,7 @@ import {
   addVerticalMovementButtonsForPriority,
   addVisibilityToggleButton
 } from './settings-util'
-import {Priorities} from "../util/priority-util";
+import {Priorities} from '../util/priority-util'
 
 
 export class FantasyGanttSettingTab extends PluginSettingTab {
@@ -18,7 +18,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     super(app, plugin)
   }
 
-  // This is the old pre-1.13. version of settings
+  /* This is the old pre-1.13. version of settings */
   display(): void {
     const {containerEl} = this
     containerEl.empty()
@@ -97,8 +97,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
 
-    // const mainCalendarContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
-
     /**
      * Saves settings, then empties and redraws the calendar overview table
      */
@@ -113,12 +111,12 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     let calendars: Record<string, GroupOrCalendarSettings> = pluginSettings.calendars
 
 
-    { // Make sure that default values and priorities are given
+    { /* Make sure that default values and priorities are given */
       const defaultCalendar = pluginSettings.defaultCalendar
       const knownCalendars = Object.keys(calendars)
 
       if (!knownCalendars.includes(defaultCalendar)) {
-        calendars[defaultCalendar] = {"visible": true, "color": pluginSettings.fallbackColor, "priority": 0}
+        calendars[defaultCalendar] = {'visible': true, 'color': pluginSettings.fallbackColor, 'priority': 0}
       }
     }
 
@@ -135,7 +133,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isHighestPriority = currPriority <= priorities.min
       const isLowestPriority = currPriority >= priorities.max
 
-      const calSetting = new Setting(mainCalendarContainer).setName(`Calendar "${id}"`)
+      const calSetting = new Setting(mainCalendarContainer).setName(`Calendar '${id}'`)
       .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
@@ -153,7 +151,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       addVerticalMovementButtonsForPriority(calSetting, isLowestPriority, isHighestPriority,
         async () => {
-          const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority + 1);
+          const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority + 1)
 
           if (calendarSettings?.length === 1 && Priorities.switchValues(calendar, calendarSettings[0]!)) {
             await saveSettingsAndReRenderCalendarSettings()
@@ -162,7 +160,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           }
         },
         async () => {
-          const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority - 1);
+          const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority - 1)
 
           if (calendarSettings?.length === 1 && Priorities.switchValues(calendar, calendarSettings[0]!)) {
             await saveSettingsAndReRenderCalendarSettings()
@@ -179,7 +177,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         }
       )
 
-    } // end of calendar loop
+    } /* end of calendar loop  */
 
     addCreateSetting(new Setting(mainCalendarContainer), 'calendar', async (calendarName: string) => {
         if (!calendars[calendarName]) {
@@ -193,11 +191,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       }
     )
 
-  } // end of calendar setting group
+  } /* end of calendar setting group */
 
   private async renderGroupSettings(mainGroupContainer: HTMLElement) {
-
-    // const mainGroupContainer = containerEl.createDiv({cls: Css.settings.calendarControl})
 
     /**
      * Saves settings, then empties and redraws the calendar overview table
@@ -224,7 +220,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isHighestPriority = currPriority <= priorities.min
       const isLowestPriority = currPriority >= priorities.max
 
-      const groupSetting = new Setting(mainGroupContainer).setName(`Group "${id}"`)
+      const groupSetting = new Setting(mainGroupContainer).setName(`Group '${id}'`)
       .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(groupSetting, group.visible, async (value: boolean) => {
@@ -242,7 +238,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       addVerticalMovementButtonsForPriority(groupSetting, isLowestPriority, isHighestPriority,
         async () => {
-          const groupSettings = Object.values(groups).filter(x => x.priority === currPriority + 1);
+          const groupSettings = Object.values(groups).filter(x => x.priority === currPriority + 1)
 
           if (groupSettings?.length === 1 && Priorities.switchValues(group, groupSettings[0]!)) {
             await saveSettingsAndReRenderGroupSettings()
@@ -251,7 +247,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           }
         },
         async () => {
-          const groupSettings = Object.values(groups).filter(x => x.priority === currPriority - 1);
+          const groupSettings = Object.values(groups).filter(x => x.priority === currPriority - 1)
 
           if (groupSettings?.length === 1 && Priorities.switchValues(group, groupSettings[0]!)) {
             await saveSettingsAndReRenderGroupSettings()
@@ -266,7 +262,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         }
       )
 
-    } // end of calendar loop
+    } /* end of calendar loop  */
 
     addCreateSetting(new Setting(mainGroupContainer), 'group', async (groupName: string) => {
         if (!groups[groupName]) {
@@ -295,9 +291,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     .map(file => file.path)
 
     folders.sort((a, b) => a.localeCompare(b, undefined,
-      {numeric: true, sensitivity: 'base'}));
+      {numeric: true, sensitivity: 'base'}))
 
-    // Modern syntax mapping
+    /* Modern syntax mapping */
     return {
       '/': '[root]',
       ...Object.fromEntries(folders.filter(f => f !== '/').map(f => [f, f]))

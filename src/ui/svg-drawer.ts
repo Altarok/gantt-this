@@ -1,6 +1,6 @@
 import {GanttGroup, GanttItem} from '../const/types'
 import FantasyGanttPlugin from '../main'
-import {Css} from '../const/strings'
+import {Css, svgUrl} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
@@ -32,7 +32,7 @@ export class GanttRenderEngine {
     margin: {top: 20, right: 0, bottom: 10, left: 0}
   }
 
-  // Bounds tracked in raw day counts
+  /* Bounds tracked in raw day counts */
   private minDays = 0
   private maxDays = 0
   zoomScale = 1
@@ -90,8 +90,8 @@ export class GanttRenderEngine {
 
     if (this.settings.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
-      for (const name of groupNames) { // groupNames is sorted!
-        groupedMap.set(name, []);
+      for (const name of groupNames) { /* groupNames is sorted! */
+        groupedMap.set(name, [])
       }
       activeData.forEach(item => {
         const gName = item.group || 'general'
@@ -129,7 +129,7 @@ export class GanttRenderEngine {
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
-    this.container.style.height = '100%'// `${this.totalHeight}px`
+    this.container.style.height = '100%' /* `${this.totalHeight}px` */
   }
 
   initChartStructure() {
@@ -151,7 +151,7 @@ export class GanttRenderEngine {
     this.chartArea.setAttribute('transform', `translate(${this.config.margin.left}, 0)`)
     this.svg.appendChild(this.chartArea)
 
-    // Dedicated grid container behind bars and points
+    /* Dedicated grid container behind bars and points */
     this.gridG = this.createSVGElement('g')
     this.chartArea.appendChild(this.gridG)
 
@@ -252,11 +252,10 @@ export class GanttRenderEngine {
           rect.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(rect)
 
-          /*  start text           */
+          /* start text */
           const text = this.createSVGElement('text')
           text.setAttribute('x', (x1 + 6).toString())
           text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
-          // text.setAttribute('dominant-baseline', 'middle')
 
           const availableWidth = barWidth - 6
           text.textContent = this.truncateText(d.name, availableWidth)
@@ -264,7 +263,7 @@ export class GanttRenderEngine {
           text.setAttribute(css, Css.item.barText)
           text.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(text)
-          /* end text           */
+          /* end text */
 
         } else if (displayType === 'point') {
           const cx = this.getXPosition(d.startDays, width)
@@ -280,7 +279,7 @@ export class GanttRenderEngine {
         } else if (displayType === 'diamond') {
 
           const cx = this.getXPosition(d.startDays, width)
-          // Center the diamond vertically in the row
+          /* Center the diamond vertically in the row */
           const cy = laneY + this.config.rowHeight / 2
 
           const size = 7
@@ -299,25 +298,10 @@ export class GanttRenderEngine {
           const cy = laneY + (this.config.rowHeight / 2)
           const size = 16
 
-          // rect.setAttribute('x', x1.toString())
-          // rect.setAttribute('y', laneY.toString())
-          // rect.setAttribute('width', barWidth.toString())
-
           const group = this.createSVGElement('g')
           group.setAttribute('transform', `translate(${cx}, ${cy})`)
           group.setAttribute(css, Css.item.icon)
-          // if (d.color) group.setAttribute('fill', d.color)
           group.setAttribute('data-id', d.id.toString())
-
-          // const circle = this.createSVGElement('circle')
-          // circle.setAttribute(css, Css.item.icon)
-          // circle.setAttribute('cx', cx.toString())
-          // circle.setAttribute('cy', laneY.toString())
-          // // circle.setAttribute('r', '12')
-          // if (d.color) circle.setAttribute('fill', d.color)
-          // circle.setAttribute('data-id', d.id.toString())
-          // group.appendChild(circle)
-          // this.dataG.appendChild(circle)
 
           const rect = this.createSVGElement('rect')
           rect.setAttribute('x', `-${size / 2}`)
@@ -331,28 +315,23 @@ export class GanttRenderEngine {
           if (d.color) rect.setAttribute('fill', d.color)
           group.appendChild(rect)
 
-          const svgContainer: SVGSVGElement = window.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          const svgContainer: SVGSVGElement = window.document.createElementNS(svgUrl, 'svg')
           svgContainer.setAttribute(css, Css.item.icon)
           svgContainer.setAttribute('width', String(size))
           svgContainer.setAttribute('height', String(size))
           svgContainer.setAttribute('x', `-${size / 2}`)
           svgContainer.setAttribute('y', `-${size / 2}`)
           svgContainer.setAttribute('viewBox', '0 0 24 24')
-          // svgContainer.setAttribute('fill', 'none')
-          // svgContainer.setAttribute('stroke', 'currentColor')
           svgContainer.setAttribute('stroke-width', '2')
           svgContainer.setAttribute('stroke-linecap', 'round')
           svgContainer.setAttribute('stroke-linejoin', 'round')
           svgContainer.setAttribute('stroke', 'rgb(255 0 0)')
           svgContainer.style.pointerEvents = 'none'
-          // svgContainer.setAttribute('data-id', d.id.toString())
 
           setIcon(svgContainer as unknown as HTMLElement, d.displayIcon)
           group.appendChild(svgContainer)
           this.dataG.appendChild(group)
         }
-
-
       })
     })
   }
@@ -383,7 +362,7 @@ export class GanttRenderEngine {
       const individualAxisG = this.createSVGElement('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
 
-      // Layer 1: Ticks, baseline, and dates (rendered underneath)
+      /* Layer 1: Ticks, baseline, and dates (rendered underneath) */
       const ticksG = this.createSVGElement('g')
       individualAxisG.appendChild(ticksG)
 
@@ -402,13 +381,13 @@ export class GanttRenderEngine {
         const xPos = this.getXPosition(currDays, width)
         if (xPos < 0 || xPos > renderWidth) continue
 
-        // Draw vertical gridlines into dedicated grid container
+        /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
           const gridLine = this.createSVGElement('line')
           gridLine.setAttribute('x1', xPos.toString())
           gridLine.setAttribute('x2', xPos.toString())
-          gridLine.setAttribute('y1', '0') // `-${itemsAreaHeight}`)
-          gridLine.setAttribute('y2', itemsAreaHeight.toString()) // '0')
+          gridLine.setAttribute('y1', '0')
+          gridLine.setAttribute('y2', itemsAreaHeight.toString())
           gridLine.setAttribute(css, Css.axis.gridline)
           this.gridG.appendChild(gridLine)
         }
@@ -434,7 +413,7 @@ export class GanttRenderEngine {
         }
       }
 
-      // Layer 2: Badge and label (rendered on top so ticks scroll beneath them)
+      /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
       const headerG = this.createSVGElement('g')
       individualAxisG.appendChild(headerG)
 
@@ -443,7 +422,7 @@ export class GanttRenderEngine {
       badge.setAttribute('x', '8')
       badge.setAttribute('y', '7')
 
-      // Calculate width accurately off-screen with explicit uppercase padding
+      /* Calculate width accurately off-screen with explicit uppercase padding */
       const textWidth = this.measureTextWidth(calType)
       const badgePadding = 12
       const exactWidth = textWidth + badgePadding
@@ -468,10 +447,10 @@ export class GanttRenderEngine {
     const context = canvas.getContext('2d')
     if (!context) return text.length * 8
 
-    // Match: font-size: 0.75em (~12px in default Obsidian), font-weight: bold
+    /* Match: font-size: 0.75em (~12px in default Obsidian), font-weight: bold */
     context.font = 'bold 12px sans-serif'
 
-    // Explicitly measure uppercase because CSS applies text-transform: uppercase
+    /* Explicitly measure uppercase because CSS applies text-transform: uppercase */
     return context.measureText(text.toUpperCase()).width
   }
 
@@ -490,9 +469,9 @@ export class GanttRenderEngine {
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
-    const newScale = oldScale / factor // Math.max(oldScale / factor, 0.5) // Min zoom floor
+    const newScale = oldScale / factor /* Math.max(oldScale / factor, 0.5) - Min zoom floor */
 
-    // Focal point zoom: adjust translateX so center point stays pinned
+    /* Focal point zoom: adjust translateX so center point stays pinned */
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
     this.zoomScale = newScale
 
@@ -507,9 +486,9 @@ export class GanttRenderEngine {
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
-    const newScale = oldScale * factor // Math.min(oldScale * factor, 50) // Max zoom cap
+    const newScale = oldScale * factor /* Math.min(oldScale * factor, 50) - Max zoom cap */
 
-    // Focal point zoom: adjust translateX so center point stays pinned
+    /* Focal point zoom: adjust translateX so center point stays pinned */
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
     this.zoomScale = newScale
 
@@ -611,6 +590,6 @@ export class GanttRenderEngine {
   }
 
   private createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K): SVGElementTagNameMap[K] {
-    return window.document.createElementNS('http://www.w3.org/2000/svg', tag)
+    return window.document.createElementNS(svgUrl, tag)
   }
 }

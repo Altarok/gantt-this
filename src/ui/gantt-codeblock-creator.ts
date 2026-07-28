@@ -5,8 +5,8 @@ import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/o
 import {CodeBlock} from '../const/strings'
 import {GanttRender} from './svg-drawer-prestep'
 
-// npm update @Altarok/obsidian-dev-utils
-// npm link @Altarok/obsidian-dev-utils
+/* npm update @Altarok/obsidian-dev-utils */
+/* npm link @Altarok/obsidian-dev-utils  */
 export class CodeBlockCreatorModal extends Modal {
   constructor(public readonly app: App, public readonly plugin: FantasyGanttPlugin) {
     super(app)
@@ -18,7 +18,6 @@ export class CodeBlockCreatorModal extends Modal {
 
     const output: Record<string, OutputData> = {}
 
-    // const globalSettings: Readonly<PluginSettings> = Object.assign({}, this.plugin.settings)
     const input: Readonly<UserInput>[] = defineInput(this.plugin.settings)
 
     const onUpdatePreview = (previewEl: HTMLElement): void => {
@@ -106,31 +105,5 @@ function defineInput(pluginSettings: PluginSettings): UserInput[] {
         }
       ]
     },
-    // {
-    //   type: 'color', prompt: 'Ne Farbe.',
-    //   key: 'neFarbe2',
-    //   current: '#000000'
-    // },
-    // {
-    //   type: 'expandable', prompt: 'Advanced', mandatory: false,
-    //   openOnStart: false,
-    //   nestedInput: [
-    //     {
-    //       type: 'color', prompt: 'Ne Farbe.',
-    //       key: 'neFarbe',
-    //       current: '#000000'
-    //     },
-    //     {
-    //       type: 'slider', prompt: 'Ne Zahl zwischen 1 und 7',
-    //       key: 'neZahl',
-    //       from: 1, to: 7, current: 3, step: 1
-    //     }
-    //   ]
-    // },
-    // {
-    //   type: 'slider', prompt: 'Ne Zahl zwischen 10 und 70', mandatory: true,
-    //   key: 'neZahl2',
-    //   from: 10, to: 70, current: 30, step: 5
-    // }
   ]
 }

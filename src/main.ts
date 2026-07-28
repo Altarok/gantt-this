@@ -26,7 +26,6 @@ export default class FantasyGanttPlugin extends Plugin {
   async loadSettings() {
     let loadedData = (await this.loadData()) as Partial<PluginSettings> | null
 
-    // Deep clone the object properties to avoid mutating DEFAULT_SETTINGS references
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...loadedData,

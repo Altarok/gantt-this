@@ -1,5 +1,5 @@
 import {PluginSettings} from '../const/types'
-import {StringUtils} from "../const/strings";
+import {StringUtils} from '../const/strings'
 
 /**
  * Reads given code block content and returns values in a new copy of the plugin's settings.
@@ -21,7 +21,7 @@ export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: str
 
     switch (key) {
       case 'eventPath':
-        settings.eventPath = resolvePath(value, currentFolder);
+        settings.eventPath = resolvePath(value, currentFolder)
         break
       case 'calendarPath':
         settings.calendarPath = resolvePath(value, currentFolder)

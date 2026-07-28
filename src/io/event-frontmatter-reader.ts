@@ -6,7 +6,7 @@ import {
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import {Gregorian} from '../util/gregorian'
 import FantasyGanttPlugin from '../main'
-import {FrontMatterCache, TFile} from "obsidian";
+import {FrontMatterCache, TFile} from 'obsidian'
 
 
 /**
