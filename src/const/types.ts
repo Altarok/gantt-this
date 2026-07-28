@@ -56,8 +56,16 @@ export type CalendarConfig = {
   ruleBasedDetails?: RuleBasedDetails
 }
 
-/** Calendar event type */
-export type GanttItemDisplayType = 'bar' | 'point' // | 'vertical-line'
+/** Calendar event display type */
+export const GANTT_ITEM_DISPLAY_TYPE = [
+  'bar', 'point', // = default values
+  'icon', // = must be accompanied by a lucide-dev icon
+  'diamond'] as const
+export type GanttItemDisplayType = (typeof GANTT_ITEM_DISPLAY_TYPE)[number]
+
+export function isGanttItemDisplayType(value: string): value is GanttItemDisplayType {
+  return (GANTT_ITEM_DISPLAY_TYPE as readonly string[]).includes(value)
+}
 
 /** Calendar event */
 export type GanttItem = {
@@ -69,6 +77,7 @@ export type GanttItem = {
   endDays: number
   group: string
   displayType: GanttItemDisplayType
+  displayIcon: string // lucide-dev icon
   calendarType: string
   color?: string
   link?: string
@@ -99,6 +108,8 @@ export type PluginSettings = { // usable by code
   calendars: Record<string, GroupOrCalendarSettings>
   groups: Record<string, GroupOrCalendarSettings>
   placeholder: number
+  mouseOverEventShowBox: boolean
+  mouseOverEventShowVerticalLine: boolean
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -112,6 +123,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     'gregorian': {"visible": true, "color": "#1565c0", "priority": 0},
   },
   groups: {},
-  placeholder: 0
+  placeholder: 0,
+  mouseOverEventShowBox: true,
+  mouseOverEventShowVerticalLine: false
 }
 

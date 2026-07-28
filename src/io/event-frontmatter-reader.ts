@@ -1,7 +1,6 @@
 import {
-  CalendarConfig,
-  GanttItem,
-  GanttItemDisplayType,
+  CalendarConfig, GanttItem,
+  GanttItemDisplayType, isGanttItemDisplayType,
   PluginSettings
 } from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
@@ -68,11 +67,21 @@ function createItem(
   const endRes = endInput ? Gregorian.parseToAbsoluteDays(endInput, config) : startRes
   if (!endRes) return null
 
-  const displayType: GanttItemDisplayType = (!endInput || startRes.days === endRes.days) ? 'point' : 'bar'
+  let displayType: GanttItemDisplayType
+  if (!endInput || startRes.days === endRes.days) {
+    displayType = 'point'
+    if (frontMatter['gantt-symbol']) {
+      const symbol = frontMatter['gantt-symbol'] as string
+      if (isGanttItemDisplayType(symbol)) displayType = symbol
+    }
+  } else {
+    displayType = 'bar'
+  }
+
   const group = (frontMatter['gantt-group'] as string || 'general').toLowerCase()
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
 
-  return {
+  return /* GanttItem */ {
     id,
     name: frontMatter['gantt-name'] as string || file.basename,
     startDateDisplay: startRes.display,
@@ -81,9 +90,10 @@ function createItem(
     endDays: endRes.days,
     group: group,
     displayType,
+    displayIcon: (frontMatter['gantt-displayIcon'] ? frontMatter['gantt-displayIcon'] as string : ''),
     calendarType: calendarId,
     color,
-    link: file.path
+    link: file.path + (frontMatter['gantt-linkToHeader'] ? `#${frontMatter['gantt-linkToHeader'] as string}` : '')
   }
 }
 

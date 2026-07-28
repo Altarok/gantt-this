@@ -9,6 +9,9 @@ export class GanttEventManager {
   private startTranslateX = 0
   private rafId: number | null = null
   private currentSvg: SVGElement | null = null
+  private verticalGuides: SVGLineElement[] = []
+  private lastHoveredTarget: HTMLElement | null = null
+  private highlightElement: SVGElement | null = null
 
   // Bound handler references for clean removal
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -20,7 +23,9 @@ export class GanttEventManager {
   private readonly boundSvgMouseLeave: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  constructor(private engine: GanttRenderEngine) {
+  constructor(private engine: GanttRenderEngine,
+              readonly mouseOverEventShowBox: boolean,
+              readonly mouseOverEventShowVerticalLine: boolean) {
     // Bind all handlers once
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -61,7 +66,6 @@ export class GanttEventManager {
     this.currentSvg.addEventListener('mouseleave', this.boundSvgMouseLeave)
     this.currentSvg.addEventListener('click', this.boundSvgClick)
   }
-
 
 
   private handleWindowMouseMove(e: MouseEvent) {
@@ -115,7 +119,11 @@ export class GanttEventManager {
       if (rawId === null) return
       const id = Number(rawId)
       const dataObj = this.engine.rawData.find(d => d.id === id)
-      if (dataObj) this.showTooltip(dataObj)
+      if (dataObj) {
+        this.showTooltip(dataObj)
+        this.showHighlightAroundElement(target, dataObj)
+        this.showVerticalGuide(target, dataObj)
+      }
     }
   }
 
@@ -132,11 +140,25 @@ export class GanttEventManager {
       }
     } else {
       this.engine.tooltip.classList.remove(Css.tooltip.isActive)
+
+      // Clean up if mouse drifted off a data element onto empty SVG space
+      this.hideHighlightAroundElement()
+
+      this.hideVerticalGuide()
     }
   }
 
   private handleSvgMouseLeave() {
     this.engine.tooltip.classList.remove(Css.tooltip.isActive)
+
+    // Clean up the outline on the previously hovered element
+    // const target = event.target as HTMLElement
+
+// Clean up using the tracked reference instead of event.target
+    this.hideHighlightAroundElement()
+
+    // Remove the vertical guide line
+    this.hideVerticalGuide()
   }
 
   private handleSvgClick(event: MouseEvent) {
@@ -146,9 +168,9 @@ export class GanttEventManager {
       const rawId = target.getAttribute('data-id')
       if (rawId === null) return
       const id = Number(rawId)
-      const dataObj = this.engine.rawData.find(d => d.id === id)
-      if (dataObj?.link) {
-        void this.engine.plugin.app.workspace.openLinkText(dataObj.link, '', true)
+      const link = this.engine.rawData.find(d => d.id === id)?.link
+      if (link) {
+        void this.engine.plugin.app.workspace.openLinkText(link, '', true)
       }
     }
   }
@@ -196,6 +218,173 @@ export class GanttEventManager {
       this.currentSvg.removeEventListener('mouseleave', this.boundSvgMouseLeave)
       this.currentSvg.removeEventListener('click', this.boundSvgClick)
       this.currentSvg = null
+    }
+  }
+
+  private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
+    if (!this.mouseOverEventShowVerticalLine) return
+
+    const svg = target.closest('svg')
+    if (!svg) return
+
+    // Get the bounding box of the hovered element relative to the SVG container
+    const targetRect = target.getBoundingClientRect()
+    const svgRect = svg.getBoundingClientRect()
+
+    if (ganttItem.displayType === 'bar') {
+      // For bars, we want two lines: one at the left edge (start) and one at the right edge (end)
+      // Note: If your SVG bar element bounds represent the full width, we can use targetRect.left and targetRect.right.
+      const x1 = targetRect.left - svgRect.left
+      const x2 = targetRect.right - svgRect.left
+
+      // Ensure we have two guide line elements
+      this.ensureVerticalGuidesCount(svg, 2)
+
+      if (this.verticalGuides.length === 2) {
+        this.updateLine(this.verticalGuides[0]!, x1, svg.clientHeight)
+        this.updateLine(this.verticalGuides[1]!, x2, svg.clientHeight)
+      }
+    } else {
+      // Calculate X position centered on the target element
+      const x = targetRect.left + targetRect.width / 2 - svgRect.left
+
+      this.ensureVerticalGuidesCount(svg, 1)
+
+      if (this.verticalGuides.length === 1) {
+        this.updateLine(this.verticalGuides[0]!, x, svg.clientHeight)
+      }
+    }
+
+
+    // if (!this.verticalGuide) {
+    //   this.verticalGuide = window.document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    //   this.verticalGuide.setAttribute('stroke', 'red')
+    //   this.verticalGuide.setAttribute('stroke-width', '1')
+    //   this.verticalGuide.setAttribute('stroke-dasharray', '4 4') // Optional: dashed line
+    //   svg.appendChild(this.verticalGuide)
+    // }
+    //
+    // if (this.verticalGuide) {
+    //   // Set line coordinates from top to bottom of the SVG viewport
+    //   this.verticalGuide.setAttribute('x1', String(x))
+    //   this.verticalGuide.setAttribute('y1', '0')
+    //   this.verticalGuide.setAttribute('x2', String(x))
+    //   this.verticalGuide.setAttribute('y2', String(svg.clientHeight))
+    // }
+  }
+
+  private ensureVerticalGuidesCount(svg: SVGSVGElement, count: number) {
+    // Remove excess if switching from bar to point
+    while (this.verticalGuides.length > count) {
+      const line = this.verticalGuides.pop()
+      line?.remove()
+    }
+
+    // Add missing if switching from point to bar
+    while (this.verticalGuides.length < count) {
+      const line = window.document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      line.setAttribute('stroke', 'red')
+      line.setAttribute('stroke-width', '1.5')
+      line.setAttribute('stroke-dasharray', '4 4')
+      svg.appendChild(line)
+      this.verticalGuides.push(line)
+    }
+  }
+
+  private updateLine(line: SVGLineElement, x: number, height: number) {
+    line.setAttribute('x1', String(x))
+    line.setAttribute('y1', '0')
+    line.setAttribute('x2', String(x))
+    line.setAttribute('y2', String(height))
+  }
+
+  /** Remove vertical red line. */
+  private hideVerticalGuide() {
+    for (const line of this.verticalGuides) {
+      line.remove()
+    }
+    this.verticalGuides = []
+  }
+
+  /** Show red box around hovered element. */
+  private showHighlightAroundElement(target: HTMLElement, ganttItem: GanttItem) {
+    if (!this.mouseOverEventShowBox) return
+
+    if (this.lastHoveredTarget && this.lastHoveredTarget !== target) {
+      if (this.highlightElement) {
+        this.highlightElement.remove()
+        this.highlightElement = null
+      } else {
+        this.lastHoveredTarget.style.outline = ''
+        this.lastHoveredTarget.style.outlineOffset = ''
+      }
+    }
+
+    this.lastHoveredTarget = target
+
+    if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'icon' ) {
+      target.style.outline = '1px solid red'
+      return
+    }
+
+    const svg = target.closest('svg')
+    if (!svg) return
+
+    const svgRect = svg.getBoundingClientRect()
+    const targetRect = target.getBoundingClientRect()
+    const x = targetRect.left - svgRect.left
+    const y = targetRect.top - svgRect.top
+    const width = targetRect.width
+    const height = targetRect.height
+
+    if (!this.highlightElement) {
+      this.highlightElement = window.document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      svg.appendChild(this.highlightElement)
+    }
+
+    this.highlightElement.innerHTML = ''
+    let shape: SVGElement
+
+    if (ganttItem.displayType === 'diamond') {
+      const cx = x + width / 2
+      const cy = y + height / 2
+      const pad = 4
+      const points = `${cx},${y - pad} ${cx + width / 2 + pad},${cy} ${cx},${y + height + pad} ${cx - width / 2 - pad},${cy}`
+      shape = window.document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      shape.setAttribute('points', points)
+    } else  //   if (ganttItem.displayType === 'point')
+    {
+      shape = window.document.createElementNS('http://www.w3.org/2000/svg', 'ellipse')
+      shape.setAttribute('cx', String(x + width / 2))
+      shape.setAttribute('cy', String(y + height / 2))
+      shape.setAttribute('rx', String(width / 2 + 3))
+      shape.setAttribute('ry', String(height / 2 + 3))
+      // } else {
+      //      shape = window.document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      //      shape.setAttribute('x', String(x - 2))
+      //      shape.setAttribute('y', String(y - 2))
+      //      shape.setAttribute('width', String(width + 4))
+      //      shape.setAttribute('height', String(height + 4))
+      //      shape.setAttribute('rx', '3')
+    }
+
+    shape.setAttribute('stroke', 'red')
+    shape.setAttribute('stroke-width', '1')
+    shape.setAttribute('fill', 'none')
+    shape.style.pointerEvents = 'none'
+
+    this.highlightElement.appendChild(shape)
+  }
+
+  private hideHighlightAroundElement() {
+    if (this.highlightElement) {
+      this.highlightElement.remove()
+      this.highlightElement = null
+    }
+    if (this.lastHoveredTarget) {
+      this.lastHoveredTarget.style.outline = ''
+      this.lastHoveredTarget.style.outlineOffset = ''
+      this.lastHoveredTarget = null
     }
   }
 }

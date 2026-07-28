@@ -19,7 +19,10 @@ export const Css = {
   item: {
     item: 'gt-item',
     bar: 'gt-item bar-rect',
-    point: 'gt-item point-circle',
+    barText: 'gt-item bar-text',
+    circle: 'gt-item point-circle',
+    diamond: 'gt-item point-diamond',
+    icon: 'gt-item point-icon',
   },
   group: {
     text: 'gt-group-text',

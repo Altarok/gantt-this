@@ -85,6 +85,7 @@
 
 /* Force the zoom buttons to take full row width on mobile */
 .is-mobile .gt-toolbar-zoom-group
+
 @media (width <= 768px) {
   .gt-toolbar-zoom-group {
     flex-basis: 100%;
@@ -274,9 +275,15 @@
   transform: translateY(4px); /* Pushes it down into the middle of the row track */
 }
 
-/* Fallback fill ONLY if color attribute isn't provided inline via frontMatter */
-.gt-item.bar-rect:not([fill]) {
-  fill: var(--interactive-accent);
+.gt-item.bar-text {
+  height: 14px; /* config.rowHeight (24) - 8 */
+  transform: translateY(1px);
+  dominant-baseline: middle;
+
+  /* prevent any interaction (x3) */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gt-item.point-circle {
@@ -284,9 +291,14 @@
   transform: translateY(12px); /* Pushes the center down to rowHeight / 2 */
 }
 
-.gt-item.point-circle:not([fill]) {
-  fill: var(--text-accent);
+.gt-item.point-diamond {
+  /* Nothing yet */
 }
+
+.gt-item.point-icon {
+  /* Nothing yet */
+}
+
 
 /* ------------ settings ------------ */
 

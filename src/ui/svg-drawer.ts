@@ -3,7 +3,8 @@ import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
 import {GanttEventManager} from './svg-event-manager'
-import {Priorities} from "../util/priority-util";
+import {Priorities} from '../util/priority-util'
+import {setIcon} from 'obsidian'
 
 const css = 'class'
 
@@ -73,7 +74,8 @@ export class GanttRenderEngine {
       )
     )
     if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d =>
-        d.displayType === 'point' && (!groupSettings[d.group] || groupSettings[d.group]?.visible) && calendarSettings[d.calendarType]?.visible
+        (d.displayType === 'point' || d.displayType === 'diamond' || (d.displayType === 'icon' && !!d.displayIcon))
+        && (!groupSettings[d.group] || groupSettings[d.group]?.visible) && calendarSettings[d.calendarType]?.visible
       )
     )
 
@@ -172,7 +174,9 @@ export class GanttRenderEngine {
     this.axisG = this.createSVGElement('g')
     this.chartArea.appendChild(this.axisG)
 
-    this.eventManager = new GanttEventManager(this)
+    this.eventManager = new GanttEventManager(this,
+      this.plugin.settings.mouseOverEventShowBox,
+      this.plugin.settings.mouseOverEventShowVerticalLine)
   }
 
   handleResize() {
@@ -215,20 +219,26 @@ export class GanttRenderEngine {
     })
   }
 
+  private truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
+    const maxChars = Math.floor(maxWidth / charWidthEstimate)
+    if (text.length <= maxChars) return text
+    if (maxChars <= 3) return '...'
+    return text.substring(0, maxChars - 3) + '...'
+  }
+
   renderData(width: number) {
     this.dataG.innerHTML = ''
-
-    // debugger
 
     this.groups.forEach(group => {
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
-        // debugger
         const laneY = groupYStart + lane! * this.config.rowHeight
 
-        if (d.displayType === 'bar') {
+        const displayType = d.displayType
+
+        if (displayType === 'bar') {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
@@ -241,17 +251,108 @@ export class GanttRenderEngine {
           if (d.color) rect.setAttribute('fill', d.color)
           rect.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(rect)
-        } else if (d.displayType === 'point') {
+
+          /*  start text           */
+          const text = this.createSVGElement('text')
+          text.setAttribute('x', (x1 + 6).toString())
+          text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
+          // text.setAttribute('dominant-baseline', 'middle')
+
+          const availableWidth = barWidth - 6
+          text.textContent = this.truncateText(d.name, availableWidth)
+
+          text.setAttribute(css, Css.item.barText)
+          text.setAttribute('data-id', d.id.toString())
+          this.dataG.appendChild(text)
+          /* end text           */
+
+        } else if (displayType === 'point') {
           const cx = this.getXPosition(d.startDays, width)
 
           const circle = this.createSVGElement('circle')
-          circle.setAttribute(css, Css.item.point)
+          circle.setAttribute(css, Css.item.circle)
           circle.setAttribute('cx', cx.toString())
           circle.setAttribute('cy', laneY.toString())
           if (d.color) circle.setAttribute('fill', d.color)
           circle.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(circle)
+
+        } else if (displayType === 'diamond') {
+
+          const cx = this.getXPosition(d.startDays, width)
+          // Center the diamond vertically in the row
+          const cy = laneY + this.config.rowHeight / 2
+
+          const size = 7
+          const points = `${cx},${cy - size} ${cx + size},${cy} ${cx},${cy + size} ${cx - size},${cy}`
+
+          const polygon = this.createSVGElement('polygon')
+          polygon.setAttribute(css, Css.item.diamond)
+          polygon.setAttribute('points', points)
+          if (d.color) polygon.setAttribute('fill', d.color)
+          polygon.setAttribute('data-id', d.id.toString())
+          this.dataG.appendChild(polygon)
+
+        } else if (displayType === 'icon' && d.displayIcon) {
+
+          const cx = this.getXPosition(d.startDays, width)
+          const cy = laneY + (this.config.rowHeight / 2)
+          const size = 16
+
+          // rect.setAttribute('x', x1.toString())
+          // rect.setAttribute('y', laneY.toString())
+          // rect.setAttribute('width', barWidth.toString())
+
+          const group = this.createSVGElement('g')
+          group.setAttribute('transform', `translate(${cx}, ${cy})`)
+          group.setAttribute(css, Css.item.icon)
+          // if (d.color) group.setAttribute('fill', d.color)
+          group.setAttribute('data-id', d.id.toString())
+
+          // const circle = this.createSVGElement('circle')
+          // circle.setAttribute(css, Css.item.icon)
+          // circle.setAttribute('cx', cx.toString())
+          // circle.setAttribute('cy', laneY.toString())
+          // // circle.setAttribute('r', '12')
+          // if (d.color) circle.setAttribute('fill', d.color)
+          // circle.setAttribute('data-id', d.id.toString())
+          // group.appendChild(circle)
+          // this.dataG.appendChild(circle)
+
+          const rect = this.createSVGElement('rect')
+          rect.setAttribute('x', `-${size / 2}`)
+          rect.setAttribute('y', `-${size / 2}`)
+          rect.setAttribute('width', size.toString())
+          rect.setAttribute('height', size.toString())
+          rect.setAttribute('rx', '2')
+          rect.setAttribute('ry', '2')
+          rect.setAttribute(css, Css.item.icon)
+          rect.setAttribute('data-id', d.id.toString())
+          if (d.color) rect.setAttribute('fill', d.color)
+          group.appendChild(rect)
+
+          const svgContainer: SVGSVGElement = window.document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          svgContainer.setAttribute(css, Css.item.icon)
+          svgContainer.setAttribute('width', String(size))
+          svgContainer.setAttribute('height', String(size))
+          svgContainer.setAttribute('x', `-${size / 2}`)
+          svgContainer.setAttribute('y', `-${size / 2}`)
+          svgContainer.setAttribute('viewBox', '0 0 24 24')
+          // svgContainer.setAttribute('fill', 'none')
+          // svgContainer.setAttribute('stroke', 'currentColor')
+          svgContainer.setAttribute('stroke-width', '2')
+          svgContainer.setAttribute('stroke-linecap', 'round')
+          svgContainer.setAttribute('stroke-linejoin', 'round')
+          svgContainer.setAttribute('stroke', 'rgb(255 0 0)')
+          svgContainer.style.pointerEvents = 'none'
+          // svgContainer.setAttribute('data-id', d.id.toString())
+
+          setIcon(svgContainer as unknown as HTMLElement, d.displayIcon)
+          group.appendChild(svgContainer)
+          this.dataG.appendChild(group)
         }
+
+
       })
     })
   }
