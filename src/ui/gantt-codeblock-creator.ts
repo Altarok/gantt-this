@@ -2,6 +2,7 @@ import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {PluginSettings} from '../const/types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
+// import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 import {CodeBlock} from '../const/strings'
 import {GanttRender} from './svg-drawer-prestep'
 
@@ -12,8 +13,24 @@ export class CodeBlockCreatorModal extends Modal {
     super(app)
   }
 
+
+  /**
+   * <div class="modal-container"> <!-- Backdrop/overlay -->
+   *   <div class="modal"> <!-- THIS is this.modalEl -->
+   *     <div class="modal-close-button"></div>
+   *     <div class="modal-content"> <!-- THIS is this.contentEl -->
+   *       <!-- Your custom form/preview gets injected here -->
+   *     </div>
+   *   </div>
+   * </div>
+   */
   onOpen() {
+    super.onOpen()
+    this.modalEl.style.width = '90vw'
+    this.modalEl.style.maxWidth = '90vw'
+
     const {contentEl} = this
+
     contentEl.empty()
 
     const output: Record<string, OutputData> = {}
@@ -40,6 +57,9 @@ export class CodeBlockCreatorModal extends Modal {
     }
 
     new GenericModal(contentEl, modalInput).display()
+
+    // contentEl.style.width = '90vw'
+    // contentEl.style.maxWidth = '90vw'
 
     contentEl.focus()
   }
