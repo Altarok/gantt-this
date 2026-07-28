@@ -18,6 +18,7 @@ export class GanttRenderEngine {
   private clipRect!: SVGElement
 
   private groups: GanttGroup[] = []
+  /** Collection of calendars to be shown as axis. */
   private activeAxesList: string[] = []
   private totalHeight = 400
   private resizeObserver: ResizeObserver
@@ -76,11 +77,11 @@ export class GanttRenderEngine {
       )
     )
 
-    /*
-     * Calendars to be shown as axis:
-     */
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
-    this.activeAxesList.sort((a, b) => (calendarSettings[a]?.priority ?? Infinity) - (calendarSettings[b]?.priority ?? Infinity));
+    Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarSettings)
+
+    const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group)))
+    Priorities.sortCalendarAxisByPriority(groupNames, groupSettings)
 
     /*
      * TODO first collect and sort group names - then map to groups
@@ -90,6 +91,9 @@ export class GanttRenderEngine {
 
     if (this.settings.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
+      for (const name of groupNames) { // groupNames is sorted!
+        groupedMap.set(name, []);
+      }
       activeData.forEach(item => {
         const gName = item.group || 'general'
         if (!groupedMap.has(gName)) groupedMap.set(gName, [])

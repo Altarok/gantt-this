@@ -10,6 +10,14 @@ function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCa
   return Object.entries(objects).sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity));
 }
 
+function sortCalendarAxisByPriority(calendars: string[], calendarSettings: Record<string, GroupOrCalendarSettings>): void {
+  calendars.sort((a, b) => (calendarSettings[a]?.priority ?? Infinity) - (calendarSettings[b]?.priority ?? Infinity))
+}
+
+function sortGroupAxisByPriority(groups: string[], groupSettings: Record<string, GroupOrCalendarSettings>): void {
+  groups.sort((a, b) => (groupSettings[a]?.priority ?? Infinity) - (groupSettings[b]?.priority ?? Infinity))
+}
+
 // { min: number, max: number, changed: boolean }
 function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], groupSettings: Record<string, GroupOrCalendarSettings>): void {
 
@@ -84,6 +92,10 @@ function switchValues(a: GroupOrCalendarSettings, b: GroupOrCalendarSettings): b
 
 export const Priorities = {
   sortGroupOrCalendarSettingsByPriority,
+
+  /* 2x: Sort string arrays */
+  sortCalendarAxisByPriority, sortGroupAxisByPriority,
+
   fixPrioritiesIfNecessary: fixGroupOrCalendarSettingsPrioritySetupIfBroken,
   fixGanttGroupPrioritySetupIfBroken,
   switchValues
