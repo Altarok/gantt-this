@@ -13,7 +13,6 @@ export class CodeBlockCreatorModal extends Modal {
     super(app)
   }
 
-
   /**
    * <div class="modal-container"> <!-- Backdrop/overlay -->
    *   <div class="modal"> <!-- THIS is this.modalEl -->
@@ -25,7 +24,6 @@ export class CodeBlockCreatorModal extends Modal {
    * </div>
    */
   onOpen() {
-    super.onOpen()
     this.modalEl.style.width = '90vw'
     this.modalEl.style.maxWidth = '90vw'
 

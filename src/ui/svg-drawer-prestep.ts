@@ -116,11 +116,13 @@ export class GanttRender {
         let isVisible: boolean = groups[groupName]?.visible ?? false
         const button = createIconButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
         subGroup.createDiv({text: groupName})
-        button.addEventListener('click', async () => {
-          isVisible = !isVisible
-          if (groups[groupName]) groups[groupName].visible = isVisible
-          await this.plugin.saveSettings()
-          refreshChartCallback()
+        button.addEventListener('click', () => {
+          if (groups[groupName]) {
+            isVisible = !isVisible
+            groups[groupName].visible = isVisible
+            void this.plugin.saveSettings()
+            refreshChartCallback()
+          }
         })
       }
     }
