@@ -83,9 +83,6 @@ export class GanttRenderEngine {
     const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group)))
     Priorities.sortCalendarAxisByPriority(groupNames, groupSettings)
 
-    /*
-     * TODO first collect and sort group names - then map to groups
-     */
     this.groups = []
     let currentYOffset = this.config.margin.top
 
@@ -125,15 +122,8 @@ export class GanttRenderEngine {
       currentYOffset += groupHeight
     }
 
-    // debugger
-
     /* Before going on, we have to sort groups by their respective priority */
     Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, groupSettings)
-
-    Object.values(this.groups).forEach(grp => {
-      // TODO fix y offest
-    })
-    // debugger
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
