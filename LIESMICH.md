@@ -17,9 +17,9 @@ Beispiel:
 - Sowohl Gruppen als auch Kalender lassen sich sortieren.
 - Sowohl Zeitspannen als auch Zeitpunkte lassen sich ein- oder ausblenden.
 - Zeitpunkte können mit einem icon deiner Wahl versehen werden. (QUELLE: https://lucide.dev)
-- Metadaten der Events werden in einem Tooltip angezeigt.
+- Ausgewählte Metadaten der Events werden in einem Tooltip angezeigt.
 - Ein Klick auf Events öffnet die entsprechende Quelldatei.
-  - Oder einen von dir definierten Header der Datei.
+  - Oder springt direkt an einen von dir definierten Überschrift der Datei.
 
 > Wichtig: Das Plugin kann deine Daten nicht löschen.
 > Es kann, wenn du das wünschst, Daten schreiben. Konkreter kann es einen Codeblock in eine Markdown-Datei einfügen.<br>
@@ -34,10 +34,12 @@ Es gibt 2 Möglichkeiten dies zu erreichen.
 1. Öffne eine Markdown-Datei und nutze das Ribbon Icon `'Gantt this: Open code block creator'` und lass dich vom Modal
    durch die Schritte führen.
 
-- Du darfst angeben in welchem Ordner das Plugin nach Events suchen darf.
-  - Standardwert ist: Der Ordner der gerade offenen Datei
-- Du darfst angeben in welchem Ordner das Plugin nach Kalendern suchen darf.
-  - Auch hier: Der Standardwert ist der Ordner der gerade offenen Datei
+- Du kannst angeben in welchem Ordner das Plugin nach Events suchen darf.
+  - Ein Toggle erlaubt das rekursive Suchen nach Events in Unterordnern.
+  - Standardwert ist: Der Ordner der gerade offenen Datei.
+- Du kannst angeben in welchem Ordner das Plugin nach Kalendern suchen darf.
+  - Auch hier: Ein Toggle erlaubt das rekursive Suchen.
+  - Auch hier: Der Standardwert ist der Ordner der gerade offenen Datei.
 - Am unteren Ende des Popup kannst du deinen von dir definierten Codeblock sehen.
 - Die 2 Buttons neben dem Codeblock lassen ihn dich entweder ..
   - .. kopieren und manuell an die Stelle deiner Wahl einfügen oder ..
