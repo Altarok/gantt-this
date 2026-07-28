@@ -18,7 +18,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     this.registerMarkdownCodeBlockProcessor(CodeBlock.id, this.registerCalendar.bind(this) /* (source, el, ctx) */)
 
-    this.addRibbonIcon('lucide-chart-bar-stacked', 'Fantasy Gantt: Open code block creator', () =>
+    this.addRibbonIcon('lucide-chart-bar-stacked', 'Gantt this: Open code block creator', () =>
       new CodeBlockCreatorModal(this.app, this).open()
     )
   }
