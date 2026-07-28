@@ -1,9 +1,7 @@
 import {ColorComponent, Setting} from 'obsidian'
-import {GroupOrCalendarSettings} from "../const/types";
 
 const VISIBLE_ICON = 'eye' // an open eye
 const INVISIBLE_ICON = 'eye-off' // an open eye, but with strike through
-
 
 
 export function addVisibilityToggleButton(setting: Setting, initialVisibility: boolean, saveSettingsCallback: (value: boolean) => Promise<void>) {

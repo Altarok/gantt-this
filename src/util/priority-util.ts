@@ -35,7 +35,7 @@ function fixGroupOrCalendarSettingsPrioritySetupIfBroken(grpOrCals: Record<strin
 
   let min: number | undefined = undefined
   let max: number | undefined = undefined
-  let changed: boolean = false
+  let changed = false
   let count = 0
 
   const priorities: number[] = []
