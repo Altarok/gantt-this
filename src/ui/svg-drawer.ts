@@ -224,14 +224,14 @@ export class GanttRenderEngine {
   renderData(width: number) {
     this.dataG.innerHTML = ''
 
-    debugger
+    // debugger
 
     this.groups.forEach(group => {
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
-        debugger
+        // debugger
         const laneY = groupYStart + lane! * this.config.rowHeight
 
         if (d.displayType === 'bar') {
