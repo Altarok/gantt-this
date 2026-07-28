@@ -68,6 +68,15 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       )
     )
 
+    new Setting(containerEl).setName('Extend toolbar with buttons to hide groups individually')
+      .addToggle(t => t.setValue(this.plugin.settings.showButtonsToHideGroups)
+        .onChange(async (value) => {
+            this.plugin.settings.showButtonsToHideGroups = value
+            await this.plugin.saveSettings()
+          }
+        )
+      )
+
   }
 
   private addDefaultColorSelection(containerEl: HTMLElement) {
@@ -110,7 +119,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     let calendars: Record<string, GroupOrCalendarSettings> = pluginSettings.calendars
 
-
     { /* Make sure that default values and priorities are given */
       const defaultCalendar = pluginSettings.defaultCalendar
       const knownCalendars = Object.keys(calendars)
@@ -119,7 +127,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         calendars[defaultCalendar] = {'visible': true, 'color': pluginSettings.fallbackColor, 'priority': 0}
       }
     }
-
 
     const priorities: { min: number, max: number, changed: boolean } = Priorities.fixPrioritiesIfNecessary(calendars)
     if (priorities.changed) await this.plugin.saveSettings()

@@ -110,6 +110,7 @@ export type PluginSettings = {
   placeholder: number
   mouseOverEventShowBox: boolean
   mouseOverEventShowVerticalLine: boolean
+  showButtonsToHideGroups: boolean
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -125,6 +126,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   groups: {},
   placeholder: 0,
   mouseOverEventShowBox: true,
-  mouseOverEventShowVerticalLine: false
+  mouseOverEventShowVerticalLine: false,
+  showButtonsToHideGroups: false
 }
 
