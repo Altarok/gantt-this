@@ -1,12 +1,9 @@
-import {
-  CalendarConfig, GanttItem,
-  GanttItemDisplayType, isGanttItemDisplayType,
-  PluginSettings
-} from '../const/types'
+import {CalendarConfig, GanttItem, GanttItemDisplayType, isGanttItemDisplayType, PluginSettings} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import {Gregorian} from '../util/gregorian'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
+import {Colors} from "../const/strings";
 
 
 /**
@@ -130,8 +127,14 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
  */
 function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
 
-  return frontMatter['gantt-color'] as string ??
+  let clr = frontMatter['gantt-color'] as string ??
     settings.groups[group]?.color ??
     settings.calendars[calendar]?.color ??
     settings.fallbackColor
+
+  if (!clr.startsWith('#') && clr in Object.keys(Colors)) {
+    clr = Colors[clr] ?? settings.fallbackColor
+  }
+
+  return clr
 }

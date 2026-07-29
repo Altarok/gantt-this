@@ -23,6 +23,7 @@ export const Css = {
     circle: 'gt-item point-circle',
     diamond: 'gt-item point-diamond',
     icon: 'gt-item point-icon',
+    iconExternal: 'gt-item point-icon-external',
   },
   group: {
     text: 'gt-group-text',
@@ -59,6 +60,19 @@ export const Css = {
   /* obsidian native classes */
   modWarning: 'is-destructive',
 
+} as const
+
+export const Colors: Record<string, string> = {
+  red: '#ff0000',
+  white: '#ffffff',
+  blue: '#002fff',
+  green: '#3cb371',
+  yellow: '#ffff00',
+  gold: '#ffd700',
+  black: '#000000',
+  orange: '#ff8c00',
+  pink: '#ff1493',
+  purple: '#9400d3',
 } as const
 
 export const svgUrl = 'http://www.w3.org/2000/svg'
