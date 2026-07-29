@@ -77,7 +77,8 @@ export type GanttItem = {
   endDays: number
   group: string
   displayType: GanttItemDisplayType
-  displayIcon: string /* lucide-dev icon */
+  displayIcon?: string /* lucide-dev icon */
+  displayIconColor?: string
   calendarType: string
   color?: string
   link?: string

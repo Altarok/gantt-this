@@ -77,6 +77,7 @@ function createItem(
 
   const group = (frontMatter['gantt-group'] as string || 'general').toLowerCase()
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
+  const displayIconColor = frontMatter['gantt-displayIconColor'] ? frontMatter['gantt-displayIconColor'] as string : undefined
 
   return /* GanttItem */ {
     id,
@@ -87,13 +88,13 @@ function createItem(
     endDays: endRes.days,
     group: group,
     displayType,
-    displayIcon: (frontMatter['gantt-displayIcon'] ? frontMatter['gantt-displayIcon'] as string : ''),
+    displayIcon: (frontMatter['gantt-displayIcon'] ? frontMatter['gantt-displayIcon'] as string : undefined),
+    displayIconColor,
     calendarType: calendarId,
     color,
     link: file.path + (frontMatter['gantt-linkToHeader'] ? `#${frontMatter['gantt-linkToHeader'] as string}` : '')
   }
 }
-
 
 function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: PluginSettings) {
 
@@ -112,7 +113,6 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
     return parentPath === eventSourcePath
   })
 }
-
 
 /**
  * Returns event item color. In priority, if given, returns ...

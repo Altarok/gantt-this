@@ -247,13 +247,57 @@ export class GanttRenderEngine {
           rect.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(rect)
 
+          /* icon layout setup */
+          const iconSize = 14
+          const hasIcon = !!d.displayIcon
+          const iconSpacing = hasIcon ? iconSize + 4 : 0
+
+          if (hasIcon) {
+            const foreignObj = this.createSVGElement('foreignObject')
+            // Placed directly at x1 without left padding
+            foreignObj.setAttribute('x', x1.toString())
+            foreignObj.setAttribute('y', (laneY + (this.config.rowHeight - iconSize) / 2).toString())
+            foreignObj.setAttribute('width', iconSize.toString())
+            foreignObj.setAttribute('height', iconSize.toString())
+            foreignObj.style.pointerEvents = 'none'
+
+            const iconDiv = window.document.createElement('div')
+            iconDiv.className = Css.item.iconExternal
+            iconDiv.style.width = '100%'
+            iconDiv.style.height = '100%'
+            iconDiv.style.display = 'flex'
+            iconDiv.style.alignItems = 'center'
+            iconDiv.style.justifyContent = 'center'
+            if (d.displayIconColor) iconDiv.style.color = d.displayIconColor
+
+            setIcon(iconDiv, d.displayIcon!)
+            foreignObj.appendChild(iconDiv)
+            this.dataG.appendChild(foreignObj)
+          }
+
           /* start text */
-          const text = this.createSVGElement('text', Css.item.barText)
-          text.setAttribute('x', (x1 + 6).toString())
-          text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
-          text.textContent = this.truncateText(d.name, barWidth - 6)
-          text.setAttribute('data-id', d.id.toString())
-          this.dataG.appendChild(text)
+          const textLeftPadding = 6
+          const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
+          const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
+
+          if (availableTextWidth > 0) {
+            const text = this.createSVGElement('text', Css.item.barText)
+            text.setAttribute('x', textX.toString())
+            text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
+            text.textContent = this.truncateText(d.name, availableTextWidth)
+            text.setAttribute('data-id', d.id.toString())
+            this.dataG.appendChild(text)
+          }
+          /* end text */
+
+
+          /* start text */
+          // const text = this.createSVGElement('text', Css.item.barText)
+          // text.setAttribute('x', (x1 + 6).toString())
+          // text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
+          // text.textContent = this.truncateText(d.name, barWidth - 6)
+          // text.setAttribute('data-id', d.id.toString())
+          // this.dataG.appendChild(text)
           /* end text */
 
         } else if (displayType === 'point') {
@@ -298,16 +342,29 @@ export class GanttRenderEngine {
           if (d.color) rect.setAttribute('fill', d.color)
           group.appendChild(rect)
 
-          const svgContainer: SVGSVGElement = this.createSVGElement('svg', Css.item.iconExternal)
-          svgContainer.setAttribute('x', `-${size / 2}`)
-          svgContainer.setAttribute('y', `-${size / 2}`)
-          svgContainer.setAttribute('viewBox', '0 0 24 24')
-          svgContainer.setAttribute('width', String(size))
-          svgContainer.setAttribute('height', String(size))
-          svgContainer.style.pointerEvents = 'none'
+          /* Create a foreignObject to bridge SVG and HTML DOM */
+          const foreignObj = this.createSVGElement('foreignObject')
+          foreignObj.setAttribute('x', `-${size / 2}`)
+          foreignObj.setAttribute('y', `-${size / 2}`)
+          foreignObj.setAttribute('width', String(size))
+          foreignObj.setAttribute('height', String(size))
+          foreignObj.style.pointerEvents = 'none'
 
-          setIcon(svgContainer as unknown as HTMLElement, d.displayIcon)
-          group.appendChild(svgContainer)
+          /* Create a standard HTML div for setIcon */
+          const iconDiv =  window.document.createElement('div')
+          iconDiv.className = Css.item.iconExternal
+          iconDiv.style.width = '100%'
+          iconDiv.style.height = '100%'
+          iconDiv.style.display = 'flex'
+          iconDiv.style.alignItems = 'center'
+          iconDiv.style.justifyContent = 'center'
+          if (d.displayIconColor) iconDiv.style.color = d.displayIconColor
+
+          /* Render icon inside the div */
+          setIcon(iconDiv, d.displayIcon)
+
+          foreignObj.appendChild(iconDiv)
+          group.appendChild(foreignObj)
           this.dataG.appendChild(group)
         }
       })
