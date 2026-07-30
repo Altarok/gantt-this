@@ -1,140 +1,92 @@
-import {CalendarConfig, GanttItem, GanttItemDisplayType, isGanttItemDisplayType, PluginSettings} from '../const/types'
-import {getCalendarDefinition} from './calendar-frontmatter-reader'
-import {Gregorian} from '../util/gregorian'
-import FantasyGanttPlugin from '../main'
-import {FrontMatterCache, TFile} from 'obsidian'
-import {Colors} from "../const/strings";
+import {FrontMatterCache} from 'obsidian'
+import {PluginSettings} from '../const/types'
 
-
-/**
- * Search files and parse to GanttItem
- * @param plugin
- * @param partialPluginSettings partial plugin settings
+/*
+ * Default key: 'gantt-item'
  */
-export async function getGanttDataFromFolder(
-  plugin: FantasyGanttPlugin,
-  partialPluginSettings: PluginSettings): Promise<GanttItem[]> {
-
-  const items: GanttItem[] = []
-  let incrementalId = 0
-
-  const files: TFile[] = getFilteredFiles(plugin, partialPluginSettings)
-
-  for (const file of files) {
-    const cache = plugin.app.metadataCache.getFileCache(file)
-    const frontMatter = cache?.frontmatter
-
-    if (frontMatter?.['gantt-item'] !== true) continue
-
-    const startInput = frontMatter['gantt-start'] as string
-    const endInput = frontMatter['gantt-end'] as string
-
-    if (startInput === undefined || startInput === null || startInput === '') continue
-
-    const calendarId: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultCalendar).trim().toLowerCase()
-
-    if (!calendarId || !plugin.settings.calendars[calendarId]?.visible) {
-      continue
-    }
-
-    const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings)
-
-    const ganttItem: GanttItem | null = createItem(plugin, startInput, endInput, calendarId, config, file, frontMatter, ++incrementalId)
-    if (!ganttItem) continue
-
-    items.push(ganttItem)
-  }
-
-  return items
+function isFileRelevant(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
+  const key = settings.frontMatterProperties['gantt.this']!
+  return frontMatter[key] === true
 }
 
-function createItem(
-  plugin: FantasyGanttPlugin,
-  startInput: string,
-  endInput: string,
-  /** Calendar to use for event */
-  calendarId: string,
-  config: CalendarConfig | null,
-  file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
-
-
-  const startRes = Gregorian.parseToAbsoluteDays(startInput, config)
-  if (!startRes) return null
-
-  const endRes = endInput ? Gregorian.parseToAbsoluteDays(endInput, config) : startRes
-  if (!endRes) return null
-
-  let displayType: GanttItemDisplayType
-  if (!endInput || startRes.days === endRes.days) {
-    displayType = 'point'
-    if (frontMatter['gantt-symbol']) {
-      const symbol = frontMatter['gantt-symbol'] as string
-      if (isGanttItemDisplayType(symbol)) displayType = symbol
-    }
-  } else {
-    displayType = 'bar'
-  }
-
-  const group = (frontMatter['gantt-group'] as string || 'general').toLowerCase()
-  const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
-  const displayIconColor = frontMatter['gantt-displayIconColor'] ? frontMatter['gantt-displayIconColor'] as string : undefined
-
-  return /* GanttItem */ {
-    id,
-    name: frontMatter['gantt-name'] as string || file.basename,
-    startDateDisplay: startRes.display,
-    endDateDisplay: endRes.display,
-    startDays: startRes.days,
-    endDays: endRes.days,
-    group: group,
-    displayType,
-    displayIcon: (frontMatter['gantt-displayIcon'] ? frontMatter['gantt-displayIcon'] as string : undefined),
-    displayIconColor,
-    calendarType: calendarId,
-    color,
-    link: file.path + (frontMatter['gantt-linkToHeader'] ? `#${frontMatter['gantt-linkToHeader'] as string}` : '')
-  }
-}
-
-function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: PluginSettings) {
-
-  const allFiles = plugin.app.vault.getMarkdownFiles()
-  const eventSourcePath = partialPluginSettings.eventPath === '/' ? '' : partialPluginSettings.eventPath
-
-  return allFiles.filter(f => {
-    const parentPath = f.parent?.path ?? ''
-
-    if (partialPluginSettings.eventPathSearchRecursive) {
-      return eventSourcePath === '' ||
-        parentPath === eventSourcePath ||
-        parentPath.startsWith(eventSourcePath + '/')
-    }
-
-    return parentPath === eventSourcePath
-  })
-}
-
-/**
- * Returns event item color. In priority, if given, returns ...
- * * color read from file's FrontMatter or ...
- * * color defined for event group or ...
- * * color
- * * global fallback color
- * @param frontMatter
- * @param settings this plugin's settings
- * @param group name of group, e.g. 'historic'
- * @param calendar name of calendar, e.g. 'mayan'
+/*
+ * Default key: 'gantt-type'
  */
-function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
+function getEventCalendarName(frontMatter: FrontMatterCache, settings: PluginSettings): string {
+  const key = settings.frontMatterProperties['event.calendar']!
+  return (frontMatter[key] as string ?? settings.defaultCalendar).trim().toLowerCase()
+}
 
-  let clr = frontMatter['gantt-color'] as string ??
-    settings.groups[group]?.color ??
-    settings.calendars[calendar]?.color ??
-    settings.fallbackColor
+/*
+ * Default key: 'gantt-color'
+ */
+function getEventColor(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  const key = settings.frontMatterProperties['event.color']!
+  return frontMatter[key] as string ?? undefined
+}
 
-  if (!clr.startsWith('#') && clr in Object.keys(Colors)) {
-    clr = Colors[clr] ?? settings.fallbackColor
-  }
+/*
+ * Default key: 'gantt-group'
+ */
+function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings): string {
+  const key = settings.frontMatterProperties['event.group']!
+  return (frontMatter[key] as string ?? 'general').toLowerCase()
+}
 
-  return clr
+/*
+ * Default key: 'gantt-name'
+ */
+function getEventName(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  const key = settings.frontMatterProperties['event.name']!
+  return frontMatter[key] as string ?? undefined
+}
+
+/*
+ * Default key: 'gantt-displayIcon'
+ */
+function getEventIconID(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  const key = settings.frontMatterProperties['event.icon.name']!
+  return frontMatter[key] as string ?? undefined
+}
+
+/*
+ * Default key: 'gantt-displayIconColor'
+ */
+function getEventIconColor(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  const key = settings.frontMatterProperties['event.icon.color']!
+  return frontMatter[key] as string ?? undefined
+}
+
+/*
+ * Default keys: 'gantt-start' & 'gantt-end'
+ */
+function getEventTimestamps(frontMatter: FrontMatterCache, settings: PluginSettings):
+  { startDate?: string, endDate?: string } {
+  const keyStartDate = settings.frontMatterProperties['event.time.start']!
+  const keyEndDate = settings.frontMatterProperties['event.time.end']!
+
+  const startDate = frontMatter[keyStartDate] as string ?? undefined
+  const endDate = frontMatter[keyEndDate] as string ?? undefined
+
+  return {startDate, endDate}
+}
+
+/*
+ * Default key: 'gantt-linkToHeader'
+ */
+function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  const key = settings.frontMatterProperties['note.header']!
+  return (frontMatter[key] ? `#${frontMatter[key] as string}` : '')
+}
+
+export const FrontMatterUtil = {
+  isFileRelevant,
+  getEventCalendarName,
+  getEventColor,
+  getEventGroup,
+  getEventName,
+  getEventIconID,
+  getEventIconColor,
+  getEventTimestamps,
+  getHeaderToLinkTo
 }

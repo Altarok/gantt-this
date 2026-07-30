@@ -106,12 +106,13 @@ export type PluginSettings = {
   calendarPathSearchRecursive: boolean
   defaultCalendar: string
   fallbackColor: string
-  calendars: Record<string, GroupOrCalendarSettings>
-  groups: Record<string, GroupOrCalendarSettings>
   placeholder: number
   mouseOverEventShowBox: boolean
   mouseOverEventShowVerticalLine: boolean
   showButtonsToHideGroups: boolean
+  calendars: Record<string, GroupOrCalendarSettings>
+  groups: Record<string, GroupOrCalendarSettings>
+  frontMatterProperties: Record<string, string>
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -128,6 +129,27 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   placeholder: 0,
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
-  showButtonsToHideGroups: false
+  showButtonsToHideGroups: false,
+  /*
+   * FrontMatter properties ...
+   */
+  frontMatterProperties: {
+
+    /* mandatory */
+    'gantt.this': 'gantt-item', // boolean; "activates" file as event source
+    'calendar.name': 'gantt-type-definition', // string; "activates" file as calendar source
+    'event.time.start': 'gantt-start', // start of event (or timestamp if no end is given )
+
+    /* optional */
+    'event.time.end': 'gantt-end', // ... or time.start
+    'event.name': 'gantt-name', // ... or filename
+    'event.color': 'gantt-color', // hex value | human-readable color  ... or global fallback color
+    'event.group': 'gantt-group', // ... or 'general'
+    'event.symbol': 'gantt-symbol', // diamond ... or auto-(bar | point)
+    'event.calendar': 'gantt-type', // name of matching calendar or 'gregorian'
+    'event.icon.name': 'gantt-displayIcon', // icon name from https://lucide.dev
+    'event.icon.color': 'gantt-displayIconColor',  // color for said icon
+    'note.header': 'gantt-linkToHeader', // note-internal header to link to
+  }
 }
 

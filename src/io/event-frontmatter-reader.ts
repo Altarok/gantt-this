@@ -4,6 +4,7 @@ import {Gregorian} from '../util/gregorian'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {Colors} from "../const/strings";
+import {FrontMatterUtil} from "./frontmatter-reader";
 
 
 /**
@@ -24,22 +25,20 @@ export async function getGanttDataFromFolder(
     const cache = plugin.app.metadataCache.getFileCache(file)
     const frontMatter = cache?.frontmatter
 
-    if (frontMatter?.['gantt-item'] !== true) continue
+    if (!frontMatter) continue
+    if (!FrontMatterUtil.isFileRelevant(frontMatter, plugin.settings)) continue
 
-    const startInput = frontMatter['gantt-start'] as string
-    const endInput = frontMatter['gantt-end'] as string
+    const {startDate, endDate} = FrontMatterUtil.getEventTimestamps(frontMatter, plugin.settings)
 
-    if (startInput === undefined || startInput === null || startInput === '') continue
+    if (startDate === undefined || startDate === null || startDate === '') continue
 
-    const calendarId: string = (frontMatter['gantt-type'] as string || plugin.settings.defaultCalendar).trim().toLowerCase()
+    const calendarId: string = FrontMatterUtil.getEventCalendarName(frontMatter, plugin.settings)
 
-    if (!calendarId || !plugin.settings.calendars[calendarId]?.visible) {
-      continue
-    }
+    if (!calendarId || !plugin.settings.calendars[calendarId]?.visible) continue
 
     const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings)
 
-    const ganttItem: GanttItem | null = createItem(plugin, startInput, endInput, calendarId, config, file, frontMatter, ++incrementalId)
+    const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate ?? startDate, calendarId, config, file, frontMatter, ++incrementalId)
     if (!ganttItem) continue
 
     items.push(ganttItem)
@@ -50,22 +49,21 @@ export async function getGanttDataFromFolder(
 
 function createItem(
   plugin: FantasyGanttPlugin,
-  startInput: string,
-  endInput: string,
+  startDate: string,
+  endDate: string,
   /** Calendar to use for event */
   calendarId: string,
   config: CalendarConfig | null,
   file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
 
-
-  const startRes = Gregorian.parseToAbsoluteDays(startInput, config)
+  const startRes = Gregorian.parseToAbsoluteDays(startDate, config)
   if (!startRes) return null
 
-  const endRes = endInput ? Gregorian.parseToAbsoluteDays(endInput, config) : startRes
+  const endRes = endDate ? Gregorian.parseToAbsoluteDays(endDate, config) : startRes
   if (!endRes) return null
 
   let displayType: GanttItemDisplayType
-  if (!endInput || startRes.days === endRes.days) {
+  if (!endDate || startRes.days === endRes.days) {
     displayType = 'point'
     if (frontMatter['gantt-symbol']) {
       const symbol = frontMatter['gantt-symbol'] as string
@@ -75,24 +73,25 @@ function createItem(
     displayType = 'bar'
   }
 
-  const group = (frontMatter['gantt-group'] as string || 'general').toLowerCase()
+//  const name = FrontMatterUtil.getEventName(frontMatter, plugin.settings) ?? file.basename
+  const group = FrontMatterUtil.getEventGroup(frontMatter, plugin.settings)
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
-  const displayIconColor = frontMatter['gantt-displayIconColor'] ? frontMatter['gantt-displayIconColor'] as string : undefined
+
 
   return /* GanttItem */ {
     id,
-    name: frontMatter['gantt-name'] as string || file.basename,
+    name: FrontMatterUtil.getEventName(frontMatter, plugin.settings) ?? file.basename,
     startDateDisplay: startRes.display,
     endDateDisplay: endRes.display,
     startDays: startRes.days,
     endDays: endRes.days,
     group: group,
     displayType,
-    displayIcon: (frontMatter['gantt-displayIcon'] ? frontMatter['gantt-displayIcon'] as string : undefined),
-    displayIconColor,
+    displayIcon: FrontMatterUtil.getEventIconID(frontMatter, plugin.settings),
+    displayIconColor: FrontMatterUtil.getEventIconColor(frontMatter, plugin.settings),
     calendarType: calendarId,
     color,
-    link: file.path + (frontMatter['gantt-linkToHeader'] ? `#${frontMatter['gantt-linkToHeader'] as string}` : '')
+    link: file.path + FrontMatterUtil.getHeaderToLinkTo(frontMatter, plugin.settings)
   }
 }
 
@@ -127,7 +126,7 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
  */
 function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
 
-  let clr = frontMatter['gantt-color'] as string ??
+  let clr = FrontMatterUtil.getEventColor(frontMatter, settings) ??
     settings.groups[group]?.color ??
     settings.calendars[calendar]?.color ??
     settings.fallbackColor
