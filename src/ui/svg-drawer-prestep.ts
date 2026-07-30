@@ -8,7 +8,7 @@ import {
   setIcon
 } from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {Css} from '../const/strings'
+import {Css, EventIDs} from '../const/strings'
 import {PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
@@ -128,7 +128,7 @@ export class GanttRender {
     }
 
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
-    const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: 'gantt-tooltip-element'}})
+    const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: EventIDs.tooltip}})
 
     const hoverTitle = tooltip.createDiv({cls: Css.tooltip.title})
     const hoverDates = tooltip.createDiv({cls: Css.tooltip.dates})

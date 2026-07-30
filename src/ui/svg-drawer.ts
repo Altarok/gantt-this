@@ -351,7 +351,7 @@ export class GanttRenderEngine {
           foreignObj.style.pointerEvents = 'none'
 
           /* Create a standard HTML div for setIcon */
-          const iconDiv =  window.document.createElement('div')
+          const iconDiv = window.document.createElement('div')
           iconDiv.className = Css.item.iconExternal
           iconDiv.style.width = '100%'
           iconDiv.style.height = '100%'

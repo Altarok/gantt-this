@@ -51,22 +51,22 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     containerEl.createEl('h3', {text: 'Advanced settings'})
 
     new Setting(containerEl).setName('Show box around events when hovered over')
-    .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowBox)
-      .onChange(async (value) => {
-          this.plugin.settings.mouseOverEventShowBox = value
-          await this.plugin.saveSettings()
-        }
+      .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowBox)
+        .onChange(async (value) => {
+            this.plugin.settings.mouseOverEventShowBox = value
+            await this.plugin.saveSettings()
+          }
+        )
       )
-    )
 
     new Setting(containerEl).setName('Show vertical line over events when hovered over')
-    .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowVerticalLine)
-      .onChange(async (value) => {
-          this.plugin.settings.mouseOverEventShowVerticalLine = value
-          await this.plugin.saveSettings()
-        }
+      .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowVerticalLine)
+        .onChange(async (value) => {
+            this.plugin.settings.mouseOverEventShowVerticalLine = value
+            await this.plugin.saveSettings()
+          }
+        )
       )
-    )
 
     new Setting(containerEl).setName('Extend toolbar with buttons to hide groups individually')
       .addToggle(t => t.setValue(this.plugin.settings.showButtonsToHideGroups)
@@ -81,27 +81,27 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private addDefaultColorSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default fallback color')
-    .setDesc('Used when no color is defined in the item front-matter, ' +
-      'its group, or its calendar type.')
-    .addColorPicker(color => color
-    .setValue(this.plugin.settings.fallbackColor)
-    .onChange(async (value) => {
-      this.plugin.settings.fallbackColor = value
-      await this.plugin.saveSettings()
-    }))
+      .setDesc('Used when no color is defined in the item front-matter, ' +
+        'its group, or its calendar type.')
+      .addColorPicker(color => color
+        .setValue(this.plugin.settings.fallbackColor)
+        .onChange(async (value) => {
+          this.plugin.settings.fallbackColor = value
+          await this.plugin.saveSettings()
+        }))
   }
 
   private addDefaultCalendarSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default calendar')
-    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
-    .addText(text => text
-    .setPlaceholder('gregorian')
-    .setValue(this.plugin.settings.defaultCalendar)
-    .onChange(async (value) => {
-      const v = value.trim()
-      this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
-      await this.plugin.saveSettings()
-    }))
+      .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
+      .addText(text => text
+        .setPlaceholder('gregorian')
+        .setValue(this.plugin.settings.defaultCalendar)
+        .onChange(async (value) => {
+          const v = value.trim()
+          this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
+          await this.plugin.saveSettings()
+        }))
   }
 
   private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
@@ -141,7 +141,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isLowestPriority = currPriority >= priorities.max
 
       const calSetting = new Setting(mainCalendarContainer).setName(`Calendar '${id}'`)
-      .setDesc('Change visibility, color and order or appearance')
+        .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
           calendar.visible = value
@@ -228,7 +228,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isLowestPriority = currPriority >= priorities.max
 
       const groupSetting = new Setting(mainGroupContainer).setName(`Group '${id}'`)
-      .setDesc('Change visibility, color and order or appearance')
+        .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(groupSetting, group.visible, async (value: boolean) => {
           group.visible = value
@@ -285,7 +285,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   }
 
-
   private addDataSourceSettings(containerEl: HTMLElement) {
     const folders: Record<string, string> = this.getAllPaths()
     this.addEventPathSelection(containerEl, folders)
@@ -294,8 +293,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private getAllPaths() {
     const folders = this.plugin.app.vault.getAllLoadedFiles()
-    .filter(file => file instanceof TFolder)
-    .map(file => file.path)
+      .filter(file => file instanceof TFolder)
+      .map(file => file.path)
 
     folders.sort((a, b) => a.localeCompare(b, undefined,
       {numeric: true, sensitivity: 'base'}))
@@ -310,49 +309,191 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   private addEventPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
     new Setting(containerEl)
-    .setName('Folder to search for timeline events.')
-    .setDesc('Folder can be searched recursively.')
-    .addDropdown(dd => dd
-      .addOptions(folders)
-      .setValue(this.plugin.settings.eventPath || '/')
-      .onChange(async (value) => {
-        this.plugin.settings.eventPath = value
-        await this.plugin.saveSettings()
-      })
-    )
-    .addToggle(tt => tt
-      .setValue(this.plugin.settings.eventPathSearchRecursive)
-      .setTooltip('Search recursively?', {delay: -1})
-      .onChange(async (value) => {
-        this.plugin.settings.eventPathSearchRecursive = value
-        await this.plugin.saveSettings()
-      })
-    )
+      .setName('Folder to search for timeline events.')
+      .setDesc('Folder can be searched recursively.')
+      .addDropdown(dd => dd
+        .addOptions(folders)
+        .setValue(this.plugin.settings.eventPath || '/')
+        .onChange(async (value) => {
+          this.plugin.settings.eventPath = value
+          await this.plugin.saveSettings()
+        })
+      )
+      .addToggle(tt => tt
+        .setValue(this.plugin.settings.eventPathSearchRecursive)
+        .setTooltip('Search recursively?', {delay: -1})
+        .onChange(async (value) => {
+          this.plugin.settings.eventPathSearchRecursive = value
+          await this.plugin.saveSettings()
+        })
+      )
   }
 
   private addCalendarPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
     new Setting(containerEl)
-    .setName('Folder to search for calendar definitions.')
-    .setDesc('Folder can be searched recursively.')
-    .addDropdown(dd => dd
-      .addOptions(folders)
-      .setValue(this.plugin.settings.calendarPath || '/')
-      .onChange(async (value) => {
-        this.plugin.settings.calendarPath = value
-        await this.plugin.saveSettings()
-      })
-    )
-    .addToggle(tt => tt
-      .setValue(this.plugin.settings.calendarPathSearchRecursive)
-      .setTooltip('Search recursively?', {delay: -1})
-      .onChange(async (value) => {
-        this.plugin.settings.calendarPathSearchRecursive = value
-        await this.plugin.saveSettings()
-      })
-    )
+      .setName('Folder to search for calendar definitions.')
+      .setDesc('Folder can be searched recursively.')
+      .addDropdown(dd => dd
+        .addOptions(folders)
+        .setValue(this.plugin.settings.calendarPath || '/')
+        .onChange(async (value) => {
+          this.plugin.settings.calendarPath = value
+          await this.plugin.saveSettings()
+        })
+      )
+      .addToggle(tt => tt
+        .setValue(this.plugin.settings.calendarPathSearchRecursive)
+        .setTooltip('Search recursively?', {delay: -1})
+        .onChange(async (value) => {
+          this.plugin.settings.calendarPathSearchRecursive = value
+          await this.plugin.saveSettings()
+        })
+      )
   }
 
+  /*
+  https://docs.obsidian.md/Plugins/User+interface/Settings
 
+  https://docs.obsidian.md/plugins/guides/migrate-declarative-settings
+   */
+  getSettingDefinitions() {
+    // const folders: Record<string, string> = this.getAllPaths()
+
+    return [
+      {
+        type: 'group',
+        heading: 'Event and calendar source path selection',
+        items: [
+          {
+            name: 'Source folder for events',
+            desc: 'asdADS',
+            control: {type: 'folder', key: 'eventPath', includeRoot: true},
+          },
+          {
+            name: 'Search sub-folders for events',
+            control: {type: 'toggle', key: 'eventPathSearchRecursive'}
+          },
+          {
+            name: 'Source folder for calendar definitions',
+            control: {type: 'folder', key: 'calendarPath', includeRoot: true},
+          },
+          {
+            name: 'Search sub-folders for calendar definitions',
+            control: {type: 'toggle', key: 'calendarPathSearchRecursive'}
+          }
+        ]
+      },
+      {
+        type: 'group',
+        heading: 'Calendar settings',
+        items: []
+      },
+      {
+        type: 'group',
+        heading: 'Group settings',
+        items: []
+      },
+      {
+        type: 'group',
+        heading: 'Advanced settings',
+        items: [
+          {
+            name: 'Show box around events when hovered over',
+            control: {type: 'toggle', key: 'mouseOverEventShowBox'}
+          },
+          {
+            name: 'Show vertical line over events when hovered over',
+            control: {type: 'toggle', key: 'mouseOverEventShowVerticalLine'}
+          },
+          {
+            name: 'Extend toolbar with buttons to hide groups individually',
+            control: {type: 'toggle', key: 'showButtonsToHideGroups'}
+          }
+        ]
+      },
+      {
+        type: 'group',
+        heading: 'FrontMatter property names',
+        items: [
+          {
+            name: 'Show override frontmatter properties',
+            control: {type: 'toggle', key: 'frontMatterProperty_manual_override'},
+          },
+          {
+            name: 'Boolean marking notes as Gantt events',
+            desc: 'Mandatory. Main frontmatter property the plugin searches for',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_gantt_this'},
+          },
+          {
+            name: 'Calendar definition',
+            desc: 'Name of calendar',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_calendar_name'},
+          },
+          {
+            name: 'Event calendar',
+            desc: 'Optional. Defines which calendar to apply this event to',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_calendar'},
+          },
+          {
+            name: 'Event name',
+            desc: 'Optional. Name of event',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_name'},
+          },
+          {
+            name: 'Event start date',
+            desc: 'Mandatory',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_time_start'},
+          },
+          {
+            name: 'Event end date',
+            desc: 'Optional',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_time_end'},
+          },
+          {
+            name: 'Event color',
+            desc: 'Optional. Hex color or human-readable name',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_color'},
+          },
+          {
+            name: 'Event group',
+            desc: 'Optional',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_group'},
+          },
+          {
+            name: 'Event symbol',
+            desc: 'Optional.',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_symbol'},
+          },
+          {
+            name: 'Event icon name',
+            desc: 'Optional. Name of icon, see https://lucide.dev',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_icon_name'},
+          },
+          {
+            name: 'Event icon color',
+            desc: 'Optional. Hex color or human-readable name',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_event_icon_color'},
+          },
+          {
+            name: 'Header in note',
+            desc: 'Optional. Clicking the event will point to header instead of file.',
+            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
+            control: {type: 'text', key: 'frontMatterProperty_note_header'},
+          }
+        ]
+      },
+    ]
+  }
 }
-

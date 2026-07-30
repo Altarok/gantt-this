@@ -31,8 +31,7 @@ export default class FantasyGanttPlugin extends Plugin {
       ...DEFAULT_SETTINGS,
       ...loadedData,
       calendars: {...DEFAULT_SETTINGS.calendars, ...loadedData?.calendars},
-      groups: {...DEFAULT_SETTINGS.groups, ...loadedData?.groups},
-      frontMatterProperties: {...DEFAULT_SETTINGS.frontMatterProperties, ...loadedData?.frontMatterProperties},
+      groups: {...DEFAULT_SETTINGS.groups, ...loadedData?.groups}
     }
   }
 

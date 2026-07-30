@@ -1,4 +1,4 @@
-import {CalendarConfig, GanttItem, GanttItemDisplayType, isGanttItemDisplayType, PluginSettings} from '../const/types'
+import {CalendarConfig, GanttItem, GanttItemDisplayType, PluginSettings} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import {Gregorian} from '../util/gregorian'
 import FantasyGanttPlugin from '../main'
@@ -64,19 +64,13 @@ function createItem(
 
   let displayType: GanttItemDisplayType
   if (!endDate || startRes.days === endRes.days) {
-    displayType = 'point'
-    if (frontMatter['gantt-symbol']) {
-      const symbol = frontMatter['gantt-symbol'] as string
-      if (isGanttItemDisplayType(symbol)) displayType = symbol
-    }
+    displayType = FrontMatterUtil.getEventSymbol(frontMatter, plugin.settings) ?? 'point'
   } else {
     displayType = 'bar'
   }
 
-//  const name = FrontMatterUtil.getEventName(frontMatter, plugin.settings) ?? file.basename
   const group = FrontMatterUtil.getEventGroup(frontMatter, plugin.settings)
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
-
 
   return /* GanttItem */ {
     id,
