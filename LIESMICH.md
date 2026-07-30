@@ -71,18 +71,19 @@ gantt-group: "Entwicklung" # Optional, als Fallbackwert wird 'general' genutzt
 
 Die folgende Tabelle zeigt alle verfügbaren Eigenschaften, die du in deinen Notizen verwenden kannst:
 
-| Eigenschaft        | Typ / Werte               | Optional? | Standardwert / Fallback                     | Beschreibung                                                             |
-|--------------------|---------------------------|-----------|---------------------------------------------|--------------------------------------------------------------------------|
-| gantt-item         | Boolean                   | Nein      | Keine (muss true sein)                      | Aktiviert die Erfassung der Notiz als Gantt-Ereignis.                    |
-| gantt-start        | String                    | Nein      | Keine (Eintrag wird sonst ignoriert)        | Startdatum oder Startwert des Ereignisses.                               |
-| gantt-end          | String                    | Ja        | Entspricht dem Startwert (gantt-start)      | Enddatum des Ereignisses. Bei identischem Wert wird ein Punkt angezeigt. |
-| gantt-name         | String                    | Ja        | Dateiname ohne Endung (file.basename)       | Name des Ereignisses in der Zeitleiste und im Tooltip.                   |
-| gantt-type         | String                    | Ja        | Standard-Kalender des Plugins               | Bestimmt den verwendeten Kalendertyp.                                    
-| gantt-group        | String                    | Ja        | 'general'                                   | Gruppe für die Zeilenanordnung und Strukturierung.                       |
-| gantt-color        | Hex-Code (z.B. #ff0000)   | Ja        | Gruppenfarbe → Kalenderfarbe → Standardwert | Überschreibt die Farbe des Balkens oder Punktes individuell.             |
-| gantt-displayIcon  | String (Lucide-Icon)      | Ja        | Leer (kein Icon)                            | Zeigt ein Icon an (nur bei Punkt-Darstellung wirksam).                   |
-| gantt-symbol       | bar, point, icon, diamond | Ja        | bar (Zeitspanne) bzw. point (Einzelpunkt)   | Legt die visuelle Darstellungsform fest.                                 |
-| gantt-linkToHeader | String                    | Ja        | Leer (verlinkt an den Anfang)               | Verlinkt direkt auf eine spezifische Überschrift beim Klicken.           |
+| Eigenschaft            | Typ / Werte                   | Optional? | Standardwert / Fallback                     | Beschreibung                                                             |
+|------------------------|-------------------------------|-----------|---------------------------------------------|--------------------------------------------------------------------------|
+| gantt-item             | Boolean                       | Nein      | Keine (muss true sein)                      | Aktiviert die Erfassung der Notiz als Gantt-Ereignis.                    |
+| gantt-start            | String                        | Nein      | Keine (Eintrag wird sonst ignoriert)        | Startdatum oder Startwert des Ereignisses.                               |
+| gantt-end              | String                        | Ja        | Entspricht dem Startwert (gantt-start)      | Enddatum des Ereignisses. Bei identischem Wert wird ein Punkt angezeigt. |
+| gantt-name             | String                        | Ja        | Dateiname ohne Endung (file.basename)       | Name des Ereignisses in der Zeitleiste und im Tooltip.                   |
+| gantt-type             | String                        | Ja        | Standard-Kalender des Plugins               | Bestimmt den verwendeten Kalendertyp.                                    
+| gantt-group            | String                        | Ja        | 'general'                                   | Gruppe für die Zeilenanordnung und Strukturierung.                       |
+| gantt-color            | Farbe (z.B. #ff0000 oder red) | Ja        | Gruppenfarbe → Kalenderfarbe → Standardwert | Überschreibt die Farbe des Balkens oder Punktes individuell.             |
+| gantt-displayIcon      | String (Lucide-Icon)          | Ja        | Leer (kein Icon)                            | Zeigt ein Icon an (nur bei Punkt-Darstellung wirksam).                   |
+| gantt-displayIconColor | Farbe (z.B. #ff0000 oder red) | Ja        | Leer (kein Icon)                            | Zeigt ein Icon an (nur bei Punkt-Darstellung wirksam).                   |
+| gantt-symbol           | bar, point, icon, diamond     | Ja        | bar (Zeitspanne) bzw. point (Einzelpunkt)   | Legt die visuelle Darstellungsform fest.                                 |
+| gantt-linkToHeader     | String                        | Ja        | Leer (verlinkt an den Anfang)               | Verlinkt direkt auf eine spezifische Überschrift beim Klicken.           |
 
 ## *Benutzerdefinierte Kalender-Definitionen*
 
