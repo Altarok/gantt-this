@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, Setting} from 'obsidian'
+import {App, ColorComponent, PluginSettingTab, Setting} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DEFAULT_SETTINGS, isCalendarIdentifier} from '../const/types'
 import {AddEntryModal} from "./settings-util";
@@ -129,6 +129,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           name: cal.id,
           searchable: false,
           render: (setting: Setting) => {
+            let cc: ColorComponent
             setting
               .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
                 .onClick(async () => {
@@ -137,13 +138,20 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
                   await this.plugin.saveSettings()
                 })
               )
-              .addColorPicker(cc => cc
+              .addColorPicker(c => cc = c
                 .setValue(cal.color ?? this.plugin.settings.fallbackColor)
                 .onChange(async (value) => {
                     cal.color = value
                     await this.plugin.saveSettings()
                   }
                 )
+              )
+              .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+                .onClick(async () => {
+                  cc.setValue(this.plugin.settings.fallbackColor)
+                  cal.color = this.plugin.settings.fallbackColor
+                  await this.plugin.saveSettings()
+                })
               )
           },
         }))
@@ -173,6 +181,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           name: group.id,
           searchable: false,
           render: (setting: Setting) => {
+            let cc: ColorComponent
             setting
               .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
                 .onClick(async () => {
@@ -181,13 +190,20 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
                   await this.plugin.saveSettings()
                 })
               )
-              .addColorPicker(cc => cc
+              .addColorPicker(c => cc = c
                 .setValue(group.color ?? this.plugin.settings.fallbackColor)
                 .onChange(async (value) => {
                     group.color = value
                     await this.plugin.saveSettings()
                   }
                 )
+              )
+              .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+                .onClick(async () => {
+                  cc.setValue(this.plugin.settings.fallbackColor)
+                  group.color = this.plugin.settings.fallbackColor
+                  await this.plugin.saveSettings()
+                })
               )
           },
         }))
