@@ -1,4 +1,4 @@
-import {App, ColorComponent, PluginSettingTab, Setting} from 'obsidian'
+import {App, ColorComponent, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DEFAULT_SETTINGS, isCalendarIdentifier} from '../const/types'
 import {AddEntryModal} from "./settings-util";
@@ -21,21 +21,12 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     super(app, plugin)
   }
 
-  rerender(): void {
-    // @ts-ignore
-    super.update()
-  }
-
-  display(): void {
-    /* This is the old pre-1.13. version of settings */
-  }
-
   /*
    * https://docs.obsidian.md/Plugins/User+interface/Settings
    *
    * https://docs.obsidian.md/plugins/guides/migrate-declarative-settings
    */
-  getSettingDefinitions() {
+  getSettingDefinitions(): SettingDefinitionItem[] {
 
     const openAddForm = (target: "groups" | "calendars") => {
       new AddEntryModal(this.plugin, (entry) => {
@@ -46,7 +37,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
         list.push(newEntry)
 
-        void this.plugin.saveData(this.plugin.settings).then(() => this.rerender())
+        void this.plugin.saveData(this.plugin.settings).then(() => this.update())
       }).open()
     }
 
@@ -99,7 +90,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             control: {
               type: 'color',
               key: 'fallbackColor',
-              placeholder: DEFAULT_SETTINGS.fallbackColor,
+              // placeholder: DEFAULT_SETTINGS.fallbackColor,
             }
           }
         ]
@@ -117,13 +108,13 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             this.plugin.settings.calendars.splice(newIndex, 0, moved)
             this.plugin.settings.calendars.forEach((cal, index) => cal.priority = index)
             await this.plugin.saveSettings()
-            this.rerender()
+            this.update()
           }
         },
         onDelete: async (idx: number) => {
           this.plugin.settings.calendars.splice(idx, 1)
           await this.plugin.saveSettings()
-          this.rerender()
+          this.update()
         },
         items: this.plugin.settings.calendars.map((cal) => ({
           name: cal.id,
@@ -169,13 +160,13 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             this.plugin.settings.groups.splice(newIndex, 0, moved)
             this.plugin.settings.groups.forEach((grp, index) => grp.priority = index)
             await this.plugin.saveSettings()
-            this.rerender()
+            this.update()
           }
         },
         onDelete: async (idx: number) => {
           this.plugin.settings.groups.splice(idx, 1)
           await this.plugin.saveSettings()
-          this.rerender()
+          this.update()
         },
         items: this.plugin.settings.groups.map((group) => ({
           name: group.id,
