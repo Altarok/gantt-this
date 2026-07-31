@@ -1,7 +1,7 @@
 import {App, Notice, PluginSettingTab, Setting, TFolder} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/strings'
-import {GroupOrCalendarSettings, isCalendarIdentifier} from '../const/types'
+import {DEFAULT_SETTINGS, GroupOrCalendarSettings, isCalendarIdentifier} from '../const/types'
 import {
   addColorPickerFollowedByResetButton,
   addCreateSetting,
@@ -11,6 +11,14 @@ import {
 } from './settings-util'
 import {Priorities} from '../util/priority-util'
 
+/**
+ * Validate FrontMatter input
+ * @param value
+ * @return undefined if the input is fine, otherwise a string explaining why it isn't
+ */
+function testFrontMatterInput(value: string): string | undefined {
+  return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'String must match ^[a-zA-Z0-9_.-]+$.' /* input NOK */
+}
 
 export class FantasyGanttSettingTab extends PluginSettingTab {
 
@@ -51,57 +59,57 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     containerEl.createEl('h3', {text: 'Advanced settings'})
 
     new Setting(containerEl).setName('Show box around events when hovered over')
-      .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowBox)
-        .onChange(async (value) => {
-            this.plugin.settings.mouseOverEventShowBox = value
-            await this.plugin.saveSettings()
-          }
-        )
+    .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowBox)
+      .onChange(async (value) => {
+          this.plugin.settings.mouseOverEventShowBox = value
+          await this.plugin.saveSettings()
+        }
       )
+    )
 
     new Setting(containerEl).setName('Show vertical line over events when hovered over')
-      .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowVerticalLine)
-        .onChange(async (value) => {
-            this.plugin.settings.mouseOverEventShowVerticalLine = value
-            await this.plugin.saveSettings()
-          }
-        )
+    .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowVerticalLine)
+      .onChange(async (value) => {
+          this.plugin.settings.mouseOverEventShowVerticalLine = value
+          await this.plugin.saveSettings()
+        }
       )
+    )
 
     new Setting(containerEl).setName('Extend toolbar with buttons to hide groups individually')
-      .addToggle(t => t.setValue(this.plugin.settings.showButtonsToHideGroups)
-        .onChange(async (value) => {
-            this.plugin.settings.showButtonsToHideGroups = value
-            await this.plugin.saveSettings()
-          }
-        )
+    .addToggle(t => t.setValue(this.plugin.settings.showButtonsToHideGroups)
+      .onChange(async (value) => {
+          this.plugin.settings.showButtonsToHideGroups = value
+          await this.plugin.saveSettings()
+        }
       )
+    )
 
   }
 
   private addDefaultColorSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default fallback color')
-      .setDesc('Used when no color is defined in the item front-matter, ' +
-        'its group, or its calendar type.')
-      .addColorPicker(color => color
-        .setValue(this.plugin.settings.fallbackColor)
-        .onChange(async (value) => {
-          this.plugin.settings.fallbackColor = value
-          await this.plugin.saveSettings()
-        }))
+    .setDesc('Used when no color is defined in the item front-matter, ' +
+      'its group, or its calendar type.')
+    .addColorPicker(color => color
+    .setValue(this.plugin.settings.fallbackColor)
+    .onChange(async (value) => {
+      this.plugin.settings.fallbackColor = value
+      await this.plugin.saveSettings()
+    }))
   }
 
   private addDefaultCalendarSelection(containerEl: HTMLElement) {
     new Setting(containerEl).setName('Default calendar')
-      .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
-      .addText(text => text
-        .setPlaceholder('gregorian')
-        .setValue(this.plugin.settings.defaultCalendar)
-        .onChange(async (value) => {
-          const v = value.trim()
-          this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
-          await this.plugin.saveSettings()
-        }))
+    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
+    .addText(text => text
+    .setPlaceholder('gregorian')
+    .setValue(this.plugin.settings.defaultCalendar)
+    .onChange(async (value) => {
+      const v = value.trim()
+      this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
+      await this.plugin.saveSettings()
+    }))
   }
 
   private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
@@ -141,7 +149,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isLowestPriority = currPriority >= priorities.max
 
       const calSetting = new Setting(mainCalendarContainer).setName(`Calendar '${id}'`)
-        .setDesc('Change visibility, color and order or appearance')
+      .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
           calendar.visible = value
@@ -228,7 +236,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const isLowestPriority = currPriority >= priorities.max
 
       const groupSetting = new Setting(mainGroupContainer).setName(`Group '${id}'`)
-        .setDesc('Change visibility, color and order or appearance')
+      .setDesc('Change visibility, color and order or appearance')
 
       addVisibilityToggleButton(groupSetting, group.visible, async (value: boolean) => {
           group.visible = value
@@ -293,8 +301,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private getAllPaths() {
     const folders = this.plugin.app.vault.getAllLoadedFiles()
-      .filter(file => file instanceof TFolder)
-      .map(file => file.path)
+    .filter(file => file instanceof TFolder)
+    .map(file => file.path)
 
     folders.sort((a, b) => a.localeCompare(b, undefined,
       {numeric: true, sensitivity: 'base'}))
@@ -309,47 +317,47 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   private addEventPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
     new Setting(containerEl)
-      .setName('Folder to search for timeline events.')
-      .setDesc('Folder can be searched recursively.')
-      .addDropdown(dd => dd
-        .addOptions(folders)
-        .setValue(this.plugin.settings.eventPath || '/')
-        .onChange(async (value) => {
-          this.plugin.settings.eventPath = value
-          await this.plugin.saveSettings()
-        })
-      )
-      .addToggle(tt => tt
-        .setValue(this.plugin.settings.eventPathSearchRecursive)
-        .setTooltip('Search recursively?', {delay: -1})
-        .onChange(async (value) => {
-          this.plugin.settings.eventPathSearchRecursive = value
-          await this.plugin.saveSettings()
-        })
-      )
+    .setName('Folder to search for timeline events.')
+    .setDesc('Folder can be searched recursively.')
+    .addDropdown(dd => dd
+      .addOptions(folders)
+      .setValue(this.plugin.settings.eventPath || '/')
+      .onChange(async (value) => {
+        this.plugin.settings.eventPath = value
+        await this.plugin.saveSettings()
+      })
+    )
+    .addToggle(tt => tt
+      .setValue(this.plugin.settings.eventPathSearchRecursive)
+      .setTooltip('Search recursively?', {delay: -1})
+      .onChange(async (value) => {
+        this.plugin.settings.eventPathSearchRecursive = value
+        await this.plugin.saveSettings()
+      })
+    )
   }
 
   private addCalendarPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
 
     new Setting(containerEl)
-      .setName('Folder to search for calendar definitions.')
-      .setDesc('Folder can be searched recursively.')
-      .addDropdown(dd => dd
-        .addOptions(folders)
-        .setValue(this.plugin.settings.calendarPath || '/')
-        .onChange(async (value) => {
-          this.plugin.settings.calendarPath = value
-          await this.plugin.saveSettings()
-        })
-      )
-      .addToggle(tt => tt
-        .setValue(this.plugin.settings.calendarPathSearchRecursive)
-        .setTooltip('Search recursively?', {delay: -1})
-        .onChange(async (value) => {
-          this.plugin.settings.calendarPathSearchRecursive = value
-          await this.plugin.saveSettings()
-        })
-      )
+    .setName('Folder to search for calendar definitions.')
+    .setDesc('Folder can be searched recursively.')
+    .addDropdown(dd => dd
+      .addOptions(folders)
+      .setValue(this.plugin.settings.calendarPath || '/')
+      .onChange(async (value) => {
+        this.plugin.settings.calendarPath = value
+        await this.plugin.saveSettings()
+      })
+    )
+    .addToggle(tt => tt
+      .setValue(this.plugin.settings.calendarPathSearchRecursive)
+      .setTooltip('Search recursively?', {delay: -1})
+      .onChange(async (value) => {
+        this.plugin.settings.calendarPathSearchRecursive = value
+        await this.plugin.saveSettings()
+      })
+    )
   }
 
   /*
@@ -390,8 +398,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         items: []
       },
       {
-        type: 'group',
+        type: 'list',
         heading: 'Group settings',
+        emptyState: 'No group defined yet.',
         items: []
       },
       {
@@ -417,80 +426,130 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         heading: 'FrontMatter property names',
         items: [
           {
-            name: 'Show override frontmatter properties',
+            name: 'Override FrontMatter properties?',
+            desc: 'Scroll down after activating',
             control: {type: 'toggle', key: 'frontMatterProperty_manual_override'},
           },
           {
             name: 'Boolean marking notes as Gantt events',
-            desc: 'Mandatory. Main frontmatter property the plugin searches for',
+            desc: 'Mandatory. Main FrontMatter property the plugin searches for',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_gantt_this'},
+            control: {
+              type: 'text',
+              key: 'frontMatterProperty_gantt_this',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Calendar definition',
             desc: 'Name of calendar',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_calendar_name'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_calendar_name',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event calendar',
             desc: 'Optional. Defines which calendar to apply this event to',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_calendar'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_calendar',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event name',
             desc: 'Optional. Name of event',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_name'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_name',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_name,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event start date',
             desc: 'Mandatory',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_time_start'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_time_start',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event end date',
             desc: 'Optional',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_time_end'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_time_end',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event color',
             desc: 'Optional. Hex color or human-readable name',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_color'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_color',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_color,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event group',
             desc: 'Optional',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_group'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_group',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_group,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event symbol',
             desc: 'Optional.',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_symbol'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_symbol',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event icon name',
             desc: 'Optional. Name of icon, see https://lucide.dev',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_icon_name'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_icon_name',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Event icon color',
             desc: 'Optional. Hex color or human-readable name',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_event_icon_color'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_event_icon_color',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           },
           {
             name: 'Header in note',
             desc: 'Optional. Clicking the event will point to header instead of file.',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
-            control: {type: 'text', key: 'frontMatterProperty_note_header'},
+            control: {
+              type: 'text', key: 'frontMatterProperty_note_header',
+              placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
+              validate: (value: string) => testFrontMatterInput(value)
+            },
           }
         ]
       },
