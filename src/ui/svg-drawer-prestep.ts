@@ -111,15 +111,15 @@ export class GanttRender {
       /* Create buttons to hide groups */
       const hideGroupEl = toolbar.createEl('div', {cls: 'gt-toolbar-hide-groups'})
       const groups = this.plugin.settings.groups
-      for (const groupName of Object.keys(groups)) {
+      for (const group of groups) {
         const subGroup = hideGroupEl.createEl('div', {cls: 'gt-toolbar-hide-group'})
-        let isVisible: boolean = groups[groupName]?.visible ?? false
+        let isVisible: boolean = group?.visible ?? false
         const button = createIconButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
-        subGroup.createDiv({text: groupName})
+        subGroup.createDiv({text: group.id})
         button.addEventListener('click', () => {
-          if (groups[groupName]) {
+          if (group) {
             isVisible = !isVisible
-            groups[groupName].visible = isVisible
+            group.visible = isVisible
             void this.plugin.saveSettings()
             refreshChartCallback()
           }

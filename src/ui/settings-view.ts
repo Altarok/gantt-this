@@ -6,7 +6,6 @@ import {AddEntryModal} from "./settings-util";
 const VISIBLE_ICON = 'eye' /* an open eye */
 const INVISIBLE_ICON = 'eye-off' /* an open eye, but with strike through */
 
-
 /**
  * Validate FrontMatter input
  * @param value
@@ -16,281 +15,20 @@ function testFrontMatterInput(value: string): string | undefined {
   return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'String must match ^[a-zA-Z0-9_.-]+$.' /* input NOK */
 }
 
-// TODO rename
 export class FantasyGanttSettingTab extends PluginSettingTab {
 
   constructor(app: App, public readonly plugin: FantasyGanttPlugin) {
     super(app, plugin)
   }
 
+  rerender(): void {
+    // @ts-ignore
+    super.update()
+  }
+
   display(): void {
     /* This is the old pre-1.13. version of settings */
   }
-
-//    const {containerEl} = this
-//    containerEl.empty()
-//
-//    /* Add event and calendar path source selection */
-//    containerEl.createEl('h2', {text: 'Event and calendar source path selection'})
-//    this.addDataSourceSettings(containerEl)
-//
-//    containerEl.createEl('h2', {text: 'Default values'})
-//    this.addDefaultCalendarSelection(containerEl)
-//    this.addDefaultColorSelection(containerEl)
-//
-//    containerEl.createEl('h3', {text: 'Calendar control'})
-//    containerEl.createEl('div', {
-//      text: 'Control which groups are visible on your timelines. If a calendar type is turned off here,' +
-//        ' items belonging to that calendar type will be hidden.',
-//      cls: Css.settings.itemDescription
-//    })
-//
-//    void this.renderCalendarSettings(containerEl.createDiv({cls: Css.settings.calendarControl}))
-//
-//    containerEl.createEl('h3', {text: 'Group control'})
-//    containerEl.createEl('div', {
-//      text: 'Control group color and order or appearance.',
-//      cls: Css.settings.itemDescription
-//    })
-//
-//    void this.renderGroupSettings(containerEl.createDiv({cls: Css.settings.calendarControl}))
-//
-//    containerEl.createEl('h3', {text: 'Advanced settings'})
-//
-//    new Setting(containerEl).setName('Show box around events when hovered over')
-//    .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowBox)
-//      .onChange(async (value) => {
-//          this.plugin.settings.mouseOverEventShowBox = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//    )
-//
-//    new Setting(containerEl).setName('Show vertical line over events when hovered over')
-//    .addToggle(t => t.setValue(this.plugin.settings.mouseOverEventShowVerticalLine)
-//      .onChange(async (value) => {
-//          this.plugin.settings.mouseOverEventShowVerticalLine = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//    )
-//
-//    new Setting(containerEl).setName('Extend toolbar with buttons to hide groups individually')
-//    .addToggle(t => t.setValue(this.plugin.settings.showButtonsToHideGroups)
-//      .onChange(async (value) => {
-//          this.plugin.settings.showButtonsToHideGroups = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//    )
-//
-//  }
-
-//  private addDefaultColorSelection(containerEl: HTMLElement) {
-//    new Setting(containerEl).setName('Default fallback color')
-//    .setDesc('Used when no color is defined in the item front-matter, ' +
-//      'its group, or its calendar type.')
-//    .addColorPicker(color => color
-//    .setValue(this.plugin.settings.fallbackColor)
-//    .onChange(async (value) => {
-//      this.plugin.settings.fallbackColor = value
-//      await this.plugin.saveSettings()
-//    }))
-//  }
-
-//  private addDefaultCalendarSelection(containerEl: HTMLElement) {
-//    new Setting(containerEl).setName('Default calendar')
-//    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
-//    .addText(text => text
-//    .setPlaceholder('gregorian')
-//    .setValue(this.plugin.settings.defaultCalendar)
-//    .onChange(async (value) => {
-//      const v = value.trim()
-//      this.plugin.settings.defaultCalendar = isCalendarIdentifier(v) ? v : 'gregorian'
-//      await this.plugin.saveSettings()
-//    }))
-//  }
-
-//  private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
-//
-//    /**
-//     * Saves settings, then empties and redraws the calendar overview table
-//     */
-//    const saveSettingsAndReRenderCalendarSettings = async (): Promise<void> => {
-//      await this.plugin.saveSettings()
-//      mainCalendarContainer.empty()
-//      await this.renderCalendarSettings(mainCalendarContainer)
-//    }
-//
-//    const {settings: pluginSettings} = this.plugin
-//
-//    let calendars: Record<string, GroupOrCalendarSettings> = pluginSettings.calendars
-//
-//    { /* Make sure that default values and priorities are given */
-//      const defaultCalendar = pluginSettings.defaultCalendar
-//      const knownCalendars = Object.keys(calendars)
-//
-//      if (!knownCalendars.includes(defaultCalendar)) {
-//        calendars[defaultCalendar] = {'visible': true, 'color': pluginSettings.fallbackColor, 'priority': 0}
-//      }
-//    }
-//
-//    const priorities: { min: number, max: number, changed: boolean } = Priorities.fixPrioritiesIfNecessary(calendars)
-//    if (priorities.changed) await this.plugin.saveSettings()
-//    const sortedCalendarList: [string, GroupOrCalendarSettings][] = Priorities.sortGroupOrCalendarSettingsByPriority(calendars)
-//
-//    for (const [id, calendar] of sortedCalendarList) {
-//
-//      calendar.visible ??= false
-//
-//      const currPriority: number = calendar.priority!
-//      const isHighestPriority = currPriority <= priorities.min
-//      const isLowestPriority = currPriority >= priorities.max
-//
-//      const calSetting = new Setting(mainCalendarContainer).setName(`Calendar '${id}'`)
-//      .setDesc('Change visibility, color and order or appearance')
-//
-//      addVisibilityToggleButton(calSetting, calendar.visible, async (value: boolean) => {
-//          calendar.visible = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//
-//      addColorPickerFollowedByResetButton(calSetting, calendar.color ?? pluginSettings.fallbackColor, pluginSettings.fallbackColor,
-//        async (value?: string) => {
-//          calendar.color = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//
-//      addVerticalMovementButtonsForPriority(calSetting, isLowestPriority, isHighestPriority,
-//        async () => {
-//          const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority + 1)
-//
-//          if (calendarSettings?.length === 1 && Priorities.switchValues(calendar, calendarSettings[0]!)) {
-//            await saveSettingsAndReRenderCalendarSettings()
-//          } else {
-//            new Notice(`Warn: can not find matching entry with priority '${currPriority + 1}'`)
-//          }
-//        },
-//        async () => {
-//          const calendarSettings = Object.values(calendars).filter(x => x.priority === currPriority - 1)
-//
-//          if (calendarSettings?.length === 1 && Priorities.switchValues(calendar, calendarSettings[0]!)) {
-//            await saveSettingsAndReRenderCalendarSettings()
-//          } else {
-//            new Notice(`Warn: can not find matching entry with priority '${currPriority - 1}'`)
-//          }
-//        })
-//
-//      const isDefaultCalendar: boolean = id === pluginSettings.defaultCalendar
-//
-//      addDeleteButton(calSetting, !isDefaultCalendar, 'Can not delete default calendar', async () => {
-//          delete pluginSettings.calendars[id]
-//          await saveSettingsAndReRenderCalendarSettings()
-//        }
-//      )
-//
-//    } /* end of calendar loop  */
-//
-//    addCreateSetting(new Setting(mainCalendarContainer), 'calendar', async (calendarName: string) => {
-//        if (!calendars[calendarName]) {
-//          calendars[calendarName] = {
-//            visible: true,
-//            color: pluginSettings.fallbackColor,
-//            priority: priorities.max + 1
-//          }
-//          await saveSettingsAndReRenderCalendarSettings()
-//        }
-//      }
-//    )
-//
-//  } /* end of calendar setting group */
-
-//  private async renderGroupSettings(mainGroupContainer: HTMLElement) {
-//
-//    /**
-//     * Saves settings, then empties and redraws the calendar overview table
-//     */
-//    const saveSettingsAndReRenderGroupSettings = async (): Promise<void> => {
-//      await this.plugin.saveSettings()
-//      mainGroupContainer.empty()
-//      await this.renderGroupSettings(mainGroupContainer)
-//    }
-//
-//    const {settings: pluginSettings} = this.plugin
-//
-//    let groups: Record<string, GroupOrCalendarSettings> = pluginSettings.groups
-//
-//    const priorities: { min: number, max: number, changed: boolean } = Priorities.fixPrioritiesIfNecessary(groups)
-//    if (priorities.changed) await this.plugin.saveSettings()
-//    const sortedGroupList: [string, GroupOrCalendarSettings][] = Priorities.sortGroupOrCalendarSettingsByPriority(groups)
-//
-//    for (const [id, group] of sortedGroupList) {
-//
-//      group.visible ??= true
-//
-//      const currPriority: number = group.priority!
-//      const isHighestPriority = currPriority <= priorities.min
-//      const isLowestPriority = currPriority >= priorities.max
-//
-//      const groupSetting = new Setting(mainGroupContainer).setName(`Group '${id}'`)
-//      .setDesc('Change visibility, color and order or appearance')
-//
-//      addVisibilityToggleButton(groupSetting, group.visible, async (value: boolean) => {
-//          group.visible = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//
-//      addColorPickerFollowedByResetButton(groupSetting, group.color ?? pluginSettings.fallbackColor, pluginSettings.fallbackColor,
-//        async (value?: string) => {
-//          group.color = value
-//          await this.plugin.saveSettings()
-//        }
-//      )
-//
-//      addVerticalMovementButtonsForPriority(groupSetting, isLowestPriority, isHighestPriority,
-//        async () => {
-//          const groupSettings = Object.values(groups).filter(x => x.priority === currPriority + 1)
-//
-//          if (groupSettings?.length === 1 && Priorities.switchValues(group, groupSettings[0]!)) {
-//            await saveSettingsAndReRenderGroupSettings()
-//          } else {
-//            new Notice(`Warn: can not find matching entry with priority '${currPriority + 1}'`)
-//          }
-//        },
-//        async () => {
-//          const groupSettings = Object.values(groups).filter(x => x.priority === currPriority - 1)
-//
-//          if (groupSettings?.length === 1 && Priorities.switchValues(group, groupSettings[0]!)) {
-//            await saveSettingsAndReRenderGroupSettings()
-//          } else {
-//            new Notice(`Warn: can not find matching entry with priority '${currPriority - 1}'`)
-//          }
-//        })
-//
-//      addDeleteButton(groupSetting, true, '', async () => {
-//          delete pluginSettings.groups[id]
-//          await saveSettingsAndReRenderGroupSettings()
-//        }
-//      )
-//
-//    } /* end of calendar loop  */
-//
-//    addCreateSetting(new Setting(mainGroupContainer), 'group', async (groupName: string) => {
-//        if (!groups[groupName]) {
-//          groups[groupName] = {
-//            visible: true,
-//            color: pluginSettings.fallbackColor,
-//            priority: priorities.max + 1
-//          }
-//          await saveSettingsAndReRenderGroupSettings()
-//        }
-//      }
-//    )
-//
-//  }
 
   /*
    * https://docs.obsidian.md/Plugins/User+interface/Settings
@@ -308,10 +46,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
         list.push(newEntry)
 
-        void this.plugin.saveData(this.plugin.settings).then(() => {
-//          this.getSettingDefinitions()
-          this.update()
-        })
+        void this.plugin.saveData(this.plugin.settings).then(() => this.rerender())
       }).open()
     }
 
@@ -373,58 +108,87 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       {
         type: 'list',
         heading: 'Calendars',
+        desc: 'Control calendar visibility, color and order or appearance.',
         emptyState: 'No calendar defined yet.',
-        addItem: {
-          name: 'Add group',
-          action: () => this.emptyMethod(),
+        addItem: {name: 'Add calendar', action: () => openAddForm('calendars')},
+        onReorder: async (oldIndex: number, newIndex: number) => {
+          let [moved] = this.plugin.settings.calendars.splice(oldIndex, 1)
+          if (moved) {
+            this.plugin.settings.calendars.splice(newIndex, 0, moved)
+            this.plugin.settings.calendars.forEach((cal, index) => cal.priority = index)
+            await this.plugin.saveSettings()
+            this.rerender()
+          }
         },
-        items: []
+        onDelete: async (idx: number) => {
+          this.plugin.settings.calendars.splice(idx, 1)
+          await this.plugin.saveSettings()
+          this.rerender()
+        },
+        items: this.plugin.settings.calendars.map((cal) => ({
+          name: cal.id,
+          searchable: false,
+          render: (setting: Setting) => {
+            setting
+              .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+                .onClick(async () => {
+                  cal.visible = !cal.visible
+                  void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+                  await this.plugin.saveSettings()
+                })
+              )
+              .addColorPicker(cc => cc
+                .setValue(cal.color ?? this.plugin.settings.fallbackColor)
+                .onChange(async (value) => {
+                    cal.color = value
+                    await this.plugin.saveSettings()
+                  }
+                )
+              )
+          },
+        }))
       },
       /* Group list */
       {
         type: 'list',
         heading: 'Groups',
+        desc: 'Control group visibility, color and order or appearance.',
         emptyState: 'No group defined yet.',
-        addItem: {
-          name: 'Add group',
-          action: () => openAddForm('groups')
-        },
+        addItem: {name: 'Add group', action: () => openAddForm('groups')},
         onReorder: async (oldIndex: number, newIndex: number) => {
           let [moved] = this.plugin.settings.groups.splice(oldIndex, 1)
           if (moved) {
             this.plugin.settings.groups.splice(newIndex, 0, moved)
-            this.plugin.settings.groups.forEach((group, index) => {
-              group.priority = index
-            })
+            this.plugin.settings.groups.forEach((grp, index) => grp.priority = index)
             await this.plugin.saveSettings()
-//            this.update()
+            this.rerender()
           }
         },
         onDelete: async (idx: number) => {
           this.plugin.settings.groups.splice(idx, 1)
           await this.plugin.saveSettings()
-//          this.update()
+          this.rerender()
         },
         items: this.plugin.settings.groups.map((group) => ({
           name: group.id,
           searchable: false,
           render: (setting: Setting) => {
             setting
-            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                group.visible = !group.visible
-                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-                await this.plugin.saveSettings()
-              })
-            )
-            .addColorPicker(cc => cc
-              .setValue(group.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  group.color = value
+              .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+                .onClick(async () => {
+                  group.visible = !group.visible
+                  void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                   await this.plugin.saveSettings()
-                }
+                })
               )
-            )
+              .addColorPicker(cc => cc
+                .setValue(group.color ?? this.plugin.settings.fallbackColor)
+                .onChange(async (value) => {
+                    group.color = value
+                    await this.plugin.saveSettings()
+                  }
+                )
+              )
           },
         }))
       },
@@ -581,12 +345,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         ]
       },
     ]
-  }
-
-  private emptyMethod() {
-    /*
-    TODO
-     */
   }
 
 }

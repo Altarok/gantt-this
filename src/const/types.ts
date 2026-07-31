@@ -95,7 +95,7 @@ export type GanttGroup = {
 
 export type GroupOrCalendarSettings = {
   id: string
-  visible?: boolean
+  visible: boolean
   color?: string
   priority?: number
 }

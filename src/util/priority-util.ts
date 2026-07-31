@@ -7,8 +7,6 @@ import {GanttGroup, GroupOrCalendarSettings} from '../const/types'
  * @param objects to sort
  */
 function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCalendarSettings>): [string, GroupOrCalendarSettings][] {
-
-
   return Object.entries(objects).sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity))
 }
 
@@ -17,7 +15,6 @@ function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCa
  * @param calendarConfigs
  */
 function sortCalendarAxisByPriority(calendarNames: string[], calendarConfigs: GroupOrCalendarSettings[]): void {
-
   const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
     calendarConfigs.map((c) => [c.id, c])
   )

@@ -6,7 +6,6 @@ import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {CodeBlock} from './const/strings'
 import {GanttRender} from './ui/svg-drawer-prestep'
 
-// TODO rename
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
   calendarConfigsCache = new Map<string, CalendarConfig>()
