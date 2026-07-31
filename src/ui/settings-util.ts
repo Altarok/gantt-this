@@ -1,4 +1,7 @@
-import {ColorComponent, Setting} from 'obsidian'
+import {ColorComponent, Modal, Setting} from 'obsidian'
+import {GroupOrCalendarSettings} from '../const/types'
+import FantasyGanttPlugin from "../main";
+
 
 const VISIBLE_ICON = 'eye' /* an open eye */
 const INVISIBLE_ICON = 'eye-off' /* an open eye, but with strike through */
@@ -80,3 +83,43 @@ export function addCreateSetting(setting: Setting, createWhat: string, saveSetti
 
 }
 
+export class AddEntryModal extends Modal {
+  private result: Partial<GroupOrCalendarSettings> = {
+    id: "",
+    visible: true
+  }
+
+  constructor(readonly plugin: FantasyGanttPlugin,
+              readonly onSubmit: (entry: GroupOrCalendarSettings) => void) {
+    super(plugin.app)
+  }
+
+  onOpen() {
+    const {contentEl} = this
+    contentEl.empty()
+    contentEl.createEl("h2", {text: "Add new item"})
+
+    new Setting(contentEl)
+    .setName("ID / Name")
+    .addText(text => text
+      .onChange((value) => {
+        this.result.id = value.trim()
+      })
+    )
+
+    new Setting(contentEl).addButton(btn => btn
+      .setButtonText("Add")
+      .setCta()
+      .onClick(() => {
+        if (!this.result.id) return
+        this.close()
+        this.onSubmit(this.result as GroupOrCalendarSettings)
+      })
+    )
+  }
+
+  onClose() {
+    const {contentEl} = this
+    contentEl.empty()
+  }
+}

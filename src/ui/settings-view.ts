@@ -1,6 +1,11 @@
-import {App, PluginSettingTab} from 'obsidian'
+import {App, PluginSettingTab, Setting} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {DEFAULT_SETTINGS} from '../const/types'
+import {DEFAULT_SETTINGS, isCalendarIdentifier} from '../const/types'
+import {AddEntryModal} from "./settings-util";
+
+const VISIBLE_ICON = 'eye' /* an open eye */
+const INVISIBLE_ICON = 'eye-off' /* an open eye, but with strike through */
+
 
 /**
  * Validate FrontMatter input
@@ -80,7 +85,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 //    )
 //
 //  }
-//
+
 //  private addDefaultColorSelection(containerEl: HTMLElement) {
 //    new Setting(containerEl).setName('Default fallback color')
 //    .setDesc('Used when no color is defined in the item front-matter, ' +
@@ -92,7 +97,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 //      await this.plugin.saveSettings()
 //    }))
 //  }
-//
+
 //  private addDefaultCalendarSelection(containerEl: HTMLElement) {
 //    new Setting(containerEl).setName('Default calendar')
 //    .setDesc('The fallback value for gantt-type if it is not explicitly defined in a file.')
@@ -105,7 +110,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 //      await this.plugin.saveSettings()
 //    }))
 //  }
-//
+
 //  private async renderCalendarSettings(mainCalendarContainer: HTMLElement) {
 //
 //    /**
@@ -201,7 +206,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 //    )
 //
 //  } /* end of calendar setting group */
-//
+
 //  private async renderGroupSettings(mainGroupContainer: HTMLElement) {
 //
 //    /**
@@ -286,89 +291,29 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 //    )
 //
 //  }
-//
-//  private addDataSourceSettings(containerEl: HTMLElement) {
-//    const folders: Record<string, string> = this.getAllPaths()
-//    this.addEventPathSelection(containerEl, folders)
-//    this.addCalendarPathSelection(containerEl, folders)
-//  }
-//
-//  private getAllPaths() {
-//    const folders = this.plugin.app.vault.getAllLoadedFiles()
-//    .filter(file => file instanceof TFolder)
-//    .map(file => file.path)
-//
-//    folders.sort((a, b) => a.localeCompare(b, undefined,
-//      {numeric: true, sensitivity: 'base'}))
-//
-//    /* Modern syntax mapping */
-//    return {
-//      '/': '[root]',
-//      ...Object.fromEntries(folders.filter(f => f !== '/').map(f => [f, f]))
-//    }
-//  }
-//
-//  private addEventPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
-//
-//    new Setting(containerEl)
-//    .setName('Folder to search for timeline events.')
-//    .setDesc('Folder can be searched recursively.')
-//    .addDropdown(dd => dd
-//      .addOptions(folders)
-//      .setValue(this.plugin.settings.eventPath || '/')
-//      .onChange(async (value) => {
-//        this.plugin.settings.eventPath = value
-//        await this.plugin.saveSettings()
-//      })
-//    )
-//    .addToggle(tt => tt
-//      .setValue(this.plugin.settings.eventPathSearchRecursive)
-//      .setTooltip('Search recursively?', {delay: -1})
-//      .onChange(async (value) => {
-//        this.plugin.settings.eventPathSearchRecursive = value
-//        await this.plugin.saveSettings()
-//      })
-//    )
-//  }
-//
-//  private addCalendarPathSelection(containerEl: HTMLElement, folders: Record<string, string>) {
-//
-//    new Setting(containerEl)
-//    .setName('Folder to search for calendar definitions.')
-//    .setDesc('Folder can be searched recursively.')
-//    .addDropdown(dd => dd
-//      .addOptions(folders)
-//      .setValue(this.plugin.settings.calendarPath || '/')
-//      .onChange(async (value) => {
-//        this.plugin.settings.calendarPath = value
-//        await this.plugin.saveSettings()
-//      })
-//    )
-//    .addToggle(tt => tt
-//      .setValue(this.plugin.settings.calendarPathSearchRecursive)
-//      .setTooltip('Search recursively?', {delay: -1})
-//      .onChange(async (value) => {
-//        this.plugin.settings.calendarPathSearchRecursive = value
-//        await this.plugin.saveSettings()
-//      })
-//    )
-//  }
 
   /*
-  https://docs.obsidian.md/Plugins/User+interface/Settings
-
-  https://docs.obsidian.md/plugins/guides/migrate-declarative-settings
+   * https://docs.obsidian.md/Plugins/User+interface/Settings
+   *
+   * https://docs.obsidian.md/plugins/guides/migrate-declarative-settings
    */
   getSettingDefinitions() {
 
-//    let showGroup = (group: GroupOrCalendarSettings): void => {
-//      new AddEntryModal(this.app, values, (entry) => {
-//        values.push(entry);
-//        this.plugin.settings.entries = values;
-//        void this.plugin.saveData(this.plugin.settings);
-//        this.update();
-//      }).open();
-//    };
+    const openAddForm = (target: "groups" | "calendars") => {
+      new AddEntryModal(this.plugin, (entry) => {
+        const list = this.plugin.settings[target]
+
+        // Set priority to the end of the current list
+        const newEntry = {...entry, priority: list.length}
+
+        list.push(newEntry)
+
+        void this.plugin.saveData(this.plugin.settings).then(() => {
+//          this.getSettingDefinitions()
+          this.update()
+        })
+      }).open()
+    }
 
     return [
       /* Source paths for input */
@@ -377,24 +322,54 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         heading: 'Event and calendar source path selection',
         items: [
           {
-            name: 'Source folder for events',
-            desc: 'asdADS',
-            control: {type: 'folder', key: 'eventPath', includeRoot: true},
+            name: 'Folder to search for event definitions',
+            desc: 'Can be searched recursively',
+            control: {type: 'folder', key: 'eventPath', includeRoot: true}
           },
           {
-            name: 'Search sub-folders for events',
+            name: 'Search sub-folders?',
             control: {type: 'toggle', key: 'eventPathSearchRecursive'}
+            // .setTooltip('Search recursively?', {delay: -1})
           },
           {
-            name: 'Source folder for calendar definitions',
-            control: {type: 'folder', key: 'calendarPath', includeRoot: true},
+            name: 'Folder to search for calendar definitions',
+            desc: 'Can be searched recursively',
+            control: {type: 'folder', key: 'calendarPath', includeRoot: true}
           },
           {
-            name: 'Search sub-folders for calendar definitions',
+            name: 'Search sub-folders?',
             control: {type: 'toggle', key: 'calendarPathSearchRecursive'}
+            // .setTooltip('Search recursively?', {delay: -1})
           }
         ]
       },
+      /* Default values */
+      {
+        type: 'group',
+        heading: 'Default values',
+        items: [
+          {
+            name: 'Default event calendar',
+            desc: `Fallback value for event property 'gantt-type'. Default: ${DEFAULT_SETTINGS.defaultCalendar}`,
+            control: {
+              type: 'text',
+              key: 'defaultCalendar',
+              placeholder: DEFAULT_SETTINGS.defaultCalendar,
+              validate: (value: string) => isCalendarIdentifier(value) ? undefined : 'Not a known calendar!'
+            }
+          },
+          {
+            name: 'Default event color',
+            desc: `Fallback value for event property 'gantt-color'.`,
+            control: {
+              type: 'color',
+              key: 'fallbackColor',
+              placeholder: DEFAULT_SETTINGS.fallbackColor,
+            }
+          }
+        ]
+      },
+      /* Calendar list */
       {
         type: 'list',
         heading: 'Calendars',
@@ -405,34 +380,52 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         },
         items: []
       },
+      /* Group list */
       {
         type: 'list',
         heading: 'Groups',
         emptyState: 'No group defined yet.',
         addItem: {
           name: 'Add group',
-          action: () => this.emptyMethod(),
+          action: () => openAddForm('groups')
         },
         onReorder: async (oldIndex: number, newIndex: number) => {
           let [moved] = this.plugin.settings.groups.splice(oldIndex, 1)
           if (moved) {
             this.plugin.settings.groups.splice(newIndex, 0, moved)
-
             this.plugin.settings.groups.forEach((group, index) => {
               group.priority = index
             })
-
-            await this.plugin.saveData(this.plugin.settings)
+            await this.plugin.saveSettings()
+//            this.update()
           }
         },
         onDelete: async (idx: number) => {
           this.plugin.settings.groups.splice(idx, 1)
-          await this.plugin.saveData(this.plugin.settings)
-          this.getSettingDefinitions()
+          await this.plugin.saveSettings()
+//          this.update()
         },
         items: this.plugin.settings.groups.map((group) => ({
           name: group.id,
           searchable: false,
+          render: (setting: Setting) => {
+            setting
+            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                group.visible = !group.visible
+                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+                await this.plugin.saveSettings()
+              })
+            )
+            .addColorPicker(cc => cc
+              .setValue(group.color ?? this.plugin.settings.fallbackColor)
+              .onChange(async (value) => {
+                  group.color = value
+                  await this.plugin.saveSettings()
+                }
+              )
+            )
+          },
         }))
       },
       /* Advanced */
@@ -596,7 +589,4 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
      */
   }
 
-//  private doSomething(index: number) {
-//    console.log(`index ${index}`);
-//  }
 }
