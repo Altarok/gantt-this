@@ -1,4 +1,4 @@
-import {CalendarConfig, GanttItem, GanttItemDisplayType, PluginSettings} from '../const/types'
+import {CalendarConfig, GanttItem, GanttItemDisplayType, GroupOrCalendarSettings, PluginSettings} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import {Gregorian} from '../util/gregorian'
 import FantasyGanttPlugin from '../main'
@@ -21,6 +21,10 @@ export async function getGanttDataFromFolder(
 
   const files: TFile[] = getFilteredFiles(plugin, partialPluginSettings)
 
+  const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
+    plugin.settings.calendars.map((c) => [c.id, c])
+  )
+
   for (const file of files) {
     const cache = plugin.app.metadataCache.getFileCache(file)
     const frontMatter = cache?.frontmatter
@@ -34,7 +38,7 @@ export async function getGanttDataFromFolder(
 
     const calendarId: string = FrontMatterUtil.getEventCalendarName(frontMatter, plugin.settings)
 
-    if (!calendarId || !plugin.settings.calendars[calendarId]?.visible) continue
+    if (!calendarId || !mappedCalendarConfigs[calendarId]?.visible) continue
 
     const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings)
 
@@ -121,8 +125,8 @@ function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: Plu
 function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
 
   let clr = FrontMatterUtil.getEventColor(frontMatter, settings) ??
-    settings.groups[group]?.color ??
-    settings.calendars[calendar]?.color ??
+    settings.groups.filter((value) => value.id === group)?.[0]?.color ??
+    settings.calendars.filter((value) => value.id === calendar)?.[0]?.color ??
     settings.fallbackColor
 
   if (!clr.startsWith('#') && clr in Object.keys(Colors)) {

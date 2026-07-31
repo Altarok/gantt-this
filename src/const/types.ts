@@ -94,6 +94,7 @@ export type GanttGroup = {
 }
 
 export type GroupOrCalendarSettings = {
+  id: string
   visible?: boolean
   color?: string
   priority?: number
@@ -106,8 +107,8 @@ export type PluginSettings = {
   calendarPathSearchRecursive: boolean
   defaultCalendar: string
   fallbackColor: string
-  calendars: Record<string, GroupOrCalendarSettings>
-  groups: Record<string, GroupOrCalendarSettings>
+  calendars: GroupOrCalendarSettings[]
+  groups: GroupOrCalendarSettings[]
   placeholder: number
   mouseOverEventShowBox: boolean
   mouseOverEventShowVerticalLine: boolean
@@ -135,10 +136,10 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   calendarPathSearchRecursive: false,
   defaultCalendar: 'gregorian',
   fallbackColor: '#1565c0',
-  calendars: {
-    'gregorian': {'visible': true, 'priority': 0},
-  },
-  groups: {},
+  calendars: [
+    {id: 'gregorian', visible: true, priority: 0},
+  ],
+  groups: [],
   placeholder: 0,
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,

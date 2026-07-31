@@ -30,9 +30,14 @@ export default class FantasyGanttPlugin extends Plugin {
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...loadedData,
-      calendars: {...DEFAULT_SETTINGS.calendars, ...loadedData?.calendars},
-      groups: {...DEFAULT_SETTINGS.groups, ...loadedData?.groups}
+      calendars: Array.isArray(loadedData?.calendars)
+        ? loadedData?.calendars
+        : (Array.isArray(DEFAULT_SETTINGS.calendars) ? DEFAULT_SETTINGS.calendars : []),
+      groups: Array.isArray(loadedData?.groups)
+        ? loadedData?.groups
+        : (Array.isArray(DEFAULT_SETTINGS.groups) ? DEFAULT_SETTINGS.groups : []),
     }
+
   }
 
   async saveSettings() {

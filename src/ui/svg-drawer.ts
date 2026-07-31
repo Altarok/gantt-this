@@ -1,4 +1,4 @@
-import {GanttGroup, GanttItem} from '../const/types'
+import {GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {Css, svgUrl} from '../const/strings'
 import {Gregorian} from '../util/gregorian'
@@ -65,23 +65,34 @@ export class GanttRenderEngine {
   initLayout() {
     let activeData: GanttItem[] = []
 
-    const {groups: groupSettings, calendars: calendarSettings} = this.plugin.settings
+    const {groups: groupConfigs, calendars: calendarConfigs} = this.plugin.settings
 
-    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d =>
-        d.displayType === 'bar' && (!groupSettings[d.group] || groupSettings[d.group]?.visible) && calendarSettings[d.calendarType]?.visible
+    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => {
+
+          const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
+          const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
+
+          return d.displayType === 'bar' && (!group || group?.visible) && calendar?.visible
+        }
       )
     )
-    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d =>
-        (d.displayType === 'point' || d.displayType === 'diamond' || (d.displayType === 'icon' && !!d.displayIcon))
-        && (!groupSettings[d.group] || groupSettings[d.group]?.visible) && calendarSettings[d.calendarType]?.visible
+    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => {
+
+          const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
+          const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
+
+          return (d.displayType === 'point' || d.displayType === 'diamond' || (d.displayType === 'icon' && !!d.displayIcon))
+            && (!group || group?.visible) && calendar?.visible
+        }
       )
     )
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
-    Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarSettings)
+    Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarConfigs)
+
 
     const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group)))
-    Priorities.sortCalendarAxisByPriority(groupNames, groupSettings)
+    Priorities.sortGroupAxisByPriority(groupNames, groupConfigs)
 
     this.groups = []
     let currentYOffset = this.config.margin.top
@@ -123,7 +134,7 @@ export class GanttRenderEngine {
     }
 
     /* Before going on, we have to sort groups by their respective priority */
-    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, groupSettings)
+    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, groupConfigs)
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom

@@ -7,22 +7,43 @@ import {GanttGroup, GroupOrCalendarSettings} from '../const/types'
  * @param objects to sort
  */
 function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCalendarSettings>): [string, GroupOrCalendarSettings][] {
+
+
   return Object.entries(objects).sort(([, a], [, b]) => (a.priority ?? Infinity) - (b.priority ?? Infinity))
 }
 
-function sortCalendarAxisByPriority(calendars: string[], calendarSettings: Record<string, GroupOrCalendarSettings>): void {
-  calendars.sort((a, b) => (calendarSettings[a]?.priority ?? Infinity) - (calendarSettings[b]?.priority ?? Infinity))
+/**
+ * @param calendarNames will get sorted
+ * @param calendarConfigs
+ */
+function sortCalendarAxisByPriority(calendarNames: string[], calendarConfigs: GroupOrCalendarSettings[]): void {
+
+  const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
+    calendarConfigs.map((c) => [c.id, c])
+  )
+
+  calendarNames.sort((a, b) => (mappedCalendarConfigs[a]?.priority ?? Infinity) - (mappedCalendarConfigs[b]?.priority ?? Infinity))
 }
 
-function sortGroupAxisByPriority(groups: string[], groupSettings: Record<string, GroupOrCalendarSettings>): void {
-  groups.sort((a, b) => (groupSettings[a]?.priority ?? Infinity) - (groupSettings[b]?.priority ?? Infinity))
+function sortGroupAxisByPriority(groups: string[], groupConfigs: GroupOrCalendarSettings[]): void {
+
+  const mappedGroupConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
+    groupConfigs.map((c) => [c.id, c])
+  )
+
+  groups.sort((a, b) => (mappedGroupConfigs[a]?.priority ?? Infinity) - (mappedGroupConfigs[b]?.priority ?? Infinity))
 }
 
-function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], groupSettings: Record<string, GroupOrCalendarSettings>): void {
+function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], groupConfigs: GroupOrCalendarSettings[]): void {
+
+  const mappedGroupConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
+    groupConfigs.map((c) => [c.id, c])
+  )
+
 
   groups.sort((a, b) => {
-    const pa = groupSettings[a.name]?.priority ?? Infinity
-    const pb = groupSettings[b.name]?.priority ?? Infinity
+    const pa = mappedGroupConfigs[a.name]?.priority ?? Infinity
+    const pb = mappedGroupConfigs[b.name]?.priority ?? Infinity
     return pa - pb /* a - b -> ASC -- b - a -> DESC */
   })
 
@@ -30,8 +51,8 @@ function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], groupSettings:
 
   /* Just overwrite values now */
   Object.values(groups).forEach(grp => {
-    if (groupSettings[grp.name])
-      groupSettings[grp.name]!.priority = i++
+    if (mappedGroupConfigs[grp.name])
+      mappedGroupConfigs[grp.name]!.priority = i++
   })
 
 }
