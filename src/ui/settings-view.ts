@@ -102,19 +102,23 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         desc: 'Control calendar visibility, color and order or appearance.',
         emptyState: 'No calendar defined yet.',
         addItem: {name: 'Add calendar', action: () => openAddForm('calendars')},
-        onReorder: async (oldIndex: number, newIndex: number) => {
+        onReorder: (oldIndex: number, newIndex: number) => {
           let [moved] = this.plugin.settings.calendars.splice(oldIndex, 1)
           if (moved) {
             this.plugin.settings.calendars.splice(newIndex, 0, moved)
             this.plugin.settings.calendars.forEach((cal, index) => cal.priority = index)
-            await this.plugin.saveSettings()
-            this.update()
+            void (async () => {
+              await this.plugin.saveSettings()
+              this.update()
+            })()
           }
         },
-        onDelete: async (idx: number) => {
+        onDelete: (idx: number) => {
           this.plugin.settings.calendars.splice(idx, 1)
-          await this.plugin.saveSettings()
-          this.update()
+          void (async () => {
+            await this.plugin.saveSettings()
+            this.update()
+          })()
         },
         items: this.plugin.settings.calendars.map((cal) => ({
           name: cal.id,
@@ -154,19 +158,23 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         desc: 'Control group visibility, color and order or appearance.',
         emptyState: 'No group defined yet.',
         addItem: {name: 'Add group', action: () => openAddForm('groups')},
-        onReorder: async (oldIndex: number, newIndex: number) => {
+        onReorder: (oldIndex: number, newIndex: number) => {
           let [moved] = this.plugin.settings.groups.splice(oldIndex, 1)
           if (moved) {
             this.plugin.settings.groups.splice(newIndex, 0, moved)
             this.plugin.settings.groups.forEach((grp, index) => grp.priority = index)
-            await this.plugin.saveSettings()
-            this.update()
+            void (async () => {
+              await this.plugin.saveSettings()
+              this.update()
+            })()
           }
         },
-        onDelete: async (idx: number) => {
+        onDelete: (idx: number) => {
           this.plugin.settings.groups.splice(idx, 1)
-          await this.plugin.saveSettings()
-          this.update()
+          void (async () => {
+            await this.plugin.saveSettings()
+            this.update()
+          })()
         },
         items: this.plugin.settings.groups.map((group) => ({
           name: group.id,
