@@ -57,7 +57,7 @@ function getEventIconColor(frontMatter: FrontMatterCache, settings: PluginSettin
  */
 function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings): GanttItemDisplayType | undefined {
   const value = frontMatter[settings.frontMatterProperty_event_symbol] as string ?? undefined
-  return (value &&  isGanttItemDisplayType(value) ? value : undefined)
+  return (value && isGanttItemDisplayType(value) ? value : undefined)
 }
 
 
@@ -75,8 +75,8 @@ function getEventTimestamps(frontMatter: FrontMatterCache, settings: PluginSetti
  * Default key: 'gantt-linkToHeader'
  */
 function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  const value = frontMatter[settings.frontMatterProperty_note_header]
-  return (value ? `#${value as string}` : '')
+  const value: string | undefined = frontMatter[settings.frontMatterProperty_note_header] as string
+  return (value ? `#${value}` : '')
 }
 
 export const FrontMatterUtil = {
