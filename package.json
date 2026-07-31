@@ -30,7 +30,7 @@
     "esbuild": "^0.28.1",
     "eslint": "^10.4.0",
     "eslint-plugin-obsidianmd": "^0.4.1",
-    "obsidian": "1.12.3",
+    "obsidian": "1.13.1",
     "sort-package-json": "^4.0.0",
     "stylelint": "^17.13.0",
     "stylelint-config-standard": "^40.0.0",
