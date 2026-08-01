@@ -71,7 +71,7 @@ export class RuleBasedCalendarParser {
 
     return {
       days: daysFromYears + daysFromCurrentYearMonths + day,
-      display: input
+      display: `${year}${delimiter}${months[monthIndex]!.name}${delimiter}${day}`
     }
   }
 

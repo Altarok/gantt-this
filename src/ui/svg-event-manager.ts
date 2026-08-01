@@ -170,6 +170,7 @@ export class GanttEventManager {
   }
 
   private showTooltip(d: GanttItem) {
+    if (d.displayType === 'era') return
     this.engine.hoverTitle.textContent = d.name
     this.engine.hoverDates.textContent = d.displayType === 'bar'
       ? `${d.startDateDisplay} to ${d.endDateDisplay}`
@@ -217,6 +218,7 @@ export class GanttEventManager {
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
     if (!this.mouseOverEventShowVerticalLine) return
+    if (ganttItem.displayType === 'era') return
 
     const svg = target.closest('svg')
     if (!svg) return
@@ -296,6 +298,8 @@ export class GanttEventManager {
         this.lastHoveredTarget.style.outlineOffset = ''
       }
     }
+
+    if (ganttItem.displayType === 'era') return
 
     this.lastHoveredTarget = target
 

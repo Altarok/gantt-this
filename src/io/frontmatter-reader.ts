@@ -51,15 +51,20 @@ function getEventIconColor(frontMatter: FrontMatterCache, settings: PluginSettin
   return frontMatter[settings.frontMatterProperty_event_icon_color] as string ?? undefined
 }
 
-
 /*
  * Default key: 'gantt-symbol'
+ * @param isTimeSpan true if event has two different timestamps
  */
-function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings): GanttItemDisplayType | undefined {
-  const value = frontMatter[settings.frontMatterProperty_event_symbol] as string ?? undefined
-  return (value && isGanttItemDisplayType(value) ? value : undefined)
-}
+function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings, isTimeSpan: boolean): GanttItemDisplayType {
+  let value: string | undefined = frontMatter[settings.frontMatterProperty_event_symbol] as string ?? undefined
+  if (value && !isGanttItemDisplayType(value)) value = undefined
 
+  if (isTimeSpan) {
+    return value === 'era' ? value : 'bar' /* fallback value for timespans */
+  } else {
+    return (value === 'icon' || value === 'diamond') ? value : 'point' /* fallback value for timestamps */
+  }
+}
 
 /*
  * Default keys: 'gantt-start' & 'gantt-end'

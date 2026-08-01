@@ -22,7 +22,7 @@ export class GanttRenderEngine {
   private totalHeight = 400
   private resizeObserver: ResizeObserver
 
-  private settings = {showBars: true, showPoints: true, enableGrouping: true}
+  private settings = {showEras: true, showBars: true, showPoints: true, enableGrouping: true}
   config = {
     rowHeight: 24,
     groupHeaderHeight: 25,
@@ -67,25 +67,28 @@ export class GanttRenderEngine {
 
     const {groups: groupConfigs, calendars: calendarConfigs} = this.plugin.settings
 
+
+    if (this.settings.showEras) activeData = activeData.concat(this.rawData.filter(d => {
+      const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
+      const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
+
+      return d.displayType === 'era' && (!group || group?.visible) && calendar?.visible
+    }))
     if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => {
 
-          const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
-          const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
+      const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
+      const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
 
-          return d.displayType === 'bar' && (!group || group?.visible) && calendar?.visible
-        }
-      )
-    )
+      return d.displayType === 'bar' && (!group || group?.visible) && calendar?.visible
+    }))
     if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => {
 
-          const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
-          const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
+      const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
+      const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
 
-          return (d.displayType === 'point' || d.displayType === 'diamond' || (d.displayType === 'icon' && !!d.displayIcon))
-            && (!group || group?.visible) && calendar?.visible
-        }
-      )
-    )
+      return (d.displayType === 'point' || d.displayType === 'diamond' || (d.displayType === 'icon' && !!d.displayIcon))
+        && (!group || group?.visible) && calendar?.visible
+    }))
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarConfigs)
@@ -236,16 +239,51 @@ export class GanttRenderEngine {
   renderData(width: number) {
     this.dataG.innerHTML = ''
 
+    let firstYValue: number | null = null
+
+    const totalChartHeight = this.groups.reduce((acc, g) => {
+      const header = this.settings.enableGrouping ? this.config.groupHeaderHeight : 0
+      const content = (g.lanes ?? 1) * this.config.rowHeight
+      return acc + header + content
+    }, 0)
+
     this.groups.forEach(group => {
+      firstYValue ??= group.yOffset
       const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
+
+      const headerHeight = this.settings.enableGrouping ? this.config.groupHeaderHeight : 0
+      const groupContentHeight = (group.lanes ?? 1) * this.config.rowHeight
+      const totalGroupHeight = headerHeight + groupContentHeight
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
         const laneY = groupYStart + lane! * this.config.rowHeight
-
         const displayType = d.displayType
 
-        if (displayType === 'bar') {
+        if (displayType === 'era') {
+          const x1 = this.getXPosition(d.startDays, width)
+          const x2 = this.getXPosition(d.endDays, width)
+          const barWidth = Math.max(2, x2 - x1)
+          const eraBackground = this.createSVGElement('rect')
+
+          { /* x */
+            eraBackground.setAttribute('x', x1.toString())
+            eraBackground.setAttribute('width', barWidth.toString())
+          }
+          if (d.group !== 'general') { /* y */
+            eraBackground.setAttribute('y', group.yOffset.toString())
+            eraBackground.setAttribute('height', totalGroupHeight.toString())
+          } else {
+            eraBackground.setAttribute('y', String(firstYValue!))
+            eraBackground.setAttribute('height', totalChartHeight.toString())
+          }
+          { /* color */
+            eraBackground.setAttribute('fill', d.color ?? '#ffff00')
+            eraBackground.setAttribute('fill-opacity', '0.1')
+          }
+          this.dataG.appendChild(eraBackground)
+
+        } else if (displayType === 'bar') {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
@@ -286,30 +324,20 @@ export class GanttRenderEngine {
             this.dataG.appendChild(foreignObj)
           }
 
-          /* start text */
-          const textLeftPadding = 6
-          const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
-          const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
+          { /* start text */
+            const textLeftPadding = 6
+            const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
+            const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
 
-          if (availableTextWidth > 0) {
-            const text = this.createSVGElement('text', Css.item.barText)
-            text.setAttribute('x', textX.toString())
-            text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
-            text.textContent = this.truncateText(d.name, availableTextWidth)
-            text.setAttribute('data-id', d.id.toString())
-            this.dataG.appendChild(text)
-          }
-          /* end text */
-
-
-          /* start text */
-          // const text = this.createSVGElement('text', Css.item.barText)
-          // text.setAttribute('x', (x1 + 6).toString())
-          // text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
-          // text.textContent = this.truncateText(d.name, barWidth - 6)
-          // text.setAttribute('data-id', d.id.toString())
-          // this.dataG.appendChild(text)
-          /* end text */
+            if (availableTextWidth > 0) {
+              const text = this.createSVGElement('text', Css.item.barText)
+              text.setAttribute('x', textX.toString())
+              text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
+              text.textContent = this.truncateText(d.name, availableTextWidth)
+              text.setAttribute('data-id', d.id.toString())
+              this.dataG.appendChild(text)
+            }
+          } /* end text */
 
         } else if (displayType === 'point') {
           const cx = this.getXPosition(d.startDays, width)

@@ -66,12 +66,9 @@ function createItem(
   const endRes = endDate ? Gregorian.parseToAbsoluteDays(endDate, config) : startRes
   if (!endRes) return null
 
-  let displayType: GanttItemDisplayType
-  if (!endDate || startRes.days === endRes.days) {
-    displayType = FrontMatterUtil.getEventSymbol(frontMatter, plugin.settings) ?? 'point'
-  } else {
-    displayType = 'bar'
-  }
+  const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
+
+  let displayType: GanttItemDisplayType = FrontMatterUtil.getEventSymbol(frontMatter, plugin.settings, isTimeSpan)
 
   const group = FrontMatterUtil.getEventGroup(frontMatter, plugin.settings)
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
