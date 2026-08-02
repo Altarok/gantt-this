@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "paths": {
       "@Altarok/utils": [
         "../../obsidian-dev-utils/src/index.ts"

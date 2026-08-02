@@ -14,3 +14,5 @@ data.json
 # system junk
 .DS_Store
 Thumbs.db
+# copy to Obsidian
+*.cmd
