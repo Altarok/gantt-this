@@ -150,7 +150,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     if (remainingDays > monthDays) {
       remainingDays -= monthDays
     } else {
-      monthName = monthDef.name
+      monthName =  monthDef.shortname ?? monthDef.name
       dayOfPeriod = remainingDays
       break
     }

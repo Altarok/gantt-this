@@ -69,9 +69,11 @@ export class RuleBasedCalendarParser {
       }
     }
 
+    const monthNameFinal = months[monthIndex]!.shortname ?? months[monthIndex]!.name
+
     return {
       days: daysFromYears + daysFromCurrentYearMonths + day,
-      display: `${year}${delimiter}${months[monthIndex]!.name}${delimiter}${day}`
+      display: `${year}${delimiter}${monthNameFinal}${delimiter}${day}`
     }
   }
 
