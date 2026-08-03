@@ -1,7 +1,7 @@
 import {App, ColorComponent, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DEFAULT_SETTINGS, isCalendarIdentifier} from '../const/types'
-import {AddEntryModal} from "./settings-util";
+import {AddEntryModal} from './settings-util'
 
 const VISIBLE_ICON = 'eye' /* an open eye */
 const INVISIBLE_ICON = 'eye-off' /* an open eye, but with strike through */
