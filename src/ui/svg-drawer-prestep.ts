@@ -120,6 +120,7 @@ export class GanttRender {
           if (group) {
             isVisible = !isVisible
             group.visible = isVisible
+            setIcon(button, isVisible ? 'eye' : 'eye-off')
             void this.plugin.saveSettings()
             refreshChartCallback()
           }

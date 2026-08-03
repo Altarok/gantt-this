@@ -299,7 +299,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Event color',
-            desc: 'Optional. Hex color or human-readable name',
+            desc: 'Optional. Hex color or human-readable name. Predefined are red, white, blue, green, yellow, gold, black, orange, pink and purple.',
             visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_color',
