@@ -11,8 +11,7 @@ data.json
 # dev junk
 .env
 *.log
+*.cmd
 # system junk
 .DS_Store
 Thumbs.db
-# copy to Obsidian
-*.cmd

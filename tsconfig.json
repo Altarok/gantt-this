@@ -17,7 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    /* Strict Type-Checking Guard Rails */
+    /* Strict type-checking guard rails */
     "strict": true,
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,

@@ -82,12 +82,12 @@ export class GanttRender {
         new Notice('Re-rendering Gantt...')
         this.plugin.calendarConfigsCache.clear()
         getGanttDataFromFolder(this.plugin, codeBlockContent)
-          .then(updatedData => {
-            if (renderEngine) {
-              renderEngine.updateData(updatedData)
-            }
-          })
-          .catch(err => new Notice('Failed: ' + err))
+        .then(updatedData => {
+          if (renderEngine) {
+            renderEngine.updateData(updatedData)
+          }
+        })
+        .catch(err => new Notice('Failed: ' + err))
       }, 500)
     }
 
@@ -109,10 +109,10 @@ export class GanttRender {
 
     if (this.plugin.settings.showButtonsToHideGroups) {
       /* Create buttons to hide groups */
-      const hideGroupEl = toolbar.createEl('div', {cls: 'gt-toolbar-hide-groups'})
+      const hideGroupEl = toolbar.createDiv({cls: 'gt-toolbar-hide-groups'})
       const groups = this.plugin.settings.groups
       for (const group of groups) {
-        const subGroup = hideGroupEl.createEl('div', {cls: 'gt-toolbar-hide-group'})
+        const subGroup = hideGroupEl.createDiv({cls: 'gt-toolbar-hide-group'})
         let isVisible: boolean = group?.visible ?? false
         const button = createIconButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
         subGroup.createDiv({text: group.id})
