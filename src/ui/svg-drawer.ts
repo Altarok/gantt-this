@@ -265,6 +265,7 @@ export class GanttRenderEngine {
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
           const eraBackground = this.createSVGElement('rect')
+          eraBackground.setAttribute('pointer-events', 'none')
 
           { /* x */
             eraBackground.setAttribute('x', x1.toString())
