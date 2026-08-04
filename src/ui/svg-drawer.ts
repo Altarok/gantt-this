@@ -264,7 +264,7 @@ export class GanttRenderEngine {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
-          const eraBackground = this.createSVGElement('rect')
+          const eraBackground = this.createSVGElement('rect', Css.item.era)
           eraBackground.setAttribute('pointer-events', 'none')
 
           { /* x */
@@ -280,9 +280,53 @@ export class GanttRenderEngine {
           }
           { /* color */
             eraBackground.setAttribute('fill', d.color ?? '#ffff00')
-            eraBackground.setAttribute('fill-opacity', '0.1')
+            eraBackground.setAttribute('fill-opacity', '0.25')
           }
           this.dataG.appendChild(eraBackground)
+
+          /* icon layout setup */
+          const iconSize = 14
+          const hasIcon = !!d.displayIcon
+          const iconSpacing = hasIcon ? iconSize + 4 : 0
+
+          if (hasIcon) {
+            const foreignObj = this.createSVGElement('foreignObject', Css.item.iconExternal)
+            // Placed directly at x1 without left padding
+            foreignObj.setAttribute('x', x1.toString())
+            foreignObj.setAttribute('y', (eraBackground.getAttribute('y')! /* + (this.config.rowHeight - iconSize) / 2*/ ).toString())
+            foreignObj.setAttribute('width', iconSize.toString())
+            foreignObj.setAttribute('height', iconSize.toString())
+            foreignObj.style.pointerEvents = 'none'
+
+            const iconDiv = window.createDiv()
+            iconDiv.className = Css.item.iconExternal
+            iconDiv.style.width = '100%'
+            iconDiv.style.height = '100%'
+            iconDiv.style.display = 'flex'
+            iconDiv.style.alignItems = 'center'
+            iconDiv.style.justifyContent = 'center'
+            if (d.displayIconColor) iconDiv.style.color = d.displayIconColor
+
+            setIcon(iconDiv, d.displayIcon!)
+            foreignObj.appendChild(iconDiv)
+            this.dataG.appendChild(foreignObj)
+          }
+
+          { /* start text */
+            const textLeftPadding = 6
+            const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
+            const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
+
+            if (availableTextWidth > 0) {
+              const text = this.createSVGElement('text', Css.item.eraText)
+              text.setAttribute('x', textX.toString())
+              text.setAttribute('y', (eraBackground.getAttribute('y')!).toString())
+                // (laneY + this.config.rowHeight / 2).toString())
+              text.textContent = this.truncateText(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, availableTextWidth)
+              // text.setAttribute('data-id', d.id.toString())
+              this.dataG.appendChild(text)
+            }
+          } /* end text */
 
         } else if (displayType === 'bar') {
           const x1 = this.getXPosition(d.startDays, width)

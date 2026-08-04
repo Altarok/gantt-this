@@ -289,6 +289,19 @@
   transform: translateY(4px); /* Pushes it down into the middle of the row track */
 }
 
+.gt-item.era {
+  /* empty for now */
+}
+.gt-item.era-text {
+  height: 14px; /* config.rowHeight (24) - 8 */
+  transform: translateY(12px);
+  dominant-baseline: middle;
+
+  /* prevent any interaction (x3) */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .gt-item.bar-text {
   height: 14px; /* config.rowHeight (24) - 8 */
   transform: translateY(1px);

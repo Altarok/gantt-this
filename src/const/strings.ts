@@ -22,6 +22,8 @@ export const Css = {
     barText: 'gt-item bar-text',
     circle: 'gt-item point-circle',
     diamond: 'gt-item point-diamond',
+    era: 'gt-item era',
+    eraText: 'gt-item era-text',
     icon: 'gt-item point-icon',
     iconExternal: 'gt-item point-icon-external',
   },

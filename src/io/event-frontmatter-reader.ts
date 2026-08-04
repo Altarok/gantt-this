@@ -45,6 +45,8 @@ export async function getGanttDataFromFolder(
     const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate ?? startDate, calendarId, config, file, frontMatter, ++incrementalId)
     if (!ganttItem) continue
 
+    // console.log(ganttItem)
+
     items.push(ganttItem)
   }
 
