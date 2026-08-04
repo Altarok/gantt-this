@@ -318,6 +318,10 @@
   transform: translateY(12px); /* Pushes the center down to rowHeight / 2 */
 }
 
+.gt-item.vertical-line{
+  stroke-width: 2;
+}
+
 .gt-item.point-diamond {
   /* Nothing yet */
 }

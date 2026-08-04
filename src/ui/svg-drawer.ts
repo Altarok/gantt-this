@@ -86,7 +86,7 @@ export class GanttRenderEngine {
       const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
       const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
 
-      return (d.displayType === 'point' || d.displayType === 'diamond' || (d.displayType === 'icon' && !!d.displayIcon))
+      return (d.displayType === 'point' || d.displayType === 'diamond' || d.displayType === 'vertical-line' || (d.displayType === 'icon' && !!d.displayIcon))
         && (!group || group?.visible) && calendar?.visible
     }))
 
@@ -260,7 +260,20 @@ export class GanttRenderEngine {
         const laneY = groupYStart + lane! * this.config.rowHeight
         const displayType = d.displayType
 
-        if (displayType === 'era') {
+        if (displayType === 'vertical-line') {
+          const x1 = this.getXPosition(d.startDays, width)
+
+          const line = this.createSVGElement('line', Css.item.line)
+          line.setAttribute('x1', x1.toString())
+          line.setAttribute('x2', x1.toString())
+          // line.setAttribute('y', laneY.toString())
+          line.setAttribute('y1', String(firstYValue ?? 0))
+          line.setAttribute('y2', totalChartHeight.toString())
+          if (d.color) line.setAttribute('stroke', d.color ?? 'red')
+          line.setAttribute('data-id', d.id.toString())
+          this.dataG.appendChild(line)
+
+        } else if (displayType === 'era') {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)

@@ -68,6 +68,7 @@ export const GANTT_ITEM_DISPLAY_TYPE = [
   'bar', 'point', /* = default values */
   'icon', /* = must be accompanied by a lucide-dev icon */
   'era', /* = must be accompanied by differing start and end dates */
+  'vertical-line', /* can not come with icon */
   'diamond'] as const
 export type GanttItemDisplayType = (typeof GANTT_ITEM_DISPLAY_TYPE)[number]
 

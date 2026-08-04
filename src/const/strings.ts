@@ -26,6 +26,7 @@ export const Css = {
     eraText: 'gt-item era-text',
     icon: 'gt-item point-icon',
     iconExternal: 'gt-item point-icon-external',
+    line: 'gt-item vertical-line',
   },
   group: {
     text: 'gt-group-text',
