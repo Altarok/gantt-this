@@ -1,6 +1,12 @@
 import {CalendarConfig, LeapYearRule} from '../const/types'
 import {RuleBasedCalendarParser} from './rule-based-calendar-parser'
 
+export const Dates = {
+  parseToAbsoluteDays,
+  parseDaysToGregorianDateString,
+  parseDaysToNonGregorianDatString,
+  formatDaysToCalendarString
+}
 
 export function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
@@ -38,6 +44,9 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
   const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
 
   return {
+    /*
+     * 719162 = days between 1-1-1 and 1970-1-1
+     */
     days: epochDaysOffset + totalDays + 719162,
     display: cleanInput
   }
@@ -150,7 +159,7 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     if (remainingDays > monthDays) {
       remainingDays -= monthDays
     } else {
-      monthName =  monthDef.shortname ?? monthDef.name
+      monthName = monthDef.shortname ?? monthDef.name
       dayOfPeriod = remainingDays
       break
     }
@@ -201,9 +210,3 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
   return stringSegments.join(config.delimiter)
 }
 
-export const Gregorian = {
-  parseToAbsoluteDays,
-  parseDaysToGregorianDateString,
-  parseDaysToNonGregorianDatString,
-  formatDaysToCalendarString
-}

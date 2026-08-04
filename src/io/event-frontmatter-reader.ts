@@ -1,6 +1,6 @@
 import {CalendarConfig, GanttItem, GanttItemDisplayType, GroupOrCalendarSettings, PluginSettings} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
-import {Gregorian} from '../util/gregorian'
+import {Dates} from '../util/dates'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {Colors} from "../const/strings";
@@ -60,10 +60,10 @@ function createItem(
   config: CalendarConfig | null,
   file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
 
-  const startRes = Gregorian.parseToAbsoluteDays(startDate, config)
+  const startRes = Dates.parseToAbsoluteDays(startDate, config)
   if (!startRes) return null
 
-  const endRes = endDate ? Gregorian.parseToAbsoluteDays(endDate, config) : startRes
+  const endRes = endDate ? Dates.parseToAbsoluteDays(endDate, config) : startRes
   if (!endRes) return null
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
