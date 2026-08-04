@@ -311,7 +311,7 @@ export class GanttRenderEngine {
             foreignObj.setAttribute('height', iconSize.toString())
             foreignObj.style.pointerEvents = 'none'
 
-            const iconDiv = window.document.createElement('div')
+            const iconDiv = window.createDiv()
             iconDiv.className = Css.item.iconExternal
             iconDiv.style.width = '100%'
             iconDiv.style.height = '100%'
@@ -391,7 +391,7 @@ export class GanttRenderEngine {
           foreignObj.style.pointerEvents = 'none'
 
           /* Create a standard HTML div for setIcon */
-          const iconDiv = window.document.createElement('div')
+          const iconDiv = window.createDiv()
           iconDiv.className = Css.item.iconExternal
           iconDiv.style.width = '100%'
           iconDiv.style.height = '100%'
@@ -511,7 +511,7 @@ export class GanttRenderEngine {
   }
 
   private measureTextWidth(text: string): number {
-    const canvas = window.document.createElement('canvas')
+    const canvas = window.createEl('canvas')
     const context = canvas.getContext('2d')
     if (!context) return text.length * 8
 
