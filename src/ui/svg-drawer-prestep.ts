@@ -67,7 +67,7 @@ export class GanttRender {
       const lbl = toolbar.createEl('label', {cls: Css.inputLabel})
       const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
       input.checked = checked
-      lbl.createEl('span', {text: ` ${label}`})
+      lbl.createSpan({text: ` ${label}`})
       return input
     }
 
@@ -97,7 +97,7 @@ export class GanttRender {
     const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
 
     /* Create 6 pan, zoom, settings buttons */
-    const zoomGroupEl = toolbar.createEl('div', {cls: 'gt-toolbar-zoom-group'})
+    const zoomGroupEl = toolbar.createDiv({cls: 'gt-toolbar-zoom-group'})
 
     const panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
     const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
