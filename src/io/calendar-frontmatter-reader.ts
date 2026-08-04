@@ -16,21 +16,11 @@ const yamlRegex = /```yaml\s([\s\S]*?)```/
 export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
                                             calendarId: string,
                                             pluginSettings: PluginSettings): Promise<CalendarConfig | null> {
-
-//  if (calendarId === 'french-revolution') debugger
-
-  if (!calendarId || !pluginSettings) {
-    debugger
-    return null
-  }
+  if (!calendarId || !pluginSettings) return null
 
   const cachedCalendarConfig = plugin.calendarConfigsCache.get(calendarId)
 
-
-  if (cachedCalendarConfig) {
-    console.log(`Found calendar config for calendar id ${calendarId}. Return cached calendar config.`)
-    return cachedCalendarConfig
-  }
+  if (cachedCalendarConfig) return cachedCalendarConfig
 
   let targetFile = getMatchingMarkdownFile(plugin, pluginSettings, calendarId)
 
@@ -48,7 +38,6 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
     newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.epochGregorian)
 
     /* Cache calendar: */
-    console.log(`Caching calendar config for calendar id ${calendarId}.`)
     plugin.calendarConfigsCache.set(calendarId, newCalendarConfig)
     return newCalendarConfig
   } catch (_error) {

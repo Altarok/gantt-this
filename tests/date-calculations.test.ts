@@ -135,7 +135,6 @@ describe('Creation of axis date description works for', () => {
     expect(french(365 * 4)).toBe('4-leap_days-4')
     expect(french(365 * 5)).toBe('5-leap_days-4')
     expect(french(365 * 6)).toBe('6-leap_days-3') // skipped 1 leap year
-
   })
 
   it('non-positive french-revolution dates', () => {
@@ -158,7 +157,6 @@ describe('Creation of axis date description works for', () => {
     expect(french(-304)).toBe('0-Frimaire-1')
     expect(french(-334)).toBe('0-Brumaire-1')
     expect(french(-364)).toBe('0-Vendémiaire-1')
-
   })
 })
 
