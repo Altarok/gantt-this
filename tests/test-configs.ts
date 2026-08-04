@@ -1,194 +1,111 @@
 import {CalendarConfig} from '../src/const/types'
 
 export const gregorianConfig: CalendarConfig = {
-  'id': 'gregorian',
-  'name': 'Gregorian Calendar',
-  'epochGregorian': '0001-01-01',
-  'type': 'rule-based',
-  'delimiter': '-',
-  'ruleBasedDetails': {
-    'daysInStandardYear': 365,
-    'leapYearRule': {
-      'ruleType': 'gregorian',
-      'applyToMonthIndex': 1
-    },
-    'format': [
-      'year',
-      'month',
-      'day'
-    ],
-    'months': [
-      {
-        'name': 'January',
-        'days': 31
-      },
-      {
-        'name': 'February',
-        'days': 28
-      },
-      {
-        'name': 'March',
-        'days': 31
-      },
-      {
-        'name': 'April',
-        'days': 30
-      },
-      {
-        'name': 'May',
-        'days': 31
-      },
-      {
-        'name': 'June',
-        'days': 30
-      },
-      {
-        'name': 'July',
-        'days': 31
-      },
-      {
-        'name': 'August',
-        'days': 31
-      },
-      {
-        'name': 'September',
-        'days': 30
-      },
-      {
-        'name': 'October',
-        'days': 31
-      },
-      {
-        'name': 'November',
-        'days': 30
-      },
-      {
-        'name': 'December',
-        'days': 31
-      }
+  id: 'gregorian',
+  name: 'Gregorian Calendar',
+  epochGregorian: 0,
+  offsetToDayZero: 0,
+  type: 'rule-based',
+  delimiter: '-',
+  ruleBasedDetails: {
+    daysInStandardYear: 365,
+    leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 1},
+    format: ['year', 'month', 'day'],
+    months: [
+      {shortname: 'Jan', name: 'January', days: 31},
+      {shortname: 'Feb', name: 'February', days: 28},
+      {shortname: 'Mar', name: 'March', days: 31},
+      {shortname: 'Apr', name: 'April', days: 30},
+      {shortname: 'May', name: 'May', days: 31},
+      {shortname: 'Jun', name: 'June', days: 30},
+      {shortname: 'Jul', name: 'July', days: 31},
+      {shortname: 'Aug', name: 'August', days: 31},
+      {shortname: 'Sep', name: 'September', days: 30},
+      {shortname: 'Oct', name: 'October', days: 31},
+      {shortname: 'Nov', name: 'November', days: 30},
+      {shortname: 'Dec', name: 'December', days: 31}
     ]
   }
 }
 
 export const shireConfig: CalendarConfig = {
-  'id': 'shire',
-  'name': 'Shire Reckoning',
-  'epochGregorian': '0000-12-23',
-  'type': 'rule-based',
-  'delimiter': '-',
-  'ruleBasedDetails': {
-    'daysInStandardYear': 365,
-    'leapYearRule': {
-      'ruleType': 'interval',
-      'intervalYears': 4,
-      'extraDays': 1,
-      'applyToMonthIndex': 8
+  id: 'shire',
+  name: 'Shire Reckoning',
+  epochGregorian: {year: 0, month: 12, day: 23},
+  offsetToDayZero: -8,
+  type: 'rule-based',
+  delimiter: '-',
+  ruleBasedDetails: {
+    daysInStandardYear: 365,
+    leapYearRule: {
+      ruleType: 'interval',
+      intervalYears: 4,
+      extraDays: 1,
+      applyToMonthIndex: 8
     },
-    'format': [
-      'year',
-      'month',
-      'day'
-    ],
-    'months': [
-      {
-        'name': '2. Yule',
-        'days': 1,
-        'isIntercalary': true
-      },
-      {
-        'name': 'Afteryule',
-        'days': 30
-      },
-      {
-        'name': 'Solmath',
-        'days': 30
-      },
-      {
-        'name': 'Rethe',
-        'days': 30
-      },
-      {
-        'name': 'Astron',
-        'days': 30
-      },
-      {
-        'name': 'Thrimidge',
-        'days': 30
-      },
-      {
-        'name': 'Forelithe',
-        'days': 30
-      },
-      {
-        'name': '1. Lithe',
-        'days': 1,
-        'isIntercalary': true
-      },
-      {
-        'name': 'Midyear',
-        'days': 1,
-        'isIntercalary': true
-      },
-      {
-        'name': '2. Lithe',
-        'days': 1,
-        'isIntercalary': true
-      },
-      {
-        'name': 'Wedmath',
-        'days': 30
-      },
-      {
-        'name': 'Halimath',
-        'days': 30
-      },
-      {
-        'name': 'Winterfilth',
-        'days': 30
-      },
-      {
-        'name': 'Blotmath',
-        'days': 30
-      },
-      {
-        'name': 'Foreyule',
-        'days': 30
-      },
-      {
-        'name': '1. Yule',
-        'days': 1,
-        'isIntercalary': true
-      }
+    format: ['year', 'month', 'day'],
+    months: [
+      {name: '2. Yule', days: 1, isIntercalary: true},
+      {name: 'Afteryule', days: 30},
+      {name: 'Solmath', days: 30},
+      {name: 'Rethe', days: 30},
+      {name: 'Astron', days: 30},
+      {name: 'Thrimidge', days: 30},
+      {name: 'Forelithe', days: 30},
+      {name: '1. Lithe', days: 1, isIntercalary: true},
+      {name: 'Midyear', days: 1, isIntercalary: true},
+      {name: '2. Lithe', days: 1, isIntercalary: true},
+      {name: 'Wedmath', days: 30},
+      {name: 'Halimath', days: 30},
+      {name: 'Winterfilth', days: 30},
+      {name: 'Blotmath', days: 30},
+      {name: 'Foreyule', days: 30},
+      {name: '1. Yule', days: 1, isIntercalary: true}
     ]
   }
 }
 
 export const mayanConfig: CalendarConfig = {
-  'id': 'mayan',
-  'name': 'Mayan Long Count',
-  'epochGregorian': '-003113-08-12', /* -1,137,141 */
-  'type': 'positional',
-  'delimiter': '.',
-  'positionalUnits': [
-    {
-      'name': 'baktun',
-      'days': 144000
-    },
-    {
-      'name': 'katun',
-      'days': 7200
-    },
-    {
-      'name': 'tun',
-      'days': 360
-    },
-    {
-      'name': 'uinal',
-      'days': 20
-    },
-    {
-      'name': 'kin',
-      'days': 1
-    }
+  id: 'mayan',
+  name: 'Mayan Long Count',
+  epochGregorian: {year: -3114, month: 8, day: 11},
+  offsetToDayZero: -1_137_507,
+  type: 'positional',
+  delimiter: '.',
+  positionalUnits: [
+    {name: 'baktun', days: 144000},
+    {name: 'katun', days: 7200},
+    {name: 'tun', days: 360},
+    {name: 'uinal', days: 20},
+    {name: 'kin', days: 1}
   ]
+}
+
+export const frenchRevolutionConfig: CalendarConfig = {
+  id: 'french-revolution',
+  name: 'French Revolution',
+  epochGregorian: {year: 1792, month: 9, day: 22},
+  offsetToDayZero: 654415,
+  type: 'rule-based',
+  delimiter: '-',
+  ruleBasedDetails: {
+    daysInStandardYear: 365,
+    leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 12},
+    format: ['year', 'month', 'day'],
+    months: [
+      {name: 'Vendémiaire', days: 30},
+      {name: 'Brumaire', days: 30},
+      {name: 'Frimaire', days: 30},
+      {name: 'Nivôse', days: 30},
+      {name: 'Pluviôse', days: 30},
+      {name: 'Ventôse', days: 30},
+      {name: 'Germinal', days: 30},
+      {name: 'Floréal', days: 30},
+      {name: 'Prairial', days: 30},
+      {name: 'Messidor', days: 30},
+      {name: 'Thermidor', days: 30},
+      {name: 'Fructidor', days: 30},
+      {name: 'leap_days', days: 5, isIntercalary: true}
+    ]
+  }
 }

@@ -2,10 +2,8 @@ import {CalendarConfig, LeapYearRule} from '../const/types'
 import {RuleBasedCalendarParser} from './rule-based-calendar-parser'
 
 export const Dates = {
-  parseToAbsoluteDays,
-  parseDaysToGregorianDateString,
-  parseDaysToNonGregorianDatString,
-  formatDaysToCalendarString
+  parseToAbsoluteDays, // pre-runtime, during event loading
+  createAxisDateDescription // called during runtime, to get axis description
 }
 
 export function isLeapYear(year: number): boolean {
@@ -19,14 +17,15 @@ export function isCustomLeapYear(year: number, rule?: LeapYearRule): boolean {
   return false
 }
 
-function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfig) {
-  if (!cleanInput.includes(config.delimiter)) return null
+/* Parse _positional_ date to absolute number. Done once per loaded event, ___not during runtime___. */
+function parsePositionalToAbsoluteDays(cleanInput: string, calendarConfig: CalendarConfig) {
+  if (!cleanInput.includes(calendarConfig.delimiter)) return null
 
-  const segments = cleanInput.split(config.delimiter).map(Number)
+  const segments = cleanInput.split(calendarConfig.delimiter).map(Number)
   let totalDays = 0
   let valid = true
 
-  const units = config.positionalUnits ?? []
+  const units = calendarConfig.positionalUnits ?? []
   if (units.length === 0) return null
 
   units.forEach((unit, idx) => {
@@ -40,18 +39,13 @@ function parsePositionalToAbsoluteDays(cleanInput: string, config: CalendarConfi
 
   if (!valid || segments.length !== units.length) return null
 
-  const epochDate = new Date(config.epochGregorian)
-  const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
-
   return {
-    /*
-     * 719162 = days between 1-1-1 and 1970-1-1
-     */
-    days: epochDaysOffset + totalDays + 719162,
+    days: calendarConfig.offsetToDayZero + totalDays,
     display: cleanInput
   }
 }
 
+/* Parse date to absolute number. Done once per loaded  event, ___not during runtime___. */
 function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
 
   if (!input || !config) return null
@@ -62,23 +56,49 @@ function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { da
   if (config?.type === 'positional') {
     result = parsePositionalToAbsoluteDays(cleanInput, config)
   } else if (config?.type === 'rule-based') {
-    result = RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config.ruleBasedDetails!, config.delimiter)
+    result = RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config, config.delimiter)
   }
 
   return result
 }
 
+/**
+ * Calculates days from 0001-01-01 (Day 1) to Jan 1st of `year`.
+ * Handles both positive and negative years correctly.
+ */
+function getDaysToYearStart(year: number): number {
+  const y = year - 1
+  return y * 365 + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400)
+}
+
 function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   let remainingDays = days
 
-  /* Approximate year selection step */
-  let year = Math.floor((remainingDays - 1) / 365.2425) + 1
-  let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+//  /* Approximate year selection step */
+//  let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
+//  let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+//
+//  /* Micro adjust to pinpoint exact leap layout boundary alignment */
+//  while (totalDaysToYearStart >= remainingDays) {
+//    year--
+//    totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+//  }
 
-  /* Micro adjust to pinpoint exact leap layout boundary alignment */
+  let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
+
+  /* Calculate days from Day 1 (0001-01-01) to the start of `year` */
+  let totalDaysToYearStart = getDaysToYearStart(year)
+
+  /* Adjust year downward if our estimate overshot */
   while (totalDaysToYearStart >= remainingDays) {
     year--
-    totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
+    totalDaysToYearStart = getDaysToYearStart(year)
+  }
+
+  /* Adjust year upward if our estimate undershot */
+  while (getDaysToYearStart(year + 1) < remainingDays) {
+    year++
+    totalDaysToYearStart = getDaysToYearStart(year)
   }
 
   /* Calculate 1-based day of the year (e.g., Jan 1st is Day 1) */
@@ -91,60 +111,91 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
     if (remainingDays > daysInMonth) {
       remainingDays -= daysInMonth
       month++
-    } else break
+    } else {
+      break
+    }
   }
+
+  if (month > 12) {
+    month -= 12
+    year += 1
+  }
+
+  const absYear = Math.abs(year)
+  const paddedYear = absYear.toString().padStart(4, '0')
+  const yearString = year < 0 ? `-${paddedYear}` : paddedYear
   const day = remainingDays
 
-  return `${year.toString().padStart(4, '0')}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
+  return `${yearString}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
 }
 
-function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) {
+function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig) {
+
   const details = config.ruleBasedDetails
   if (!details) return `Error: No details found for ${config.id}`
 
-  let remainingDays = days
+  const isLeapLocal = (customYear: number): boolean => {
+    if (details.leapYearRule?.ruleType === "gregorian" && typeof config.epochGregorian === 'object') {
+      // Convert custom year back to target Gregorian year based on epoch
+      const epochYear = config.epochGregorian.year
+      const targetGregorianYear = epochYear + (customYear - 1)
+      return isLeapYear(targetGregorianYear)
+    }
+    return isCustomLeapYear(customYear, details.leapYearRule)
+  }
+
+  let remainingDays = days - config.offsetToDayZero
   let year = 1
 
-  /*
-  * TODO block entfernen?
-   */
-  /* Fast-forward large day counts safely if using an interval rule */
+  /* Fast-forward or rewind large day counts using interval cycles */
   if (details.leapYearRule?.ruleType === 'interval' && details.leapYearRule.intervalYears) {
     const interval = details.leapYearRule.intervalYears
     const extra = details.leapYearRule.extraDays ?? 1
 
-    /*  Calculate average days in one full interval cycle (e.g., 4 years) */
+    /* Calculate average days in one full interval cycle (e.g., 4 years) */
     const daysInCycle = (details.daysInStandardYear * interval) + extra
 
-    if (remainingDays > daysInCycle) {
+    if (Math.abs(remainingDays) > daysInCycle) {
       const cycles = Math.floor(remainingDays / daysInCycle)
       year += cycles * interval
       remainingDays -= cycles * daysInCycle
     }
   }
 
+  /* Determine the Year (birectional adjustment) */
+  if (remainingDays > 0) {
+    while (true) {
+      /* Calculate the length of the current year being evaluated */
+      const isLeap = isLeapLocal(year)
+      const daysInYear = details.daysInStandardYear +
+        (isLeap ? (details.leapYearRule?.extraDays ?? 1) : 0)
 
-  /* Determine the Year */
-  while (true) {
-    /* Calculate the length of the current year being evaluated */
-    const isLeap = isCustomLeapYear(year, details.leapYearRule)
-    const daysInYear = details.daysInStandardYear +
-      (isLeap ? (details.leapYearRule?.extraDays ?? 1) : 0)
+      if (remainingDays > daysInYear) {
+        remainingDays -= daysInYear
+        year++
+      } else {
+        break
+      }
+    }
+  } else {
+    // For negative days or 0, decrement year until remainingDays fits into positive day-of-year range
+    while (remainingDays <= 0) {
+      year--
+      const isLeap = isLeapLocal(year)
+      const daysInYear = details.daysInStandardYear + (isLeap ? (details.leapYearRule?.extraDays ?? 1) : 0)
 
-    if (remainingDays > daysInYear) {
-      remainingDays -= daysInYear
-      year++
-    } else break
+      remainingDays += daysInYear
+    }
   }
 
   /* At this point, remainingDays represents the day offset inside the current 'year' (1-indexed base).
    If remainingDays was 0 (which shouldn't happen with 1-based days), we default it to 1 */
-  if (remainingDays <= 0) remainingDays = 1
+//  if (remainingDays <= 0) remainingDays = 1
 
   /* Determine the Month and Day */
   let monthName = ''
   let dayOfPeriod = 1
-  const isLeap = isCustomLeapYear(year, details.leapYearRule)
+  const isLeap = isLeapLocal(year)
 
   for (let m = 0; m < details.months.length; m++) {
     const monthDef = details.months[m]
@@ -165,10 +216,14 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
     }
   }
 
-  /* Construct the dynamic string based on details.format (e.g. ['year', 'month', 'day']) */
+  /* Construct the dynamic string based on details.format */
   const format = details.format || ['year', 'month', 'day']
   const outputParts = format.map(component => {
-    if (component === 'year') return year.toString()
+    if (component === 'year') {
+      const absYear = Math.abs(year)
+      const paddedYear = absYear.toString().padStart(4, '0')
+      return year < 0 ? `-${paddedYear}` : year.toString()
+    }
     if (component === 'month') return monthName
     if (component === 'day') return dayOfPeriod.toString()
     return ''
@@ -178,27 +233,22 @@ function parseDaysToNonGregorianDatString(days: number, config: CalendarConfig) 
 }
 
 /* Update the axis label formatter inside the Gantt render engine class */
-function formatDaysToCalendarString(days: number, config: CalendarConfig | null): string {
+function createAxisDateDescription(days: number, config: CalendarConfig | null): string {
 
-  if (!config) {
-    const dateObj = new Date(days * 24 * 60 * 60 * 1000)
-    return dateObj.toISOString().split('T')[0]!
-  }
+  /* Workaround: fall back to default gregorian, but since 1970 */
+  if (!config)
+    return new Date(days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!
 
   if (config.type === 'rule-based') {
     if (config.id === 'gregorian') {
       return parseDaysToGregorianDateString(days, config)
     } else {
-      return parseDaysToNonGregorianDatString(days, config)
+      return parseDaysToNonGregorianDateString(days, config)
     }
   }
 
   /* STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.) */
-  const epochDate = new Date(config.epochGregorian)
-  const epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
-  let localDays = days - epochDaysOffset
-
-  if (localDays < 0) return `BCE (${Math.abs(localDays)} days)`
+  let localDays = days - config.offsetToDayZero
 
   const stringSegments: string[] = []
   config.positionalUnits?.forEach(unit => {
@@ -209,4 +259,3 @@ function formatDaysToCalendarString(days: number, config: CalendarConfig | null)
 
   return stringSegments.join(config.delimiter)
 }
-

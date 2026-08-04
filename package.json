@@ -19,7 +19,8 @@
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "dependencies": {
-    "@Altarok/obsidian-dev-utils": "github:Altarok/obsidian-dev-utils"
+    "@Altarok/obsidian-dev-utils": "github:Altarok/obsidian-dev-utils",
+    "@vitest/coverage-v8": "^4.1.10"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

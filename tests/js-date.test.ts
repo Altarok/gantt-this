@@ -5,24 +5,50 @@ import {describe, expect, it} from 'vitest'
   */
 const zeroOffset = -719162
 
+/**
+ * @param epochGregorian beware that month has an offset of 1 -> month input = 1 -> january
+ */
+const newOffsetDate = (epochGregorian: { year: number, month: number, day: number } | number = 0) => {
+  /* Always start with Monday, January 1st, Year 1 */
+  const date = new Date('0001-01-01')
+
+  if (typeof epochGregorian === 'number') {
+    date.setDate(date.getDate() + epochGregorian as number)
+  } else {
+    date.setFullYear(epochGregorian.year, epochGregorian.month - 1, epochGregorian.day)
+  }
+  return date
+}
+
+
 describe('EpochGregorian date offset calculation', () => {
 
   it('works without offset', () => {
 
-    let epochDate = new Date('0001-01-01')
+    let epochDate = newOffsetDate()
     let epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
 
     expect(epochDaysOffset).toBe(zeroOffset)
+    expect(epochDate.getFullYear()).toBe(1)
+    expect(epochDate.getMonth()).toBe(0) /* 0 is January */
+    expect(epochDate.getDay()).toBe(1)
 
-    epochDate = new Date('0001-01-02')
+    epochDate = newOffsetDate({year: 1, month: 1, day: 1})
     epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
 
-    expect(epochDaysOffset).toBe(zeroOffset + 1)
+    expect(epochDaysOffset).toBe(zeroOffset)
+    expect(epochDate.getFullYear()).toBe(1)
+    expect(epochDate.getMonth()).toBe(0) /* 0 is January */
+    expect(epochDate.getDay()).toBe(1)
 
-    epochDate = new Date('0001-01-03')
+
+    epochDate = newOffsetDate({year: 1, month: 1, day: 3})
     epochDaysOffset = Math.floor(epochDate.getTime() / (24 * 60 * 60 * 1000))
 
     expect(epochDaysOffset).toBe(zeroOffset + 2)
+    expect(epochDate.getFullYear()).toBe(1)
+    expect(epochDate.getMonth()).toBe(0) /* 0 is January */
+    expect(epochDate.getDay()).toBe(3)
 
   })
 })

@@ -44,7 +44,14 @@ export type RuleBasedDetails = {
 export type CalendarConfig = {
   id: string
   name: string
-  epochGregorian: string
+  /* Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
+  epochGregorian: {
+    year: number,
+    month: number,
+    day: number
+  } | number
+  /* Not defined by user, calculated based on epochGregorian */
+  offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in markdown */
   type: CalendarConfigType
   delimiter: string
   positionalUnits?: {

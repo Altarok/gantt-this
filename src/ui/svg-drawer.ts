@@ -476,7 +476,7 @@ export class GanttRenderEngine {
           const text = this.createSVGElement('text', Css.axis.text)
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
-          text.textContent = Dates.formatDaysToCalendarString(currDays, config)
+          text.textContent = Dates.createAxisDateDescription(currDays, config)
 
           ticksG.appendChild(text)
           lastTextX = xPos

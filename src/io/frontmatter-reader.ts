@@ -2,6 +2,13 @@ import {FrontMatterCache} from 'obsidian'
 import {GanttItemDisplayType, isGanttItemDisplayType, PluginSettings} from '../const/types'
 
 /*
+ * Default key: 'gantt-type-definition'
+ */
+function isMatchingCalendarDefinition(frontMatter: FrontMatterCache, settings: PluginSettings, calendarId: string): boolean {
+  return frontMatter[settings.frontMatterProperty_calendar_name] === calendarId
+}
+
+/*
  * Default key: 'gantt-item'
  */
 function isFileRelevant(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
@@ -85,6 +92,7 @@ function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettin
 }
 
 export const FrontMatterUtil = {
+  isMatchingCalendarDefinition,
   isFileRelevant,
   getEventCalendarName,
   getEventColor,
