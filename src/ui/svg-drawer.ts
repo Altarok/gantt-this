@@ -1,11 +1,11 @@
 import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
+import {GanttChartSettings, GanttGroup, GanttItem} from '../const/types'
 import {Css} from '../const/constants'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
-import {createAxisDateDescription} from "../util/dates";
-import {Util} from "./svg-drawer-util";
+import {createAxisDateDescription} from '../util/dates'
+import {Util} from './svg-drawer-util'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -23,7 +23,7 @@ export class GanttRenderEngine {
   private totalHeight = 400
   private resizeObserver: ResizeObserver
 
-  private settings = {showEras: true, showBars: true, showPoints: true, enableGrouping: true}
+  private settings: GanttChartSettings = {showEras: true, showBars: true, showPoints: true, enableGrouping: true}
   config = {
     rowHeight: 24,
     groupHeaderHeight: 25,
@@ -61,32 +61,11 @@ export class GanttRenderEngine {
   }
 
   initLayout() {
-    let activeData: GanttItem[] = []
+
+
+    let activeData: GanttItem[] = Util.filterActivelyShownEventData(this.rawData, this.plugin.settings, this.settings)
 
     const {groups: groupConfigs, calendars: calendarConfigs} = this.plugin.settings
-
-
-    if (this.settings.showEras) activeData = activeData.concat(this.rawData.filter(d => {
-      const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
-      const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
-
-      return d.displayType === 'era' && (!group || group?.visible) && calendar?.visible
-    }))
-    if (this.settings.showBars) activeData = activeData.concat(this.rawData.filter(d => {
-
-      const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
-      const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
-
-      return d.displayType === 'bar' && (!group || group?.visible) && calendar?.visible
-    }))
-    if (this.settings.showPoints) activeData = activeData.concat(this.rawData.filter(d => {
-
-      const group: GroupOrCalendarSettings | undefined = groupConfigs.filter((value) => value.id === d.group)?.[0] ?? undefined
-      const calendar: GroupOrCalendarSettings | undefined = calendarConfigs.filter((value) => value.id === d.calendarType)?.[0] ?? undefined
-
-      return (d.displayType === 'point' || d.displayType === 'diamond' || d.displayType === 'vertical-line' || (d.displayType === 'icon' && !!d.displayIcon))
-        && (!group || group?.visible) && calendar?.visible
-    }))
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarConfigs)

@@ -107,6 +107,13 @@ export type GroupOrCalendarSettings = {
   priority?: number
 }
 
+export type GanttChartSettings = {
+  showEras: boolean
+  showBars: boolean
+  showPoints: boolean
+  enableGrouping: boolean
+}
+
 export type PluginSettings = {
   eventPath: string
   eventPathSearchRecursive: boolean
