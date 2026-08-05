@@ -1,6 +1,6 @@
 import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {GanttChartSettings, GanttGroup, GanttItem} from '../const/types'
+import {CalendarConfig, GanttChartSettings, GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
 import {Css} from '../const/constants'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
@@ -118,9 +118,7 @@ export class GanttRenderEngine {
   }
 
   initChartStructure() {
-    if (this.eventManager) {
-      this.eventManager.destroy()
-    }
+    if (this.eventManager) this.eventManager.destroy()
 
     this.container.innerHTML = ''
 
@@ -234,7 +232,7 @@ export class GanttRenderEngine {
 
         if (displayType === 'vertical-line') {
           const x1 = this.getXPosition(d.startDays, width)
-          const line = Util.createVerticalLine(this.plugin.settings,  d, x1, width, firstYValue!, totalChartHeight)
+          const line = Util.createVerticalLine(this.plugin.settings, d, x1, width, firstYValue!, totalChartHeight)
           this.dataG.appendChild(line)
         } else if (displayType === 'era') {
           const x1 = this.getXPosition(d.startDays, width)
@@ -462,7 +460,7 @@ export class GanttRenderEngine {
       ticksG.appendChild(baseline)
 
       let lastTextX = -999
-      const config = this.plugin.calendarConfigsCache.get(calType) ?? null
+      const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
 
       for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
         const xPos = this.getXPosition(currDays, width)
@@ -489,12 +487,14 @@ export class GanttRenderEngine {
           const text = Util.createSVGElement('text', Css.axis.text)
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
-          text.textContent = createAxisDateDescription(currDays, config)
+          text.textContent = createAxisDateDescription(currDays, calendarConfig)
 
           ticksG.appendChild(text)
           lastTextX = xPos
         }
       }
+
+      const calBadgeTextContent =  calendarConfig?.displayName ?? calendarConfig?.name ?? calType
 
       /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
       const headerG = Util.createSVGElement('g')
@@ -505,7 +505,7 @@ export class GanttRenderEngine {
       badge.setAttribute('y', '7')
 
       /* Calculate width accurately off-screen with explicit uppercase padding */
-      const textWidth = this.measureTextWidth(calType)
+      const textWidth = this.measureTextWidth(calBadgeTextContent)
       const badgePadding = 12
       const exactWidth = textWidth + badgePadding
 
@@ -515,7 +515,7 @@ export class GanttRenderEngine {
       const label = Util.createSVGElement('text', Css.axis.label)
       label.setAttribute('x', '14')
       label.setAttribute('y', '19')
-      label.textContent = calType
+      label.textContent = calBadgeTextContent
 
       headerG.appendChild(label)
 

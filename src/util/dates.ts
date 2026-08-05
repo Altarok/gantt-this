@@ -168,7 +168,7 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
 /* Update the axis label formatter inside the Gantt render engine class */
 
 // called during runtime, to get axis description
-export function createAxisDateDescription(days: number, config: CalendarConfig | null): string {
+export function createAxisDateDescription(days: number, config: CalendarConfig | undefined): string {
 
   /* Workaround: fall back to default gregorian, but since 1970 */
   if (!config)

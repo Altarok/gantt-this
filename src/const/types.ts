@@ -45,7 +45,8 @@ export type EpochGregorianOffsetDefinition = { year: number, month: number, day:
 
 export type CalendarConfig = {
   id: string
-  name: string
+  name?: string
+  displayName?: string
   /* Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
   epochGregorian: EpochGregorianOffsetDefinition
   /* Not defined by user, calculated based on epochGregorian */
