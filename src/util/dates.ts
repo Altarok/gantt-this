@@ -1,66 +1,5 @@
-import {CalendarConfig, LeapYearRule} from '../const/types'
-import {RuleBasedCalendarParser} from './rule-based-calendar-parser'
-
-export const Dates = {
-  parseToAbsoluteDays, // pre-runtime, during event loading
-  createAxisDateDescription // called during runtime, to get axis description
-}
-
-export function isLeapYear(year: number): boolean {
-  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
-}
-
-export function isCustomLeapYear(year: number, rule?: LeapYearRule): boolean {
-  if (!rule || rule.ruleType === 'none') return false
-  if (rule.ruleType === 'interval' && rule.intervalYears) return year % rule.intervalYears === 0
-  if (rule.ruleType === 'gregorian') return isLeapYear(year)
-  return false
-}
-
-/* Parse _positional_ date to absolute number. Done once per loaded event, ___not during runtime___. */
-function parsePositionalToAbsoluteDays(cleanInput: string, calendarConfig: CalendarConfig) {
-  if (!cleanInput.includes(calendarConfig.delimiter)) return null
-
-  const segments = cleanInput.split(calendarConfig.delimiter).map(Number)
-  let totalDays = 0
-  let valid = true
-
-  const units = calendarConfig.positionalUnits ?? []
-  if (units.length === 0) return null
-
-  units.forEach((unit, idx) => {
-    const val = segments[idx]
-    if (val !== undefined && !isNaN(val)) {
-      totalDays += val * unit.days
-    } else if (idx < segments.length) {
-      valid = false
-    }
-  })
-
-  if (!valid || segments.length !== units.length) return null
-
-  return {
-    days: calendarConfig.offsetToDayZero + totalDays,
-    display: cleanInput
-  }
-}
-
-/* Parse date to absolute number. Done once per loaded  event, ___not during runtime___. */
-function parseToAbsoluteDays(input: string, config: CalendarConfig | null): { days: number; display: string } | null {
-
-  if (!input || !config) return null
-  const cleanInput = input.toString().trim()
-
-  let result: { days: number; display: string } | null = null
-
-  if (config?.type === 'positional') {
-    result = parsePositionalToAbsoluteDays(cleanInput, config)
-  } else if (config?.type === 'rule-based') {
-    result = RuleBasedCalendarParser.parseToAbsoluteDays(cleanInput, config, config.delimiter)
-  }
-
-  return result
-}
+import {CalendarConfig} from '../const/types'
+import {isCustomLeapYear, isLeapYear} from "../date-calculations/leap-year-calc";
 
 /**
  * Calculates days from 0001-01-01 (Day 1) to Jan 1st of `year`.
@@ -73,16 +12,6 @@ function getDaysToYearStart(year: number): number {
 
 function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   let remainingDays = days
-
-//  /* Approximate year selection step */
-//  let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
-//  let totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-//
-//  /* Micro adjust to pinpoint exact leap layout boundary alignment */
-//  while (totalDaysToYearStart >= remainingDays) {
-//    year--
-//    totalDaysToYearStart = (year - 1) * 365 + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400)
-//  }
 
   let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
 
@@ -233,7 +162,9 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
 }
 
 /* Update the axis label formatter inside the Gantt render engine class */
-function createAxisDateDescription(days: number, config: CalendarConfig | null): string {
+
+// called during runtime, to get axis description
+export function createAxisDateDescription(days: number, config: CalendarConfig | null): string {
 
   /* Workaround: fall back to default gregorian, but since 1970 */
   if (!config)

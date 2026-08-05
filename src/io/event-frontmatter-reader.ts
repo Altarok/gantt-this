@@ -1,10 +1,10 @@
 import {CalendarConfig, GanttItem, GanttItemDisplayType, GroupOrCalendarSettings, PluginSettings} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
-import {Dates} from '../util/dates'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {Colors} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
+import {ParsedDate, parseEventDate} from "../date-calculations/event-date-input-calc";
 
 
 /**
@@ -62,10 +62,10 @@ function createItem(
   config: CalendarConfig | null,
   file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
 
-  const startRes = Dates.parseToAbsoluteDays(startDate, config)
+  const startRes: ParsedDate | null = parseEventDate(startDate, config)
   if (!startRes) return null
 
-  const endRes = endDate ? Dates.parseToAbsoluteDays(endDate, config) : startRes
+  const endRes: ParsedDate | null = endDate ? parseEventDate(endDate, config) : startRes
   if (!endRes) return null
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days

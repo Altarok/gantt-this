@@ -2,8 +2,7 @@ import {Notice, parseYaml, TFile} from 'obsidian'
 import {CalendarConfig, PluginSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
-import {runOffsetCalculations} from './calendar-frontmatter-reader-util'
-
+import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 

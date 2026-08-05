@@ -1,11 +1,9 @@
 import {describe, expect, it} from 'vitest'
-import {Dates, isCustomLeapYear, isLeapYear} from '../src/util/dates'
+import {createAxisDateDescription} from '../src/util/dates'
 import {frenchRevolutionConfig, gregorianConfig, mayanConfig, shireConfig} from './test-configs'
 import {Consts} from '../src/const/constants'
+import {ParsedDate, parseEventDate} from "../src/date-calculations/event-date-input-calc";
 
-// const gregorianPhase = 400 * 396 + 97
-//const dateToDaysGregorian = (humanReadableDate: string): { days: number; display: string } =>
-//  Dates.parseToAbsoluteDays(humanReadableDate, gregorianConfig)
 
 describe('Verify test data is configured correctly', () => {
 
@@ -29,7 +27,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test gregorian offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = Dates.parseToAbsoluteDays('0000-12-31', gregorianConfig)
+    const parseToAbsoluteDays = parseEventDate('0000-12-31', gregorianConfig)
     expect(parseToAbsoluteDays.days).toBe(gregorianConfig.offsetToDayZero)
     expect(parseToAbsoluteDays.display).toBe('0-Dec-31')
   })
@@ -49,7 +47,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test shire offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = Dates.parseToAbsoluteDays('1-2. Yule-1', shireConfig)
+    const parseToAbsoluteDays = parseEventDate('1-2. Yule-1', shireConfig)
     expect(parseToAbsoluteDays.days).toBe(shireConfig.offsetToDayZero + 1)
     expect(parseToAbsoluteDays.display).toBe('1-2. Yule-1')
   })
@@ -68,7 +66,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test mayan offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = Dates.parseToAbsoluteDays('0.0.0.0.0', mayanConfig)
+    const parseToAbsoluteDays = parseEventDate('0.0.0.0.0', mayanConfig)
     expect(parseToAbsoluteDays.days).toBe(mayanConfig.offsetToDayZero)
     expect(parseToAbsoluteDays.display).toBe('0.0.0.0.0')
   })
@@ -87,7 +85,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test french revolution offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = Dates.parseToAbsoluteDays('0-leap_days-6', frenchRevolutionConfig)
+    const parseToAbsoluteDays = parseEventDate('0-leap_days-6', frenchRevolutionConfig)
     expect(parseToAbsoluteDays.days).toBe(frenchRevolutionConfig.offsetToDayZero)
     expect(parseToAbsoluteDays.display).toBe('0-leap_days-6')
   })
@@ -97,8 +95,8 @@ describe('Verify test data is configured correctly', () => {
 
 describe('Creation of axis date description works for', () => {
 
-  const gregorian = (days: number) => Dates.createAxisDateDescription(days, gregorianConfig)
-  const french = (days: number) => Dates.createAxisDateDescription(frenchRevolutionConfig.offsetToDayZero + days, frenchRevolutionConfig)
+  const gregorian = (days: number) => createAxisDateDescription(days, gregorianConfig)
+  const french = (days: number) => createAxisDateDescription(frenchRevolutionConfig.offsetToDayZero + days, frenchRevolutionConfig)
 
   it('default gregorian dates', () => {
     expect(gregorian(1)).toBe('0001-01-01')
@@ -164,12 +162,12 @@ describe('Parse date to absolute days works for', () => {
 
   it('differing formats (gregorian)', () => {
     const expected = 7733
-    expect(Dates.parseToAbsoluteDays('0022-3-4', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('022-3-4', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('22-3-4', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('22-03-04', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('22-March-04', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('22-Mar-04', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('0022-3-4', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('022-3-4', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('22-3-4', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('22-03-04', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('22-March-04', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('22-Mar-04', gregorianConfig).days).toBe(expected)
   })
 
   it('calc base offset', () => {
@@ -193,42 +191,42 @@ describe('Parse date to absolute days works for', () => {
     epochDate = new Date()
     epochDate.setFullYear(1, 0, 1)
     epochDaysOffset = Math.round(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    expect(epochDaysOffset).toBe(-Consts.DAYS_FROM_1_1_1_TO_1_1_1970 + 1)
+    expect(epochDaysOffset).toBe(-Consts.DAYS_FROM_0_12_31_TO_1_1_1970)
   })
 
   it('default gregorian dates', () => {
-    expect(Dates.parseToAbsoluteDays('0001-01-01', gregorianConfig)).toStrictEqual({
+    expect(parseEventDate('0001-01-01', gregorianConfig)).toStrictEqual({
       days: 1, display: '1-Jan-1'
     })
-    expect(Dates.parseToAbsoluteDays('0001-12-31', gregorianConfig)).toStrictEqual({
+    expect(parseEventDate('0001-12-31', gregorianConfig)).toStrictEqual({
       days: 365, display: '1-Dec-31'
     })
-    expect(Dates.parseToAbsoluteDays('1970-1-1', gregorianConfig)).toStrictEqual({
-      days: Consts.DAYS_FROM_1_1_1_TO_1_1_1970 + 1, display: '1970-Jan-1'
+    expect(parseEventDate('1970-1-1', gregorianConfig)).toStrictEqual({
+      days: Consts.DAYS_FROM_0_12_31_TO_1_1_1970, display: '1970-Jan-1'
     })
   })
 
   it('non-positive gregorian dates', () => {
-    expect(Dates.parseToAbsoluteDays('0000-12-31', gregorianConfig)).toStrictEqual({
+    expect(parseEventDate('0000-12-31', gregorianConfig)).toStrictEqual({
       days: 0, display: '0-Dec-31'
     })
-    expect(Dates.parseToAbsoluteDays('0000-01-01', gregorianConfig)).toStrictEqual({
+    expect(parseEventDate('0000-01-01', gregorianConfig)).toStrictEqual({
       days: -365, display: '0-Jan-1'
     })
-    expect(Dates.parseToAbsoluteDays('1970-1-1', gregorianConfig)).toStrictEqual({
-      days: Consts.DAYS_FROM_1_1_1_TO_1_1_1970 + 1, display: '1970-Jan-1'
+    expect(parseEventDate('1970-1-1', gregorianConfig)).toStrictEqual({
+      days: Consts.DAYS_FROM_0_12_31_TO_1_1_1970, display: '1970-Jan-1'
     })
   })
 
   it('shire', () => {
-    expect(Dates.parseToAbsoluteDays('0001-Afteryule-9', shireConfig)).toStrictEqual({
+    expect(parseEventDate('0001-Afteryule-9', shireConfig)).toStrictEqual({
       days: 2,
       display: '1-Afteryule-9'
     })
   })
 
   it('should match epoch offset for zero dates', () => {
-    expect(Dates.parseToAbsoluteDays('0.0.0.0.1', mayanConfig)).toStrictEqual({
+    expect(parseEventDate('0.0.0.0.1', mayanConfig)).toStrictEqual({
       days: mayanConfig.offsetToDayZero + 1,
       display: '0.0.0.0.1'
     })
@@ -236,36 +234,36 @@ describe('Parse date to absolute days works for', () => {
 
   it('have identical output (121548), spot test', () => {
     const expected = 121549
-    expect(Dates.parseToAbsoluteDays('333-Oct-16', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('333-Blotmath-20', shireConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('8.14.17.6.16', mayanConfig).days).toBe(expected)
+    expect(parseEventDate('333-Oct-16', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('333-Blotmath-20', shireConfig).days).toBe(expected)
+    expect(parseEventDate('8.14.17.6.16', mayanConfig).days).toBe(expected)
   })
 
   it('have identical output (443556), spot test', () => {
     const expected = 443557
-    expect(Dates.parseToAbsoluteDays('1215-Jun-2', gregorianConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('1215-Forelithe-1', shireConfig).days).toBe(expected)
-    expect(Dates.parseToAbsoluteDays('10.19.11.14.24', mayanConfig).days).toBe(expected)
+    expect(parseEventDate('1215-Jun-2', gregorianConfig).days).toBe(expected)
+    expect(parseEventDate('1215-Forelithe-1', shireConfig).days).toBe(expected)
+    expect(parseEventDate('10.19.11.14.24', mayanConfig).days).toBe(expected)
   })
 
   it('have identical output (725957), spot test', () => {
     const expected: number = 725958
-    let actual: { days: number; display: string }
+    let actual: ParsedDate
 
-    actual = Dates.parseToAbsoluteDays('1988-08-09', gregorianConfig)
+    actual = parseEventDate('1988-08-09', gregorianConfig)
     expect(actual.days).toBe(expected)
 
-    actual = Dates.parseToAbsoluteDays('1988-Wedmath-30', shireConfig)
+    actual = parseEventDate('1988-Wedmath-30', shireConfig)
     expect(actual.days).toBe(expected)
 
-    actual = Dates.parseToAbsoluteDays('12.18.16.05.05', mayanConfig)
+    actual = parseEventDate('12.18.16.05.05', mayanConfig)
     expect(actual.days).toBe(expected)
   })
 
   it('have reversible in- and output', () => {
-    const expected = Dates.parseToAbsoluteDays('1970-01-01', gregorianConfig)
+    const expected = parseEventDate('1970-01-01', gregorianConfig)
 
-    const s = Dates.createAxisDateDescription(expected.days, gregorianConfig)
+    const s = createAxisDateDescription(expected.days, gregorianConfig)
 
     expect(s).toBe('1970-01-01')
   })
@@ -275,43 +273,12 @@ describe('Parse date to absolute days works for', () => {
 describe('Parse days to date format', () => {
 
   it('gregorian', () => {
-    expect(Dates.createAxisDateDescription(1, gregorianConfig)).toBe('0001-01-01')
+    expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-01-01')
   })
 
   it('shire', () => {
-    expect(Dates.createAxisDateDescription(-7, shireConfig)).toBe('1-2. Yule-1')
+    expect(createAxisDateDescription(-7, shireConfig)).toBe('1-2. Yule-1')
   })
 
 })
 
-describe('Leap year calculations should work for', () => {
-
-  it('default dates', () => {
-    expect(isLeapYear(0)).toBe(true)
-    expect(isLeapYear(1)).toBe(false)
-    expect(isLeapYear(2)).toBe(false)
-    expect(isLeapYear(3)).toBe(false)
-    expect(isLeapYear(4)).toBe(true)
-    expect(isLeapYear(8)).toBe(true)
-    expect(isLeapYear(100)).toBe(false)
-    expect(isLeapYear(200)).toBe(false)
-    expect(isLeapYear(400)).toBe(true)
-    expect(isLeapYear(800)).toBe(true)
-  })
-
-  it('shire dates', () => {
-    const {leapYearRule} = shireConfig.ruleBasedDetails
-
-    expect(isCustomLeapYear(0, leapYearRule)).toBe(true)
-    expect(isCustomLeapYear(1, leapYearRule)).toBe(false)
-    expect(isCustomLeapYear(2, leapYearRule)).toBe(false)
-    expect(isCustomLeapYear(3, leapYearRule)).toBe(false)
-    expect(isCustomLeapYear(4, leapYearRule)).toBe(true)
-    expect(isCustomLeapYear(8, leapYearRule)).toBe(true)
-    expect(isCustomLeapYear(100, leapYearRule)).toBe(true)
-    expect(isCustomLeapYear(200, leapYearRule)).toBe(true)
-    expect(isCustomLeapYear(400, leapYearRule)).toBe(true)
-    expect(isCustomLeapYear(800, leapYearRule)).toBe(true)
-  })
-
-})

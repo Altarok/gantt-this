@@ -112,7 +112,7 @@ export const StringUtils = {
 }
 
 export const Consts = {
-  DAYS_FROM_1_1_1_TO_1_1_1970: 719162, //  = days between 1-1-1 and 1970-1-1
-  DAYS_FROM_0_12_31_TO_1_1_1970: 719163, //  = days between 1-1-1 and 1970-1-1
+  // DAYS_FROM_1_1_1_TO_1_1_1970: 719162, //  = days between 1-1-1 (day 1) and 1970-1-1
+  DAYS_FROM_0_12_31_TO_1_1_1970: 719163, //  = days between 0-12-31 (day 0) and 1970-1-1
   MILLIS_IN_1_DAY: 86_400_000 // = 24 * 60 * 60 * 1000
 } as const

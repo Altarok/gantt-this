@@ -2,9 +2,9 @@ import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
 import {Css, svgUrl} from '../const/constants'
-import {Dates} from '../util/dates'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
+import {createAxisDateDescription} from "../util/dates";
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -533,7 +533,7 @@ export class GanttRenderEngine {
           const text = this.createSVGElement('text', Css.axis.text)
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
-          text.textContent = Dates.createAxisDateDescription(currDays, config)
+          text.textContent = createAxisDateDescription(currDays, config)
 
           ticksG.appendChild(text)
           lastTextX = xPos

@@ -1,8 +1,8 @@
 import {describe, expect, it} from 'vitest'
 
 /*
-  * 719162 = days between 1-1-1 and 1970-1-1
-  */
+ * 719162 = days between 1-1-1 and 1970-1-1
+ */
 const zeroOffset = -719162
 
 /**
