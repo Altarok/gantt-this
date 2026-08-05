@@ -126,28 +126,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           render: (setting: Setting) => {
             let cc: ColorComponent
             setting
-              .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-                .onClick(async () => {
-                  cal.visible = !cal.visible
-                  void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                cal.visible = !cal.visible
+                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+                await this.plugin.saveSettings()
+              })
+            )
+            .addColorPicker(c => cc = c
+              .setValue(cal.color ?? this.plugin.settings.fallbackColor)
+              .onChange(async (value) => {
+                  cal.color = value
                   await this.plugin.saveSettings()
-                })
+                }
               )
-              .addColorPicker(c => cc = c
-                .setValue(cal.color ?? this.plugin.settings.fallbackColor)
-                .onChange(async (value) => {
-                    cal.color = value
-                    await this.plugin.saveSettings()
-                  }
-                )
-              )
-              .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-                .onClick(async () => {
-                  cc.setValue(this.plugin.settings.fallbackColor)
-                  cal.color = this.plugin.settings.fallbackColor
-                  await this.plugin.saveSettings()
-                })
-              )
+            )
+            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+              .onClick(async () => {
+                cc.setValue(this.plugin.settings.fallbackColor)
+                cal.color = this.plugin.settings.fallbackColor
+                await this.plugin.saveSettings()
+              })
+            )
           },
         }))
       },
@@ -182,35 +182,35 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           render: (setting: Setting) => {
             let cc: ColorComponent
             setting
-              .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-                .onClick(async () => {
-                  group.visible = !group.visible
-                  void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                group.visible = !group.visible
+                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+                await this.plugin.saveSettings()
+              })
+            )
+            .addColorPicker(c => cc = c
+              .setValue(group.color ?? this.plugin.settings.fallbackColor)
+              .onChange(async (value) => {
+                  group.color = value
                   await this.plugin.saveSettings()
-                })
+                }
               )
-              .addColorPicker(c => cc = c
-                .setValue(group.color ?? this.plugin.settings.fallbackColor)
-                .onChange(async (value) => {
-                    group.color = value
-                    await this.plugin.saveSettings()
-                  }
-                )
-              )
-              .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-                .onClick(async () => {
-                  cc.setValue(this.plugin.settings.fallbackColor)
-                  group.color = this.plugin.settings.fallbackColor
-                  await this.plugin.saveSettings()
-                })
-              )
+            )
+            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+              .onClick(async () => {
+                cc.setValue(this.plugin.settings.fallbackColor)
+                group.color = this.plugin.settings.fallbackColor
+                await this.plugin.saveSettings()
+              })
+            )
           },
         }))
       },
       /* Advanced */
       {
         type: 'group',
-        heading: 'Advanced',
+        heading: 'Advanced UX settings',
         items: [
           {
             name: 'Show box around events when hovered over',
@@ -223,23 +223,24 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Extend toolbar with buttons to hide groups individually',
             control: {type: 'toggle', key: 'showButtonsToHideGroups'}
+          },
+          {
+            name: 'Width of vertical line events.',
+            control: {
+              type: 'slider', key: 'uxVerticalLineEventWidth',
+              min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
+            }
           }
         ]
       },
       /* FrontMatter property names */
       {
-        type: 'group',
-        heading: 'FrontMatter property names',
+        type: 'page',
+        name: 'FrontMatter property names',
         items: [
-          {
-            name: 'Override FrontMatter properties?',
-            desc: 'Scroll down after activating',
-            control: {type: 'toggle', key: 'frontMatterProperty_manual_override'},
-          },
           {
             name: 'Boolean marking notes as Gantt events',
             desc: 'Mandatory. Main FrontMatter property the plugin searches for',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text',
               key: 'frontMatterProperty_gantt_this',
@@ -250,7 +251,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Calendar definition',
             desc: 'Name of calendar',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_calendar_name',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
@@ -260,7 +260,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event calendar',
             desc: 'Optional. Defines which calendar to apply this event to',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_calendar',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
@@ -270,7 +269,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event name',
             desc: 'Optional. Name of event',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_name',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_name,
@@ -280,7 +278,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event start date',
             desc: 'Mandatory',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_time_start',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
@@ -290,7 +287,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event end date',
             desc: 'Optional',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_time_end',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
@@ -300,7 +296,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event color',
             desc: 'Optional. Hex color or human-readable name. Predefined are red, white, blue, green, yellow, gold, black, orange, pink and purple.',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_color',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_color,
@@ -310,7 +305,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event group',
             desc: 'Optional',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_group',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_group,
@@ -320,7 +314,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event symbol',
             desc: 'Optional.',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_symbol',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
@@ -330,7 +323,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event icon name',
             desc: 'Optional. Name of icon, see https://lucide.dev',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_icon_name',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
@@ -340,7 +332,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Event icon color',
             desc: 'Optional. Hex color or human-readable name',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_event_icon_color',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
@@ -350,7 +341,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Header in note',
             desc: 'Optional. Clicking the event will point to header instead of file.',
-            visible: () => this.plugin.settings.frontMatterProperty_manual_override,
             control: {
               type: 'text', key: 'frontMatterProperty_note_header',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,

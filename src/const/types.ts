@@ -121,7 +121,6 @@ export type PluginSettings = {
   mouseOverEventShowVerticalLine: boolean
   showButtonsToHideGroups: boolean
 
-  frontMatterProperty_manual_override: boolean
   frontMatterProperty_gantt_this: string
   frontMatterProperty_calendar_name: string
   frontMatterProperty_event_time_start: string
@@ -134,6 +133,8 @@ export type PluginSettings = {
   frontMatterProperty_event_icon_name: string
   frontMatterProperty_event_icon_color: string
   frontMatterProperty_note_header: string
+
+  uxVerticalLineEventWidth: number
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -152,11 +153,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,
 
-  frontMatterProperty_manual_override: false,
   frontMatterProperty_gantt_this: 'gantt-item', // boolean; "activates" file as event source
   frontMatterProperty_calendar_name: 'gantt-type-definition', // string; "activates" file as calendar source
   frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian'
-
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
   frontMatterProperty_event_name: 'gantt-name', // ... or filename
@@ -166,6 +165,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // icon name from https://lucide.dev
   frontMatterProperty_event_icon_color: 'gantt-displayIconColor',  // color for said icon
   frontMatterProperty_note_header: 'gantt-linkToHeader', // note-internal header to link to
+
+  uxVerticalLineEventWidth: 3
 
 }
 

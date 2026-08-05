@@ -292,9 +292,10 @@
 .gt-item.era {
   /* empty for now */
 }
+
 .gt-item.era-text {
   height: 14px; /* config.rowHeight (24) - 8 */
-  transform: translateY(12px);
+  transform: translateY(9px);
   dominant-baseline: middle;
 
   /* prevent any interaction (x3) */
@@ -302,6 +303,7 @@
   user-select: none;
   -webkit-user-select: none;
 }
+
 .gt-item.bar-text {
   height: 14px; /* config.rowHeight (24) - 8 */
   transform: translateY(1px);
@@ -318,8 +320,8 @@
   transform: translateY(12px); /* Pushes the center down to rowHeight / 2 */
 }
 
-.gt-item.vertical-line{
-  stroke-width: 2;
+.gt-item.vertical-line {
+  /* stroke-width: 2; */
 }
 
 .gt-item.point-diamond {

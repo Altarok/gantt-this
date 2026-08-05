@@ -1,10 +1,11 @@
 import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
-import {Css, svgUrl} from '../const/constants'
+import {Css} from '../const/constants'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from "../util/dates";
+import {Util} from "./svg-drawer-util";
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -36,21 +37,18 @@ export class GanttRenderEngine {
   zoomScale = 1
   zoomTranslateX = 0
 
-  constructor(
-    public readonly container: HTMLElement,
-    public rawData: GanttItem[],
-    public readonly tooltip: HTMLElement,
-    public readonly hoverTitle: HTMLElement,
-    public readonly hoverDates: HTMLElement,
-    public readonly plugin: FantasyGanttPlugin
+  constructor(public readonly container: HTMLElement,
+              public rawData: GanttItem[],
+              public readonly tooltip: HTMLElement,
+              public readonly hoverTitle: HTMLElement,
+              public readonly hoverDates: HTMLElement,
+              public readonly plugin: FantasyGanttPlugin
   ) {
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
 
-    this.resizeObserver = new ResizeObserver(() => {
-      this.handleResize()
-    })
+    this.resizeObserver = new ResizeObserver(() => this.handleResize())
     this.resizeObserver.observe(this.container)
   }
 
@@ -151,25 +149,25 @@ export class GanttRenderEngine {
 
     this.container.innerHTML = ''
 
-    this.svg = this.createSVGElement('svg', Css.svg.canvas)
+    this.svg = Util.createSVGElement('svg', Css.svg.canvas)
     this.svg.setAttribute('height', this.totalHeight.toString())
     this.container.appendChild(this.svg)
 
-    this.backgroundG = this.createSVGElement('g')
+    this.backgroundG = Util.createSVGElement('g')
     this.svg.appendChild(this.backgroundG)
 
-    this.chartArea = this.createSVGElement('g')
+    this.chartArea = Util.createSVGElement('g')
     this.chartArea.setAttribute('transform', `translate(${this.config.margin.left}, 0)`)
     this.svg.appendChild(this.chartArea)
 
     /* Dedicated grid container behind bars and points */
-    this.gridG = this.createSVGElement('g')
+    this.gridG = Util.createSVGElement('g')
     this.chartArea.appendChild(this.gridG)
 
-    const defs = this.createSVGElement('defs')
-    const clipPath = this.createSVGElement('clipPath')
+    const defs = Util.createSVGElement('defs')
+    const clipPath = Util.createSVGElement('clipPath')
     clipPath.setAttribute('id', 'gantt-clip')
-    this.clipRect = this.createSVGElement('rect')
+    this.clipRect = Util.createSVGElement('rect')
 
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
     this.clipRect.setAttribute('height', itemsAreaHeight.toString())
@@ -178,11 +176,11 @@ export class GanttRenderEngine {
     defs.appendChild(clipPath)
     this.svg.appendChild(defs)
 
-    this.dataG = this.createSVGElement('g')
+    this.dataG = Util.createSVGElement('g')
     this.dataG.setAttribute('clip-path', 'url(#gantt-clip)')
     this.chartArea.appendChild(this.dataG)
 
-    this.axisG = this.createSVGElement('g')
+    this.axisG = Util.createSVGElement('g')
     this.chartArea.appendChild(this.axisG)
 
     this.eventManager = new GanttEventManager(this,
@@ -206,10 +204,10 @@ export class GanttRenderEngine {
       if (this.settings.enableGrouping) {
 
 
-        const groupG = this.createSVGElement('g')
+        const groupG = Util.createSVGElement('g')
         groupG.setAttribute('transform', `translate(0, ${d.yOffset})`)
 
-        const rect = this.createSVGElement('rect', i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd)
+        const rect = Util.createSVGElement('rect', i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd)
         rect.setAttribute('width', width.toString())
         rect.setAttribute('height', d.height.toString())
         groupG.appendChild(rect)
@@ -263,12 +261,13 @@ export class GanttRenderEngine {
         if (displayType === 'vertical-line') {
           const x1 = this.getXPosition(d.startDays, width)
 
-          const line = this.createSVGElement('line', Css.item.line)
+          const line = Util.createSVGElement('line', Css.item.line)
           line.setAttribute('x1', x1.toString())
           line.setAttribute('x2', x1.toString())
           // line.setAttribute('y', laneY.toString())
           line.setAttribute('y1', String(firstYValue ?? 0))
           line.setAttribute('y2', totalChartHeight.toString())
+          line.setAttribute('stroke-width', this.plugin.settings.uxVerticalLineEventWidth.toString())
           if (d.color) line.setAttribute('stroke', d.color ?? 'red')
           line.setAttribute('data-id', d.id.toString())
           this.dataG.appendChild(line)
@@ -277,7 +276,7 @@ export class GanttRenderEngine {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
-          const eraBackground = this.createSVGElement('rect', Css.item.era)
+          const eraBackground = Util.createSVGElement('rect', Css.item.era)
           eraBackground.setAttribute('pointer-events', 'none')
 
           { /* x */
@@ -303,7 +302,7 @@ export class GanttRenderEngine {
           const iconSpacing = hasIcon ? iconSize + 4 : 0
 
           if (hasIcon) {
-            const foreignObj = this.createSVGElement('foreignObject', Css.item.iconExternal)
+            const foreignObj = Util.createSVGElement('foreignObject', Css.item.iconExternal)
             // Placed directly at x1 without left padding
             foreignObj.setAttribute('x', x1.toString())
             foreignObj.setAttribute('y', (eraBackground.getAttribute('y')! /* + (this.config.rowHeight - iconSize) / 2*/).toString())
@@ -331,7 +330,7 @@ export class GanttRenderEngine {
             const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
 
             if (availableTextWidth > 0) {
-              const text = this.createSVGElement('text', Css.item.eraText)
+              const text = Util.createSVGElement('text', Css.item.eraText)
               text.setAttribute('x', textX.toString())
               text.setAttribute('y', (eraBackground.getAttribute('y')!).toString())
               // (laneY + this.config.rowHeight / 2).toString())
@@ -346,7 +345,7 @@ export class GanttRenderEngine {
           const x2 = this.getXPosition(d.endDays, width)
           const barWidth = Math.max(2, x2 - x1)
 
-          const rect = this.createSVGElement('rect', Css.item.bar)
+          const rect = Util.createSVGElement('rect', Css.item.bar)
           rect.setAttribute('x', x1.toString())
           rect.setAttribute('y', laneY.toString())
           rect.setAttribute('width', barWidth.toString())
@@ -360,7 +359,7 @@ export class GanttRenderEngine {
           const iconSpacing = hasIcon ? iconSize + 4 : 0
 
           if (hasIcon) {
-            const foreignObj = this.createSVGElement('foreignObject')
+            const foreignObj = Util.createSVGElement('foreignObject')
             // Placed directly at x1 without left padding
             foreignObj.setAttribute('x', x1.toString())
             foreignObj.setAttribute('y', (laneY + (this.config.rowHeight - iconSize) / 2).toString())
@@ -388,7 +387,7 @@ export class GanttRenderEngine {
             const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
 
             if (availableTextWidth > 0) {
-              const text = this.createSVGElement('text', Css.item.barText)
+              const text = Util.createSVGElement('text', Css.item.barText)
               text.setAttribute('x', textX.toString())
               text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
               text.textContent = this.truncateText(d.name, availableTextWidth)
@@ -400,7 +399,7 @@ export class GanttRenderEngine {
         } else if (displayType === 'point') {
           const cx = this.getXPosition(d.startDays, width)
 
-          const circle = this.createSVGElement('circle', Css.item.circle)
+          const circle = Util.createSVGElement('circle', Css.item.circle)
           circle.setAttribute('cx', cx.toString())
           circle.setAttribute('cy', laneY.toString())
           if (d.color) circle.setAttribute('fill', d.color)
@@ -416,7 +415,7 @@ export class GanttRenderEngine {
           const size = 7
           const points = `${cx},${cy - size} ${cx + size},${cy} ${cx},${cy + size} ${cx - size},${cy}`
 
-          const polygon = this.createSVGElement('polygon', Css.item.diamond)
+          const polygon = Util.createSVGElement('polygon', Css.item.diamond)
           polygon.setAttribute('points', points)
           if (d.color) polygon.setAttribute('fill', d.color)
           polygon.setAttribute('data-id', d.id.toString())
@@ -429,10 +428,10 @@ export class GanttRenderEngine {
           /* This is also done in CSS, see .gt-item.point-icon-external  */
           const size = 16
 
-          const group = this.createSVGElement('g')
+          const group = Util.createSVGElement('g')
           group.setAttribute('transform', `translate(${cx}, ${cy})`)
 
-          const rect = this.createSVGElement('rect', Css.item.icon)
+          const rect = Util.createSVGElement('rect', Css.item.icon)
           rect.setAttribute('x', `-${size / 2}`)
           rect.setAttribute('y', `-${size / 2}`)
           rect.setAttribute('data-id', d.id.toString())
@@ -440,7 +439,7 @@ export class GanttRenderEngine {
           group.appendChild(rect)
 
           /* Create a foreignObject to bridge SVG and HTML DOM */
-          const foreignObj = this.createSVGElement('foreignObject')
+          const foreignObj = Util.createSVGElement('foreignObject')
           foreignObj.setAttribute('x', `-${size / 2}`)
           foreignObj.setAttribute('y', `-${size / 2}`)
           foreignObj.setAttribute('width', String(size))
@@ -491,14 +490,14 @@ export class GanttRenderEngine {
     this.activeAxesList.forEach((calType, index) => {
       const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight)
 
-      const individualAxisG = this.createSVGElement('g')
+      const individualAxisG = Util.createSVGElement('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
 
       /* Layer 1: Ticks, baseline, and dates (rendered underneath) */
-      const ticksG = this.createSVGElement('g')
+      const ticksG = Util.createSVGElement('g')
       individualAxisG.appendChild(ticksG)
 
-      const baseline = this.createSVGElement('line', Css.axis.baseline)
+      const baseline = Util.createSVGElement('line', Css.axis.baseline)
       baseline.setAttribute('x1', '0')
       baseline.setAttribute('x2', renderWidth.toString())
       baseline.setAttribute('y1', '0')
@@ -514,7 +513,7 @@ export class GanttRenderEngine {
 
         /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
-          const gridLine = this.createSVGElement('line', Css.axis.gridline)
+          const gridLine = Util.createSVGElement('line', Css.axis.gridline)
           gridLine.setAttribute('x1', xPos.toString())
           gridLine.setAttribute('x2', xPos.toString())
           gridLine.setAttribute('y1', '0')
@@ -522,7 +521,7 @@ export class GanttRenderEngine {
           this.gridG.appendChild(gridLine)
         }
 
-        const tick = this.createSVGElement('line', Css.axis.tick)
+        const tick = Util.createSVGElement('line', Css.axis.tick)
         tick.setAttribute('x1', xPos.toString())
         tick.setAttribute('x2', xPos.toString())
         tick.setAttribute('y1', '0')
@@ -530,7 +529,7 @@ export class GanttRenderEngine {
         ticksG.appendChild(tick)
 
         if (xPos - lastTextX > 80) {
-          const text = this.createSVGElement('text', Css.axis.text)
+          const text = Util.createSVGElement('text', Css.axis.text)
           text.setAttribute('x', xPos.toString())
           text.setAttribute('y', '20')
           text.textContent = createAxisDateDescription(currDays, config)
@@ -541,10 +540,10 @@ export class GanttRenderEngine {
       }
 
       /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
-      const headerG = this.createSVGElement('g')
+      const headerG = Util.createSVGElement('g')
       individualAxisG.appendChild(headerG)
 
-      const badge = this.createSVGElement('rect', Css.axis.labelBadge)
+      const badge = Util.createSVGElement('rect', Css.axis.labelBadge)
       badge.setAttribute('x', '8')
       badge.setAttribute('y', '7')
 
@@ -556,7 +555,7 @@ export class GanttRenderEngine {
       badge.setAttribute('width', exactWidth.toFixed(1))
       headerG.appendChild(badge)
 
-      const label = this.createSVGElement('text', Css.axis.label)
+      const label = Util.createSVGElement('text', Css.axis.label)
       label.setAttribute('x', '14')
       label.setAttribute('y', '19')
       label.textContent = calType
@@ -714,9 +713,5 @@ export class GanttRenderEngine {
     return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
   }
 
-  private createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K, cssClass?: string): SVGElementTagNameMap[K] {
-    const element = window.document.createElementNS(svgUrl, tag)
-    if (cssClass) element.setAttribute('class', cssClass)
-    return element
-  }
+
 }
