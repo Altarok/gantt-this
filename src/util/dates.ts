@@ -126,23 +126,27 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   let dayOfPeriod = 1
   const isLeap = isLeapLocal(year)
 
-  for (let m = 0; m < details.months.length; m++) {
-    const monthDef = details.months[m]
-    if (!monthDef) break
-    let monthDays = monthDef.days
+  if (details.months.length > 0) {
+    for (let m = 0; m < details.months.length; m++) {
+      const monthDef = details.months[m]
+      if (!monthDef) break
+      let monthDays = monthDef.days
 
-    /* Apply leap year day adjustments to the matching month/holiday index */
-    if (isLeap && details.leapYearRule?.applyToMonthIndex === m) {
-      monthDays += (details.leapYearRule.extraDays ?? 1)
-    }
+      /* Apply leap year day adjustments to the matching month/holiday index */
+      if (isLeap && details.leapYearRule?.applyToMonthIndex === m) {
+        monthDays += (details.leapYearRule.extraDays ?? 1)
+      }
 
-    if (remainingDays > monthDays) {
-      remainingDays -= monthDays
-    } else {
-      monthName = monthDef.shortname ?? monthDef.name
-      dayOfPeriod = remainingDays
-      break
+      if (remainingDays > monthDays) {
+        remainingDays -= monthDays
+      } else {
+        monthName = monthDef.shortname ?? monthDef.name
+        dayOfPeriod = remainingDays
+        break
+      }
     }
+  } else {
+    dayOfPeriod = remainingDays
   }
 
   /* Construct the dynamic string based on details.format */

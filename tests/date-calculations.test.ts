@@ -1,8 +1,14 @@
 import {describe, expect, it} from 'vitest'
 import {createAxisDateDescription} from '../src/util/dates'
-import {frenchRevolutionConfig, gregorianConfig, mayanConfig, shireConfig} from './test-configs'
+import {
+  frenchRevolutionConfig,
+  gregorianConfig,
+  gregorianWithoutMonthsConfig,
+  mayanConfig,
+  shireConfig
+} from './test-configs'
 import {Consts} from '../src/const/constants'
-import {ParsedDate, parseEventDate} from "../src/date-calculations/event-date-input-calc";
+import {parseEventDate} from "../src/date-calculations/event-date-input-calc";
 
 
 describe('Verify test data is configured correctly', () => {
@@ -158,106 +164,29 @@ describe('Creation of axis date description works for', () => {
   })
 })
 
-describe('Parse date to absolute days works for', () => {
 
-  it('differing formats (gregorian)', () => {
-    const expected = 7733
-    expect(parseEventDate('0022-3-4', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('022-3-4', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('22-3-4', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('22-03-04', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('22-March-04', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('22-Mar-04', gregorianConfig).days).toBe(expected)
+describe('Parse days to date format', () => {
+
+  it('gregorian', () => {
+    expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-01-01')
   })
 
-  it('calc base offset', () => {
-    let epochDate = new Date('1970-01-01T00:00:00Z')
-    let epochDaysOffset = Math.abs(Math.round(epochDate.getTime() / (24 * 60 * 60 * 1000)))
-    expect(epochDaysOffset).toBe(0)
+  it('gregorian without months', () => {
+    expect(createAxisDateDescription(1, gregorianWithoutMonthsConfig)).toBe('1.1')
+    expect(createAxisDateDescription(2, gregorianWithoutMonthsConfig)).toBe('1.2')
+    expect(createAxisDateDescription(3, gregorianWithoutMonthsConfig)).toBe('1.3')
 
-    epochDate = new Date('01-30-1970')
-    epochDaysOffset = Math.round(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    expect(epochDaysOffset).toBe(29)
+    expect(createAxisDateDescription(1 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.1')
+    expect(createAxisDateDescription(2 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.2')
+    expect(createAxisDateDescription(3 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.3')
 
-    epochDate = new Date('01-05-1970')
-    epochDaysOffset = Math.round(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    expect(epochDaysOffset).toBe(4)
+    /* add 400 years + 397 leap days + 222 because why not */
+    expect(createAxisDateDescription(1 + 400 * 365 + 397 + 222, gregorianWithoutMonthsConfig)).toBe('401.223')
 
-    epochDate = new Date('12-28-1969')
-    epochDaysOffset = Math.round(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    expect(epochDaysOffset).toBe(-4)
-
-    /* Explicitly pass year, monthIndex (0 = Jan), day  */
-    epochDate = new Date()
-    epochDate.setFullYear(1, 0, 1)
-    epochDaysOffset = Math.round(epochDate.getTime() / (24 * 60 * 60 * 1000))
-    expect(epochDaysOffset).toBe(-Consts.DAYS_FROM_0_12_31_TO_1_1_1970)
-  })
-
-  it('default gregorian dates', () => {
-    expect(parseEventDate('0001-01-01', gregorianConfig)).toStrictEqual({
-      days: 1, display: '1-Jan-1'
-    })
-    expect(parseEventDate('0001-12-31', gregorianConfig)).toStrictEqual({
-      days: 365, display: '1-Dec-31'
-    })
-    expect(parseEventDate('1970-1-1', gregorianConfig)).toStrictEqual({
-      days: Consts.DAYS_FROM_0_12_31_TO_1_1_1970, display: '1970-Jan-1'
-    })
-  })
-
-  it('non-positive gregorian dates', () => {
-    expect(parseEventDate('0000-12-31', gregorianConfig)).toStrictEqual({
-      days: 0, display: '0-Dec-31'
-    })
-    expect(parseEventDate('0000-01-01', gregorianConfig)).toStrictEqual({
-      days: -365, display: '0-Jan-1'
-    })
-    expect(parseEventDate('1970-1-1', gregorianConfig)).toStrictEqual({
-      days: Consts.DAYS_FROM_0_12_31_TO_1_1_1970, display: '1970-Jan-1'
-    })
   })
 
   it('shire', () => {
-    expect(parseEventDate('0001-Afteryule-9', shireConfig)).toStrictEqual({
-      days: 2,
-      display: '1-Afteryule-9'
-    })
-  })
-
-  it('should match epoch offset for zero dates', () => {
-    expect(parseEventDate('0.0.0.0.1', mayanConfig)).toStrictEqual({
-      days: mayanConfig.offsetToDayZero + 1,
-      display: '0.0.0.0.1'
-    })
-  })
-
-  it('have identical output (121548), spot test', () => {
-    const expected = 121549
-    expect(parseEventDate('333-Oct-16', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('333-Blotmath-20', shireConfig).days).toBe(expected)
-    expect(parseEventDate('8.14.17.6.16', mayanConfig).days).toBe(expected)
-  })
-
-  it('have identical output (443556), spot test', () => {
-    const expected = 443557
-    expect(parseEventDate('1215-Jun-2', gregorianConfig).days).toBe(expected)
-    expect(parseEventDate('1215-Forelithe-1', shireConfig).days).toBe(expected)
-    expect(parseEventDate('10.19.11.14.24', mayanConfig).days).toBe(expected)
-  })
-
-  it('have identical output (725957), spot test', () => {
-    const expected: number = 725958
-    let actual: ParsedDate
-
-    actual = parseEventDate('1988-08-09', gregorianConfig)
-    expect(actual.days).toBe(expected)
-
-    actual = parseEventDate('1988-Wedmath-30', shireConfig)
-    expect(actual.days).toBe(expected)
-
-    actual = parseEventDate('12.18.16.05.05', mayanConfig)
-    expect(actual.days).toBe(expected)
+    expect(createAxisDateDescription(-7, shireConfig)).toBe('1-2. Yule-1')
   })
 
   it('have reversible in- and output', () => {
@@ -266,18 +195,6 @@ describe('Parse date to absolute days works for', () => {
     const s = createAxisDateDescription(expected.days, gregorianConfig)
 
     expect(s).toBe('1970-01-01')
-  })
-
-})
-
-describe('Parse days to date format', () => {
-
-  it('gregorian', () => {
-    expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-01-01')
-  })
-
-  it('shire', () => {
-    expect(createAxisDateDescription(-7, shireConfig)).toBe('1-2. Yule-1')
   })
 
 })

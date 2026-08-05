@@ -3,7 +3,6 @@ import {isCustomLeapYear, isLeapYear} from '../src/date-calculations/leap-year-c
 import {gregorianConfig, shireConfig} from './test-configs'
 import {LeapYearRule} from "../src/const/types";
 
-
 describe('Leap year calculations should work for', () => {
 
   it('gregorian years', () => {
@@ -42,7 +41,6 @@ describe('Leap year calculations should work for', () => {
 
 })
 
-
 describe('Leap year calculations should be skipped for', () => {
 
   it('positional calendars', () => {
@@ -51,8 +49,11 @@ describe('Leap year calculations should be skipped for', () => {
   })
 
   it('nonsense data', () => {
-    const nonsenseLeapYearRule: LeapYearRule = {ruleType: 'interval'}
-    expect(isCustomLeapYear(0, nonsenseLeapYearRule)).toBe(false)
+    const missingIntervalYears: LeapYearRule = {ruleType: 'interval'}
+    expect(isCustomLeapYear(0, missingIntervalYears)).toBe(false)
+
+    const missingLeapYearRuleType: LeapYearRule = {ruleType: 'foo'} as any as LeapYearRule
+    expect(isCustomLeapYear(0, missingLeapYearRuleType)).toBe(false)
   })
 
   it('no data', () => {

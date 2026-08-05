@@ -1,20 +1,23 @@
 import {Consts} from '../const/constants'
+import {EpochGregorianOffsetDefinition} from '../const/types'
 
 /**
  * Calculates base offset for calendar definitions.
  * This is a different static value for each calendar telling you the offset to the base calendar used for calculations (gregorian).
  * Runs once on creation instead of millions of times for each zoom/pan/whatever.
  * <p>
- * Calculates offset to gregorian day 0 (1 BC December 31).
+ * Calculates offset to gregorian day 0 (1 BC / Year 0, December 31).
+ *
+ * @param offsetConfig = { year: number, month: number, day: number } | number, defined by user
  */
-export function runOffsetCalculations(epochGregorian: { year: number, month: number, day: number } | number): number {
+export function runOffsetCalculations(offsetConfig?: EpochGregorianOffsetDefinition): number {
 
-  if (typeof epochGregorian === 'number') {
-    return epochGregorian
-  } else if (epochGregorian && typeof epochGregorian === 'object') {
-    const year = epochGregorian.year ?? 1 // keep zero if given
-    const month = (!epochGregorian.month || epochGregorian.month < 1) ? 1 : epochGregorian.month
-    const day = (!epochGregorian.day || epochGregorian.day < 1) ? 1 : epochGregorian.day
+  if (typeof offsetConfig === 'number') {
+    return offsetConfig
+  } else if (offsetConfig && typeof offsetConfig === 'object') {
+    const year = offsetConfig.year ?? 1 // keep zero if given
+    const month = (!offsetConfig.month || offsetConfig.month < 1) ? 1 : offsetConfig.month
+    const day = (!offsetConfig.day || offsetConfig.day < 1) ? 1 : offsetConfig.day
 
     // Date.UTC() correctly handles 0001-0099 without shifting to 1900s
     const utcDate = new Date('0001-01-01T00:00:00Z')

@@ -1,5 +1,11 @@
 import {describe, expect, it} from 'vitest'
-import {frenchRevolutionConfig, gregorianConfig, mayanConfig, shireConfig} from './test-configs'
+import {
+  frenchRevolutionConfig,
+  gregorianConfig,
+  gregorianWithoutMonthsConfig,
+  mayanConfig,
+  shireConfig
+} from './test-configs'
 import {runOffsetCalculations} from '../src/date-calculations/calendar-offset-calc'
 
 describe('Calendar offset calculations are done correctly for', () => {
@@ -7,6 +13,13 @@ describe('Calendar offset calculations are done correctly for', () => {
   it('gregorian calendar', () => {
     const calculatedOffsetToDayZero = runOffsetCalculations(gregorianConfig.epochGregorian)
     expect(calculatedOffsetToDayZero).toBe(gregorianConfig.offsetToDayZero)
+    expect(calculatedOffsetToDayZero).toBe(0)
+  })
+
+
+  it('gregorian calendar without months', () => {
+    const calculatedOffsetToDayZero = runOffsetCalculations(gregorianWithoutMonthsConfig.epochGregorian)
+    expect(calculatedOffsetToDayZero).toBe(gregorianWithoutMonthsConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(0)
   })
 

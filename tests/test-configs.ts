@@ -28,6 +28,21 @@ export const gregorianConfig: CalendarConfig = {
   }
 }
 
+export const gregorianWithoutMonthsConfig: CalendarConfig = {
+  id: 'gregorian-no-months',
+  name: 'Gregorian Calendar without months',
+  epochGregorian: 0,
+  offsetToDayZero: 0,
+  type: 'rule-based',
+  delimiter: '.',
+  ruleBasedDetails: {
+    daysInStandardYear: 365,
+    leapYearRule: {ruleType: 'gregorian'},
+    format: ['year', 'day'],
+    months: []
+  }
+}
+
 export const shireConfig: CalendarConfig = {
   id: 'shire',
   name: 'Shire Reckoning',

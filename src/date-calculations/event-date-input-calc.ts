@@ -1,12 +1,15 @@
 import {CalendarConfig, RuleBasedDetails} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
 
-export type ParsedDate = { days: number; display: string }
+export type ParsedDate = {
+  /** Absolute offset to day 0 of the event's relative calendar. */
+  days: number
+  /** Human-readable display of date. May include (short) month names if given. */
+  display: string
+}
 
 /**
- * Used solely during the event load phase.
- *
- * Parse date to absolute number. Done once per loaded  event, ___not during runtime___.
+ * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
  */
 export function parseEventDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {
 
@@ -24,10 +27,7 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
   return result
 }
 
-/**
- * Parse _positional_ event date.
- * Done once per loaded event, ___not during runtime___.
- */
+/** Parse _positional_ event date. */
 function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: CalendarConfig): ParsedDate | null {
   if (!cleanInput.includes(calendarConfig.delimiter)) return null
 
@@ -36,7 +36,7 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
   let valid = true
 
   const units = calendarConfig.positionalUnits ?? []
-  if (units.length === 0) return null
+  if (segments.length === 0 || units.length === 0 || segments.length !== units.length) return null
 
   units.forEach((unit, idx) => {
     const val = segments[idx]
@@ -55,14 +55,11 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
   }
 }
 
-/**
- * Parse __rule-based__ event date.
- * Done once for each loaded event, ___not during runtime___..
- */
+/** Parse _rule-based_ event date. */
 function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: CalendarConfig): ParsedDate | null {
 
   const {delimiter, ruleBasedDetails: details} = calendarConfig
-  if (!details) return null /* Should not happen, this is the method handling exactly that */
+  if (!details) return null /* Should not happen, this method handles exactly that */
 
   /*
    * The delimiter often is '-'. Since this also stands for a negative year value, we need a workaround here.
@@ -97,7 +94,9 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
     }
   }
 
-  if (isNaN(year) || isNaN(day)) return null
+  /* Reject invalid input! */
+  const isInvalid: boolean = isNaN(year) || isNaN(day) || day < 1 || (typeof monthName === 'number' && monthName < 1)
+  if (isInvalid) return null
 
   /* Calculate days from previous years */
   const daysFromYears = calculateDaysForYears(year - 1, details)
@@ -108,7 +107,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
     const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
     if (day < 1 || day > maxDays) return null
 
-    const days = daysFromYears + day + calendarConfig.offsetToDayZero;
+    const days = daysFromYears + day + calendarConfig.offsetToDayZero
     return {
       days: days === +0 ? 0 : days,
       display: `${year}${delimiter}${day}`

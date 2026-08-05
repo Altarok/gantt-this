@@ -41,15 +41,13 @@ export type RuleBasedDetails = {
   format: DateFormatComponent[]
 }
 
+export type EpochGregorianOffsetDefinition = { year: number, month: number, day: number } | number
+
 export type CalendarConfig = {
   id: string
   name: string
   /* Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
-  epochGregorian: {
-    year: number,
-    month: number,
-    day: number
-  } | number
+  epochGregorian: EpochGregorianOffsetDefinition
   /* Not defined by user, calculated based on epochGregorian */
   offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in markdown */
   type: CalendarConfigType
