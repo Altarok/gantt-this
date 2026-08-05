@@ -1,10 +1,10 @@
-import {GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
+import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {Css, svgUrl} from '../const/strings'
+import {GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
+import {Css, svgUrl} from '../const/constants'
 import {Dates} from '../util/dates'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
-import {setIcon} from 'obsidian'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -306,7 +306,7 @@ export class GanttRenderEngine {
             const foreignObj = this.createSVGElement('foreignObject', Css.item.iconExternal)
             // Placed directly at x1 without left padding
             foreignObj.setAttribute('x', x1.toString())
-            foreignObj.setAttribute('y', (eraBackground.getAttribute('y')! /* + (this.config.rowHeight - iconSize) / 2*/ ).toString())
+            foreignObj.setAttribute('y', (eraBackground.getAttribute('y')! /* + (this.config.rowHeight - iconSize) / 2*/).toString())
             foreignObj.setAttribute('width', iconSize.toString())
             foreignObj.setAttribute('height', iconSize.toString())
             foreignObj.style.pointerEvents = 'none'
@@ -334,7 +334,7 @@ export class GanttRenderEngine {
               const text = this.createSVGElement('text', Css.item.eraText)
               text.setAttribute('x', textX.toString())
               text.setAttribute('y', (eraBackground.getAttribute('y')!).toString())
-                // (laneY + this.config.rowHeight / 2).toString())
+              // (laneY + this.config.rowHeight / 2).toString())
               text.textContent = this.truncateText(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, availableTextWidth)
               // text.setAttribute('data-id', d.id.toString())
               this.dataG.appendChild(text)

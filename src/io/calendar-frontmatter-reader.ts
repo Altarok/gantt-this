@@ -1,8 +1,8 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
 import {CalendarConfig, PluginSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
-import {FrontMatterUtil} from "./frontmatter-reader";
-import {runOffsetCalculations} from "./calendar-frontmatter-reader-util";
+import {FrontMatterUtil} from './frontmatter-reader'
+import {runOffsetCalculations} from './calendar-frontmatter-reader-util'
 
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/

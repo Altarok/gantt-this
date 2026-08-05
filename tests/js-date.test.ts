@@ -9,7 +9,7 @@ const zeroOffset = -719162
  * @param epochGregorian beware that month has an offset of 1 -> month input = 1 -> january
  */
 const newOffsetDate = (epochGregorian: { year: number, month: number, day: number } | number = 0) => {
-  /* Always start with Monday, January 1st, Year 1 */
+  /* Always start with Monday, 1 AD January 1st */
   const date = new Date('0001-01-01')
 
   if (typeof epochGregorian === 'number') {

@@ -3,7 +3,7 @@ import {FantasyGanttSettingTab} from './ui/settings-view'
 import {CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
 import {readCodeBlock} from './util/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
-import {CodeBlock} from './const/strings'
+import {CodeBlock} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
 
 export default class FantasyGanttPlugin extends Plugin {

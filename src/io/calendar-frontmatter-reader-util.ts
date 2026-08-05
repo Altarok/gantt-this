@@ -1,4 +1,4 @@
-import {Consts} from "../const/strings"
+import {Consts} from '../const/constants'
 
 /*
  * Run once on creation instead of millions of times for each zoom/pan/whatever

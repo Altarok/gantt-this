@@ -8,7 +8,7 @@ import {
   setIcon
 } from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {Css, EventIDs} from '../const/strings'
+import {Css, EventIDs} from '../const/constants'
 import {PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'

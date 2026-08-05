@@ -1,6 +1,6 @@
 import {ColorComponent, Modal, Setting} from 'obsidian'
+import FantasyGanttPlugin from '../main'
 import {GroupOrCalendarSettings} from '../const/types'
-import FantasyGanttPlugin from "../main";
 
 
 const VISIBLE_ICON = 'eye' /* an open eye */

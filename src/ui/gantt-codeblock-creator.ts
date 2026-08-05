@@ -3,10 +3,11 @@ import FantasyGanttPlugin from '../main'
 import {PluginSettings} from '../const/types'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
 // import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
-import {CodeBlock} from '../const/strings'
+import {CodeBlock} from '../const/constants'
 import {GanttRender} from './svg-drawer-prestep'
 
 /* npm update @Altarok/obsidian-dev-utils */
+
 /* npm link @Altarok/obsidian-dev-utils  */
 export class CodeBlockCreatorModal extends Modal {
   constructor(public readonly app: App, public readonly plugin: FantasyGanttPlugin) {
@@ -103,7 +104,7 @@ function defineInput(pluginSettings: PluginSettings): UserInput[] {
       nestedInput: [
         {
           type: 'path', prompt: 'Folder to search for timeline events.',
-          key: 'eventPath',  mandatory: true,
+          key: 'eventPath', mandatory: true,
           current: pluginSettings.eventPath
         },
         {

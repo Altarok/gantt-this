@@ -1,5 +1,5 @@
 import {PluginSettings} from '../const/types'
-import {StringUtils} from '../const/strings'
+import {StringUtils} from '../const/constants'
 
 /**
  * Reads given code block content and returns values in a new copy of the plugin's settings.

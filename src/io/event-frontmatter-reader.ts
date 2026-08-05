@@ -3,8 +3,8 @@ import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import {Dates} from '../util/dates'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
-import {Colors} from "../const/strings";
-import {FrontMatterUtil} from "./frontmatter-reader";
+import {Colors} from '../const/constants'
+import {FrontMatterUtil} from './frontmatter-reader'
 
 
 /**

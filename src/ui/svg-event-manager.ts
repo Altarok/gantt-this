@@ -1,5 +1,5 @@
 import {GanttItem} from '../const/types'
-import {Css, svgUrl} from '../const/strings'
+import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
 
 export class GanttEventManager {

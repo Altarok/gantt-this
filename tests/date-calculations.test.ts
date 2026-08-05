@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {Dates, isCustomLeapYear, isLeapYear} from '../src/util/dates'
 import {frenchRevolutionConfig, gregorianConfig, mayanConfig, shireConfig} from './test-configs'
-import {Consts} from '../src/const/strings'
+import {Consts} from '../src/const/constants'
 
 // const gregorianPhase = 400 * 396 + 97
 //const dateToDaysGregorian = (humanReadableDate: string): { days: number; display: string } =>
