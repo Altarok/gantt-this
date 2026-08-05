@@ -1,6 +1,6 @@
 import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {CalendarConfig, GanttChartSettings, GanttGroup, GanttItem, GroupOrCalendarSettings} from '../const/types'
+import {CalendarConfig, GanttChartSettings, GanttGroup, GanttItem} from '../const/types'
 import {Css} from '../const/constants'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
@@ -494,7 +494,7 @@ export class GanttRenderEngine {
         }
       }
 
-      const calBadgeTextContent =  calendarConfig?.displayName ?? calendarConfig?.name ?? calType
+      const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
 
       /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
       const headerG = Util.createSVGElement('g')
