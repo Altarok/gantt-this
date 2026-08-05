@@ -126,28 +126,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           render: (setting: Setting) => {
             let cc: ColorComponent
             setting
-            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                cal.visible = !cal.visible
-                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-                await this.plugin.saveSettings()
-              })
-            )
-            .addColorPicker(c => cc = c
-              .setValue(cal.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  cal.color = value
+              .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+                .onClick(async () => {
+                  cal.visible = !cal.visible
+                  void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                   await this.plugin.saveSettings()
-                }
+                })
               )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.plugin.settings.fallbackColor)
-                cal.color = this.plugin.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+              .addColorPicker(c => cc = c
+                .setValue(cal.color ?? this.plugin.settings.fallbackColor)
+                .onChange(async (value) => {
+                    cal.color = value
+                    await this.plugin.saveSettings()
+                  }
+                )
+              )
+              .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+                .onClick(async () => {
+                  cc.setValue(this.plugin.settings.fallbackColor)
+                  cal.color = this.plugin.settings.fallbackColor
+                  await this.plugin.saveSettings()
+                })
+              )
           },
         }))
       },
@@ -182,35 +182,34 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           render: (setting: Setting) => {
             let cc: ColorComponent
             setting
-            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                group.visible = !group.visible
-                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-                await this.plugin.saveSettings()
-              })
-            )
-            .addColorPicker(c => cc = c
-              .setValue(group.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  group.color = value
+              .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+                .onClick(async () => {
+                  group.visible = !group.visible
+                  void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                   await this.plugin.saveSettings()
-                }
+                })
               )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.plugin.settings.fallbackColor)
-                group.color = this.plugin.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+              .addColorPicker(c => cc = c
+                .setValue(group.color ?? this.plugin.settings.fallbackColor)
+                .onChange(async (value) => {
+                    group.color = value
+                    await this.plugin.saveSettings()
+                  }
+                )
+              )
+              .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+                .onClick(async () => {
+                  cc.setValue(this.plugin.settings.fallbackColor)
+                  group.color = this.plugin.settings.fallbackColor
+                  await this.plugin.saveSettings()
+                })
+              )
           },
         }))
       },
       /* Advanced */
       {
-        type: 'group',
-        heading: 'Advanced UX settings',
+        type: 'group', heading: 'Advanced UX settings',
         items: [
           {
             name: 'Show box around events when hovered over',
@@ -235,8 +234,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       /* FrontMatter property names */
       {
-        type: 'page',
-        name: 'FrontMatter property names',
+        type: 'page', name: 'FrontMatter property names',
         items: [
           {
             name: 'Boolean marking notes as Gantt events',

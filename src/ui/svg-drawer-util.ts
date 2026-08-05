@@ -1,9 +1,11 @@
-import {svgUrl} from '../const/constants'
+import {Css, svgUrl} from '../const/constants'
 import {GanttChartSettings, GanttItem, GroupOrCalendarSettings, PluginSettings} from '../const/types'
 
 export const Util = {
   createSVGElement,
-  filterActivelyShownEventData: filterActiveEventData
+  filterActivelyShownEventData: filterActiveEventData,
+
+  createVerticalLine
 }
 
 function createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K, cssClass?: string): SVGElementTagNameMap[K] {
@@ -12,12 +14,9 @@ function createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K, cssClass
   return element
 }
 
-
 function filterActiveEventData(rawData: GanttItem[],
                                pluginSettings: PluginSettings,
                                ganttChartSettings: GanttChartSettings): GanttItem[] {
-
-//  const {groups: groupConfigs, calendars: calendarConfigs} = pluginSettings
 
   const mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(pluginSettings.groups.map((g: GroupOrCalendarSettings) => [g.id, g]))
   const mappedCalConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(pluginSettings.calendars.map((c: GroupOrCalendarSettings) => [c.id, c]))
@@ -47,4 +46,20 @@ function filterActiveEventData(rawData: GanttItem[],
   }))
 
   return activeData
+}
+
+function createVerticalLine(pluginSettings: PluginSettings,
+                            d: GanttItem,
+                            x1: number,
+                            width: number,
+                            firstYValue: number, totalChartHeight: number): SVGLineElement {
+  const line = Util.createSVGElement('line', Css.item.line)
+  line.setAttribute('x1', x1.toString())
+  line.setAttribute('x2', x1.toString())
+  line.setAttribute('y1', String(firstYValue ?? 0))
+  line.setAttribute('y2', totalChartHeight.toString())
+  line.setAttribute('stroke-width', pluginSettings.uxVerticalLineEventWidth.toString())
+  if (d.color) line.setAttribute('stroke', d.color ?? 'red')
+  line.setAttribute('data-id', d.id.toString())
+  return line
 }

@@ -42,8 +42,7 @@ export class GanttRenderEngine {
               public readonly tooltip: HTMLElement,
               public readonly hoverTitle: HTMLElement,
               public readonly hoverDates: HTMLElement,
-              public readonly plugin: FantasyGanttPlugin
-  ) {
+              public readonly plugin: FantasyGanttPlugin) {
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
@@ -61,15 +60,12 @@ export class GanttRenderEngine {
   }
 
   initLayout() {
-
-
     let activeData: GanttItem[] = Util.filterActivelyShownEventData(this.rawData, this.plugin.settings, this.settings)
 
     const {groups: groupConfigs, calendars: calendarConfigs} = this.plugin.settings
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarConfigs)
-
 
     const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group)))
     Priorities.sortGroupAxisByPriority(groupNames, groupConfigs)
@@ -179,9 +175,8 @@ export class GanttRenderEngine {
   private drawGroupBackgrounds(width: number) {
     this.backgroundG.innerHTML = ''
 
-    this.groups.forEach((d, i) => {
-      if (this.settings.enableGrouping) {
-
+    if (this.settings.enableGrouping) {
+      this.groups.forEach((d, i) => {
 
         const groupG = Util.createSVGElement('g')
         groupG.setAttribute('transform', `translate(0, ${d.yOffset})`)
@@ -202,8 +197,8 @@ export class GanttRenderEngine {
         const badgeWidth = (textWidthEstimate + 20).toString()
 
         badge.setAttribute('width', badgeWidth)
-      }
-    })
+      })
+    }
   }
 
   private truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
@@ -239,18 +234,8 @@ export class GanttRenderEngine {
 
         if (displayType === 'vertical-line') {
           const x1 = this.getXPosition(d.startDays, width)
-
-          const line = Util.createSVGElement('line', Css.item.line)
-          line.setAttribute('x1', x1.toString())
-          line.setAttribute('x2', x1.toString())
-          // line.setAttribute('y', laneY.toString())
-          line.setAttribute('y1', String(firstYValue ?? 0))
-          line.setAttribute('y2', totalChartHeight.toString())
-          line.setAttribute('stroke-width', this.plugin.settings.uxVerticalLineEventWidth.toString())
-          if (d.color) line.setAttribute('stroke', d.color ?? 'red')
-          line.setAttribute('data-id', d.id.toString())
+          const line = Util.createVerticalLine(this.plugin.settings,  d, x1, width, firstYValue!, totalChartHeight)
           this.dataG.appendChild(line)
-
         } else if (displayType === 'era') {
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
@@ -454,14 +439,7 @@ export class GanttRenderEngine {
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
     const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
 
-    let stepDays = 1
-    if (totalDaysSpan > 365 * 50) stepDays = 365 * 10
-    else if (totalDaysSpan > 365 * 10) stepDays = 365 * 2
-    else if (totalDaysSpan > 365 * 3) stepDays = 365
-    else if (totalDaysSpan > 365) stepDays = 90
-    else if (totalDaysSpan > 60) stepDays = 20
-    else if (totalDaysSpan > 20) stepDays = 7
-    else if (totalDaysSpan > 5) stepDays = 2
+    const stepDays = Math.floor(totalDaysSpan / 6) + 1
 
     const startDaysValue = Math.floor(this.minDays / stepDays) * stepDays - stepDays
     const endDaysValue = Math.ceil(this.maxDays / stepDays) * stepDays + stepDays
@@ -691,6 +669,5 @@ export class GanttRenderEngine {
     const percentage = (days - this.minDays) / (this.maxDays - this.minDays)
     return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
   }
-
 
 }
