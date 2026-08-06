@@ -9,7 +9,7 @@ const textLeftPadding = 3
 /*
 Element,Default Anchor Point,Positioned By
 <g> (Group),"Top-Left (0, 0)","transform=""translate(x, y)"""
-<rect>,Top-Left corner,"x, y"
+<bar>,Top-Left corner,"x, y"
 <circle>,Center,"cx, cy"
 <text>,Bottom-Left baseline (by default),"x, y"
  */
@@ -66,8 +66,7 @@ function addIconIfPresent(d: GanttItem,
   if (!d.displayIcon) return false
 
   const foreignObj = createSVGElement('foreignObject',
-    'gt-prevent-user-interactions',
-    {x, y, width: iconSize, height: iconSize}
+    'gt-prevent-user-interactions', {x, y, width: iconSize, height: iconSize}
   )
   foreignObj.appendChild(createIconInDiv(d))
   container.appendChild(foreignObj)
@@ -83,7 +82,8 @@ function filterActiveEventData(rawData: GanttItem[],
     const grp = mappedGrpConfigs[d.group]
     const cal = mappedCalConfigs[d.calendarType]
 
-    if ((grp && !grp.visible) || (cal && !cal.visible)) return false
+    /* Undefined groups or calendars are accepted! */
+    if (grp?.visible === false || cal?.visible === false) return false
 
     switch (d.displayType) {
       case 'era':
@@ -109,70 +109,61 @@ function truncateText(text: string, maxWidth: number, charWidthEstimate = 7): st
 }
 
 /**
- * Draws horizontal bar. SVG rect anchor is top left corner. SVG text anchor is left-middle.
- * @param d event to draw
- * @param x1 lower horizontal bound of svg to draw
- * @param x2 upper horizontal bound of svg to draw
- * @param cy vertical center of svg to draw, method converts to top left corner
+ * @param text ti display
+ * @param x left bound of surrounding svg
+ * @param y upper bound of surrounding svg
+ * @param width of surrounding svg
+ * @param hasIcon moves text to the right if true
  * @param svgContainer
  */
-function drawBar(d: GanttItem, x1: number, x2: number, cy: number, svgContainer: SVGElement): void {
-
-  const barWidth = Math.max(2, x2 - x1)
-
-  // Css.item.bar
-  const rect = createSVGElement('rect', 'gt-item timespan bar', {
-    x: x1, y: cy - iconRadius, width: barWidth,
-    'data-id': d.id
-  })
-  if (d.color) rect.setAttribute('fill', d.color)
-  svgContainer.appendChild(rect)
-
-  const hasIcon = addIconIfPresent(d, x1, cy - iconRadius, svgContainer)
+function addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement): void {
   const textSpacing = textLeftPadding + (hasIcon ? iconSize : 0)
-  const availableTextWidth = barWidth - textSpacing
+  const availableTextWidth = width - textSpacing
 
   if (availableTextWidth > 0) {
-    const text = createSVGElement('text', 'gt-item timespan bar text', {
-      x: x1 + textSpacing, y: cy, 'data-id': d.id
-    })
-    text.textContent = truncateText(d.name, availableTextWidth)
-    svgContainer.appendChild(text)
+    const textSvg = createSVGElement('text', Css.item.text, {x: x + textSpacing, y: y + iconRadius + 1})
+    textSvg.textContent = truncateText(text, availableTextWidth)
+    svgContainer.appendChild(textSvg)
   }
+}
+
+/**
+ * Draws horizontal bar. SVG rect anchor is top left corner. SVG text anchor is left-middle.
+ * @param d event to draw
+ * @param x1 left bound of svg to draw
+ * @param x2 right bound of svg to draw
+ * @param y upper bound of svg to draw
+ * @param svgContainer
+ */
+function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: SVGElement): void {
+  const width = Math.max(2, x2 - x1)
+
+  const bar = createSVGElement('rect', Css.item.bar, {x: x1, y: y, width, 'data-id': d.id})
+  if (d.color) bar.setAttribute('fill', d.color)
+  svgContainer.appendChild(bar)
+
+  const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
+  addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer)
 }
 
 /**
  * Draws horizontal bar with differing height. SVG rect anchor is top left corner. SVG text anchor is left-middle.
  * @param d event to draw
- * @param x1 lower horizontal bound of svg to draw
- * @param x2 upper horizontal bound of svg to draw
- * @param y upper vertical bound of svg to draw
+ * @param x1 left bound of svg to draw
+ * @param x2 right bound of svg to draw
+ * @param y upper bound of svg to draw
  * @param height height of svg to draw
  * @param svgContainer
  */
 function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number, svgContainer: SVGElement): void {
-
   const width = Math.max(2, x2 - x1)
 
-  const era = createSVGElement('rect', Css.item.era, {x: x1, y, width, height})
+  const era = createSVGElement('rect', Css.item.era, {x: x1, y, width, height, 'data-id': d.id})
   if (d.color) era.setAttribute('fill', d.color)
   svgContainer.appendChild(era)
 
   const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
-  const iconSpacing = hasIcon ? iconSize + 4 : 0
-
-  const textLeftPadding = 6
-  const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
-  const availableTextWidth = width - (hasIcon ? iconSpacing : textLeftPadding)
-
-  if (availableTextWidth > 0) {
-    const text = createSVGElement('text', Css.item.eraText)
-    text.setAttribute('x', textX.toString())
-    text.setAttribute('y', (era.getAttribute('y')!).toString())
-    text.textContent = truncateText(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, availableTextWidth)
-    svgContainer.appendChild(text)
-  }
-
+  addTextIfFitting(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, x1, y, width, hasIcon, svgContainer)
 }
 
 /**
@@ -183,12 +174,9 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
  * @param svgContainer
  */
 function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
-  const circle = createSVGElement('circle', 'gt-item timestamp circle', {
-    cx, cy, 'data-id': d.id // 'circle' center is center
-  })
+  const circle = createSVGElement('circle', 'gt-item timestamp circle', {cx, cy, 'data-id': d.id})
   if (d.color) circle.setAttribute('fill', d.color)
   svgContainer.appendChild(circle)
-
   addIconIfPresent(d, cx - iconRadius, cy - iconRadius, svgContainer)
 }
 
@@ -201,17 +189,14 @@ function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElemen
  */
 function drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
   const points = `${cx},${cy - iconRadius} ${cx + iconRadius},${cy} ${cx},${cy + iconRadius} ${cx - iconRadius},${cy}`
-  const polygon = createSVGElement('polygon', 'gt-item timestamp circle', {
-    points, // 'polygon' center is center
-    'data-id': d.id
-  })
+  const polygon = createSVGElement('polygon', 'gt-item timestamp diamond', {points, 'data-id': d.id})
   if (d.color) polygon.setAttribute('fill', d.color)
   svgContainer.appendChild(polygon)
   addIconIfPresent(d, cx - iconRadius, cy - iconRadius, svgContainer)
 }
 
 /**
- * SVG rect anchor is top left corner.
+ * SVG bar anchor is top left corner.
  * @param d event to draw
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
@@ -219,9 +204,7 @@ function drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElem
  */
 function drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
   const rect = createSVGElement('rect', 'gt-item timestamp box', {
-    x: cx - iconRadius,
-    y: cy - iconRadius,
-    'data-id': d.id
+    x: cx - iconRadius, y: cy - iconRadius, 'data-id': d.id
   })
   if (d.color) rect.setAttribute('fill', d.color)
   svgContainer.appendChild(rect)

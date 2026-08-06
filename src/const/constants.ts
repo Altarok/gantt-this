@@ -17,16 +17,19 @@ export const Css = {
     icon: 'gt-btn-icon',
   },
   item: {
-    item: 'gt-item',
-    bar: 'gt-item bar-rect',
-    barText: 'gt-item bar-text',
-    circle: 'gt-item point-circle',
-    diamond: 'gt-item point-diamond',
-    era: 'gt-item era',
-    eraText: 'gt-item era-text',
-    icon: 'gt-item point-icon-container',
-    iconExternal: 'gt-item point-icon-external',
-    line: 'gt-item vertical-line',
+    item:    'gt-item',
+
+    circle:  'gt-item timestamp circle',
+    diamond: 'gt-item timestamp diamond',
+    line:    'gt-item timestamp vertical-line',
+
+    bar:     'gt-item timespan bar',
+    era:     'gt-item timespan era',
+
+    text:    'gt-item text-overlay',
+
+    // icon: 'gt-item point-icon-container',
+    // iconExternal: 'gt-item point-icon-external',
   },
   group: {
     text: 'gt-group-text',
@@ -52,14 +55,11 @@ export const Css = {
   svg: {
     canvas: 'gt-svg-canvas',
   },
-
-
   /* obsidian native classes */
   theme: {
     dark: 'theme-dark',
     light: 'theme-light',
   },
-
   /* obsidian native classes */
   modWarning: 'is-destructive',
 
