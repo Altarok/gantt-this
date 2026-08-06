@@ -3,7 +3,7 @@ import {FantasyGanttSettingTab} from './ui/settings-view'
 import {CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
 import {readCodeBlock} from './util/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
-import {CodeBlock} from './const/constants'
+import {Consts} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
 
 export default class FantasyGanttPlugin extends Plugin {
@@ -15,7 +15,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     this.addSettingTab(new FantasyGanttSettingTab(this.app, this))
 
-    this.registerMarkdownCodeBlockProcessor(CodeBlock.id, this.registerCalendar.bind(this) /* (source, el, ctx) */)
+    this.registerMarkdownCodeBlockProcessor(Consts.CODEBLOCK_ID, this.registerCalendar.bind(this) /* (source, el, ctx) */)
 
     this.addRibbonIcon('lucide-chart-bar-stacked', 'Gantt this: Open code block creator', () =>
       new CodeBlockCreatorModal(this.app, this).open()
@@ -29,12 +29,8 @@ export default class FantasyGanttPlugin extends Plugin {
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...loadedData,
-      calendars: Array.isArray(loadedData?.calendars)
-        ? loadedData?.calendars
-        : (Array.isArray(DEFAULT_SETTINGS.calendars) ? DEFAULT_SETTINGS.calendars : []),
-      groups: Array.isArray(loadedData?.groups)
-        ? loadedData?.groups
-        : (Array.isArray(DEFAULT_SETTINGS.groups) ? DEFAULT_SETTINGS.groups : []),
+      calendars: Array.isArray(loadedData?.calendars) ? loadedData?.calendars : (Array.isArray(DEFAULT_SETTINGS.calendars) ? DEFAULT_SETTINGS.calendars : []),
+      groups: Array.isArray(loadedData?.groups) ? loadedData?.groups : (Array.isArray(DEFAULT_SETTINGS.groups) ? DEFAULT_SETTINGS.groups : []),
     }
 
   }
@@ -44,7 +40,6 @@ export default class FantasyGanttPlugin extends Plugin {
     this.app.metadataCache.trigger('resolved')
   }
 
-
   private async registerCalendar(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
     const currentFile = this.app.workspace.getActiveFile()
     if (!currentFile?.parent) {
@@ -52,11 +47,11 @@ export default class FantasyGanttPlugin extends Plugin {
       return
     }
 
-    const partialPluginSettings: PluginSettings = readCodeBlock(this.settings, currentFile.parent.path, source)
+    const codeBlockContent = readCodeBlock(currentFile.parent.path, source)
 
     const render = new GanttRender(this)
 
-    await render.renderGantt(el, partialPluginSettings, ctx)
+    await render.renderGantt(el, this.settings, codeBlockContent, ctx)
   }
 
 }

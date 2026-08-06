@@ -1,25 +1,34 @@
-import {CalendarConfig, GanttItem, GanttItemDisplayType, GroupOrCalendarSettings, PluginSettings} from '../const/types'
+import {
+  CalendarConfig,
+  CodeBlockContent,
+  GanttItem,
+  GanttItemDisplayType,
+  GroupOrCalendarSettings,
+  ParsedDate,
+  PluginSettings
+} from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
-import {Colors} from '../const/constants'
+import {Colors, Consts} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
-import {ParsedDate, parseEventDate} from "../date-calculations/event-date-input-calc";
+import {parseEventDate} from "../date-calculations/event-date-input-calc";
 
 
 /**
  * Search files and parse to GanttItem
  * @param plugin
  * @param partialPluginSettings partial plugin settings
+ * @param codeBlockContent user input in Markdown block
  */
-export async function getGanttDataFromFolder(
-  plugin: FantasyGanttPlugin,
-  partialPluginSettings: PluginSettings): Promise<GanttItem[]> {
+export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
+                                             partialPluginSettings: PluginSettings,
+                                             codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
 
   const items: GanttItem[] = []
   let incrementalId = 0
 
-  const files: TFile[] = getFilteredFiles(plugin, partialPluginSettings)
+  const files: TFile[] = getFilteredFiles(plugin, partialPluginSettings, codeBlockContent)
 
   const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
     plugin.settings.calendars.map((c) => [c.id, c])
@@ -40,7 +49,7 @@ export async function getGanttDataFromFolder(
 
     if (!calendarId || !mappedCalendarConfigs[calendarId]?.visible) continue
 
-    const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings)
+    const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings, codeBlockContent)
 
     const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate ?? startDate, calendarId, config, file, frontMatter, ++incrementalId)
     if (!ganttItem) continue
@@ -92,21 +101,22 @@ function createItem(
   }
 }
 
-function getFilteredFiles(plugin: FantasyGanttPlugin, partialPluginSettings: PluginSettings) {
-
+function getFilteredFiles(plugin: FantasyGanttPlugin,
+                          pluginSettings: PluginSettings,
+                          codeBlockContent: CodeBlockContent): TFile[] {
   const allFiles = plugin.app.vault.getMarkdownFiles()
-  const eventSourcePath = partialPluginSettings.eventPath === '/' ? '' : partialPluginSettings.eventPath
+
+  let eventSourcePath = codeBlockContent.eventPath ?? pluginSettings.eventPath
+  /* Normalize root path reference */
+  if (eventSourcePath === Consts.ROOT_PATH) eventSourcePath = Consts.ROOT_PATH_NORMALIZED
 
   return allFiles.filter(f => {
     const parentPath = f.parent?.path ?? ''
 
-    if (partialPluginSettings.eventPathSearchRecursive) {
-      return eventSourcePath === '' ||
-        parentPath === eventSourcePath ||
-        parentPath.startsWith(eventSourcePath + '/')
-    }
-
-    return parentPath === eventSourcePath
+    if (codeBlockContent.eventPathSearchRecursive ?? pluginSettings.eventPathSearchRecursive)
+      return eventSourcePath === '' || parentPath === eventSourcePath || parentPath.startsWith(eventSourcePath + Consts.DIR_SEPARATOR)
+    else
+      return parentPath === eventSourcePath
   })
 }
 

@@ -41,14 +41,14 @@ export type RuleBasedDetails = {
   format: DateFormatComponent[]
 }
 
-export type EpochGregorianOffsetDefinition = { year: number, month: number, day: number } | number
+export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
 export type CalendarConfig = {
   id: string
   name?: string
   displayName?: string
   /* Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
-  epochGregorian: EpochGregorianOffsetDefinition
+  epochGregorian: EpochOffsetDefinition
   /* Not defined by user, calculated based on epochGregorian */
   offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in markdown */
   type: CalendarConfigType
@@ -62,17 +62,27 @@ export type CalendarConfig = {
   ruleBasedDetails?: RuleBasedDetails
 }
 
+
 /** Calendar event display type */
+
+
 export const GANTT_ITEM_DISPLAY_TYPE = [
   'bar', 'point', /* = default values */
-  'icon', /* = must be accompanied by a lucide-dev icon */
+  'box', /* = must be accompanied by a lucide-dev icon */
   'era', /* = must be accompanied by differing start and end dates */
   'vertical-line', /* can not come with icon */
   'diamond'] as const
 export type GanttItemDisplayType = (typeof GANTT_ITEM_DISPLAY_TYPE)[number]
 
 export function isGanttItemDisplayType(value: string): value is GanttItemDisplayType {
-  return (GANTT_ITEM_DISPLAY_TYPE as readonly string[]).includes(value)
+  return GANTT_ITEM_DISPLAY_TYPE.includes(value as GanttItemDisplayType)
+}
+
+export type ParsedDate = {
+  /** Absolute offset to day 0 of the event's relative calendar. */
+  days: number
+  /** Human-readable display of date. May include (short) month names if given. */
+  display: string
 }
 
 /** Calendar event */
@@ -108,18 +118,38 @@ export type GroupOrCalendarSettings = {
   priority?: number
 }
 
-export type GanttChartSettings = {
+export type GanttChartDateBound = string | number
+
+export type GanttChartSources = {
+  eventPath: string,
+  eventPathSearchRecursive: boolean,
+  calendarPath: string,
+  calendarPathSearchRecursive: boolean,
+}
+
+export type CodeBlockContent = Partial<GanttChartSources> & {
+  lowerBoundDate?: GanttChartDateBound
+  centerHereDate?: GanttChartDateBound
+  upperBoundDate?: GanttChartDateBound
+  calendarForBounds?: string
+}
+
+export type GanttChartButtonSelection = {
   showEras: boolean
   showBars: boolean
   showPoints: boolean
   enableGrouping: boolean
 }
 
-export type PluginSettings = {
-  eventPath: string
-  eventPathSearchRecursive: boolean
-  calendarPath: string
-  calendarPathSearchRecursive: boolean
+export type GanttChartConfig =
+  GanttChartButtonSelection & CodeBlockContent & {
+  rowHeight: number,
+  groupHeaderHeight: number,
+  singleAxisHeight: number,
+  margin: { top: number, right: number, bottom: number, left: number }
+}
+
+export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   fallbackColor: string
   calendars: GroupOrCalendarSettings[]
@@ -175,6 +205,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_note_header: 'gantt-linkToHeader', // note-internal header to link to
 
   uxVerticalLineEventWidth: 3
+} as const
 
+
+export type SvgDrawerData = {
+  mappedGrpConfigs: Record<string, GroupOrCalendarSettings>
+  mappedCalConfigs: Record<string, GroupOrCalendarSettings>
 }
 

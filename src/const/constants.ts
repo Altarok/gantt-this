@@ -24,7 +24,7 @@ export const Css = {
     diamond: 'gt-item point-diamond',
     era: 'gt-item era',
     eraText: 'gt-item era-text',
-    icon: 'gt-item point-icon',
+    icon: 'gt-item point-icon-container',
     iconExternal: 'gt-item point-icon-external',
     line: 'gt-item vertical-line',
   },
@@ -84,12 +84,6 @@ export const EventIDs = {
 
 export const svgUrl = 'http://www.w3.org/2000/svg'
 
-export const CodeBlock = {
-  id: 'gantt-this',
-  eventPath: 'eventPath',
-  calendarPath: 'calendarPath',
-}
-
 export const StringUtils = {
   /**
    * Splits given string, but only at first appearance of the separator.<br>
@@ -113,6 +107,10 @@ export const StringUtils = {
 
 export const Consts = {
   // DAYS_FROM_1_1_1_TO_1_1_1970: 719162, //  = days between 1-1-1 (day 1) and 1970-1-1
+  CODEBLOCK_ID: 'gantt-this',
   DAYS_FROM_0_12_31_TO_1_1_1970: 719163, //  = days between 0-12-31 (day 0) and 1970-1-1
-  MILLIS_IN_1_DAY: 86_400_000 // = 24 * 60 * 60 * 1000
+  MILLIS_IN_1_DAY: 86_400_000, // = 24 * 60 * 60 * 1000
+  ROOT_PATH: '/',
+  ROOT_PATH_NORMALIZED: '',
+  DIR_SEPARATOR: '/'
 } as const

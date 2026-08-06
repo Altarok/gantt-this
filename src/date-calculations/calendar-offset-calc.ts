@@ -1,5 +1,5 @@
 import {Consts} from '../const/constants'
-import {EpochGregorianOffsetDefinition} from '../const/types'
+import {EpochOffsetDefinition} from '../const/types'
 
 /**
  * Calculates base offset for calendar definitions.
@@ -10,7 +10,7 @@ import {EpochGregorianOffsetDefinition} from '../const/types'
  *
  * @param offsetConfig = { year: number, month: number, day: number } | number, defined by user
  */
-export function runOffsetCalculations(offsetConfig?: EpochGregorianOffsetDefinition): number {
+export function runOffsetCalculations(offsetConfig?: EpochOffsetDefinition): number {
 
   if (typeof offsetConfig === 'number') {
     return offsetConfig

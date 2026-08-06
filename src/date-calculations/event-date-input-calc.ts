@@ -1,12 +1,6 @@
-import {CalendarConfig, RuleBasedDetails} from '../const/types'
+import {CalendarConfig, ParsedDate, RuleBasedDetails} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
 
-export type ParsedDate = {
-  /** Absolute offset to day 0 of the event's relative calendar. */
-  days: number
-  /** Human-readable display of date. May include (short) month names if given. */
-  display: string
-}
 
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.

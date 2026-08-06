@@ -12,30 +12,17 @@ function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCa
 
 /**
  * @param calendarNames will get sorted
- * @param calendarConfigs
+ * @param mappedCalendarConfigs mapped to theid respective id
  */
-function sortCalendarAxisByPriority(calendarNames: string[], calendarConfigs: GroupOrCalendarSettings[]): void {
-  const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
-    calendarConfigs.map((c) => [c.id, c])
-  )
-
+function sortCalendarAxisByPriority(calendarNames: string[], mappedCalendarConfigs: Record<string, GroupOrCalendarSettings>): void {
   calendarNames.sort((a, b) => (mappedCalendarConfigs[a]?.priority ?? Infinity) - (mappedCalendarConfigs[b]?.priority ?? Infinity))
 }
 
-function sortGroupAxisByPriority(groups: string[], groupConfigs: GroupOrCalendarSettings[]): void {
-
-  const mappedGroupConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
-    groupConfigs.map((c) => [c.id, c])
-  )
-
+function sortGroupAxisByPriority(groups: string[], mappedGroupConfigs: Record<string, GroupOrCalendarSettings>): void {
   groups.sort((a, b) => (mappedGroupConfigs[a]?.priority ?? Infinity) - (mappedGroupConfigs[b]?.priority ?? Infinity))
 }
 
-function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], groupConfigs: GroupOrCalendarSettings[]): void {
-
-  const mappedGroupConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
-    groupConfigs.map((c) => [c.id, c])
-  )
+function fixGanttGroupPrioritySetupIfBroken(groups: GanttGroup[], mappedGroupConfigs: Record<string, GroupOrCalendarSettings>): void {
 
   groups.sort((a, b) => {
     const pa = mappedGroupConfigs[a.name]?.priority ?? Infinity

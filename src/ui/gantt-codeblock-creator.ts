@@ -1,14 +1,15 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {PluginSettings} from '../const/types'
+import {CodeBlockContent, PluginSettings} from '../const/types'
+import {Consts} from '../const/constants'
+import {GanttRender} from './svg-drawer-prestep'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
 // import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
-import {CodeBlock} from '../const/constants'
-import {GanttRender} from './svg-drawer-prestep'
 
-/* npm update @Altarok/obsidian-dev-utils */
-
-/* npm link @Altarok/obsidian-dev-utils  */
+/*
+ * npm update @Altarok/obsidian-dev-utils
+ * npm link @Altarok/obsidian-dev-utils
+ */
 export class CodeBlockCreatorModal extends Modal {
   constructor(public readonly app: App, public readonly plugin: FantasyGanttPlugin) {
     super(app)
@@ -40,16 +41,17 @@ export class CodeBlockCreatorModal extends Modal {
       previewEl.empty()
 
       const globalSettings: Readonly<PluginSettings> = this.plugin.settings
-      const codeBlockContent: PluginSettings = mergeSettings(globalSettings, output)
+      const pluginSettings: PluginSettings = mergeSettings(globalSettings, output)
+      const noCodeBlockContent: CodeBlockContent = {}
 
       const render = new GanttRender(this.plugin)
 
-      void render.renderGantt(previewEl, codeBlockContent)
+      void render.renderGantt(previewEl, pluginSettings, noCodeBlockContent)
     }
 
     const modalInput: GenericModalInput = {
       pluginName: 'Gantt This',
-      codeBlockId: CodeBlock.id,
+      codeBlockId: Consts.CODEBLOCK_ID,
       input,
       onUpdatePreview,
       output

@@ -1,8 +1,9 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {CalendarConfig, PluginSettings} from '../const/types'
+import {CalendarConfig, CodeBlockContent, PluginSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
+import {Consts} from "../const/constants";
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -14,14 +15,15 @@ const yamlRegex = /```yaml\s([\s\S]*?)```/
  */
 export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
                                             calendarId: string,
-                                            pluginSettings: PluginSettings): Promise<CalendarConfig | null> {
+                                            pluginSettings: PluginSettings,
+                                            codeBlockContent: CodeBlockContent): Promise<CalendarConfig | null> {
   if (!calendarId || !pluginSettings) return null
 
   const cachedCalendarConfig = plugin.calendarConfigsCache.get(calendarId)
 
   if (cachedCalendarConfig) return cachedCalendarConfig
 
-  let targetFile = getMatchingMarkdownFile(plugin, pluginSettings, calendarId)
+  let targetFile = getMatchingMarkdownFile(plugin, calendarId, pluginSettings, codeBlockContent)
 
   if (!targetFile) return null
 
@@ -48,27 +50,24 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
 /**
  * Search for Markdown file defining the missing calendar config.
- * @param plugin
- * @param pluginSettings
- * @param calendarId
  */
 function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
+                                 calendarId: string,
                                  pluginSettings: PluginSettings,
-                                 calendarId: string): TFile | null {
-
+                                 codeBlockContent: CodeBlockContent): TFile | null {
   const allFiles: TFile[] = plugin.app.vault.getMarkdownFiles()
 
-  /* Normalize root path references */
-  const calendarSourcePath = pluginSettings.calendarPath === '/' ? '' : pluginSettings.calendarPath
+  let calendarSourcePath = codeBlockContent.calendarPath ?? pluginSettings.calendarPath
+  /* Normalize root path reference */
+  if (calendarSourcePath === Consts.ROOT_PATH) calendarSourcePath = Consts.ROOT_PATH_NORMALIZED
 
   const files: TFile[] = allFiles.filter(f => {
     const parentPath = f.parent?.path ?? ''
 
-    if (pluginSettings.calendarPathSearchRecursive) {
+    if (codeBlockContent.calendarPathSearchRecursive ?? pluginSettings.calendarPathSearchRecursive)
       return calendarSourcePath === '' || parentPath === calendarSourcePath || parentPath.startsWith(calendarSourcePath + '/')
-    }
-
-    return parentPath === calendarSourcePath
+    else
+      return parentPath === calendarSourcePath
   })
 
   for (const file of files) {

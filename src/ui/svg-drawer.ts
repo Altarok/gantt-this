@@ -1,6 +1,14 @@
-import {setIcon} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {CalendarConfig, GanttChartSettings, GanttGroup, GanttItem} from '../const/types'
+import {
+  CalendarConfig,
+  CodeBlockContent,
+  GanttChartConfig,
+  GanttGroup,
+  GanttItem,
+  GanttItemDisplayType,
+  GroupOrCalendarSettings,
+  SvgDrawerData
+} from '../const/types'
 import {Css} from '../const/constants'
 import {GanttEventManager} from './svg-event-manager'
 import {Priorities} from '../util/priority-util'
@@ -23,8 +31,11 @@ export class GanttRenderEngine {
   private totalHeight = 400
   private resizeObserver: ResizeObserver
 
-  private settings: GanttChartSettings = {showEras: true, showBars: true, showPoints: true, enableGrouping: true}
-  config = {
+  config: GanttChartConfig = {
+    showEras: true,
+    showBars: true,
+    showPoints: true,
+    enableGrouping: true,
     rowHeight: 24,
     groupHeaderHeight: 25,
     singleAxisHeight: 35,
@@ -37,12 +48,17 @@ export class GanttRenderEngine {
   zoomScale = 1
   zoomTranslateX = 0
 
+  private svgDrawerData: SvgDrawerData
+
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
               public readonly tooltip: HTMLElement,
               public readonly hoverTitle: HTMLElement,
               public readonly hoverDates: HTMLElement,
-              public readonly plugin: FantasyGanttPlugin) {
+              public readonly plugin: FantasyGanttPlugin,
+              public readonly codeBlockContent: CodeBlockContent
+  ) {
+    this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
@@ -52,6 +68,7 @@ export class GanttRenderEngine {
   }
 
   public updateData(newData: GanttItem[]) {
+    this.svgDrawerData = this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
@@ -59,21 +76,26 @@ export class GanttRenderEngine {
     this.handleResize()
   }
 
-  initLayout() {
-    let activeData: GanttItem[] = Util.filterActivelyShownEventData(this.rawData, this.plugin.settings, this.settings)
+  updateSvgDrawerData() {
+    return {
+      mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, g])),
+      mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, c]))
+    }
+  }
 
-    const {groups: groupConfigs, calendars: calendarConfigs} = this.plugin.settings
+  initLayout() {
+    let activeData: GanttItem[] = Util.filterActivelyShownEventData(this.rawData, this.svgDrawerData, this.config)
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
-    Priorities.sortCalendarAxisByPriority(this.activeAxesList, calendarConfigs)
+    Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
     const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group)))
-    Priorities.sortGroupAxisByPriority(groupNames, groupConfigs)
+    Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
     this.groups = []
     let currentYOffset = this.config.margin.top
 
-    if (this.settings.enableGrouping) {
+    if (this.config.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
       for (const name of groupNames) { /* groupNames is sorted! */
         groupedMap.set(name, [])
@@ -110,7 +132,7 @@ export class GanttRenderEngine {
     }
 
     /* Before going on, we have to sort groups by their respective priority */
-    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, groupConfigs)
+    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.svgDrawerData.mappedGrpConfigs)
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
@@ -173,7 +195,7 @@ export class GanttRenderEngine {
   private drawGroupBackgrounds(width: number) {
     this.backgroundG.innerHTML = ''
 
-    if (this.settings.enableGrouping) {
+    if (this.config.enableGrouping) {
       this.groups.forEach((d, i) => {
 
         const groupG = Util.createSVGElement('g')
@@ -199,231 +221,67 @@ export class GanttRenderEngine {
     }
   }
 
-  private truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
-    const maxChars = Math.floor(maxWidth / charWidthEstimate)
-    if (text.length <= maxChars) return text
-    if (maxChars <= 3) return '...'
-    return text.substring(0, maxChars - 3) + '...'
-  }
-
   renderData(width: number) {
     this.dataG.innerHTML = ''
+    const halfRowHeight = this.config.rowHeight / 2
 
     let firstYValue: number | null = null
 
     const totalChartHeight = this.groups.reduce((acc, g) => {
-      const header = this.settings.enableGrouping ? this.config.groupHeaderHeight : 0
+      const header = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
       const content = (g.lanes ?? 1) * this.config.rowHeight
       return acc + header + content
     }, 0)
 
     this.groups.forEach(group => {
       firstYValue ??= group.yOffset
-      const groupYStart = group.yOffset + (this.settings.enableGrouping ? this.config.groupHeaderHeight : 0)
+      const groupYStart = group.yOffset + (this.config.enableGrouping ? this.config.groupHeaderHeight : 0)
 
-      const headerHeight = this.settings.enableGrouping ? this.config.groupHeaderHeight : 0
+      const headerHeight = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
       const groupContentHeight = (group.lanes ?? 1) * this.config.rowHeight
       const totalGroupHeight = headerHeight + groupContentHeight
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
         const laneY = groupYStart + lane! * this.config.rowHeight
-        const displayType = d.displayType
+        const displayType: GanttItemDisplayType = d.displayType
 
         if (displayType === 'vertical-line') {
+
           const x1 = this.getXPosition(d.startDays, width)
-          const line = Util.createVerticalLine(this.plugin.settings, d, x1, width, firstYValue!, totalChartHeight)
-          this.dataG.appendChild(line)
+          Util.drawVerticalLine(d, x1, firstYValue!, totalChartHeight, this.plugin.settings.uxVerticalLineEventWidth, this.dataG)
+
         } else if (displayType === 'era') {
+
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
-          const barWidth = Math.max(2, x2 - x1)
-          const eraBackground = Util.createSVGElement('rect', Css.item.era)
-          eraBackground.setAttribute('pointer-events', 'none')
+          const isInGeneralGroup = d.group === 'general'
+          const y: number = isInGeneralGroup ? firstYValue! : group.yOffset
+          const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
 
-          { /* x */
-            eraBackground.setAttribute('x', x1.toString())
-            eraBackground.setAttribute('width', barWidth.toString())
-          }
-          if (d.group !== 'general') { /* y */
-            eraBackground.setAttribute('y', group.yOffset.toString())
-            eraBackground.setAttribute('height', totalGroupHeight.toString())
-          } else {
-            eraBackground.setAttribute('y', String(firstYValue!))
-            eraBackground.setAttribute('height', totalChartHeight.toString())
-          }
-          { /* color */
-            eraBackground.setAttribute('fill', d.color ?? '#ffff00')
-            eraBackground.setAttribute('fill-opacity', '0.25')
-          }
-          this.dataG.appendChild(eraBackground)
-
-          /* icon layout setup */
-          const iconSize = 14
-          const hasIcon = !!d.displayIcon
-          const iconSpacing = hasIcon ? iconSize + 4 : 0
-
-          if (hasIcon) {
-            const foreignObj = Util.createSVGElement('foreignObject', Css.item.iconExternal)
-            // Placed directly at x1 without left padding
-            foreignObj.setAttribute('x', x1.toString())
-            foreignObj.setAttribute('y', (eraBackground.getAttribute('y')! /* + (this.config.rowHeight - iconSize) / 2*/).toString())
-            foreignObj.setAttribute('width', iconSize.toString())
-            foreignObj.setAttribute('height', iconSize.toString())
-            foreignObj.style.pointerEvents = 'none'
-
-            const iconDiv = window.createDiv()
-            iconDiv.className = Css.item.iconExternal
-            iconDiv.style.width = '100%'
-            iconDiv.style.height = '100%'
-            iconDiv.style.display = 'flex'
-            iconDiv.style.alignItems = 'center'
-            iconDiv.style.justifyContent = 'center'
-            if (d.displayIconColor) iconDiv.style.color = d.displayIconColor
-
-            setIcon(iconDiv, d.displayIcon!)
-            foreignObj.appendChild(iconDiv)
-            this.dataG.appendChild(foreignObj)
-          }
-
-          { /* start text */
-            const textLeftPadding = 6
-            const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
-            const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
-
-            if (availableTextWidth > 0) {
-              const text = Util.createSVGElement('text', Css.item.eraText)
-              text.setAttribute('x', textX.toString())
-              text.setAttribute('y', (eraBackground.getAttribute('y')!).toString())
-              // (laneY + this.config.rowHeight / 2).toString())
-              text.textContent = this.truncateText(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, availableTextWidth)
-              // text.setAttribute('data-id', d.id.toString())
-              this.dataG.appendChild(text)
-            }
-          } /* end text */
+          Util.drawEra(d, x1, x2, y, height, this.dataG)
 
         } else if (displayType === 'bar') {
+
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
-          const barWidth = Math.max(2, x2 - x1)
-
-          const rect = Util.createSVGElement('rect', Css.item.bar)
-          rect.setAttribute('x', x1.toString())
-          rect.setAttribute('y', laneY.toString())
-          rect.setAttribute('width', barWidth.toString())
-          if (d.color) rect.setAttribute('fill', d.color)
-          rect.setAttribute('data-id', d.id.toString())
-          this.dataG.appendChild(rect)
-
-          /* icon layout setup */
-          const iconSize = 14
-          const hasIcon = !!d.displayIcon
-          const iconSpacing = hasIcon ? iconSize + 4 : 0
-
-          if (hasIcon) {
-            const foreignObj = Util.createSVGElement('foreignObject')
-            // Placed directly at x1 without left padding
-            foreignObj.setAttribute('x', x1.toString())
-            foreignObj.setAttribute('y', (laneY + (this.config.rowHeight - iconSize) / 2).toString())
-            foreignObj.setAttribute('width', iconSize.toString())
-            foreignObj.setAttribute('height', iconSize.toString())
-            foreignObj.style.pointerEvents = 'none'
-
-            const iconDiv = window.createDiv()
-            iconDiv.className = Css.item.iconExternal
-            iconDiv.style.width = '100%'
-            iconDiv.style.height = '100%'
-            iconDiv.style.display = 'flex'
-            iconDiv.style.alignItems = 'center'
-            iconDiv.style.justifyContent = 'center'
-            if (d.displayIconColor) iconDiv.style.color = d.displayIconColor
-
-            setIcon(iconDiv, d.displayIcon!)
-            foreignObj.appendChild(iconDiv)
-            this.dataG.appendChild(foreignObj)
-          }
-
-          { /* start text */
-            const textLeftPadding = 6
-            const textX = x1 + (hasIcon ? iconSpacing : textLeftPadding)
-            const availableTextWidth = barWidth - (hasIcon ? iconSpacing : textLeftPadding)
-
-            if (availableTextWidth > 0) {
-              const text = Util.createSVGElement('text', Css.item.barText)
-              text.setAttribute('x', textX.toString())
-              text.setAttribute('y', (laneY + this.config.rowHeight / 2).toString())
-              text.textContent = this.truncateText(d.name, availableTextWidth)
-              text.setAttribute('data-id', d.id.toString())
-              this.dataG.appendChild(text)
-            }
-          } /* end text */
+          Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
 
         } else if (displayType === 'point') {
-          const cx = this.getXPosition(d.startDays, width)
 
-          const circle = Util.createSVGElement('circle', Css.item.circle)
-          circle.setAttribute('cx', cx.toString())
-          circle.setAttribute('cy', laneY.toString())
-          if (d.color) circle.setAttribute('fill', d.color)
-          circle.setAttribute('data-id', d.id.toString())
-          this.dataG.appendChild(circle)
+          const x = this.getXPosition(d.startDays, width)
+          Util.drawPoint(d, x, laneY + halfRowHeight, this.dataG)
 
         } else if (displayType === 'diamond') {
 
-          const cx = this.getXPosition(d.startDays, width)
-          /* Center the diamond vertically in the row */
-          const cy = laneY + this.config.rowHeight / 2
+          const x = this.getXPosition(d.startDays, width)
+          Util.drawDiamond(d, x, laneY + halfRowHeight, this.dataG)
 
-          const size = 7
-          const points = `${cx},${cy - size} ${cx + size},${cy} ${cx},${cy + size} ${cx - size},${cy}`
+        } else if (displayType === 'box') {
 
-          const polygon = Util.createSVGElement('polygon', Css.item.diamond)
-          polygon.setAttribute('points', points)
-          if (d.color) polygon.setAttribute('fill', d.color)
-          polygon.setAttribute('data-id', d.id.toString())
-          this.dataG.appendChild(polygon)
+          const x = this.getXPosition(d.startDays, width)
+          Util.drawBox(d, x, laneY + halfRowHeight, this.dataG)
 
-        } else if (displayType === 'icon' && d.displayIcon) {
-
-          const cx = this.getXPosition(d.startDays, width)
-          const cy = laneY + (this.config.rowHeight / 2)
-          /* This is also done in CSS, see .gt-item.point-icon-external  */
-          const size = 16
-
-          const group = Util.createSVGElement('g')
-          group.setAttribute('transform', `translate(${cx}, ${cy})`)
-
-          const rect = Util.createSVGElement('rect', Css.item.icon)
-          rect.setAttribute('x', `-${size / 2}`)
-          rect.setAttribute('y', `-${size / 2}`)
-          rect.setAttribute('data-id', d.id.toString())
-          if (d.color) rect.setAttribute('fill', d.color)
-          group.appendChild(rect)
-
-          /* Create a foreignObject to bridge SVG and HTML DOM */
-          const foreignObj = Util.createSVGElement('foreignObject')
-          foreignObj.setAttribute('x', `-${size / 2}`)
-          foreignObj.setAttribute('y', `-${size / 2}`)
-          foreignObj.setAttribute('width', String(size))
-          foreignObj.setAttribute('height', String(size))
-          foreignObj.style.pointerEvents = 'none'
-
-          /* Create a standard HTML div for setIcon */
-          const iconDiv = window.createDiv()
-          iconDiv.className = Css.item.iconExternal
-          iconDiv.style.width = '100%'
-          iconDiv.style.height = '100%'
-          iconDiv.style.display = 'flex'
-          iconDiv.style.alignItems = 'center'
-          iconDiv.style.justifyContent = 'center'
-          if (d.displayIconColor) iconDiv.style.color = d.displayIconColor
-
-          /* Render icon inside the div */
-          setIcon(iconDiv, d.displayIcon)
-
-          foreignObj.appendChild(iconDiv)
-          group.appendChild(foreignObj)
-          this.dataG.appendChild(group)
         }
       })
     })
@@ -597,17 +455,17 @@ export class GanttRenderEngine {
   }
 
   toggleShowBars(val: boolean) {
-    this.settings.showBars = val
+    this.config.showBars = val
     this.updateSettings()
   }
 
   toggleShowPoints(val: boolean) {
-    this.settings.showPoints = val
+    this.config.showPoints = val
     this.updateSettings()
   }
 
   toggleGrouping(val: boolean) {
-    this.settings.enableGrouping = val
+    this.config.enableGrouping = val
     this.updateSettings()
   }
 

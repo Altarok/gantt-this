@@ -9,57 +9,21 @@ import {
 } from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css, EventIDs} from '../const/constants'
-import {PluginSettings} from '../const/types'
+import {CodeBlockContent, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
-import {ManualSvg} from './manual-svg-util'
+import {ManualSvg} from './manual-svg-icons'
 
 const step = Platform.isMobile ? 0.4 : 0.25
-
-class GanttLifecycleComponent extends MarkdownRenderChild {
-  private events: EventRef[] = []
-
-  constructor(
-    containerEl: HTMLElement,
-    private tooltipEl: HTMLElement,
-    private plugin: FantasyGanttPlugin,
-    /*
-     * TODO unused
-     */
-    private updateCallback: () => void
-  ) {
-    super(containerEl)
-  }
-
-  onload() {
-    /* Register listeners with reference tracking */
-    // this.events.push(this.plugin.app.metadataCache.on('changed', this.refreshChartCallback))
-    // this.events.push(this.plugin.app.metadataCache.on('resolved', this.refreshChartCallback))
-  }
-
-  onunload() {
-    /* Remove the DOM tooltip element */
-    if (this.tooltipEl) {
-      this.tooltipEl.remove()
-    }
-    /* Cleanly unbind listeners from the global event loop when code block is closed */
-    this.events.forEach(eventRef => this.plugin.app.metadataCache.offref(eventRef))
-    this.events = []
-  }
-}
-
-/* See https://lucide.dev for icons, */
-function createIconButton(parentEl: HTMLElement, icon: string, title: string,): HTMLButtonElement {
-  const btn = parentEl.createEl('button', {cls: Css.button.icon, title})
-  setIcon(btn, icon)
-  return btn
-}
 
 export class GanttRender {
   constructor(readonly plugin: FantasyGanttPlugin) {
   }
 
-  async renderGantt(el: HTMLElement, codeBlockContent: PluginSettings, ctx?: MarkdownPostProcessorContext) {
+  async renderGantt(el: HTMLElement,
+                    pluginSettings: PluginSettings,
+                    codeBlockContent: CodeBlockContent,
+                    ctx?: MarkdownPostProcessorContext) {
     const mainWrapper = el.createDiv({cls: Css.wrapper})
     const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
 
@@ -73,6 +37,8 @@ export class GanttRender {
 
     /* Define the callback synchronously */
     const refreshChartCallback = () => {
+      if (!renderEngine) return
+
       if (updateTimeout) {
         window.clearTimeout(updateTimeout)
       }
@@ -81,7 +47,7 @@ export class GanttRender {
       updateTimeout = window.setTimeout(() => {
         new Notice('Re-rendering Gantt...')
         this.plugin.calendarConfigsCache.clear()
-        getGanttDataFromFolder(this.plugin, codeBlockContent)
+        getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
         .then(updatedData => {
           if (renderEngine) {
             renderEngine.updateData(updatedData)
@@ -101,7 +67,7 @@ export class GanttRender {
 
     const panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
     const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
-    const zoomResetBtn = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset zoom'})
+    const zoomResetBtn = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset zoom'}) // manual svg icon
     zoomResetBtn.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
     const zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
     const panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
@@ -141,11 +107,11 @@ export class GanttRender {
 
 
     /* Register the child lifecycle component synchronously before ANY 'await' */
-    ctx?.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin, refreshChartCallback))
+    ctx?.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin))
 
     /* Perform data load in async way */
     this.plugin.calendarConfigsCache.clear()
-    const data = await getGanttDataFromFolder(this.plugin, codeBlockContent)
+    const data = await getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
 
     /* Instantiate the engine */
     renderEngine = new GanttRenderEngine(
@@ -154,7 +120,8 @@ export class GanttRender {
       tooltip,
       hoverTitle,
       hoverDates,
-      this.plugin
+      this.plugin,
+      codeBlockContent
     )
 
     reloadBtn.addEventListener('click', () => refreshChartCallback())
@@ -184,5 +151,37 @@ export class GanttRender {
       }
     )
   }
+}
 
+/* See https://lucide.dev for icons, */
+function createIconButton(parentEl: HTMLElement, icon: string, title: string,): HTMLButtonElement {
+  const btn = parentEl.createEl('button', {cls: Css.button.icon, title})
+  setIcon(btn, icon)
+  return btn
+}
+
+class GanttLifecycleComponent extends MarkdownRenderChild {
+  private events: EventRef[] = []
+
+  constructor(containerEl: HTMLElement,
+              private tooltipEl: HTMLElement,
+              private plugin: FantasyGanttPlugin) {
+    super(containerEl)
+  }
+
+  onload() {
+    /* Register listeners with reference tracking */
+    // this.events.push(this.plugin.app.metadataCache.on('changed', this.refreshChartCallback))
+    // this.events.push(this.plugin.app.metadataCache.on('resolved', this.refreshChartCallback))
+  }
+
+  onunload() {
+    /* Remove the DOM tooltip element */
+    if (this.tooltipEl) {
+      this.tooltipEl.remove()
+    }
+    /* Cleanly unbind listeners from the global event loop when code block is closed */
+    this.events.forEach(eventRef => this.plugin.app.metadataCache.offref(eventRef))
+    this.events = []
+  }
 }

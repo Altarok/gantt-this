@@ -1,16 +1,16 @@
-import {PluginSettings} from '../const/types'
+import {CodeBlockContent} from '../const/types'
 import {StringUtils} from '../const/constants'
 
 /**
  * Reads given code block content and returns values in a new copy of the plugin's settings.
  *
- * @param pluginSettings
  * @param currentFolder set to setting values 'eventPath' and 'calendarPath' if their respective value equals 'local'
  * @param source code block content
  */
-export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: string, source: string): PluginSettings {
+export function readCodeBlock(currentFolder: string,
+                              source: string): CodeBlockContent {
 
-  const settings: PluginSettings = {...pluginSettings}
+  const codeBlockContent: CodeBlockContent = {}
 
   const lines = source.split('\n').filter(Boolean)
 
@@ -21,21 +21,33 @@ export function readCodeBlock(pluginSettings: PluginSettings, currentFolder: str
 
     switch (key) {
       case 'eventPath':
-        settings.eventPath = resolvePath(value, currentFolder)
+        codeBlockContent.eventPath = resolvePath(value, currentFolder)
         break
       case 'calendarPath':
-        settings.calendarPath = resolvePath(value, currentFolder)
+        codeBlockContent.calendarPath = resolvePath(value, currentFolder)
         break
       case 'eventPathSearchRecursive':
-        settings.eventPathSearchRecursive = parseBoolean(value)
+        codeBlockContent.eventPathSearchRecursive = parseBoolean(value)
         break
       case 'calendarPathSearchRecursive':
-        settings.calendarPathSearchRecursive = parseBoolean(value)
+        codeBlockContent.calendarPathSearchRecursive = parseBoolean(value)
+        break
+      case 'lowerBoundDate':
+        codeBlockContent.lowerBoundDate = value
+        break
+      case 'centerHereDate':
+        codeBlockContent.centerHereDate = value
+        break
+      case 'upperBoundDate':
+        codeBlockContent.upperBoundDate = value
+        break
+      case 'calendarForBounds':
+        codeBlockContent.calendarForBounds = value
         break
     }
   }
 
-  return settings
+  return codeBlockContent
 }
 
 /**
