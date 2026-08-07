@@ -57,7 +57,6 @@ export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
     items.push(ganttItem)
   }
 
-  debugger
   parseCodeBlockContent(plugin, codeBlockContent)
 
   return items
@@ -69,11 +68,9 @@ function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: Co
   const calendarConfig = plugin.calendarConfigsCache.get(codeBlockContent.calendar ?? 'gregorian')
   if (!calendarConfig) return
 
-
   if (codeBlockContent.lowerBoundDate) codeBlockContent.lowerBoundDateParsed = parseCodeBlockDate(codeBlockContent.lowerBoundDate, calendarConfig)
   if (codeBlockContent.centerHereDate) codeBlockContent.centerHereDateParsed = parseCodeBlockDate(codeBlockContent.centerHereDate, calendarConfig)
   if (codeBlockContent.upperBoundDate) codeBlockContent.upperBoundDateParsed = parseCodeBlockDate(codeBlockContent.upperBoundDate, calendarConfig)
-
 }
 
 function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
