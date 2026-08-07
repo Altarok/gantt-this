@@ -222,44 +222,42 @@ export class GanttRenderEngine {
   }
 
   renderData(width: number) {
-    this.dataG.innerHTML = ''
+    this.dataG.empty()
+
+    const eraLayer = Util.createSVGElement('g', 'gt-layer-eras')
+
+    this.dataG.appendChild(eraLayer)
+
     const halfRowHeight = this.config.rowHeight / 2
+    const firstYValue = this.config.margin.top
+    const totalChartHeight = this.calculateTotalChartHeight()
 
-    let firstYValue: number | null = null
-
-    const totalChartHeight = this.groups.reduce((acc, g) => {
-      const header = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
-      const content = (g.lanes ?? 1) * this.config.rowHeight
-      return acc + header + content
-    }, 0)
+    const headerHeight = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
 
     this.groups.forEach(group => {
-      firstYValue ??= group.yOffset
-      const groupYStart = group.yOffset + (this.config.enableGrouping ? this.config.groupHeaderHeight : 0)
-
-      const headerHeight = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
       const groupContentHeight = (group.lanes ?? 1) * this.config.rowHeight
       const totalGroupHeight = headerHeight + groupContentHeight
+      const groupYStart = group.yOffset + headerHeight
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
-        const laneY = groupYStart + lane! * this.config.rowHeight
+        const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
         if (displayType === 'vertical-line') {
 
           const x1 = this.getXPosition(d.startDays, width)
-          Util.drawVerticalLine(d, x1, firstYValue!, totalChartHeight, this.plugin.settings.uxVerticalLineEventWidth, this.dataG)
+          Util.drawVerticalLine(d, x1, firstYValue, totalChartHeight, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
 
         } else if (displayType === 'era') {
 
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
           const isInGeneralGroup = d.group === 'general'
-          const y: number = isInGeneralGroup ? firstYValue! : group.yOffset
+          const y: number = isInGeneralGroup ? firstYValue : group.yOffset
           const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
 
-          Util.drawEra(d, x1, x2, y, height, this.dataG)
+          Util.drawEra(d, x1, x2, y, height, eraLayer)
 
         } else if (displayType === 'bar') {
 
@@ -285,6 +283,14 @@ export class GanttRenderEngine {
         }
       })
     })
+  }
+
+  private calculateTotalChartHeight() {
+    return this.groups.reduce((acc, g) => {
+      const header = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
+      const content = (g.lanes ?? 1) * this.config.rowHeight
+      return acc + header + content
+    }, 0)
   }
 
   drawAxes(width: number) {

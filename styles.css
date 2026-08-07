@@ -281,8 +281,7 @@
 }
 
 .gt-item.timespan.era {
-  fill: yellow;
-  fill-opacity: 0.25;
+  fill-opacity: 0.15;
   pointer-events: none;
   user-select: none;
 }
