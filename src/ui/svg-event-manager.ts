@@ -12,6 +12,7 @@ export class GanttEventManager {
   private verticalGuides: SVGLineElement[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private highlightElement: SVGElement | null = null
+  private autoRestrictZoom = false
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -26,6 +27,8 @@ export class GanttEventManager {
   constructor(private engine: GanttRenderEngine,
               readonly mouseOverEventShowBox: boolean,
               readonly mouseOverEventShowVerticalLine: boolean) {
+    this.autoRestrictZoom = this.engine.plugin.settings.autoRestrictZoom
+
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -99,8 +102,10 @@ export class GanttEventManager {
     const rect = this.currentSvg.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.engine.config.margin.left
 
-    const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-    const nextScale = this.engine.zoomScale * zoomFactor
+    let zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
+    if (this.autoRestrictZoom && this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
+    let nextScale = this.engine.zoomScale * zoomFactor
+    if (this.autoRestrictZoom && nextScale < 0.5) nextScale = 0.5
 
     this.engine.zoomTranslateX = mouseX - (mouseX - this.engine.zoomTranslateX) * (nextScale / this.engine.zoomScale)
     this.engine.zoomScale = nextScale

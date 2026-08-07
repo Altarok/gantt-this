@@ -47,6 +47,8 @@ export class GanttRenderEngine {
   private maxDays = 0
   zoomScale = 1
   zoomTranslateX = 0
+  /** Day diff between 2 axis ticks. Must be positive. */
+  stepDays = 1
 
   private svgDrawerData: SvgDrawerData
 
@@ -301,10 +303,10 @@ export class GanttRenderEngine {
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
     const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
 
-    const stepDays = Math.floor(totalDaysSpan / 6) + 1
+    this.stepDays = Math.floor(totalDaysSpan / 6) + 1
 
-    const startDaysValue = Math.floor(this.minDays / stepDays) * stepDays - stepDays
-    const endDaysValue = Math.ceil(this.maxDays / stepDays) * stepDays + stepDays
+    const startDaysValue = Math.floor(this.minDays / this.stepDays) * this.stepDays - this.stepDays
+    const endDaysValue = Math.ceil(this.maxDays / this.stepDays) * this.stepDays + this.stepDays
 
     this.activeAxesList.forEach((calType, index) => {
       const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight)
@@ -326,7 +328,7 @@ export class GanttRenderEngine {
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
 
-      for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += stepDays) {
+      for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += this.stepDays) {
         const xPos = this.getXPosition(currDays, width)
         if (xPos < 0 || xPos > renderWidth) continue
 
@@ -408,35 +410,36 @@ export class GanttRenderEngine {
 
   zoomOut(factor = 1.25) {
     if (this.eventManager?.isDragging) return
+    if (this.plugin.settings.autoRestrictZoom && this.zoomScale < 0.5) return
 
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
-    const newScale = oldScale / factor /* Math.max(oldScale / factor, 0.5) - Min zoom floor */
+    let newScale = oldScale / factor
+    if (this.plugin.settings.autoRestrictZoom && newScale < 0.5) newScale = 0.5
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
     this.zoomScale = newScale
-
     this.handleResize()
   }
 
   zoomIn(factor = 1.25) {
     if (this.eventManager?.isDragging) return
+    if (this.plugin.settings.autoRestrictZoom && this.stepDays < 2) return
 
     const width = this.container.clientWidth || 800
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
-    const newScale = oldScale * factor /* Math.min(oldScale * factor, 50) - Max zoom cap */
+    const newScale = oldScale * factor
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
     this.zoomScale = newScale
-
     this.handleResize()
   }
 
@@ -497,9 +500,14 @@ export class GanttRenderEngine {
     const startValues = this.rawData.map(d => d.startDays)
     const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
 
-    const paddingDays = 15
-    this.minDays = Math.min(...startValues) - paddingDays
-    this.maxDays = Math.max(...endValues) + paddingDays
+    const lowerBound = Math.min(...startValues)
+    const upperBound = Math.max(...endValues)
+    const diff = upperBound - lowerBound
+
+    const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
+
+    this.minDays = lowerBound - paddingDays
+    this.maxDays = upperBound + paddingDays
   }
 
   private calculateStacking(items: GanttItem[]) {

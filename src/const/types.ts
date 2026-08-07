@@ -154,11 +154,19 @@ export type PluginSettings = GanttChartSources & {
   fallbackColor: string
   calendars: GroupOrCalendarSettings[]
   groups: GroupOrCalendarSettings[]
-  placeholder: number
+
+  /*
+   * Advanced UX settings
+   */
   mouseOverEventShowBox: boolean
   mouseOverEventShowVerticalLine: boolean
   showButtonsToHideGroups: boolean
+  uxVerticalLineEventWidth: number
+  autoRestrictZoom: boolean
 
+  /*
+   * Front-matter property names
+   */
   frontMatterProperty_gantt_this: string
   frontMatterProperty_calendar_name: string
   frontMatterProperty_event_time_start: string
@@ -172,7 +180,6 @@ export type PluginSettings = GanttChartSources & {
   frontMatterProperty_event_icon_color: string
   frontMatterProperty_note_header: string
 
-  uxVerticalLineEventWidth: number
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -186,11 +193,19 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     {id: 'gregorian', visible: true, priority: 0},
   ],
   groups: [],
-  placeholder: 0,
+
+  /*
+   * Advanced UX settings
+   */
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,
+  uxVerticalLineEventWidth: 3,
+  autoRestrictZoom: true,
 
+  /*
+   * Front-matter property names
+   */
   frontMatterProperty_gantt_this: 'gantt-item', // boolean; "activates" file as event source
   frontMatterProperty_calendar_name: 'gantt-type-definition', // string; "activates" file as calendar source
   frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian'
@@ -202,9 +217,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_symbol: 'gantt-symbol', // diamond ... or auto-(bar | point)
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // icon name from https://lucide.dev
   frontMatterProperty_event_icon_color: 'gantt-displayIconColor',  // color for said icon
-  frontMatterProperty_note_header: 'gantt-linkToHeader', // note-internal header to link to
+  frontMatterProperty_note_header: 'gantt-linkToHeader' // note-internal header to link to
 
-  uxVerticalLineEventWidth: 3
+
 } as const
 
 
