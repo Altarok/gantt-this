@@ -265,7 +265,7 @@ export class GanttRenderEngine {
 
           const x1 = this.getXPosition(d.startDays, width)
           const x2 = this.getXPosition(d.endDays, width)
-          Util.drawBar(d, x1, x2, laneY, this.dataG)
+          Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
 
         } else if (displayType === 'point') {
 

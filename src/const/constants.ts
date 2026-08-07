@@ -17,16 +17,16 @@ export const Css = {
     icon: 'gt-btn-icon',
   },
   item: {
-    item:    'gt-item',
+    item: 'gt-item',
 
-    circle:  'gt-item timestamp circle',
+    circle: 'gt-item timestamp circle',
     diamond: 'gt-item timestamp diamond',
-    line:    'gt-item timestamp vertical-line',
+    line: 'gt-item timestamp vertical-line',
 
-    bar:     'gt-item timespan bar',
-    era:     'gt-item timespan era',
+    bar: 'gt-item timespan bar',
+    era: 'gt-item timespan era',
 
-    text:    'gt-item text-overlay',
+    text: 'gt-item text-overlay',
 
     // icon: 'gt-item point-icon-container',
     // iconExternal: 'gt-item point-icon-external',

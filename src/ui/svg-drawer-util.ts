@@ -48,8 +48,8 @@ function createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K,
 }
 
 function createIconInDiv(d: GanttItem): HTMLDivElement {
-  const iconContainerDiv = window.createDiv({cls: 'gt-item point-icon-external'})
-  if (d.displayIconColor) iconContainerDiv.style.color = d.displayIconColor
+  const iconContainerDiv = window.createDiv({cls: 'gt-item icon-container'})
+  if (d.displayIconColor) iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
   if (d.displayIcon) setIcon(iconContainerDiv, d.displayIcon)
   return iconContainerDiv
 }
@@ -109,7 +109,7 @@ function truncateText(text: string, maxWidth: number, charWidthEstimate = 7): st
 }
 
 /**
- * @param text ti display
+ * @param text to display
  * @param x left bound of surrounding svg
  * @param y upper bound of surrounding svg
  * @param width of surrounding svg
@@ -121,7 +121,7 @@ function addTextIfFitting(text: string, x: number, y: number, width: number, has
   const availableTextWidth = width - textSpacing
 
   if (availableTextWidth > 0) {
-    const textSvg = createSVGElement('text', Css.item.text, {x: x + textSpacing, y: y + iconRadius + 1})
+    const textSvg = createSVGElement('text', Css.item.text, {x: x + textSpacing, y: y})
     textSvg.textContent = truncateText(text, availableTextWidth)
     svgContainer.appendChild(textSvg)
   }
@@ -132,18 +132,20 @@ function addTextIfFitting(text: string, x: number, y: number, width: number, has
  * @param d event to draw
  * @param x1 left bound of svg to draw
  * @param x2 right bound of svg to draw
- * @param y upper bound of svg to draw
+ * @param y vertical center of svg to draw
  * @param svgContainer
  */
 function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: SVGElement): void {
   const width = Math.max(2, x2 - x1)
 
-  const bar = createSVGElement('rect', Css.item.bar, {x: x1, y: y, width, 'data-id': d.id})
+  const bar = createSVGElement('rect', Css.item.bar, {x: x1, y: y - iconRadius, width, 'data-id': d.id})
   if (d.color) bar.setAttribute('fill', d.color)
   svgContainer.appendChild(bar)
 
-  const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
-  addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer)
+  if (width > iconSize) {
+    const hasIcon = addIconIfPresent(d, x1, y - iconRadius, svgContainer)
+    if (width > 2 * iconSize) addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer)
+  }
 }
 
 /**
@@ -151,37 +153,56 @@ function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: 
  * @param d event to draw
  * @param x1 left bound of svg to draw
  * @param x2 right bound of svg to draw
- * @param y upper bound of svg to draw
+ * @param y vertical center of svg to draw
  * @param height height of svg to draw
  * @param svgContainer
  */
 function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number, svgContainer: SVGElement): void {
   const width = Math.max(2, x2 - x1)
 
-  const era = createSVGElement('rect', Css.item.era, {x: x1, y, width, height, 'data-id': d.id})
+  const era = createSVGElement('rect', Css.item.era, {x: x1, y: y, width, height, 'data-id': d.id})
   if (d.color) era.setAttribute('fill', d.color)
   svgContainer.appendChild(era)
 
-  const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
-  addTextIfFitting(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, x1, y, width, hasIcon, svgContainer)
+  if (width > iconSize) {
+    const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
+    if (width > 2 * iconSize) addTextIfFitting(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, x1, y + iconRadius, width, hasIcon, svgContainer)
+  }
 }
 
 /**
- * SVG circle anchor is dead center.
+ * Draw small shape for event with a single timestamp (box|circle|diamond). Appends event color to SVG background and adds lucide icon on top if.
+ * @param d event to draw
+ * @param shape 'circle' | 'polygon' | 'rect'
+ * @param cssClass
+ * @param attrs
+ * @param x center of svg
+ * @param y center of svg
+ * @param svgContainer
+ */
+function drawSmallShape(d: GanttItem,
+                        shape: 'circle' | 'polygon' | 'rect', cssClass: string,
+                        attrs: Record<string, string | number>, x: number, y: number,
+                        svgContainer: SVGElement): void {
+  const el = createSVGElement(shape, cssClass, {...attrs, 'data-id': d.id})
+  if (d.color) el.setAttribute('fill', d.color)
+  svgContainer.appendChild(el)
+  addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
+}
+
+/**
+ * Draw box for timestamp event. SVG bar anchor is top left corner.
  * @param d event to draw
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
  */
-function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
-  const circle = createSVGElement('circle', 'gt-item timestamp circle', {cx, cy, 'data-id': d.id})
-  if (d.color) circle.setAttribute('fill', d.color)
-  svgContainer.appendChild(circle)
-  addIconIfPresent(d, cx - iconRadius, cy - iconRadius, svgContainer)
+function drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  drawSmallShape(d, 'rect', 'gt-item timestamp box', {x: cx - iconRadius, y: cy - iconRadius}, cx, cy, svgContainer)
 }
 
 /**
- * SVG polygon anchor is dead center.
+ * Draw diamond for timestamp event. SVG polygon anchor is dead center.
  * @param d event to draw
  * @param cx horizontal center of svg to draw, keep as is for 'polygon'
  * @param cy vertical center of svg to draw, keep as is for 'polygon'
@@ -189,26 +210,18 @@ function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElemen
  */
 function drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
   const points = `${cx},${cy - iconRadius} ${cx + iconRadius},${cy} ${cx},${cy + iconRadius} ${cx - iconRadius},${cy}`
-  const polygon = createSVGElement('polygon', 'gt-item timestamp diamond', {points, 'data-id': d.id})
-  if (d.color) polygon.setAttribute('fill', d.color)
-  svgContainer.appendChild(polygon)
-  addIconIfPresent(d, cx - iconRadius, cy - iconRadius, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp diamond', {points}, cx, cy, svgContainer)
 }
 
 /**
- * SVG bar anchor is top left corner.
+ * Draw circle for timestamp event. SVG circle anchor is dead center.
  * @param d event to draw
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
  */
-function drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
-  const rect = createSVGElement('rect', 'gt-item timestamp box', {
-    x: cx - iconRadius, y: cy - iconRadius, 'data-id': d.id
-  })
-  if (d.color) rect.setAttribute('fill', d.color)
-  svgContainer.appendChild(rect)
-  addIconIfPresent(d, cx - iconRadius, cy - iconRadius, svgContainer)
+function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  drawSmallShape(d, 'circle', 'gt-item timestamp circle', {cx, cy}, cx, cy, svgContainer)
 }
 
 /**
