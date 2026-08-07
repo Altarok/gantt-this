@@ -12,6 +12,7 @@ const yamlRegex = /```yaml\s([\s\S]*?)```/
  * @param plugin
  * @param calendarId name reference of calendar, must  match front-matter property
  * @param pluginSettings partial plugin settings
+ * @param codeBlockContent
  */
 export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
                                             calendarId: string,

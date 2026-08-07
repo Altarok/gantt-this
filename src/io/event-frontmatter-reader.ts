@@ -13,6 +13,7 @@ import {FrontMatterCache, TFile} from 'obsidian'
 import {Colors, Consts} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {parseEventDate} from "../date-calculations/event-date-input-calc";
+import {createAxisDateDescription} from "../util/dates";
 
 
 /**
@@ -56,7 +57,31 @@ export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
     items.push(ganttItem)
   }
 
+  debugger
+  parseCodeBlockContent(plugin, codeBlockContent)
+
   return items
+}
+
+function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: CodeBlockContent) {
+
+  if (!codeBlockContent) return
+  const calendarConfig = plugin.calendarConfigsCache.get(codeBlockContent.calendar ?? 'gregorian')
+  if (!calendarConfig) return
+
+
+  if (codeBlockContent.lowerBoundDate) codeBlockContent.lowerBoundDateParsed = parseCodeBlockDate(codeBlockContent.lowerBoundDate, calendarConfig)
+  if (codeBlockContent.centerHereDate) codeBlockContent.centerHereDateParsed = parseCodeBlockDate(codeBlockContent.centerHereDate, calendarConfig)
+  if (codeBlockContent.upperBoundDate) codeBlockContent.upperBoundDateParsed = parseCodeBlockDate(codeBlockContent.upperBoundDate, calendarConfig)
+
+}
+
+function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
+
+  if (typeof date === 'string')
+    return parseEventDate(date, calendarConfig) ?? undefined
+  else
+    return {days: date, display: createAxisDateDescription(date, calendarConfig)}
 }
 
 function createItem(

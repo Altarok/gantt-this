@@ -10,7 +10,7 @@ import {StringUtils} from '../const/constants'
 export function readCodeBlock(currentFolder: string,
                               source: string): CodeBlockContent {
 
-  const codeBlockContent: CodeBlockContent = {}
+  const codeBlockContent: CodeBlockContent = {calendar: 'gregorian'}
 
   const lines = source.split('\n').filter(Boolean)
 
@@ -42,7 +42,7 @@ export function readCodeBlock(currentFolder: string,
         codeBlockContent.upperBoundDate = value
         break
       case 'calendarForBounds':
-        codeBlockContent.calendarForBounds = value
+        codeBlockContent.calendar = value
         break
     }
   }

@@ -131,7 +131,10 @@ export type CodeBlockContent = Partial<GanttChartSources> & {
   lowerBoundDate?: GanttChartDateBound
   centerHereDate?: GanttChartDateBound
   upperBoundDate?: GanttChartDateBound
-  calendarForBounds?: string
+  lowerBoundDateParsed?: ParsedDate
+  centerHereDateParsed?: ParsedDate
+  upperBoundDateParsed?: ParsedDate
+  calendar: string
 }
 
 export type GanttChartButtonSelection = {
