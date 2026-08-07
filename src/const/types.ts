@@ -134,7 +134,7 @@ export type CodeBlockContent = Partial<GanttChartSources> & {
   lowerBoundDateParsed?: ParsedDate
   centerHereDateParsed?: ParsedDate
   upperBoundDateParsed?: ParsedDate
-  calendar: string
+  calendar?: string
 }
 
 export type GanttChartButtonSelection = {
@@ -144,8 +144,7 @@ export type GanttChartButtonSelection = {
   enableGrouping: boolean
 }
 
-export type GanttChartConfig =
-  GanttChartButtonSelection & CodeBlockContent & {
+export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
   rowHeight: number,
   groupHeaderHeight: number,
   singleAxisHeight: number,
