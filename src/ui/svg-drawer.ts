@@ -62,7 +62,7 @@ export class GanttRenderEngine {
   ) {
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
-    this.transitionToPredefinedBounds()
+    // this.transitionToPredefinedBounds()
     this.initLayout()
     this.initChartStructure()
 
@@ -74,7 +74,7 @@ export class GanttRenderEngine {
     this.svgDrawerData = this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
-    this.transitionToPredefinedBounds()
+    // this.transitionToPredefinedBounds()
     this.initLayout()
     this.initChartStructure()
     this.handleResize()
@@ -189,6 +189,14 @@ export class GanttRenderEngine {
 
   handleResize() {
     const width = this.container.clientWidth || 800
+
+    // Re-evaluate predefined bounds now that we have the true container width
+    if (this.codeBlockContent.lowerBoundDateParsed ||
+      this.codeBlockContent.upperBoundDateParsed ||
+      this.codeBlockContent.centerHereDateParsed) {
+      this.transitionToPredefinedBounds(width)
+    }
+
     this.clipRect.setAttribute('width', (width - this.config.margin.left - this.config.margin.right).toString())
 
     this.drawGroupBackgrounds(width)
@@ -512,7 +520,7 @@ export class GanttRenderEngine {
     this.maxDays = upperBound + paddingDays
   }
 
-  private transitionToPredefinedBounds(): void {
+  private transitionToPredefinedBounds(width: number): void {
     debugger
 
     const lower = this.codeBlockContent.lowerBoundDateParsed?.days
@@ -526,6 +534,8 @@ export class GanttRenderEngine {
       return
     }
 
+    const renderWidth = Math.max(1, width - this.config.margin.left - this.config.margin.right)
+
     // Case A: Predefined min and/or max bounds supplied
     if (lower !== undefined || upper !== undefined) {
       const targetMin = lower ?? this.minDays
@@ -534,27 +544,24 @@ export class GanttRenderEngine {
 
       if (targetRange > 0) {
         this.zoomScale = totalRange / targetRange
-
-        const oldCenter =   this.minDays + totalRange / 2
-        const newCenter =   targetMin + targetRange / 2
-
-        this.zoomTranslateX =newCenter-oldCenter
-
-        // const normalizedOffset = (targetMin - this.minDays) / totalRange
-        // this.zoomTranslateX = -normalizedOffset * this.zoomScale
+        // Pixel position of targetMin at scale 1:
+        const minXAtScale1 = ((targetMin - this.minDays) / totalRange) * renderWidth
+        // Shift targetMin to pixel X = 0 under the new zoomScale:
+        this.zoomTranslateX = -(minXAtScale1 * this.zoomScale)
         return
       }
     }
 
     // Case B: Single center point specified
     if (center !== undefined) {
-      // Keeps current zoomScale (or defaults to 1 if uninitialized)
       const currentScale = this.zoomScale > 0 ? this.zoomScale : 1
-      const visibleRangeFraction = 1 / currentScale
-      const centerNormalized = (center - this.minDays) / totalRange
-
       this.zoomScale = currentScale
-      this.zoomTranslateX = -(centerNormalized - visibleRangeFraction / 2) * currentScale
+
+      const centerXAtScale1 = ((center - this.minDays) / totalRange) * renderWidth
+      const centerXZoomed = centerXAtScale1 * currentScale
+
+      // Center the target day in the middle of renderWidth:
+      this.zoomTranslateX = (renderWidth / 2) - centerXZoomed
       return
     }
 
