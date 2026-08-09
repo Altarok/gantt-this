@@ -267,7 +267,9 @@ export class GanttRenderEngine {
           const x2 = this.getXPosition(d.endDays, width)
           const isInGeneralGroup = d.group === 'general'
           const y: number = isInGeneralGroup ? firstYValue : group.yOffset
-          const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+          // const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+          const height: number = totalChartHeight
+
 
           Util.drawEra(d, x1, x2, y, height, eraLayer)
 
@@ -297,7 +299,7 @@ export class GanttRenderEngine {
     })
   }
 
-  private calculateTotalChartHeight() {
+  calculateTotalChartHeight() {
     return this.groups.reduce((acc, g) => {
       const header = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
       const content = (g.lanes ?? 1) * this.config.rowHeight

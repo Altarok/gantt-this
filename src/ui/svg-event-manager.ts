@@ -276,10 +276,13 @@ export class GanttEventManager {
   }
 
   private updateLine(line: SVGLineElement, x: number, height: number) {
+    const totalChartHeight = this.engine.calculateTotalChartHeight()
+
     line.setAttribute('x1', String(x))
     line.setAttribute('y1', '0')
     line.setAttribute('x2', String(x))
-    line.setAttribute('y2', String(height))
+    // line.setAttribute('y2', String(height))
+    line.setAttribute('y2', String(totalChartHeight))
   }
 
   /** Remove vertical red line. */
