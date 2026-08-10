@@ -512,8 +512,8 @@ export class GanttRenderEngine {
     const startValues = this.rawData.map(d => d.startDays)
     const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
 
-    const lowerBound = /* this.codeBlockContent.lowerBoundDateParsed?.days ?? */ Math.min(...startValues)
-    const upperBound = /* this.codeBlockContent.upperBoundDateParsed?.days ?? */ Math.max(...endValues)
+    const lowerBound = Math.min(...startValues)
+    const upperBound = Math.max(...endValues)
     const diff = upperBound - lowerBound
 
     const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
@@ -523,7 +523,6 @@ export class GanttRenderEngine {
   }
 
   private transitionToPredefinedBounds(width: number): void {
-    debugger
 
     const lower = this.codeBlockContent.lowerBoundDateParsed?.days
     const upper = this.codeBlockContent.upperBoundDateParsed?.days
