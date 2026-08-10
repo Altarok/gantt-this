@@ -431,14 +431,21 @@
 
 /* Inherit text color from Obsidian theme & Smooth hover or visual transition if needed */
 .moon-phase-icon {
+  overflow: visible;
   fill: none;
   stroke: currentColor;
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
+  opacity: 0.8;
 }
 
 .moon-phase-icon .moon-fill {
   fill: currentColor;
+  stroke: none;
 }
 
+.moon-phase-icon .moon-unlit {
+  fill: var(--background-primary);
+  /*opacity: 0.2;*/
+}

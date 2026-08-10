@@ -392,9 +392,8 @@ export class GanttRenderEngine {
 
         const moons = calendarConfig?.moons ?? []
         const moonCount = moons?.length ?? 0
-        moons.forEach((moon: Moon, index: number) =>
-//        for (const moon of moons)
-        {
+
+        if (moonCount) moons.forEach((moon: Moon, index: number) => {
           const L = moon.cycle
           if (!L || L <= 0) return
           const O = moon.offset ?? 0
@@ -409,7 +408,7 @@ export class GanttRenderEngine {
           const halfCyclePixels = quarterCyclePixels * 2;
 
           // Minimum distance threshold to render without icon overlap
-          const MIN_ICON_SPACING_PX = 16;
+          const MIN_ICON_SPACING_PX = 20;
 
           // Guard: Skip entire moon if even Full/New phases are too crowded
           if (halfCyclePixels < MIN_ICON_SPACING_PX) return
@@ -445,11 +444,9 @@ export class GanttRenderEngine {
 
           // Helper closure to handle visibility bounds checking & drawing
           function renderPhaseIfVisible(x: number, exactDay: number, phaseIndex: number) {
-            if (exactDay >= startDaysValue && exactDay <= endDaysValue) {
-              if (x >= 0 && x <= renderWidth) {
-                Util.drawMoonPhase(x, -10, phaseIndex, index, moonCount, ticksG, moon.color)
-              }
-            }
+            if (exactDay >= startDaysValue && exactDay <= endDaysValue)
+              if (x >= 0 && x <= renderWidth)
+                Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
           }
         })
       }

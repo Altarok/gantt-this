@@ -29,7 +29,7 @@ export type LeapYearRule = {
   applyToMonthIndex?: number /* Which month gets the leap day (e.g., February / index 1) */
 }
 
-export type Moon = { offset: number; cycle: number; color: string }
+export type Moon = { offset: number; cycle: number; color?: string }
 
 export type RuleBasedDetails = {
   months: MonthDefinition[]

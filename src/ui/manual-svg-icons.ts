@@ -5,24 +5,23 @@ const resetZoom = `
 <line x1="21" x2="16.65" y1="21" y2="16.65"/>
 </svg>
 `
-const newMoon = `<circle cx="12" cy="12" r="9"/>`
-const crescentHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" fill="currentColor"/>`
-const fullMoon = `<circle cx="12" cy="12" r="9" fill="currentColor"/>`
-const waningHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" fill="currentColor"/>`
+// const newMoon = `<circle cx="12" cy="12" r="9"/>`
+// const crescentHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" fill="currentColor"/>`
+// const fullMoon = `<circle cx="12" cy="12" r="9" fill="currentColor"/>`
+// const waningHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" fill="currentColor"/>`
 
-//const moonPhase4 = `
-//<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-//  <circle cx="12" cy="12" r="9"/>
-//  <path d="M 12 3 A 9 9 0 0 1 12 21 A 6 9 0 0 0 12 3 Z" fill="currentColor"/>
-//</svg>
-//`
+const moonPhase0 = `<circle cx="12" cy="12" r="9" class="moon-unlit"/>`
+const moonPhase1 = `<path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/>`
+const moonPhase2 = `<circle cx="12" cy="12" r="9" class="moon-fill"/>`
+const moonPhase3 = `<path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/>`
+// const moonPhase4 = `<circle cx="12" cy="12" r="9" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 1 12 21 A 6 9 0 0 0 12 3 Z" class="moon-fill"/>`
 
 export const ManualSvg = {
   resetZoom,
-  newMoon, // 0/4 - New Moon (Outline circle)
-  crescentHalfMoon, // 1/4 - First Quarter / Waxing (Right half filled)
-  fullMoon, // 2/4 - Full Moon (Solid filled circle)
-  waningHalfMoon, // 3/4 - Third Quarter / Waning (Left half filled)
+  newMoon: moonPhase0, // 0/4 - New Moon (Outline circle)
+  crescentHalfMoon: moonPhase1, // 1/4 - First Quarter / Waxing (Right half filled)
+  fullMoon: moonPhase2, // 2/4 - Full Moon (Solid filled circle)
+  waningHalfMoon: moonPhase3, // 3/4 - Third Quarter / Waning (Left half filled)
 }
 
 //~~~meta-bind-js-view

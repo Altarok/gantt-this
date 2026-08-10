@@ -267,19 +267,18 @@ export function drawMoonPhase(cx: number,
                               moonCount: number,
                               svgContainer: SVGElement,
                               color?: string): void {
-
   const innerContent = moonSvgs[phase]
   if (!innerContent) return
 
-  const iconSize = Math.floor(14 / moonCount)
+  const iconSize = Math.max(19 - moonCount, 12)// Math.floor(16 / moonCount)
   const halfSize = iconSize / 2
   const x = cx - halfSize
-  const y = cy - halfSize
+  const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
+  const y = cy - halfSize + yOffset
 
 
-  const g = createSVGElement('g', 'moon-phase-icon', {
-    viewBox: '0 0 24 24', x, y,
-    transform: `translate(${x}, ${y + 14 * (moonIndex / (moonCount - 1))})`
+  const g = createSVGElement('svg', 'moon-phase-icon', {
+    width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
   })
 
   if (color) g.style.color = color
