@@ -5,47 +5,24 @@ const resetZoom = `
 <line x1="21" x2="16.65" y1="21" y2="16.65"/>
 </svg>
 `
+const newMoon = `<circle cx="12" cy="12" r="9"/>`
+const crescentHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" fill="currentColor"/>`
+const fullMoon = `<circle cx="12" cy="12" r="9" fill="currentColor"/>`
+const waningHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" fill="currentColor"/>`
 
-const moonPhase0 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="9"/>
-</svg>
-`
-
-const moonPhase1 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="9"/>
-  <path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" fill="currentColor"/>
-</svg>
-`
-
-const moonPhase2 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="9" fill="currentColor"/>
-</svg>
-`
-
-const moonPhase3 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="9"/>
-  <path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" fill="currentColor"/>
-</svg>
-`
-
-const moonPhase4 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="9"/>
-  <path d="M12 3a9 9 0 0 1 0 18 9 9 0 0 1 0-18z" fill="currentColor"/>
-</svg>
-`
+//const moonPhase4 = `
+//<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+//  <circle cx="12" cy="12" r="9"/>
+//  <path d="M 12 3 A 9 9 0 0 1 12 21 A 6 9 0 0 0 12 3 Z" fill="currentColor"/>
+//</svg>
+//`
 
 export const ManualSvg = {
   resetZoom,
-  moonPhase0, // 0/4 - New Moon (Outline circle)
-  moonPhase1, // 1/4 - First Quarter / Waxing (Right half filled)
-  moonPhase2, // 2/4 - Full Moon (Solid filled circle)
-  moonPhase3, // 3/4 - Third Quarter / Waning (Left half filled)
-  moonPhase4, // 4/4 - Crescent / Waning Crescent (Crescent path)
+  newMoon, // 0/4 - New Moon (Outline circle)
+  crescentHalfMoon, // 1/4 - First Quarter / Waxing (Right half filled)
+  fullMoon, // 2/4 - Full Moon (Solid filled circle)
+  waningHalfMoon, // 3/4 - Third Quarter / Waning (Left half filled)
 }
 
 //~~~meta-bind-js-view

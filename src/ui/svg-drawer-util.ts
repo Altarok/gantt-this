@@ -243,11 +243,10 @@ function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, widt
 }
 
 const moonSvgs: Record<number, string> = {
-  0: ManualSvg.moonPhase0,
-  1: ManualSvg.moonPhase1,
-  2: ManualSvg.moonPhase2,
-  3: ManualSvg.moonPhase3,
-  4: ManualSvg.moonPhase4
+  0: ManualSvg.newMoon,
+  1: ManualSvg.crescentHalfMoon,
+  2: ManualSvg.fullMoon,
+  3: ManualSvg.waningHalfMoon
 }
 
 /**
@@ -261,48 +260,30 @@ const moonSvgs: Record<number, string> = {
  * @param moonCount
  * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
  */
-export function drawMoonPhase(cx: number, cy: number, phase: number, color: string, moonIndex: number, moonCount: number, svgContainer: SVGElement): void {
+export function drawMoonPhase(cx: number,
+                              cy: number,
+                              phase: number,
+                              moonIndex: number,
+                              moonCount: number,
+                              svgContainer: SVGElement,
+                              color?: string): void {
 
-  const svgString = moonSvgs[phase] ?? ManualSvg.moonPhase0
+  const innerContent = moonSvgs[phase]
+  if (!innerContent) return
 
-  // Icon dimensions
   const iconSize = Math.floor(14 / moonCount)
   const halfSize = iconSize / 2
-
-  // Create a wrapper <g> positioned at (cx, cy)
-  const g = window.createSvg('g')
-  g.classList.add('moon-phase-icon')
-
-  // Center the 16x16 icon over (cx, cy)
   const x = cx - halfSize
   const y = cy - halfSize
-  g.setAttribute('transform', `translate(${x}, ${y + 14 * (moonIndex / (moonCount - 1))})`)
-//  g.setAttribute('stroke', '#ff0000')
-  g.setAttribute('fill', color)
 
 
-  // Parse the raw SVG string and embed its contents inside the <g>
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(svgString, 'image/svg+xml')
-  const iconSvg = doc.querySelector('svg')
+  const g = createSVGElement('g', 'moon-phase-icon', {
+    viewBox: '0 0 24 24', x, y,
+    transform: `translate(${x}, ${y + 14 * (moonIndex / (moonCount - 1))})`
+  })
 
-  if (iconSvg) {
-    // Resize the 24x24 viewBox icon down to 16x16 (or keeping width/height 16)
-    iconSvg.setAttribute('width', iconSize.toString())
-    iconSvg.setAttribute('height', iconSize.toString())
-//    iconSvg.setAttribute('stroke', '#ff0000')
-//    iconSvg.setAttribute('fill', '#ffff00')
+  if (color) g.style.color = color
 
-    // Append the child nodes of the parsed SVG into the container <g>
-    while (iconSvg.firstChild) {
-      g.appendChild(iconSvg.firstChild)
-    }
-
-    // Forward essential visual attributes from the source SVG root (like fill/stroke)
-//    if (iconSvg.hasAttribute('fill')) g.setAttribute('fill', iconSvg.getAttribute('fill')!)
-//    if (iconSvg.hasAttribute('stroke')) g.setAttribute('stroke', iconSvg.getAttribute('stroke')!)
-//    if (iconSvg.hasAttribute('stroke-width')) g.setAttribute('stroke-width', iconSvg.getAttribute('stroke-width')!)
-  }
-
+  g.innerHTML = innerContent
   svgContainer.appendChild(g)
 }

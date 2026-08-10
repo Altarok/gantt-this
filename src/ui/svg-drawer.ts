@@ -447,7 +447,7 @@ export class GanttRenderEngine {
           function renderPhaseIfVisible(x: number, exactDay: number, phaseIndex: number) {
             if (exactDay >= startDaysValue && exactDay <= endDaysValue) {
               if (x >= 0 && x <= renderWidth) {
-                Util.drawMoonPhase(x, -10, phaseIndex, moon.color ?? 'currentColor', index, moonCount, ticksG)
+                Util.drawMoonPhase(x, -10, phaseIndex, index, moonCount, ticksG, moon.color)
               }
             }
           }
