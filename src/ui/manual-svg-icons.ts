@@ -7,33 +7,33 @@ const resetZoom = `
 `
 
 const moonPhase0 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="9"/>
 </svg>
 `
 
 const moonPhase1 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="9"/>
   <path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" fill="currentColor"/>
 </svg>
 `
 
 const moonPhase2 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="9" fill="currentColor"/>
 </svg>
 `
 
 const moonPhase3 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="9"/>
   <path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" fill="currentColor"/>
 </svg>
 `
 
 const moonPhase4 = `
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="9"/>
   <path d="M12 3a9 9 0 0 1 0 18 9 9 0 0 1 0-18z" fill="currentColor"/>
 </svg>
@@ -47,3 +47,29 @@ export const ManualSvg = {
   moonPhase3, // 3/4 - Third Quarter / Waning (Left half filled)
   moonPhase4, // 4/4 - Crescent / Waning Crescent (Crescent path)
 }
+
+//~~~meta-bind-js-view
+//{memory^angle} as degrees
+//---
+//const dia = 200;
+//const rad = dia / 2;
+//const angle = ((d) => -d)(context.bound.degrees ?? 0) * Math.PI / 180;
+//const sin = Math.sin(angle);
+//const cos = Math.cos(angle);
+//const signSin = Math.sign(sin);
+//const signCos = Math.sign(cos);
+//const flagSin = Math.max(0, signSin);
+//const flagCos = Math.max(0, signCos);
+//const svg = `<svg width='${dia}' height='${dia}' stroke-width='0' xlmns='http://www.w3.org/2000/svg'>
+//    <circle cx='${rad}' cy='${rad}' r='${rad}' fill='#000' />
+//    <path d='M ${rad} 0
+//            a ${cos * rad} ${rad} 0 0 ${Math.abs(flagSin - flagCos)} 0 ${dia}
+//            a ${rad} ${rad} 0 0 ${flagSin} 0 ${-1 * dia}
+//            Z'
+//        fill='#fff'
+//    />
+//</svg>`;
+//return engine.markdown.create(svg);
+//~~~
+//
+//  `INPUT[progressBar(minValue(0), maxValue(360)):memory^angle]`

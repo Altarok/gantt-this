@@ -431,11 +431,11 @@
 
 /* Inherit text color from Obsidian theme & Smooth hover or visual transition if needed */
 .moon-phase-icon {
-  color: var(--text-muted);
+  /*color: var(--text-muted);*/
   transition: opacity 0.15s ease;
 }
 
 .moon-phase-icon:hover {
-  color: var(--text-normal);
+  /*color: var(--text-normal);*/
 }
 

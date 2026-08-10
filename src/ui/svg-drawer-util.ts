@@ -256,16 +256,17 @@ const moonSvgs: Record<number, string> = {
  * @param cx Center X position (usually xPos of the tick)
  * @param cy Center Y position (e.g. -12 to sit right above baseline Y=0)
  * @param phase Phase index (0 to 4)
+ * @param color
+ * @param moonIndex
+ * @param moonCount
  * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
  */
-export function drawMoonPhase(cx: number, cy: number, phase: number, svgContainer: SVGElement): void {
-
-  console.log(phase)
+export function drawMoonPhase(cx: number, cy: number, phase: number, color: string, moonIndex: number, moonCount: number, svgContainer: SVGElement): void {
 
   const svgString = moonSvgs[phase] ?? ManualSvg.moonPhase0
 
   // Icon dimensions
-  const iconSize = 16
+  const iconSize = Math.floor(14 / moonCount)
   const halfSize = iconSize / 2
 
   // Create a wrapper <g> positioned at (cx, cy)
@@ -275,7 +276,10 @@ export function drawMoonPhase(cx: number, cy: number, phase: number, svgContaine
   // Center the 16x16 icon over (cx, cy)
   const x = cx - halfSize
   const y = cy - halfSize
-  g.setAttribute('transform', `translate(${x}, ${y})`)
+  g.setAttribute('transform', `translate(${x}, ${y + 14 * (moonIndex / (moonCount - 1))})`)
+//  g.setAttribute('stroke', '#ff0000')
+  g.setAttribute('fill', color)
+
 
   // Parse the raw SVG string and embed its contents inside the <g>
   const parser = new DOMParser()
@@ -286,6 +290,8 @@ export function drawMoonPhase(cx: number, cy: number, phase: number, svgContaine
     // Resize the 24x24 viewBox icon down to 16x16 (or keeping width/height 16)
     iconSvg.setAttribute('width', iconSize.toString())
     iconSvg.setAttribute('height', iconSize.toString())
+//    iconSvg.setAttribute('stroke', '#ff0000')
+//    iconSvg.setAttribute('fill', '#ffff00')
 
     // Append the child nodes of the parsed SVG into the container <g>
     while (iconSvg.firstChild) {
@@ -293,9 +299,9 @@ export function drawMoonPhase(cx: number, cy: number, phase: number, svgContaine
     }
 
     // Forward essential visual attributes from the source SVG root (like fill/stroke)
-    if (iconSvg.hasAttribute('fill')) g.setAttribute('fill', iconSvg.getAttribute('fill')!)
-    if (iconSvg.hasAttribute('stroke')) g.setAttribute('stroke', iconSvg.getAttribute('stroke')!)
-    if (iconSvg.hasAttribute('stroke-width')) g.setAttribute('stroke-width', iconSvg.getAttribute('stroke-width')!)
+//    if (iconSvg.hasAttribute('fill')) g.setAttribute('fill', iconSvg.getAttribute('fill')!)
+//    if (iconSvg.hasAttribute('stroke')) g.setAttribute('stroke', iconSvg.getAttribute('stroke')!)
+//    if (iconSvg.hasAttribute('stroke-width')) g.setAttribute('stroke-width', iconSvg.getAttribute('stroke-width')!)
   }
 
   svgContainer.appendChild(g)

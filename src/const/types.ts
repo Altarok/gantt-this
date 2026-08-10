@@ -29,7 +29,7 @@ export type LeapYearRule = {
   applyToMonthIndex?: number /* Which month gets the leap day (e.g., February / index 1) */
 }
 
-export type Moon = { offset: number; cycle: number }
+export type Moon = { offset: number; cycle: number; color: string }
 
 export type RuleBasedDetails = {
   months: MonthDefinition[]
@@ -41,7 +41,6 @@ export type RuleBasedDetails = {
    * For '195-2026' (Ordinal), format is ['day', 'year']
    */
   format: DateFormatComponent[]
-  moons?: Moon[]
 }
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
@@ -63,6 +62,7 @@ export type CalendarConfig = {
 
   /* Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.) */
   ruleBasedDetails?: RuleBasedDetails
+  moons?: Moon[]
 }
 
 

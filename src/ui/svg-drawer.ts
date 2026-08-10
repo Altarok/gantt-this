@@ -7,6 +7,7 @@ import {
   GanttItem,
   GanttItemDisplayType,
   GroupOrCalendarSettings,
+  Moon,
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
@@ -388,10 +389,15 @@ export class GanttRenderEngine {
       }
 
       if (showMoonPhases) {
-        for (const moon of calendarConfig?.ruleBasedDetails?.moons ?? []) {
-          const L = moon.cycle;
-          if (!L || L <= 0) continue;
-          const O = moon.offset ?? 0;
+
+        const moons = calendarConfig?.moons ?? []
+        const moonCount = moons?.length ?? 0
+        moons.forEach((moon: Moon, index: number) =>
+//        for (const moon of moons)
+        {
+          const L = moon.cycle
+          if (!L || L <= 0) return
+          const O = moon.offset ?? 0
 
           // Pixel distance for a 1/4 cycle step (quarter moon to quarter moon)
           const quarterCycleDays = L / 4;
@@ -406,7 +412,7 @@ export class GanttRenderEngine {
           const MIN_ICON_SPACING_PX = 16;
 
           // Guard: Skip entire moon if even Full/New phases are too crowded
-          if (halfCyclePixels < MIN_ICON_SPACING_PX) continue;
+          if (halfCyclePixels < MIN_ICON_SPACING_PX) return
 
           // Determine if zoom level allows quarter phases or major phases only
           const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX;
@@ -440,55 +446,13 @@ export class GanttRenderEngine {
           // Helper closure to handle visibility bounds checking & drawing
           function renderPhaseIfVisible(x: number, exactDay: number, phaseIndex: number) {
             if (exactDay >= startDaysValue && exactDay <= endDaysValue) {
-//              const xPos = this.getXPosition(exactDay, width);
               if (x >= 0 && x <= renderWidth) {
-                Util.drawMoonPhase(x, -10, phaseIndex, ticksG);
+                Util.drawMoonPhase(x, -10, phaseIndex, moon.color ?? 'currentColor', index, moonCount, ticksG)
               }
             }
           }
-        }
+        })
       }
-
-//      if (showMoonPhases) {
-//        for (const moon of calendarConfig?.ruleBasedDetails?.moons ?? []) {
-//          const L = moon.cycle
-//          if (!L || L <= 0) continue
-//          const O = moon.offset ?? 0
-//
-//          // Check pixel distance between New Moon and Full Moon (half a cycle)
-//          const halfCycleDays = L / 2
-//          const x0 = this.getXPosition(startDaysValue, width)
-//          const xHalf = this.getXPosition(startDaysValue + halfCycleDays, width)
-//          const halfCyclePixels = Math.abs(xHalf - x0)
-//
-//          // If space between Full and New moon is too small (< 16px), skip rendering
-//          if (halfCyclePixels < 16) continue
-//
-//          // Determine cycle integer range covering [startDaysValue, endDaysValue]
-//          const minK = Math.floor((startDaysValue + O) / L) - 1
-//          const maxK = Math.ceil((endDaysValue + O) / L) + 1
-//
-//          for (let k = minK; k <= maxK; k++) {
-//            // 1. Exact New Moon
-//            const exactNewMoonDay = k * L - O
-//            if (exactNewMoonDay >= startDaysValue && exactNewMoonDay <= endDaysValue) {
-//              const xPos = this.getXPosition(exactNewMoonDay, width)
-//              if (xPos >= 0 && xPos <= renderWidth) {
-//                Util.drawMoonPhase(xPos, -10, 0, ticksG)
-//              }
-//            }
-//
-//            // 2. Exact Full Moon
-//            const exactFullMoonDay = (k + 0.5) * L - O
-//            if (exactFullMoonDay >= startDaysValue && exactFullMoonDay <= endDaysValue) {
-//              const xPos = this.getXPosition(exactFullMoonDay, width)
-//              if (xPos >= 0 && xPos <= renderWidth) {
-//                Util.drawMoonPhase(xPos, -10, 2, ticksG)
-//              }
-//            }
-//          }
-//        }
-//      }
 
       const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
 

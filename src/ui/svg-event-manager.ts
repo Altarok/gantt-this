@@ -242,8 +242,8 @@ export class GanttEventManager {
       this.ensureVerticalGuidesCount(svg, 2)
 
       if (this.verticalGuides.length === 2) {
-        this.updateLine(ganttItem, this.verticalGuides[0]!, x1, svg.clientHeight)
-        this.updateLine(ganttItem, this.verticalGuides[1]!, x2, svg.clientHeight)
+        this.updateLine(ganttItem, this.verticalGuides[0]!, x1/* , svg.clientHeight */)
+        this.updateLine(ganttItem, this.verticalGuides[1]!, x2/* , svg.clientHeight */)
       }
     } else {
       /* Calculate X position centered on the target element */
@@ -252,7 +252,7 @@ export class GanttEventManager {
       this.ensureVerticalGuidesCount(svg, 1)
 
       if (this.verticalGuides.length === 1) {
-        this.updateLine(ganttItem, this.verticalGuides[0]!, x, svg.clientHeight)
+        this.updateLine(ganttItem, this.verticalGuides[0]!, x/* , svg.clientHeight */)
       }
     }
   }
@@ -287,16 +287,18 @@ export class GanttEventManager {
   /**
    * Show red, dotted, vertical lines around event on mouseover. Vertical line gros through entire gantt chart (upper half),
    * but will only be visible over calendar related to event (lower half).
+   * <p>
+   * Param height unused, but keep this for now as there will be a plugin setting for this
+   *
    * @param ganttItem
    * @param lines
    * @param x
-   * @param height unused, but keep this for now as there will be a plugin setting for this
    * @private
    */
   private updateLine(ganttItem: GanttItem, lines: {
     upper: SVGLineElement,
     lower: SVGLineElement
-  }, x: number, height: number) {
+  }, x: number/* , height: number */) {
 
     const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.config.margin.top
 
