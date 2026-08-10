@@ -9,7 +9,7 @@ export class GanttEventManager {
   private startTranslateX = 0
   private rafId: number | null = null
   private currentSvg: SVGElement | null = null
-  private verticalGuides: SVGLineElement[] = []
+  private verticalGuides: { upper: SVGLineElement, lower: SVGLineElement }[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private highlightElement: SVGElement | null = null
   private autoRestrictZoom = false
@@ -242,8 +242,8 @@ export class GanttEventManager {
       this.ensureVerticalGuidesCount(svg, 2)
 
       if (this.verticalGuides.length === 2) {
-        this.updateLine(this.verticalGuides[0]!, x1, svg.clientHeight)
-        this.updateLine(this.verticalGuides[1]!, x2, svg.clientHeight)
+        this.updateLine(ganttItem, this.verticalGuides[0]!, x1, svg.clientHeight)
+        this.updateLine(ganttItem, this.verticalGuides[1]!, x2, svg.clientHeight)
       }
     } else {
       /* Calculate X position centered on the target element */
@@ -252,7 +252,7 @@ export class GanttEventManager {
       this.ensureVerticalGuidesCount(svg, 1)
 
       if (this.verticalGuides.length === 1) {
-        this.updateLine(this.verticalGuides[0]!, x, svg.clientHeight)
+        this.updateLine(ganttItem, this.verticalGuides[0]!, x, svg.clientHeight)
       }
     }
   }
@@ -260,35 +260,65 @@ export class GanttEventManager {
   private ensureVerticalGuidesCount(svg: SVGSVGElement, count: number) {
     /* Remove excess if switching from bar to point */
     while (this.verticalGuides.length > count) {
-      const line = this.verticalGuides.pop()
-      line?.remove()
+      const lines = this.verticalGuides.pop()
+      lines?.upper?.remove()
+      lines?.lower?.remove()
     }
 
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
-      const line = window.document.createElementNS(svgUrl, 'line')
-      line.setAttribute('stroke', 'red')
-      line.setAttribute('stroke-width', '1.5')
-      line.setAttribute('stroke-dasharray', '4 4')
-      svg.appendChild(line)
-      this.verticalGuides.push(line)
+      const upper = window.document.createElementNS(svgUrl, 'line')
+      upper.setAttribute('stroke', 'red')
+      upper.setAttribute('stroke-width', '1.5')
+      upper.setAttribute('stroke-dasharray', '4 4')
+
+      const lower = window.document.createElementNS(svgUrl, 'line')
+      lower.setAttribute('stroke', 'red')
+      lower.setAttribute('stroke-width', '1.5')
+      lower.setAttribute('stroke-dasharray', '4 4')
+
+
+      svg.appendChild(upper)
+      svg.appendChild(lower)
+      this.verticalGuides.push({upper, lower})
     }
   }
 
-  private updateLine(line: SVGLineElement, x: number, height: number) {
-    const totalChartHeight = this.engine.calculateTotalChartHeight()
+  /**
+   * Show red, dotted, vertical lines around event on mouseover. Vertical line gros through entire gantt chart (upper half),
+   * but will only be visible over calendar related to event (lower half).
+   * @param ganttItem
+   * @param lines
+   * @param x
+   * @param height unused, but keep this for now as there will be a plugin setting for this
+   * @private
+   */
+  private updateLine(ganttItem: GanttItem, lines: {
+    upper: SVGLineElement,
+    lower: SVGLineElement
+  }, x: number, height: number) {
 
-    line.setAttribute('x1', String(x))
-    line.setAttribute('y1', '0')
-    line.setAttribute('x2', String(x))
-    // line.setAttribute('y2', String(height))
-    line.setAttribute('y2', String(totalChartHeight))
+    const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.config.margin.top
+
+    lines.upper.setAttribute('x1', String(x))
+    lines.upper.setAttribute('y1', `${this.engine.config.margin.top}`)
+    lines.upper.setAttribute('x2', String(x))
+    lines.upper.setAttribute('y2', String(totalChartHeight))
+
+    const cal = this.engine.svgDrawerData.drawnCals[ganttItem.calendarType]
+    if (cal) {
+      lines.lower.setAttribute('x1', String(x))
+      lines.lower.setAttribute('y1', String(cal.y1))
+      lines.lower.setAttribute('x2', String(x))
+      lines.lower.setAttribute('y2', String(cal.y2))
+    }
   }
 
   /** Remove vertical red line. */
   private hideVerticalGuide() {
-    for (const line of this.verticalGuides) {
-      line.remove()
+    for (const lines of this.verticalGuides) {
+      lines?.upper?.remove()
+      lines?.lower?.remove()
     }
     this.verticalGuides = []
   }

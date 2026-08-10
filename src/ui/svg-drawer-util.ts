@@ -1,6 +1,7 @@
 import {Css} from '../const/constants'
 import {GanttChartConfig, GanttItem, SvgDrawerData} from '../const/types'
 import {setIcon} from 'obsidian'
+import {ManualSvg} from "./manual-svg-icons";
 
 const iconSize = 16
 const iconRadius = iconSize / 2
@@ -24,7 +25,8 @@ export const Util = {
   drawPoint,
   drawBox,
   drawDiamond,
-  drawVerticalLine
+  drawVerticalLine,
+  drawMoonPhase
 }
 
 function setAttributes(el: Element,
@@ -238,4 +240,63 @@ function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, widt
   const line = createSVGElement('line', Css.item.line, {x1, x2: x1, y1, y2, 'stroke-width': width, 'data-id': d.id})
   if (d.color) line.setAttribute('stroke', d.color)
   svgContainer.appendChild(line)
+}
+
+const moonSvgs: Record<number, string> = {
+  0: ManualSvg.moonPhase0,
+  1: ManualSvg.moonPhase1,
+  2: ManualSvg.moonPhase2,
+  3: ManualSvg.moonPhase3,
+  4: ManualSvg.moonPhase4
+}
+
+/**
+ * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
+ *
+ * @param cx Center X position (usually xPos of the tick)
+ * @param cy Center Y position (e.g. -12 to sit right above baseline Y=0)
+ * @param phase Phase index (0 to 4)
+ * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
+ */
+export function drawMoonPhase(cx: number, cy: number, phase: number, svgContainer: SVGElement): void {
+
+  console.log(phase)
+
+  const svgString = moonSvgs[phase] ?? ManualSvg.moonPhase0
+
+  // Icon dimensions
+  const iconSize = 16
+  const halfSize = iconSize / 2
+
+  // Create a wrapper <g> positioned at (cx, cy)
+  const g = window.createSvg('g')
+  g.classList.add('moon-phase-icon')
+
+  // Center the 16x16 icon over (cx, cy)
+  const x = cx - halfSize
+  const y = cy - halfSize
+  g.setAttribute('transform', `translate(${x}, ${y})`)
+
+  // Parse the raw SVG string and embed its contents inside the <g>
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(svgString, 'image/svg+xml')
+  const iconSvg = doc.querySelector('svg')
+
+  if (iconSvg) {
+    // Resize the 24x24 viewBox icon down to 16x16 (or keeping width/height 16)
+    iconSvg.setAttribute('width', iconSize.toString())
+    iconSvg.setAttribute('height', iconSize.toString())
+
+    // Append the child nodes of the parsed SVG into the container <g>
+    while (iconSvg.firstChild) {
+      g.appendChild(iconSvg.firstChild)
+    }
+
+    // Forward essential visual attributes from the source SVG root (like fill/stroke)
+    if (iconSvg.hasAttribute('fill')) g.setAttribute('fill', iconSvg.getAttribute('fill')!)
+    if (iconSvg.hasAttribute('stroke')) g.setAttribute('stroke', iconSvg.getAttribute('stroke')!)
+    if (iconSvg.hasAttribute('stroke-width')) g.setAttribute('stroke-width', iconSvg.getAttribute('stroke-width')!)
+  }
+
+  svgContainer.appendChild(g)
 }

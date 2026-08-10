@@ -50,7 +50,7 @@ export class GanttRenderEngine {
   /** Day diff between 2 axis ticks. Must be positive. */
   stepDays = 1
 
-  private svgDrawerData: SvgDrawerData
+  svgDrawerData: SvgDrawerData
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
@@ -83,7 +83,15 @@ export class GanttRenderEngine {
   updateSvgDrawerData() {
     return {
       mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, g])),
-      mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, c]))
+      mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, c])),
+      drawnGrps: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, {
+        y1: 0,
+        y2: 0
+      }])),
+      drawnCals: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, {
+        y1: 0,
+        y2: 0
+      }]))
     }
   }
 
@@ -259,7 +267,7 @@ export class GanttRenderEngine {
         if (displayType === 'vertical-line') {
 
           const x1 = this.getXPosition(d.startDays, width)
-          Util.drawVerticalLine(d, x1, firstYValue, totalChartHeight, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
+          Util.drawVerticalLine(d, x1, firstYValue, totalChartHeight + this.config.margin.top, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
 
         } else if (displayType === 'era') {
 
@@ -267,9 +275,8 @@ export class GanttRenderEngine {
           const x2 = this.getXPosition(d.endDays, width)
           const isInGeneralGroup = d.group === 'general'
           const y: number = isInGeneralGroup ? firstYValue : group.yOffset
-          // const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
-          const height: number = totalChartHeight
-
+          const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+//          const height: number = totalChartHeight
 
           Util.drawEra(d, x1, x2, y, height, eraLayer)
 
@@ -322,6 +329,13 @@ export class GanttRenderEngine {
 
     this.activeAxesList.forEach((calType, index) => {
       const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight)
+      const tickPixelSpacing = (this.stepDays / (this.maxDays - this.minDays)) * renderWidth * this.zoomScale
+      const showMoonPhases: boolean = tickPixelSpacing >= 24
+
+      this.svgDrawerData.drawnCals[calType] = {
+        y1: currentAxisYStart,
+        y2: currentAxisYStart + this.config.singleAxisHeight - 1
+      }
 
       const individualAxisG = Util.createSVGElement('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
@@ -370,7 +384,111 @@ export class GanttRenderEngine {
           ticksG.appendChild(text)
           lastTextX = xPos
         }
+
       }
+
+      if (showMoonPhases) {
+        for (const moon of calendarConfig?.ruleBasedDetails?.moons ?? []) {
+          const L = moon.cycle;
+          if (!L || L <= 0) continue;
+          const O = moon.offset ?? 0;
+
+          // Pixel distance for a 1/4 cycle step (quarter moon to quarter moon)
+          const quarterCycleDays = L / 4;
+          const x0 = this.getXPosition(startDaysValue, width);
+          const xQuarter = this.getXPosition(startDaysValue + quarterCycleDays, width);
+          const quarterCyclePixels = Math.abs(xQuarter - x0);
+
+          // Pixel distance for a 1/2 cycle step (New to Full)
+          const halfCyclePixels = quarterCyclePixels * 2;
+
+          // Minimum distance threshold to render without icon overlap
+          const MIN_ICON_SPACING_PX = 16;
+
+          // Guard: Skip entire moon if even Full/New phases are too crowded
+          if (halfCyclePixels < MIN_ICON_SPACING_PX) continue;
+
+          // Determine if zoom level allows quarter phases or major phases only
+          const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX;
+
+          // Determine cycle integer range covering visible bounds
+          const minK = Math.floor((startDaysValue + O) / L) - 1;
+          const maxK = Math.ceil((endDaysValue + O) / L) + 1;
+
+          for (let k = minK; k <= maxK; k++) {
+            // 1. New Moon (Progress 0.0) -> Phase Index 0
+            const newMoonDay = k * L - O;
+            renderPhaseIfVisible(this.getXPosition(newMoonDay, width), newMoonDay, 0);
+
+            // 2. First Quarter (Progress 0.25) -> Phase Index 1
+            if (showQuarterPhases) {
+              const firstQuarterDay = (k + 0.25) * L - O;
+              renderPhaseIfVisible(this.getXPosition(firstQuarterDay, width), firstQuarterDay, 1);
+            }
+
+            // 3. Full Moon (Progress 0.5) -> Phase Index 2
+            const fullMoonDay = (k + 0.5) * L - O;
+            renderPhaseIfVisible(this.getXPosition(fullMoonDay, width), fullMoonDay, 2);
+
+            // 4. Third Quarter (Progress 0.75) -> Phase Index 3
+            if (showQuarterPhases) {
+              const thirdQuarterDay = (k + 0.75) * L - O;
+              renderPhaseIfVisible(this.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3);
+            }
+          }
+
+          // Helper closure to handle visibility bounds checking & drawing
+          function renderPhaseIfVisible(x: number, exactDay: number, phaseIndex: number) {
+            if (exactDay >= startDaysValue && exactDay <= endDaysValue) {
+//              const xPos = this.getXPosition(exactDay, width);
+              if (x >= 0 && x <= renderWidth) {
+                Util.drawMoonPhase(x, -10, phaseIndex, ticksG);
+              }
+            }
+          }
+        }
+      }
+
+//      if (showMoonPhases) {
+//        for (const moon of calendarConfig?.ruleBasedDetails?.moons ?? []) {
+//          const L = moon.cycle
+//          if (!L || L <= 0) continue
+//          const O = moon.offset ?? 0
+//
+//          // Check pixel distance between New Moon and Full Moon (half a cycle)
+//          const halfCycleDays = L / 2
+//          const x0 = this.getXPosition(startDaysValue, width)
+//          const xHalf = this.getXPosition(startDaysValue + halfCycleDays, width)
+//          const halfCyclePixels = Math.abs(xHalf - x0)
+//
+//          // If space between Full and New moon is too small (< 16px), skip rendering
+//          if (halfCyclePixels < 16) continue
+//
+//          // Determine cycle integer range covering [startDaysValue, endDaysValue]
+//          const minK = Math.floor((startDaysValue + O) / L) - 1
+//          const maxK = Math.ceil((endDaysValue + O) / L) + 1
+//
+//          for (let k = minK; k <= maxK; k++) {
+//            // 1. Exact New Moon
+//            const exactNewMoonDay = k * L - O
+//            if (exactNewMoonDay >= startDaysValue && exactNewMoonDay <= endDaysValue) {
+//              const xPos = this.getXPosition(exactNewMoonDay, width)
+//              if (xPos >= 0 && xPos <= renderWidth) {
+//                Util.drawMoonPhase(xPos, -10, 0, ticksG)
+//              }
+//            }
+//
+//            // 2. Exact Full Moon
+//            const exactFullMoonDay = (k + 0.5) * L - O
+//            if (exactFullMoonDay >= startDaysValue && exactFullMoonDay <= endDaysValue) {
+//              const xPos = this.getXPosition(exactFullMoonDay, width)
+//              if (xPos >= 0 && xPos <= renderWidth) {
+//                Util.drawMoonPhase(xPos, -10, 2, ticksG)
+//              }
+//            }
+//          }
+//        }
+//      }
 
       const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
 
