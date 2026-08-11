@@ -2,6 +2,7 @@ import {GanttItem} from '../const/types'
 import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
 import {GanttEventManager} from './event-manager'
+import {Util} from './svg-drawer-util'
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -198,7 +199,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     /* Clean up using the tracked reference instead of event.target */
     this.hideHighlightAroundElement()
 
-    /* Remove the vertical guide line */
+    /* Remove the vertical guideline */
     this.hideVerticalGuide()
   }
 
@@ -275,7 +276,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const x1 = targetRect.left - svgRect.left
       const x2 = targetRect.right - svgRect.left
 
-      /* Ensure we have two guide line elements */
+      /* Ensure we have two guideline elements */
       this.ensureVerticalGuidesCount(svg, 2)
 
       if (this.verticalGuides.length === 2) {
@@ -322,7 +323,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   /**
-   * Show red, dotted, vertical lines around event on mouseover. Vertical line gros through entire gantt chart (upper half),
+   * Show red, dotted, vertical lines around event on mouseover. Vertical line runs through entire gantt chart (upper half),
    * but will only be visible over calendar related to event (lower half).
    * <p>
    * Param height unused, but keep this for now as there will be a plugin setting for this
@@ -406,13 +407,28 @@ export class GanttDesktopEventManager implements GanttEventManager {
     /*
      * TODO create nice border around new forms
      */
-    if (ganttItem.displayType === 'diamond' /* || ganttItem.displayType === 'triangle' || ganttItem.displayType === 'hexagon' */) {
-      const cx = x + width / 2
-      const cy = y + height / 2
-      const pad = 4
-      const points = `${cx},${y - pad} ${cx + width / 2 + pad},${cy} ${cx},${y + height + pad} ${cx - width / 2 - pad},${cy}`
-      shape = window.document.createElementNS(svgUrl, 'polygon')
-      shape.setAttribute('points', points)
+    if (ganttItem.displayType === 'diamond') {
+
+      // const cx = x + width / 2
+      // const cy = y + height / 2
+      // const pad = 4
+      // const points = `${cx},${y - pad} ${cx + width / 2 + pad},${cy} ${cx},${y + height + pad} ${cx - width / 2 - pad},${cy}`
+      // shape = Util.createSVGElement('polygon')
+      // shape.setAttribute('points', points)
+
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 , 4)
+      shape = Util.createSVGElement('polygon', 'gt-item timestamp triangle', {points})
+
+    } else if (ganttItem.displayType === 'triangle') {
+
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 - 2, 3)
+      shape = Util.createSVGElement('polygon', 'gt-item timestamp triangle', {points})
+
+    } else if (ganttItem.displayType === 'hexagon') {
+
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 6)
+      shape = Util.createSVGElement('polygon', 'gt-item timestamp triangle', {points})
+
     } else {
       shape = window.document.createElementNS(svgUrl, 'ellipse')
       shape.setAttribute('cx', String(x + width / 2))

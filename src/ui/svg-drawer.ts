@@ -87,12 +87,10 @@ export class GanttRenderEngine {
       mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, g])),
       mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, c])),
       drawnGrps: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, {
-        y1: 0,
-        y2: 0
+        y1: 0, y2: 0
       }])),
       drawnCals: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, {
-        y1: 0,
-        y2: 0
+        y1: 0, y2: 0
       }]))
     }
   }
@@ -266,7 +264,6 @@ export class GanttRenderEngine {
         const lane = d.lane
         const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
         const displayType: GanttItemDisplayType = d.displayType
-
 
         const x1 = this.getXPosition(d.startDays, width)
         const x2 = (!d.endDays || d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)

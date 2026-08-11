@@ -1,6 +1,6 @@
 import {setIcon} from 'obsidian'
 import {Css} from '../const/constants'
-import {GanttChartConfig, GanttItem, SvgDrawerData} from '../const/types'
+import {GanttChartConfig, GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
 import {ManualSvg} from './manual-svg-icons'
 
 const iconSize = 16
@@ -28,8 +28,10 @@ export const Util = {
   drawHexagon,
   drawTriangle,
   drawVerticalLine,
-  
-  drawMoonPhase
+
+  drawMoonPhase,
+
+  calculatePolygonPoints
 }
 
 function setAttributes(el: Element,
@@ -90,20 +92,15 @@ function filterActiveEventData(rawData: GanttItem[],
     /* Undefined groups or calendars are accepted! */
     if (grp?.visible === false || cal?.visible === false) return false
 
-    switch (d.displayType) {
-      case 'era':
-        return ganttChartConfig.showEras
-      case 'bar':
+    if (GanttItemDisplayTypes.isTimespan(d.displayType)) switch (d.displayType) {
+      case "bar":
         return ganttChartConfig.showBars
-      case 'box':
-      case 'diamond':
-      case 'triangle':
-      case 'hexagon':
-      case 'point':
-      case 'vertical-line':
-        return ganttChartConfig.showPoints
-      default:
-        return false
+      case "era":
+        return ganttChartConfig.showEras
+    } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) {
+      return ganttChartConfig.showPoints
+    } else {
+      return false
     }
   })
 }
@@ -321,30 +318,28 @@ export function drawMoonPhase(cx: number,
  * Returns a string suitable for SVG polygon points attribute.
  *
  * @param radius - The radius of the circumscribed circle
- * @param centerX - X coordinate of the circle center
- * @param centerY - Y coordinate of the circle center
+ * @param cx - X coordinate of the circle center
+ * @param cy - Y coordinate of the circle center
  * @param numCorners - Number of corners/vertices of the polygon
  * @returns String in format 'x1,y1 x2,y2 x3,y3 ...' suitable for SVG polygon points
- *          The first point is always at (centerX, centerY + radius)
+ *          The first point is always at (cx, cy + radius)
  */
-function calculatePolygonPoints(
-  radius: number,
-  centerX: number,
-  centerY: number,
-  numCorners: number
-): string {
-  const points: string[] = [];
+function calculatePolygonPoints(radius: number,
+                                cx: number,
+                                cy: number,
+                                numCorners: number): string {
+  const points: string[] = []
 
   // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
-  const startAngle = Math.PI / 2;
+  const startAngle = Math.PI / 2
 
   for (let i = 0; i < numCorners; i++) {
     // Calculate angle for this vertex (going clockwise)
-    const angle = startAngle - (2 * Math.PI * i / numCorners);
+    const angle = startAngle - (2 * Math.PI * i / numCorners)
 
     // Calculate x and y coordinates
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
+    const x = cx + radius * Math.cos(angle)
+    const y = cy + radius * Math.sin(angle)
 
     points.push(`${x},${y}`);
   }
