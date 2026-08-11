@@ -271,11 +271,11 @@ export class GanttRenderEngine {
         if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
           case 'bar':
             return Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
-          case 'era':
+          case 'era': {
             const isInGeneralGroup = d.group === 'general'
             const y: number = isInGeneralGroup ? firstYValue : group.yOffset
             const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
-            return Util.drawEra(d, x1, x2, y, height, eraLayer)
+            return Util.drawEra(d, x1, x2, y, height, eraLayer) }
 
         } else if (GanttItemDisplayTypes.isTimestamp(displayType)) switch (displayType) {
           case 'point':
