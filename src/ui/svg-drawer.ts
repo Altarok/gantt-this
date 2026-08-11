@@ -223,15 +223,16 @@ export class GanttRenderEngine {
         const groupG = Util.createSVGElement('g')
         groupG.setAttribute('transform', `translate(0, ${d.yOffset})`)
 
-        const rect = Util.createSVGElement('rect', i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd)
-        rect.setAttribute('width', width.toString())
-        rect.setAttribute('height', d.height.toString())
+        const cssClass = i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd
+        const rect = Util.createSVGElement('rect', cssClass, {width, height: d.height})
         groupG.appendChild(rect)
 
         this.backgroundG.appendChild(groupG)
 
-        const badge = groupG.createSvg('rect', {attr: {x: 10, class: Css.group.badge}})
-        const text = groupG.createSvg('text', {attr: {x: 20, y: 17, class: Css.group.text}})
+        const badge = Util.createSVGElement('rect', Css.group.badge, {x: 10})
+        groupG.appendChild(badge)
+        const text = Util.createSVGElement('text', Css.group.text, {x: 20, y: 17})
+        groupG.appendChild(text)
         text.textContent = d.name.toUpperCase()
 
         const computedLength = text.getComputedTextLength()
