@@ -11,7 +11,7 @@ import {
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
-import {GanttEventManager} from './svg-event-manager'
+import {GanttEventManager} from './event-manager-desktop'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
