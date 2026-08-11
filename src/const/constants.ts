@@ -21,6 +21,8 @@ export const Css = {
 
     circle: 'gt-item timestamp circle',
     diamond: 'gt-item timestamp diamond',
+    triangle: 'gt-item timestamp triangle',
+    hexagon: 'gt-item timestamp hexagon',
     line: 'gt-item timestamp vertical-line',
 
     bar: 'gt-item timespan bar',

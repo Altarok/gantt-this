@@ -1,5 +1,6 @@
 /* Gridlines and Axis Lines */
-.gt-axis-gridline, .gt-axis-baseline {
+.gt-axis-gridline,
+.gt-axis-baseline {
   stroke: var(--background-modifier-border);
 }
 
@@ -57,7 +58,8 @@
   padding: 0;
   margin: 0;
   overflow: hidden;
-  width: 100%; /* span 100% of the active note area */
+  width: 100%;
+  /* span 100% of the active note area */
   box-sizing: border-box;
 }
 
@@ -66,7 +68,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px; /* 12 */
+  gap: 12px;
+  /* 12 */
 }
 
 .gt-toolbar-zoom-group {
@@ -75,10 +78,12 @@
 }
 
 /* Force the zoom buttons to take full row width on mobile */
-.is-mobile .gt-toolbar-zoom-group
+.is-mobile .gt-toolbar-zoom-group {
+  /* default mobile-specific styles can go here if needed */
+}
 
-@media (width <= 768px) {
-  .gt-toolbar-zoom-group {
+@media (max-width: 768px) {
+  .is-mobile .gt-toolbar-zoom-group {
     flex-basis: 100%;
     width: 100%;
     display: flex;
@@ -128,7 +133,8 @@
 .gt-chart-container {
   width: 100% !important;
   overflow: hidden;
-  padding: 0; /* Ensures zero internal space around the chart */
+  padding: 0;
+  /* Ensures zero internal space around the chart */
   margin: 0;
 }
 
@@ -148,10 +154,12 @@
   left: var(--mouse-x);
   top: var(--mouse-y);
   border: 1px solid var(--background-modifier-border);
-  box-shadow: var(--shadow-s); /* 0 4px 12px Replaced rgb(0 0 0 / 30%) */
+  box-shadow: var(--shadow-s);
+  /* 0 4px 12px Replaced rgb(0 0 0 / 30%) */
   padding: 10px;
   border-radius: 6px;
-  pointer-events: none; /* Prevents tooltip from breaking hover states */
+  pointer-events: none;
+  /* Prevents tooltip from breaking hover states */
   max-width: 250px;
   font-size: var(--font-small-size);
   color: var(--text-normal);
@@ -244,11 +252,13 @@
   x: 10px;
   y: 5px;
   height: 18px;
-  rx: 9px; /* half of height for pill shape */
+  rx: 9px;
+  /* half of height for pill shape */
   ry: 9px;
   fill: var(--background-modifier-border);
   opacity: 0.6;
-  filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%))); /* Replaced rgb(0 0 0 / 100%) */
+  filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%)));
+  /* Replaced rgb(0 0 0 / 100%) */
   pointer-events: none;
   user-select: none;
 }
@@ -268,8 +278,13 @@
 }
 
 .gt-item.timestamp.diamond {
-  /* empty? */
+  background-color: yellow;
 }
+
+.gt-item.timestamp.triangle {
+  background-color: yellow;
+}
+
 
 .gt-item.timestamp.box {
   rx: 1px;
@@ -391,7 +406,8 @@
   cursor: pointer;
   width: 28px;
   height: 28px;
-  -webkit-tap-highlight-color: transparent; /* Prevent gray tap highlight on mobile devices */
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent gray tap highlight on mobile devices */
   touch-action: manipulation;
 }
 
@@ -415,7 +431,7 @@
   height: 20px;
 }
 
-@media (width <= 768px) {
+@media (width <=768px) {
   .gt-btn-icon {
     width: 36px;
     height: 36px;
@@ -448,20 +464,4 @@
 .moon-phase-icon .moon-unlit {
   fill: var(--background-primary);
   /*opacity: 0.2;*/
-}
-
-/* Vertical end-cap ticks at startDay and endDay */
-.calendar-cap-marker {
-  stroke: currentColor;
-  stroke-width: 2px;
-  stroke-linecap: round;
-}
-
-/* Reign title centered over the axis segment */
-.calendar-reign-title {
-  font-size: 11px;
-  font-weight: 600;
-  opacity: 0.85;
-  pointer-events: none;
-  user-select: none;
 }

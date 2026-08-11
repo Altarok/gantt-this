@@ -69,7 +69,7 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
   if (isTimeSpan) {
     return value === 'era' ? value : 'bar' /* fallback value for timespans */
   } else {
-    return (value === 'box' || value === 'diamond' || value === 'vertical-line') ? value : 'point' /* fallback value for timestamps */
+    return (value === 'box' || value === 'diamond' || value === 'triangle' || value === 'hexagon' || value === 'vertical-line') ? value : 'point' /* fallback value for timestamps */
   }
 }
 
