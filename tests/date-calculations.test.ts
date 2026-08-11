@@ -180,8 +180,9 @@ describe('Parse days to date format', () => {
     expect(createAxisDateDescription(2 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.2')
     expect(createAxisDateDescription(3 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.3')
 
-    /* add 400 years + 397 leap days + 222 because why not */
-    expect(createAxisDateDescription(1 + 400 * 365 + 397 + 222, gregorianWithoutMonthsConfig)).toBe('401.223')
+    /* add 400 years + 97 leap days */
+    expect(createAxisDateDescription(1 + 400 * 365 + 97, gregorianWithoutMonthsConfig)).toBe('401.1')
+    expect(createAxisDateDescription(1 + 400 * 365 + 97 + 222, gregorianWithoutMonthsConfig)).toBe('401.223')
 
   })
 
