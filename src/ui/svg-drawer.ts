@@ -11,7 +11,7 @@ import {
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
-import {GanttEventManager} from './event-manager-desktop'
+import {createGanttEventManager, GanttEventManager} from './event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
@@ -191,7 +191,7 @@ export class GanttRenderEngine {
     this.axisG = Util.createSVGElement('g')
     this.chartArea.appendChild(this.axisG)
 
-    this.eventManager = new GanttEventManager(this,
+    this.eventManager = createGanttEventManager(this,
       this.plugin.settings.mouseOverEventShowBox,
       this.plugin.settings.mouseOverEventShowVerticalLine)
   }

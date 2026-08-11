@@ -1,8 +1,9 @@
 import {GanttItem} from '../const/types'
 import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
+import {GanttEventManager} from './event-manager'
 
-export class GanttEventManager {
+export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
 
   private startX = 0
@@ -437,4 +438,3 @@ export class GanttEventManager {
     }
   }
 }
-
