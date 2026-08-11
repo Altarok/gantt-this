@@ -25,9 +25,10 @@ export const Util = {
   drawPoint,
   drawBox,
   drawDiamond,
-  drawTriangle,
   drawHexagon,
+  drawTriangle,
   drawVerticalLine,
+  
   drawMoonPhase
 }
 
@@ -318,7 +319,7 @@ export function drawMoonPhase(cx: number,
 /**
  * Calculate the points for a regular polygon inscribed in a circle.
  * Returns a string suitable for SVG polygon points attribute.
- * 
+ *
  * @param radius - The radius of the circumscribed circle
  * @param centerX - X coordinate of the circle center
  * @param centerY - Y coordinate of the circle center
@@ -333,20 +334,20 @@ function calculatePolygonPoints(
   numCorners: number
 ): string {
   const points: string[] = [];
-  
+
   // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
   const startAngle = Math.PI / 2;
-  
+
   for (let i = 0; i < numCorners; i++) {
     // Calculate angle for this vertex (going clockwise)
     const angle = startAngle - (2 * Math.PI * i / numCorners);
-    
+
     // Calculate x and y coordinates
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
-    
+
     points.push(`${x},${y}`);
   }
-  
+
   return points.join(' ');
 }

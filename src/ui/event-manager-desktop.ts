@@ -403,7 +403,10 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.highlightElement.innerHTML = ''
     let shape: SVGElement
 
-    if (ganttItem.displayType === 'diamond' || ganttItem.displayType === 'triangle' || ganttItem.displayType === 'hexagon') {
+    /*
+     * TODO create nice border around new forms
+     */
+    if (ganttItem.displayType === 'diamond' /* || ganttItem.displayType === 'triangle' || ganttItem.displayType === 'hexagon' */) {
       const cx = x + width / 2
       const cy = y + height / 2
       const pad = 4
