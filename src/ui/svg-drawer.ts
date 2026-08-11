@@ -6,6 +6,7 @@ import {
   GanttGroup,
   GanttItem,
   GanttItemDisplayType,
+  GanttItemDisplayTypes,
   GroupOrCalendarSettings,
   Moon,
   SvgDrawerData
@@ -265,55 +266,36 @@ export class GanttRenderEngine {
         const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
-        if (displayType === 'vertical-line') {
 
-          const x1 = this.getXPosition(d.startDays, width)
-          Util.drawVerticalLine(d, x1, firstYValue, totalChartHeight + this.config.margin.top, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
+        const x1 = this.getXPosition(d.startDays, width)
+        const x2 = (!d.endDays || d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)
 
-        } else if (displayType === 'era') {
+        if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
+          case 'bar':
+            return Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
+          case 'era':
+            const isInGeneralGroup = d.group === 'general'
+            const y: number = isInGeneralGroup ? firstYValue : group.yOffset
+            const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+            return Util.drawEra(d, x1, x2, y, height, eraLayer)
 
-          const x1 = this.getXPosition(d.startDays, width)
-          const x2 = this.getXPosition(d.endDays, width)
-          const isInGeneralGroup = d.group === 'general'
-          const y: number = isInGeneralGroup ? firstYValue : group.yOffset
-          const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
-//          const height: number = totalChartHeight
-
-          Util.drawEra(d, x1, x2, y, height, eraLayer)
-
-        } else if (displayType === 'bar') {
-
-          const x1 = this.getXPosition(d.startDays, width)
-          const x2 = this.getXPosition(d.endDays, width)
-          Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
-
-        } else if (displayType === 'point') {
-
-          const x = this.getXPosition(d.startDays, width)
-          Util.drawPoint(d, x, laneY + halfRowHeight, this.dataG)
-
-        } else if (displayType === 'diamond') {
-
-          const x = this.getXPosition(d.startDays, width)
-          Util.drawDiamond(d, x, laneY + halfRowHeight, this.dataG)
-
-        } else if (displayType === 'box') {
-
-          const x = this.getXPosition(d.startDays, width)
-          Util.drawBox(d, x, laneY + halfRowHeight, this.dataG)
-
-        } else if (displayType === 'triangle') {
-
-          const x = this.getXPosition(d.startDays, width)
-          Util.drawTriangle(d, x, laneY + halfRowHeight, this.dataG)
-
-        } else if (displayType === 'hexagon') {
-
-          const x = this.getXPosition(d.startDays, width)
-          Util.drawHexagon(d, x, laneY + halfRowHeight, this.dataG)
+        } else if (GanttItemDisplayTypes.isTimestamp(displayType)) switch (displayType) {
+          case 'point':
+            return Util.drawPoint(d, x1, laneY + halfRowHeight, this.dataG)
+          case 'box':
+            return Util.drawBox(d, x1, laneY + halfRowHeight, this.dataG)
+          case 'vertical-line':
+            return Util.drawVerticalLine(d, x1, firstYValue, totalChartHeight + this.config.margin.top, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
+          case 'diamond':
+            return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.dataG)
+          case 'triangle':
+            return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.dataG)
+          case 'hexagon':
+            return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.dataG)
 
         }
-      })
+
+      }) // end loop group.items.forEach(GanttItem)
     })
   }
 
