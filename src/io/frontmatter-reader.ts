@@ -1,5 +1,5 @@
 import {FrontMatterCache} from 'obsidian'
-import {GanttItemDisplayType, isGanttItemDisplayType, PluginSettings} from '../const/types'
+import {GanttItemDisplayType, GanttItemDisplayTypes, PluginSettings} from '../const/types'
 
 /*
  * Default key: 'gantt-type-definition'
@@ -64,12 +64,12 @@ function getEventIconColor(frontMatter: FrontMatterCache, settings: PluginSettin
  */
 function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings, isTimeSpan: boolean): GanttItemDisplayType {
   let value: string | undefined = frontMatter[settings.frontMatterProperty_event_symbol] as string ?? undefined
-  if (value && !isGanttItemDisplayType(value)) value = undefined
+//  if (value && !isGanttItemDisplayType(value)) value = undefined
 
   if (isTimeSpan) {
-    return value === 'era' ? value : 'bar' /* fallback value for timespans */
+    return GanttItemDisplayTypes.isTimespan(value) ? value : GanttItemDisplayTypes.DEFAULT_TIMESPAN as GanttItemDisplayType
   } else {
-    return (value === 'box' || value === 'diamond' || value === 'triangle' || value === 'hexagon' || value === 'vertical-line') ? value : 'point' /* fallback value for timestamps */
+    return GanttItemDisplayTypes.isTimestamp(value) ? value : GanttItemDisplayTypes.DEFAULT_TIMESTAMP as GanttItemDisplayType
   }
 }
 

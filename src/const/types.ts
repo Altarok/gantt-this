@@ -71,20 +71,33 @@ export type CalendarConfig = {
   moons?: Moon[]
 }
 
+const DEFAULT_TIMESPAN = 'bar'
+const DEFAULT_TIMESTAMP = 'point'
 
-/** Calendar event display type */
+/** Timespans go from a start date to an end date */
+const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS = [DEFAULT_TIMESPAN, 'era'] as const
+/** Timespans only have a start date */
+const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP, 'box', 'vertical-line', 'diamond', 'triangle', 'hexagon'] as const
 
+type GanttItemDisplayTypeTimespans = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)[number]
+type GanttItemDisplayTypeTimestamp = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP)[number]
 
-export const GANTT_ITEM_DISPLAY_TYPE = [
-  'bar', 'point', /* = default values */
-  'box', /* can be accompanied by a lucide-dev icon */
-  'era', /* must be accompanied by differing start and end dates */
-  'vertical-line', /* can not come with icon */
-  'diamond', 'triangle', 'hexagon'] as const
-export type GanttItemDisplayType = (typeof GANTT_ITEM_DISPLAY_TYPE)[number]
+export type GanttItemDisplayType = GanttItemDisplayTypeTimespans | GanttItemDisplayTypeTimestamp
 
-export function isGanttItemDisplayType(value: string): value is GanttItemDisplayType {
-  return GANTT_ITEM_DISPLAY_TYPE.includes(value as GanttItemDisplayType)
+function isGanttItemDisplayTypeTimespan(value: string): value is GanttItemDisplayTypeTimespans {
+  return GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS.includes(value as GanttItemDisplayTypeTimespans)
+}
+
+function isGanttItemDisplayTypeTimestamp(value: string): value is GanttItemDisplayTypeTimestamp {
+  return GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP.includes(value as GanttItemDisplayTypeTimestamp)
+}
+
+/** Calendar event display types */
+export const GanttItemDisplayTypes = {
+  DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP,
+  GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS, GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP,
+  isTimespan: isGanttItemDisplayTypeTimespan,
+  isTimestamp: isGanttItemDisplayTypeTimestamp
 }
 
 export type ParsedDate = {
