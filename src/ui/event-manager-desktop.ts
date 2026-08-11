@@ -13,7 +13,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private verticalGuides: { upper: SVGLineElement, lower: SVGLineElement }[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private highlightElement: SVGElement | null = null
-  private autoRestrictZoom = false
+  private readonly autoRestrictZoom: boolean
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
