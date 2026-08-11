@@ -1,5 +1,5 @@
 import {CalendarConfig} from '../const/types'
-import {isCustomLeapYear, isLeapYear} from "../date-calculations/leap-year-calc";
+import {isCustomLeapYear, isLeapYear} from '../date-calculations/leap-year-calc'
 
 /**
  * Calculates days from 0001-01-01 (Day 1) to Jan 1st of `year`.
@@ -64,7 +64,7 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   if (!details) return `Error: No details found for ${config.id}`
 
   const isLeapLocal = (customYear: number): boolean => {
-    if (details.leapYearRule?.ruleType === "gregorian" && typeof config.epochGregorian === 'object') {
+    if (details.leapYearRule?.ruleType === 'gregorian' && typeof config.epochGregorian === 'object') {
       // Convert custom year back to target Gregorian year based on epoch
       const epochYear = config.epochGregorian.year
       const targetGregorianYear = epochYear + (customYear - 1)

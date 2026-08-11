@@ -5,16 +5,10 @@ const resetZoom = `
 <line x1="21" x2="16.65" y1="21" y2="16.65"/>
 </svg>
 `
-// const newMoon = `<circle cx="12" cy="12" r="9"/>`
-// const crescentHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" fill="currentColor"/>`
-// const fullMoon = `<circle cx="12" cy="12" r="9" fill="currentColor"/>`
-// const waningHalfMoon = `<circle cx="12" cy="12" r="9"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" fill="currentColor"/>`
-
 const moonPhase0 = `<circle cx="12" cy="12" r="9" class="moon-unlit"/>`
 const moonPhase1 = `<path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/>`
 const moonPhase2 = `<circle cx="12" cy="12" r="9" class="moon-fill"/>`
 const moonPhase3 = `<path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/>`
-// const moonPhase4 = `<circle cx="12" cy="12" r="9" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 1 12 21 A 6 9 0 0 0 12 3 Z" class="moon-fill"/>`
 
 export const ManualSvg = {
   resetZoom,
@@ -27,15 +21,15 @@ export const ManualSvg = {
 //~~~meta-bind-js-view
 //{memory^angle} as degrees
 //---
-//const dia = 200;
-//const rad = dia / 2;
-//const angle = ((d) => -d)(context.bound.degrees ?? 0) * Math.PI / 180;
-//const sin = Math.sin(angle);
-//const cos = Math.cos(angle);
-//const signSin = Math.sign(sin);
-//const signCos = Math.sign(cos);
-//const flagSin = Math.max(0, signSin);
-//const flagCos = Math.max(0, signCos);
+//const dia = 200
+//const rad = dia / 2
+//const angle = ((d) => -d)(context.bound.degrees ?? 0) * Math.PI / 180
+//const sin = Math.sin(angle)
+//const cos = Math.cos(angle)
+//const signSin = Math.sign(sin)
+//const signCos = Math.sign(cos)
+//const flagSin = Math.max(0, signSin)
+//const flagCos = Math.max(0, signCos)
 //const svg = `<svg width='${dia}' height='${dia}' stroke-width='0' xlmns='http://www.w3.org/2000/svg'>
 //    <circle cx='${rad}' cy='${rad}' r='${rad}' fill='#000' />
 //    <path d='M ${rad} 0
@@ -44,8 +38,8 @@ export const ManualSvg = {
 //            Z'
 //        fill='#fff'
 //    />
-//</svg>`;
-//return engine.markdown.create(svg);
+//</svg>`
+//return engine.markdown.create(svg)
 //~~~
 //
 //  `INPUT[progressBar(minValue(0), maxValue(360)):memory^angle]`

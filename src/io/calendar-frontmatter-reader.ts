@@ -3,7 +3,7 @@ import {CalendarConfig, CodeBlockContent, PluginSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
-import {Consts} from "../const/constants";
+import {Consts} from '../const/constants'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -38,6 +38,8 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
     /* Calculate offset once! */
     newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.epochGregorian)
+    newCalendarConfig.startDay = newCalendarConfig.startDay ? runOffsetCalculations(newCalendarConfig.startDay) : undefined
+    newCalendarConfig.endDay = newCalendarConfig.endDay ? runOffsetCalculations(newCalendarConfig.endDay) : undefined
 
     /* Cache calendar: */
     plugin.calendarConfigsCache.set(calendarId, newCalendarConfig)

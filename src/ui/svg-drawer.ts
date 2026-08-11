@@ -11,7 +11,7 @@ import {
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
-import {GanttEventManager} from './svg-event-manager'
+import {createGanttEventManager, GanttEventManager} from './event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
@@ -191,7 +191,7 @@ export class GanttRenderEngine {
     this.axisG = Util.createSVGElement('g')
     this.chartArea.appendChild(this.axisG)
 
-    this.eventManager = new GanttEventManager(this,
+    this.eventManager = createGanttEventManager(this,
       this.plugin.settings.mouseOverEventShowBox,
       this.plugin.settings.mouseOverEventShowVerticalLine)
   }
@@ -355,41 +355,74 @@ export class GanttRenderEngine {
       const ticksG = Util.createSVGElement('g')
       individualAxisG.appendChild(ticksG)
 
-      const baseline = Util.createSVGElement('line', Css.axis.baseline)
-      baseline.setAttribute('x1', '0')
-      baseline.setAttribute('x2', renderWidth.toString())
-      baseline.setAttribute('y1', '0')
-      baseline.setAttribute('y2', '0')
-      ticksG.appendChild(baseline)
-
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
 
-      for (let currDays = startDaysValue; currDays <= endDaysValue; currDays += this.stepDays) {
+      const calStart = calendarConfig?.startDay as number ?? -Infinity
+      const calEnd = calendarConfig?.endDay as number ?? Infinity
+
+      // Skip rendering, if current view is completely outside of calendar's lifetime
+      if (endDaysValue < calStart || startDaysValue > calEnd) return
+
+      // Clamp rendering bounds to calendar lifetime
+      const effectiveStartDay = Math.max(startDaysValue, calStart)
+      const effectiveEndDay = Math.min(endDaysValue, calEnd)
+
+      // Draw axis baseline capped to calendar bounds
+      const startX = this.getXPosition(effectiveStartDay, width)
+      const endX = this.getXPosition(effectiveEndDay, width)
+
+      const baseline = Util.createSVGElement('line', Css.axis.baseline, {
+        x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': '2.5'
+      })
+      ticksG.appendChild(baseline)
+
+      // Draw start cap marker (if in visible range)
+      if (calendarConfig?.startDay && calendarConfig.startDay as number >= startDaysValue) {
+        const startCap = Util.createSVGElement('line', 'calendar-cap-marker', {
+          x1: startX, y1: -6, x2: startX, y2: 6, stroke: 'currentColor', 'stroke-width': '2'
+        })
+        ticksG.appendChild(startCap)
+      }
+
+      // Draw end cap marker (if in visible range)
+      if (calendarConfig?.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
+        const endCap = Util.createSVGElement('line', 'calendar-cap-marker', {
+          x1: endX, y1: -6, x2: endX, y2: 6, stroke: 'currentColor', 'stroke-width': '2'
+        })
+        ticksG.appendChild(endCap)
+      }
+
+      // if (calendarConfig?.name) {
+      //   const labelX = (startX + endX) / 2
+      //   const title = Util.createSVGElement('text', 'calendar-reign-title', {
+      //     x: labelX, y: -10, 'text-anchor': 'middle', fill: 'currentColor'
+      //   })
+      //   title.textContent = calendarConfig?.name
+      //   ticksG.appendChild(title)
+      // }
+
+      for (let currDays = effectiveStartDay; currDays <= effectiveEndDay; currDays += this.stepDays) {
         const xPos = this.getXPosition(currDays, width)
         if (xPos < 0 || xPos > renderWidth) continue
 
         /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
-          const gridLine = Util.createSVGElement('line', Css.axis.gridline)
-          gridLine.setAttribute('x1', xPos.toString())
-          gridLine.setAttribute('x2', xPos.toString())
-          gridLine.setAttribute('y1', '0')
-          gridLine.setAttribute('y2', itemsAreaHeight.toString())
+          const gridLine = Util.createSVGElement('line', Css.axis.gridline, {
+            x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight
+          })
           this.gridG.appendChild(gridLine)
         }
 
-        const tick = Util.createSVGElement('line', Css.axis.tick)
-        tick.setAttribute('x1', xPos.toString())
-        tick.setAttribute('x2', xPos.toString())
-        tick.setAttribute('y1', '0')
-        tick.setAttribute('y2', '5')
+        const tick = Util.createSVGElement('line', Css.axis.tick, {
+          x1: xPos, y1: 0, x2: xPos, y2: 5
+        })
         ticksG.appendChild(tick)
 
         if (xPos - lastTextX > 80) {
-          const text = Util.createSVGElement('text', Css.axis.text)
-          text.setAttribute('x', xPos.toString())
-          text.setAttribute('y', '20')
+          const text = Util.createSVGElement('text', Css.axis.text, {
+            x: xPos, y: 20
+          })
           text.textContent = createAxisDateDescription(currDays, calendarConfig)
 
           ticksG.appendChild(text)
@@ -409,51 +442,52 @@ export class GanttRenderEngine {
           const O = moon.offset ?? 0
 
           // Pixel distance for a 1/4 cycle step (quarter moon to quarter moon)
-          const quarterCycleDays = L / 4;
-          const x0 = this.getXPosition(startDaysValue, width);
-          const xQuarter = this.getXPosition(startDaysValue + quarterCycleDays, width);
-          const quarterCyclePixels = Math.abs(xQuarter - x0);
+          const quarterCycleDays = L / 4
+          const x0 = this.getXPosition(startDaysValue, width)
+          const xQuarter = this.getXPosition(startDaysValue + quarterCycleDays, width)
+          const quarterCyclePixels = Math.abs(xQuarter - x0)
 
           // Pixel distance for a 1/2 cycle step (New to Full)
-          const halfCyclePixels = quarterCyclePixels * 2;
+          const halfCyclePixels = quarterCyclePixels * 2
 
           // Minimum distance threshold to render without icon overlap
-          const MIN_ICON_SPACING_PX = 20;
+          const MIN_ICON_SPACING_PX = 20
 
           // Guard: Skip entire moon if even Full/New phases are too crowded
           if (halfCyclePixels < MIN_ICON_SPACING_PX) return
 
           // Determine if zoom level allows quarter phases or major phases only
-          const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX;
+          const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX
 
           // Determine cycle integer range covering visible bounds
-          const minK = Math.floor((startDaysValue + O) / L) - 1;
-          const maxK = Math.ceil((endDaysValue + O) / L) + 1;
+          const minK = Math.floor((effectiveStartDay /* startDaysValue */ + O) / L) - 1
+          const maxK = Math.ceil((effectiveEndDay /* endDaysValue */ + O) / L) + 1
 
           for (let k = minK; k <= maxK; k++) {
             // 1. New Moon (Progress 0.0) -> Phase Index 0
-            const newMoonDay = k * L - O;
-            renderPhaseIfVisible(this.getXPosition(newMoonDay, width), newMoonDay, 0);
+            const newMoonDay = k * L - O
+            renderPhaseIfVisible(this.getXPosition(newMoonDay, width), newMoonDay, 0)
 
             // 2. First Quarter (Progress 0.25) -> Phase Index 1
             if (showQuarterPhases) {
-              const firstQuarterDay = (k + 0.25) * L - O;
-              renderPhaseIfVisible(this.getXPosition(firstQuarterDay, width), firstQuarterDay, 1);
+              const firstQuarterDay = (k + 0.25) * L - O
+              renderPhaseIfVisible(this.getXPosition(firstQuarterDay, width), firstQuarterDay, 1)
             }
 
             // 3. Full Moon (Progress 0.5) -> Phase Index 2
-            const fullMoonDay = (k + 0.5) * L - O;
-            renderPhaseIfVisible(this.getXPosition(fullMoonDay, width), fullMoonDay, 2);
+            const fullMoonDay = (k + 0.5) * L - O
+            renderPhaseIfVisible(this.getXPosition(fullMoonDay, width), fullMoonDay, 2)
 
             // 4. Third Quarter (Progress 0.75) -> Phase Index 3
             if (showQuarterPhases) {
-              const thirdQuarterDay = (k + 0.75) * L - O;
-              renderPhaseIfVisible(this.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3);
+              const thirdQuarterDay = (k + 0.75) * L - O
+              renderPhaseIfVisible(this.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3)
             }
           }
 
           // Helper closure to handle visibility bounds checking & drawing
           function renderPhaseIfVisible(x: number, exactDay: number, phaseIndex: number) {
+            if (effectiveEndDay < exactDay || effectiveStartDay > exactDay) return
             if (exactDay >= startDaysValue && exactDay <= endDaysValue)
               if (x >= 0 && x <= renderWidth)
                 Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')

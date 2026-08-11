@@ -1,8 +1,9 @@
 import {GanttItem} from '../const/types'
 import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
+import {GanttEventManager} from './event-manager'
 
-export class GanttEventManager {
+export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
 
   private startX = 0
@@ -48,19 +49,18 @@ export class GanttEventManager {
     window.addEventListener('mouseup', this.boundWindowMouseUp)
   }
 
+  private activeWindow: Window | null = null
+
   public attachSvgListeners() {
-    /* Clean up old SVG listeners if attached */
-    if (this.currentSvg) {
-      this.currentSvg.removeEventListener('mousedown', this.boundSvgMouseDown)
-      this.currentSvg.removeEventListener('wheel', this.boundSvgWheel)
-      this.currentSvg.removeEventListener('mouseover', this.boundSvgMouseOver)
-      this.currentSvg.removeEventListener('mousemove', this.boundSvgMouseMove)
-      this.currentSvg.removeEventListener('mouseleave', this.boundSvgMouseLeave)
-      this.currentSvg.removeEventListener('click', this.boundSvgClick)
-    }
+
+    this.detachListeners()
 
     this.currentSvg = this.engine.svg
     if (!this.currentSvg) return
+
+    this.activeWindow = this.currentSvg.ownerDocument.defaultView ?? window
+    this.activeWindow.addEventListener('mousemove', this.boundWindowMouseMove)
+    this.activeWindow.addEventListener('mouseup', this.boundWindowMouseUp)
 
     this.currentSvg.addEventListener('mousedown', this.boundSvgMouseDown)
     this.currentSvg.addEventListener('wheel', this.boundSvgWheel, {passive: false})
@@ -70,9 +70,32 @@ export class GanttEventManager {
     this.currentSvg.addEventListener('click', this.boundSvgClick)
   }
 
+  private detachListeners() {
+    if (this.activeWindow) {
+      this.activeWindow.removeEventListener('mousemove', this.boundWindowMouseMove)
+      this.activeWindow.removeEventListener('mouseup', this.boundWindowMouseUp)
+      this.activeWindow = null
+    }
+
+    if (this.currentSvg) {
+      this.currentSvg.removeEventListener('mousedown', this.boundSvgMouseDown)
+      this.currentSvg.removeEventListener('wheel', this.boundSvgWheel)
+      this.currentSvg.removeEventListener('mouseover', this.boundSvgMouseOver)
+      this.currentSvg.removeEventListener('mousemove', this.boundSvgMouseMove)
+      this.currentSvg.removeEventListener('mouseleave', this.boundSvgMouseLeave)
+      this.currentSvg.removeEventListener('click', this.boundSvgClick)
+      this.currentSvg = null
+    }
+  }
+
+  private get activeDocument(): Document {
+    return this.currentSvg?.ownerDocument ?? window.document
+  }
+
   private handleWindowMouseMove(e: MouseEvent) {
-    window.document.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
-    window.document.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
+    const doc = this.activeDocument
+    doc.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
+    doc.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
 
     if (this.isDragging) {
       const deltaX = e.clientX - this.startX
@@ -98,6 +121,25 @@ export class GanttEventManager {
     e.preventDefault()
     if (!this.currentSvg) return
 
+    if (e.ctrlKey || e.metaKey) {
+
+      this.engine.zoomTranslateX = this.engine.zoomTranslateX - Math.floor(e.deltaY / 2)
+
+      // Pan horizontally (and vertically if your timeline pans Y-axis too)
+      this.rafId ??= window.requestAnimationFrame(() => {
+        const width = this.engine.container.clientWidth || 800
+        this.engine.renderData(width)
+        this.engine.drawAxes(width)
+        this.rafId = null
+      })
+      return
+    } else {
+      this.zoom(e)
+    }
+  }
+
+  private zoom(e: WheelEvent) {
+    if (!this.currentSvg) return
     const width = this.engine.container.clientWidth || 800
     const rect = this.currentSvg.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.engine.config.margin.left
@@ -176,7 +218,16 @@ export class GanttEventManager {
 
   private showTooltip(d: GanttItem) {
     if (d.displayType === 'era') return
-    this.engine.hoverTitle.textContent = d.name
+
+    const doc = this.activeDocument
+    const tooltip = this.engine.tooltip
+
+    if (tooltip.ownerDocument !== doc) {
+      tooltip.remove()
+      doc.body.appendChild(tooltip)
+    }
+
+    this.engine.hoverTitle.textContent = `Day ${d.startDays}: ${d.name}`
     this.engine.hoverDates.textContent = d.displayType === 'bar'
       ? `${d.startDateDisplay} to ${d.endDateDisplay}`
       : d.startDateDisplay
@@ -192,33 +243,19 @@ export class GanttEventManager {
 
   private handleWindowMouseUp() {
     this.isDragging = false
-    if (this.rafId !== null) {
-      window.cancelAnimationFrame(this.rafId)
-      this.rafId = null
-    }
+    this.stopAnimation()
   }
 
   /** Fully unhook and release all window and SVG listeners to prevent leaks */
   public destroy() {
-    if (this.rafId !== null) {
-      window.cancelAnimationFrame(this.rafId)
-      this.rafId = null
-    }
+    this.stopAnimation()
+    this.detachListeners()
+  }
 
-    /* Unhook window listeners */
-    window.removeEventListener('mousemove', this.boundWindowMouseMove)
-    window.removeEventListener('mouseup', this.boundWindowMouseUp)
-
-    /* Unhook SVG listeners */
-    if (this.currentSvg) {
-      this.currentSvg.removeEventListener('mousedown', this.boundSvgMouseDown)
-      this.currentSvg.removeEventListener('wheel', this.boundSvgWheel)
-      this.currentSvg.removeEventListener('mouseover', this.boundSvgMouseOver)
-      this.currentSvg.removeEventListener('mousemove', this.boundSvgMouseMove)
-      this.currentSvg.removeEventListener('mouseleave', this.boundSvgMouseLeave)
-      this.currentSvg.removeEventListener('click', this.boundSvgClick)
-      this.currentSvg = null
-    }
+  private stopAnimation() {
+    if (this.rafId === null) return
+    window.cancelAnimationFrame(this.rafId)
+    this.rafId = null
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
@@ -401,4 +438,3 @@ export class GanttEventManager {
     }
   }
 }
-
