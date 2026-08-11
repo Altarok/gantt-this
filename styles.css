@@ -449,3 +449,19 @@
   fill: var(--background-primary);
   /*opacity: 0.2;*/
 }
+
+/* Vertical end-cap ticks at startDay and endDay */
+.calendar-cap-marker {
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+
+/* Reign title centered over the axis segment */
+.calendar-reign-title {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+  pointer-events: none;
+  user-select: none;
+}

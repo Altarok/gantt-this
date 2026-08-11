@@ -38,6 +38,8 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
     /* Calculate offset once! */
     newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.epochGregorian)
+    newCalendarConfig.startDay = newCalendarConfig.startDay ? runOffsetCalculations(newCalendarConfig.startDay) : undefined
+    newCalendarConfig.endDay = newCalendarConfig.endDay ? runOffsetCalculations(newCalendarConfig.endDay) : undefined
 
     /* Cache calendar: */
     plugin.calendarConfigsCache.set(calendarId, newCalendarConfig)

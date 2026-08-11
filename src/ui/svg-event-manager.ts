@@ -226,7 +226,7 @@ export class GanttEventManager {
       doc.body.appendChild(tooltip)
     }
 
-    this.engine.hoverTitle.textContent = d.name
+    this.engine.hoverTitle.textContent = `Day ${d.startDays}: ${d.name}`
     this.engine.hoverDates.textContent = d.displayType === 'bar'
       ? `${d.startDateDisplay} to ${d.endDateDisplay}`
       : d.startDateDisplay
