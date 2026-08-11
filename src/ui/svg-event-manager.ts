@@ -366,7 +366,7 @@ export class GanttEventManager {
     this.highlightElement.innerHTML = ''
     let shape: SVGElement
 
-    if (ganttItem.displayType === 'diamond') {
+    if (ganttItem.displayType === 'diamond' || ganttItem.displayType === 'triangle' || ganttItem.displayType === 'hexagon') {
       const cx = x + width / 2
       const cy = y + height / 2
       const pad = 4

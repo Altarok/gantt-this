@@ -302,6 +302,16 @@ export class GanttRenderEngine {
           const x = this.getXPosition(d.startDays, width)
           Util.drawBox(d, x, laneY + halfRowHeight, this.dataG)
 
+        } else if (displayType === 'triangle') {
+
+          const x = this.getXPosition(d.startDays, width)
+          Util.drawTriangle(d, x, laneY + halfRowHeight, this.dataG)
+
+        } else if (displayType === 'hexagon') {
+
+          const x = this.getXPosition(d.startDays, width)
+          Util.drawHexagon(d, x, laneY + halfRowHeight, this.dataG)
+
         }
       })
     })

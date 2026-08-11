@@ -25,6 +25,8 @@ export const Util = {
   drawPoint,
   drawBox,
   drawDiamond,
+  drawTriangle,
+  drawHexagon,
   drawVerticalLine,
   drawMoonPhase
 }
@@ -94,6 +96,8 @@ function filterActiveEventData(rawData: GanttItem[],
         return ganttChartConfig.showBars
       case 'box':
       case 'diamond':
+      case 'triangle':
+      case 'hexagon':
       case 'point':
       case 'vertical-line':
         return ganttChartConfig.showPoints
@@ -227,6 +231,30 @@ function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElemen
 }
 
 /**
+ * Draw triangle for timestamp event. SVG circle anchor is dead center.
+ * @param d event to draw
+ * @param cx horizontal center of svg to draw
+ * @param cy vertical center of svg to draw
+ * @param svgContainer
+ */
+function drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  const points = calculatePolygonPoints(iconRadius, cx, cy, 3)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp triangle', {points}, cx, cy, svgContainer)
+}
+
+/**
+ * Draw hexagon for timestamp event. SVG circle anchor is dead center.
+ * @param d event to draw
+ * @param cx horizontal center of svg to draw
+ * @param cy vertical center of svg to draw
+ * @param svgContainer
+ */
+function drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  const points = calculatePolygonPoints(iconRadius, cx, cy, 6)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer)
+}
+
+/**
  * Draws vertical line, ignoring icons.
  * SVG lines have no anchor, they just define start and end point.
  * @param d event to draw
@@ -285,4 +313,40 @@ export function drawMoonPhase(cx: number,
 
   g.innerHTML = innerContent
   svgContainer.appendChild(g)
+}
+
+/**
+ * Calculate the points for a regular polygon inscribed in a circle.
+ * Returns a string suitable for SVG polygon points attribute.
+ * 
+ * @param radius - The radius of the circumscribed circle
+ * @param centerX - X coordinate of the circle center
+ * @param centerY - Y coordinate of the circle center
+ * @param numCorners - Number of corners/vertices of the polygon
+ * @returns String in format 'x1,y1 x2,y2 x3,y3 ...' suitable for SVG polygon points
+ *          The first point is always at (centerX, centerY + radius)
+ */
+function calculatePolygonPoints(
+  radius: number,
+  centerX: number,
+  centerY: number,
+  numCorners: number
+): string {
+  const points: string[] = [];
+  
+  // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
+  const startAngle = Math.PI / 2;
+  
+  for (let i = 0; i < numCorners; i++) {
+    // Calculate angle for this vertex (going clockwise)
+    const angle = startAngle - (2 * Math.PI * i / numCorners);
+    
+    // Calculate x and y coordinates
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    
+    points.push(`${x},${y}`);
+  }
+  
+  return points.join(' ');
 }
