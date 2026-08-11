@@ -3,7 +3,7 @@ import {CalendarConfig, CodeBlockContent, PluginSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
-import {Consts} from "../const/constants";
+import {Consts} from '../const/constants'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 

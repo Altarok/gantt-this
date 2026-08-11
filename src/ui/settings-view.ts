@@ -28,7 +28,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
    */
   getSettingDefinitions(): SettingDefinitionItem[] {
 
-    const openAddForm = (target: "groups" | "calendars") => {
+    const openAddForm = (target: 'groups' | 'calendars') => {
       new AddEntryModal(this.plugin, (entry) => {
         const list = this.plugin.settings[target]
 

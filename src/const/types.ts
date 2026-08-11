@@ -29,7 +29,11 @@ export type LeapYearRule = {
   applyToMonthIndex?: number /* Which month gets the leap day (e.g., February / index 1) */
 }
 
-export type Moon = { offset: number; cycle: number; color?: string }
+export type Moon = {
+  offset: number
+  cycle: number
+  color?: string
+}
 
 export type RuleBasedDetails = {
   months: MonthDefinition[]
@@ -213,8 +217,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   /*
    * Front-matter property names
    */
-  frontMatterProperty_gantt_this: 'gantt-item', // boolean; "activates" file as event source
-  frontMatterProperty_calendar_name: 'gantt-type-definition', // string; "activates" file as calendar source
+  frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
+  frontMatterProperty_calendar_name: 'gantt-type-definition', // string, activates file as calendar source
   frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian'
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start

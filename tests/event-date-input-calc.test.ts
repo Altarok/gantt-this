@@ -1,9 +1,9 @@
 import {describe, expect, it} from 'vitest'
 import {gregorianConfig, gregorianWithoutMonthsConfig, mayanConfig, shireConfig} from './test-configs'
 import {Consts} from '../src/const/constants'
-import {ParsedDate, parseEventDate} from "../src/date-calculations/event-date-input-calc";
-import {CalendarConfig} from "../src/const/types";
-import {runOffsetCalculations} from "../src/date-calculations/calendar-offset-calc";
+import {ParsedDate, parseEventDate} from '../src/date-calculations/event-date-input-calc'
+import {CalendarConfig} from '../src/const/types'
+import {runOffsetCalculations} from '../src/date-calculations/calendar-offset-calc'
 
 describe('Parsing event dates fails for', () => {
 
@@ -174,7 +174,8 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
   })
 
   it('2. runOffsetCalculations respects explicit 0 values for month/day without fallback bugs', () => {
-    // BUG: month || 1 converts month 0 to 1; (0 < 1 ? 1 : 0) converts month 0 to 1
+    // BUG: month || 1 converts month 0 to 1
+    // (0 < 1 ? 1 : 0) converts month 0 to 1
     // Month 0 / Day 0 input should evaluate cleanly to 0000-01-01 (-365 relative days)
     const result = runOffsetCalculations({year: 0, month: 0, day: 0})
     expect(result).toBe(-365)
@@ -210,11 +211,12 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
 
   it('5. Padded numeric month "00" does not fail or resolve to month index -1', () => {
 
-    // BUG: parseInt("00") = 0; 0 - 1 = -1 (invalid index)
+    // BUG: parseInt('00') = 0
+    // 0 - 1 = -1 (invalid index)
     const value = parseInt('00', 10)
     expect(value).toBe(0)
 
-    // "00" is not a valid 1-based month for Gregorian
+    // '00' is not a valid 1-based month for Gregorian
     const result = parseEventDate('0001-00-01', gregorianConfig)
     expect(result).toBeNull()
   })

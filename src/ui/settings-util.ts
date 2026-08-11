@@ -97,10 +97,10 @@ export class AddEntryModal extends Modal {
   onOpen() {
     const {contentEl} = this
     contentEl.empty()
-    contentEl.createEl("h2", {text: "Add new item"})
+    contentEl.createEl('h2', {text: 'Add new item'})
 
     new Setting(contentEl)
-    .setName("ID / Name")
+    .setName('ID / Name')
     .addText(text => text
       .onChange((value) => {
         this.result.id = value.trim()
@@ -108,7 +108,7 @@ export class AddEntryModal extends Modal {
     )
 
     new Setting(contentEl).addButton(btn => btn
-      .setButtonText("Add")
+      .setButtonText('Add')
       .setCta()
       .onClick(() => {
         if (!this.result.id) return

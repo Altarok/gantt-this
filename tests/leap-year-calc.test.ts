@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {isCustomLeapYear, isLeapYear} from '../src/date-calculations/leap-year-calc'
 import {gregorianConfig, shireConfig} from './test-configs'
-import {LeapYearRule} from "../src/const/types";
+import {LeapYearRule} from '../src/const/types'
 
 describe('Leap year calculations should work for', () => {
 

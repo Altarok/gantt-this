@@ -12,8 +12,8 @@ import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {Colors, Consts} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
-import {parseEventDate} from "../date-calculations/event-date-input-calc";
-import {createAxisDateDescription} from "../util/dates";
+import {parseEventDate} from '../date-calculations/event-date-input-calc'
+import {createAxisDateDescription} from '../util/dates'
 
 
 /**

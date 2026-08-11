@@ -398,25 +398,21 @@ export class GanttRenderEngine {
 
         /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
-          const gridLine = Util.createSVGElement('line', Css.axis.gridline)
-          gridLine.setAttribute('x1', xPos.toString())
-          gridLine.setAttribute('x2', xPos.toString())
-          gridLine.setAttribute('y1', '0')
-          gridLine.setAttribute('y2', itemsAreaHeight.toString())
+          const gridLine = Util.createSVGElement('line', Css.axis.gridline, {
+            x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight
+          })
           this.gridG.appendChild(gridLine)
         }
 
-        const tick = Util.createSVGElement('line', Css.axis.tick)
-        tick.setAttribute('x1', xPos.toString())
-        tick.setAttribute('x2', xPos.toString())
-        tick.setAttribute('y1', '0')
-        tick.setAttribute('y2', '5')
+        const tick = Util.createSVGElement('line', Css.axis.tick, {
+          x1: xPos, y1: 0, x2: xPos, y2: 5
+        })
         ticksG.appendChild(tick)
 
         if (xPos - lastTextX > 80) {
-          const text = Util.createSVGElement('text', Css.axis.text)
-          text.setAttribute('x', xPos.toString())
-          text.setAttribute('y', '20')
+          const text = Util.createSVGElement('text', Css.axis.text, {
+            x: xPos, y: 20
+          })
           text.textContent = createAxisDateDescription(currDays, calendarConfig)
 
           ticksG.appendChild(text)
@@ -474,8 +470,8 @@ export class GanttRenderEngine {
 
             // 4. Third Quarter (Progress 0.75) -> Phase Index 3
             if (showQuarterPhases) {
-              const thirdQuarterDay = (k + 0.75) * L - O;
-              renderPhaseIfVisible(this.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3);
+              const thirdQuarterDay = (k + 0.75) * L - O
+              renderPhaseIfVisible(this.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3)
             }
           }
 

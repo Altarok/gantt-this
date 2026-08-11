@@ -8,7 +8,7 @@ import {
   shireConfig
 } from './test-configs'
 import {Consts} from '../src/const/constants'
-import {parseEventDate} from "../src/date-calculations/event-date-input-calc";
+import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
 
 
 describe('Verify test data is configured correctly', () => {
