@@ -7,7 +7,6 @@ import {
   GanttItem,
   GanttItemDisplayType,
   GanttItemDisplayTypes,
-  GroupOrCalendarSettings,
   Moon,
   SvgDrawerData
 } from '../const/types'
@@ -84,14 +83,10 @@ export class GanttRenderEngine {
 
   updateSvgDrawerData() {
     return {
-      mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, g])),
-      mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, c])),
-      drawnGrps: Object.fromEntries(this.plugin.settings.groups.map((g: GroupOrCalendarSettings) => [g.id, {
-        y1: 0, y2: 0
-      }])),
-      drawnCals: Object.fromEntries(this.plugin.settings.calendars.map((c: GroupOrCalendarSettings) => [c.id, {
-        y1: 0, y2: 0
-      }]))
+      mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, g])),
+      mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map(c => [c.id, c])),
+      drawnGroups: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, {y1: 0, y2: 0}])),
+      drawnCals: Object.fromEntries(this.plugin.settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
     }
   }
 

@@ -61,7 +61,7 @@ export type CalendarConfig = {
   startDay?: EpochOffsetDefinition
   endDay?: EpochOffsetDefinition
   /* Not defined by user, calculated based on epochGregorian */
-  offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in markdown */
+  offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in Markdown */
   type: CalendarConfigType
   delimiter: string
   positionalUnits?: {
@@ -263,7 +263,7 @@ export type GroupOrCalendarDrawerData = {
 export type SvgDrawerData = {
   mappedGrpConfigs: Record<string, GroupOrCalendarSettings>
   mappedCalConfigs: Record<string, GroupOrCalendarSettings>
-  drawnGrps: Record<string, GroupOrCalendarDrawerData>
+  drawnGroups: Record<string, GroupOrCalendarDrawerData>
   drawnCals: Record<string, GroupOrCalendarDrawerData>
 }
 
