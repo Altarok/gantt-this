@@ -344,7 +344,7 @@ function calculatePolygonPoints(radius: number,
   const points: string[] = []
 
   // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
-  const startAngle = Math.PI / 2
+  const startAngle = -Math.PI / 2
 
   for (let i = 0; i < numCorners; i++) {
     // Calculate angle for this vertex (going clockwise)
