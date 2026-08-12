@@ -96,7 +96,7 @@ export class GanttRenderEngine {
   }
 
   initLayout() {
-    let activeData: GanttItem[] = Util.filterActivelyShownEventData(this.rawData, this.svgDrawerData, this.config)
+    let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
@@ -156,25 +156,25 @@ export class GanttRenderEngine {
 
     this.container.innerHTML = ''
 
-    this.svg = Util.createSVGElement('svg', Css.svg.canvas)
+    this.svg = Util.createSvg('svg', Css.svg.canvas)
     this.svg.setAttribute('height', this.totalHeight.toString())
     this.container.appendChild(this.svg)
 
-    this.backgroundG = Util.createSVGElement('g')
+    this.backgroundG = Util.createSvg('g')
     this.svg.appendChild(this.backgroundG)
 
-    this.chartArea = Util.createSVGElement('g')
+    this.chartArea = Util.createSvg('g')
     this.chartArea.setAttribute('transform', `translate(${this.config.margin.left}, 0)`)
     this.svg.appendChild(this.chartArea)
 
     /* Dedicated grid container behind bars and points */
-    this.gridG = Util.createSVGElement('g')
+    this.gridG = Util.createSvg('g')
     this.chartArea.appendChild(this.gridG)
 
-    const defs = Util.createSVGElement('defs')
-    const clipPath = Util.createSVGElement('clipPath')
+    const defs = Util.createSvg('defs')
+    const clipPath = Util.createSvg('clipPath')
     clipPath.setAttribute('id', 'gantt-clip')
-    this.clipRect = Util.createSVGElement('rect')
+    this.clipRect = Util.createSvg('rect')
 
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
     this.clipRect.setAttribute('height', itemsAreaHeight.toString())
@@ -183,11 +183,11 @@ export class GanttRenderEngine {
     defs.appendChild(clipPath)
     this.svg.appendChild(defs)
 
-    this.dataG = Util.createSVGElement('g')
+    this.dataG = Util.createSvg('g')
     this.dataG.setAttribute('clip-path', 'url(#gantt-clip)')
     this.chartArea.appendChild(this.dataG)
 
-    this.axisG = Util.createSVGElement('g')
+    this.axisG = Util.createSvg('g')
     this.chartArea.appendChild(this.axisG)
 
     this.eventManager = createGanttEventManager(this,
@@ -218,18 +218,18 @@ export class GanttRenderEngine {
     if (this.config.enableGrouping) {
       this.groups.forEach((d, i) => {
 
-        const groupG = Util.createSVGElement('g')
+        const groupG = Util.createSvg('g')
         groupG.setAttribute('transform', `translate(0, ${d.yOffset})`)
 
         const cssClass = i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd
-        const rect = Util.createSVGElement('rect', cssClass, {width, height: d.height})
+        const rect = Util.createSvg('rect', cssClass, {width, height: d.height})
         groupG.appendChild(rect)
 
         this.backgroundG.appendChild(groupG)
 
-        const badge = Util.createSVGElement('rect', Css.group.badge, {x: 10})
+        const badge = Util.createSvg('rect', Css.group.badge, {x: 10})
         groupG.appendChild(badge)
-        const text = Util.createSVGElement('text', Css.group.text, {x: 20, y: 17})
+        const text = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
         groupG.appendChild(text)
         text.textContent = d.name.toUpperCase()
 
@@ -245,7 +245,7 @@ export class GanttRenderEngine {
   renderData(width: number) {
     this.dataG.empty()
 
-    const eraLayer = Util.createSVGElement('g', 'gt-layer-eras')
+    const eraLayer = Util.createSvg('g', 'gt-layer-eras')
 
     this.dataG.appendChild(eraLayer)
 
@@ -331,11 +331,11 @@ export class GanttRenderEngine {
         y2: currentAxisYStart + this.config.singleAxisHeight - 1
       }
 
-      const individualAxisG = Util.createSVGElement('g')
+      const individualAxisG = Util.createSvg('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
 
       /* Layer 1: Ticks, baseline, and dates (rendered underneath) */
-      const ticksG = Util.createSVGElement('g')
+      const ticksG = Util.createSvg('g')
       individualAxisG.appendChild(ticksG)
 
       let lastTextX = -999
@@ -357,14 +357,14 @@ export class GanttRenderEngine {
       const startX = this.getXPosition(effectiveStartDay, width)
       const endX = this.getXPosition(effectiveEndDay, width)
 
-      const baseline = Util.createSVGElement('line', Css.axis.baseline, {
+      const baseline = Util.createSvg('line', Css.axis.baseline, {
         x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': '2.5', fill: axisColor
       })
       ticksG.appendChild(baseline)
 
       // Draw start cap marker (if in visible range)
       if (calendarConfig?.startDay && calendarConfig.startDay as number >= startDaysValue) {
-        const startCap = Util.createSVGElement('line', 'calendar-cap-marker', {
+        const startCap = Util.createSvg('line', 'calendar-cap-marker', {
           x1: startX, y1: -6, x2: startX, y2: 6, stroke: 'currentColor', 'stroke-width': '2'
         })
         ticksG.appendChild(startCap)
@@ -372,7 +372,7 @@ export class GanttRenderEngine {
 
       // Draw end cap marker (if in visible range)
       if (calendarConfig?.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
-        const endCap = Util.createSVGElement('line', 'calendar-cap-marker', {
+        const endCap = Util.createSvg('line', 'calendar-cap-marker', {
           x1: endX, y1: -6, x2: endX, y2: 6, stroke: 'currentColor', 'stroke-width': '2'
         })
         ticksG.appendChild(endCap)
@@ -393,17 +393,17 @@ export class GanttRenderEngine {
 
         /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
-          const gridLine = Util.createSVGElement('line', Css.axis.gridline, {
+          const gridLine = Util.createSvg('line', Css.axis.gridline, {
             x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight
           })
           this.gridG.appendChild(gridLine)
         }
 
-        const tick = Util.createSVGElement('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
+        const tick = Util.createSvg('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
         ticksG.appendChild(tick)
 
         if (xPos - lastTextX > 80) {
-          const text = Util.createSVGElement('text', Css.axis.text, {x: xPos, y: 20})
+          const text = Util.createSvg('text', Css.axis.text, {x: xPos, y: 20})
           text.textContent = createAxisDateDescription(currDays, calendarConfig)
 
           ticksG.appendChild(text)
@@ -478,10 +478,10 @@ export class GanttRenderEngine {
 
       if (calBadgeTextContent) {
         /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
-        const headerG = Util.createSVGElement('g')
+        const headerG = Util.createSvg('g')
         individualAxisG.appendChild(headerG)
 
-        const badge = Util.createSVGElement('rect', Css.axis.labelBadge, {x: 8, y: 7})
+        const badge = Util.createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
 
         /* Calculate width accurately off-screen with explicit uppercase padding */
         const textWidth = this.measureTextWidth(calBadgeTextContent)
@@ -491,7 +491,7 @@ export class GanttRenderEngine {
         badge.setAttribute('width', exactWidth.toFixed(1))
         headerG.appendChild(badge)
 
-        const label = Util.createSVGElement('text', Css.axis.label, {x: 14, y: 19})
+        const label = Util.createSvg('text', Css.axis.label, {x: 14, y: 19})
         label.textContent = calBadgeTextContent
 
         headerG.appendChild(label)

@@ -16,8 +16,8 @@ Element,Default Anchor Point,Positioned By
  */
 
 export const Util = {
-  createSVGElement,
-  filterActivelyShownEventData: filterActiveEventData,
+  createSvg,
+  filterActiveEventData,
 
   drawBar,
   drawEra,
@@ -46,9 +46,9 @@ function setAttributes(el: Element,
   }
 }
 
-function createSVGElement<K extends keyof SVGElementTagNameMap>(tag: K,
-                                                                cssClass?: string,
-                                                                attrs?: Record<string, string | number>): SVGElementTagNameMap[K] {
+function createSvg<K extends keyof SVGElementTagNameMap>(tag: K,
+                                                         cssClass?: string,
+                                                         attrs?: Record<string, string | number>): SVGElementTagNameMap[K] {
   const el = window.createSvg(tag)
   if (cssClass) el.setAttribute('class', cssClass)
   if (attrs) setAttributes(el, attrs)
@@ -73,7 +73,7 @@ function addIconIfPresent(d: GanttItem,
                           container: SVGElement): boolean {
   if (!d.displayIcon) return false
 
-  const foreignObj = createSVGElement('foreignObject',
+  const foreignObj = createSvg('foreignObject',
     'gt-prevent-user-interactions', {x, y, width: iconSize, height: iconSize}
   )
   foreignObj.appendChild(createIconInDiv(d))
@@ -126,7 +126,7 @@ function addTextIfFitting(text: string, x: number, y: number, width: number, has
   const availableTextWidth = width - textSpacing
 
   if (availableTextWidth > 0) {
-    const textSvg = createSVGElement('text', Css.item.text, {x: x + textSpacing, y: y})
+    const textSvg = createSvg('text', Css.item.text, {x: x + textSpacing, y: y})
     textSvg.textContent = truncateText(text, availableTextWidth)
     svgContainer.appendChild(textSvg)
   }
@@ -143,7 +143,7 @@ function addTextIfFitting(text: string, x: number, y: number, width: number, has
 function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: SVGElement): void {
   const width = Math.max(2, x2 - x1)
 
-  const bar = createSVGElement('rect', Css.item.bar, {x: x1, y: y - iconRadius, width, 'data-id': d.id})
+  const bar = createSvg('rect', Css.item.bar, {x: x1, y: y - iconRadius, width, 'data-id': d.id})
   if (d.color) bar.setAttribute('fill', d.color)
   svgContainer.appendChild(bar)
 
@@ -165,7 +165,7 @@ function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: 
 function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number, svgContainer: SVGElement): void {
   const width = Math.max(2, x2 - x1)
 
-  const era = createSVGElement('rect', Css.item.era, {x: x1, y: y, width, height, 'data-id': d.id})
+  const era = createSvg('rect', Css.item.era, {x: x1, y: y, width, height, 'data-id': d.id})
   if (d.color) era.setAttribute('fill', d.color)
   svgContainer.appendChild(era)
 
@@ -189,7 +189,7 @@ function drawSmallShape(d: GanttItem,
                         shape: 'circle' | 'polygon' | 'rect', cssClass: string,
                         attrs: Record<string, string | number>, x: number, y: number,
                         svgContainer: SVGElement): void {
-  const el = createSVGElement(shape, cssClass, {...attrs, 'data-id': d.id})
+  const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
   if (d.color) el.setAttribute('fill', d.color)
   svgContainer.appendChild(el)
   addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
@@ -276,7 +276,7 @@ function drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElem
  * @param svgContainer
  */
 function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number, svgContainer: SVGElement): void {
-  const line = createSVGElement('line', Css.item.line, {x1, x2: x1, y1, y2, 'stroke-width': width, 'data-id': d.id})
+  const line = createSvg('line', Css.item.line, {x1, x2: x1, y1, y2, 'stroke-width': width, 'data-id': d.id})
   if (d.color) line.setAttribute('stroke', d.color)
   svgContainer.appendChild(line)
 }
@@ -316,7 +316,7 @@ export function drawMoonPhase(cx: number,
   const y = cy - halfSize + yOffset
 
 
-  const g = createSVGElement('svg', 'moon-phase-icon', {
+  const g = createSvg('svg', 'moon-phase-icon', {
     width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
   })
 
