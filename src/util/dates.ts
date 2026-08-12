@@ -54,8 +54,10 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   const paddedYear = absYear.toString().padStart(4, '0')
   const yearString = year < 0 ? `-${paddedYear}` : paddedYear
   const day = remainingDays
+  const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
+  const suffix = suffixRaw ? ` ${suffixRaw}` : ''
 
-  return `${yearString}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}`
+  return `${yearString}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}${suffix}`
 }
 
 function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig) {
@@ -162,7 +164,10 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
     return ''
   })
 
-  return outputParts.filter(Boolean).join(config.delimiter)
+  const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
+  const suffix = suffixRaw ? ` ${suffixRaw}` : ''
+
+  return outputParts.filter(Boolean).join(config.delimiter) + suffix
 }
 
 /* Update the axis label formatter inside the Gantt render engine class */

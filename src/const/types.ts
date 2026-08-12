@@ -49,6 +49,9 @@ export type RuleBasedDetails = {
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
+/**
+ * This one has to be implemented by the user inside a Markdown note.
+ */
 export type CalendarConfig = {
   id: string
   name?: string
@@ -65,9 +68,10 @@ export type CalendarConfig = {
     name: string
     days: number
   }[]
-
   /* Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.) */
   ruleBasedDetails?: RuleBasedDetails
+  bcSuffix?: string
+  adSuffix?: string
   moons?: Moon[]
 }
 
@@ -187,6 +191,8 @@ export type PluginSettings = GanttChartSources & {
   showButtonsToHideGroups: boolean
   uxVerticalLineEventWidth: number
   autoRestrictZoom: boolean
+  uxSwitchZoomAndPan: boolean
+  uxUseCalColorForCalAxis: boolean
 
   /*
    * Front-matter property names
@@ -226,6 +232,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   showButtonsToHideGroups: false,
   uxVerticalLineEventWidth: 3,
   autoRestrictZoom: true,
+  uxSwitchZoomAndPan: false,
+  uxUseCalColorForCalAxis: false,
 
   /*
    * Front-matter property names

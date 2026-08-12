@@ -341,7 +341,7 @@ export class GanttRenderEngine {
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
       const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
-      const axisColor = this.svgDrawerData.mappedCalConfigs[calType]?.color ?? 'currentColor'
+      const axisColor = (this.plugin.settings.uxUseCalColorForCalAxis ? this.svgDrawerData.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
 
       const calStart = calendarConfig?.startDay as number ?? -Infinity
       const calEnd = calendarConfig?.endDay as number ?? Infinity
@@ -358,14 +358,14 @@ export class GanttRenderEngine {
       const endX = this.getXPosition(effectiveEndDay, width)
 
       const baseline = Util.createSvg('line', Css.axis.baseline, {
-        x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': '2.5', fill: axisColor
+        x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': 2.5, stroke: axisColor
       })
       ticksG.appendChild(baseline)
 
       // Draw start cap marker (if in visible range)
       if (calendarConfig?.startDay && calendarConfig.startDay as number >= startDaysValue) {
         const startCap = Util.createSvg('line', 'calendar-cap-marker', {
-          x1: startX, y1: -6, x2: startX, y2: 6, stroke: 'currentColor', 'stroke-width': '2'
+          x1: startX, y1: -6, x2: startX, y2: 6, 'stroke-width': 2, stroke: axisColor
         })
         ticksG.appendChild(startCap)
       }
@@ -373,7 +373,7 @@ export class GanttRenderEngine {
       // Draw end cap marker (if in visible range)
       if (calendarConfig?.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
         const endCap = Util.createSvg('line', 'calendar-cap-marker', {
-          x1: endX, y1: -6, x2: endX, y2: 6, stroke: 'currentColor', 'stroke-width': '2'
+          x1: endX, y1: -6, x2: endX, y2: 6, 'stroke-width': 2, stroke: axisColor
         })
         ticksG.appendChild(endCap)
       }
