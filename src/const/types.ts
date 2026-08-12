@@ -180,6 +180,7 @@ export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
 export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   fallbackColor: string
+  fallbackColorForIcons: string
   calendars: GroupOrCalendarSettings[]
   groups: GroupOrCalendarSettings[]
 
@@ -200,12 +201,13 @@ export type PluginSettings = GanttChartSources & {
   /*
    * Front-matter property names
    */
-  frontMatterProperty_gantt_this: string
   frontMatterProperty_calendar_name: string
+
+  frontMatterProperty_gantt_this: string
   frontMatterProperty_event_time_start: string
   frontMatterProperty_event_time_end: string
   frontMatterProperty_event_name: string
-  frontMatterProperty_event_color: string,
+  frontMatterProperty_event_color: string
   frontMatterProperty_event_group: string
   frontMatterProperty_event_symbol: string
   frontMatterProperty_event_calendar: string
@@ -221,7 +223,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   calendarPath: '/',
   calendarPathSearchRecursive: false,
   defaultCalendar: 'gregorian',
-  fallbackColor: '#1565c0',
+  fallbackColor: '#1565C0',
+  fallbackColorForIcons: '#FF8800',
   calendars: [
     {id: 'gregorian', visible: true, priority: 0},
   ],
@@ -244,8 +247,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   /*
    * Front-matter property names
    */
-  frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
   frontMatterProperty_calendar_name: 'gantt-type-definition', // string, activates file as calendar source
+
+  frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
   frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian'
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start

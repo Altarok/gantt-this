@@ -86,11 +86,18 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Default event color',
-            desc: `Fallback value for event property 'gantt-color'.`,
+            desc: `Fallback value for event property '${this.plugin.settings.frontMatterProperty_event_color}'.`,
             control: {
-              type: 'color',
-              key: 'fallbackColor',
-              // placeholder: DEFAULT_SETTINGS.fallbackColor,
+              type: 'color', key: 'fallbackColor',
+              defaultValue: DEFAULT_SETTINGS.fallbackColor
+            }
+          },
+          {
+            name: 'Default icon color',
+            desc: `Fallback value for event property '${this.plugin.settings.frontMatterProperty_event_icon_color}'.`,
+            control: {
+              type: 'color', key: 'fallbackColorForIcons',
+              defaultValue: DEFAULT_SETTINGS.fallbackColorForIcons
             }
           }
         ]
@@ -292,124 +299,174 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         ]
       },
       /* FrontMatter property names */
-      {
-        name: 'Front-matter properties', type: 'page',
-        desc: 'Configure front-matter properties the plugin uses',
-        items: [
-          {
-            name: 'This marks a note as Gantt event',
-            desc: 'Mandatory. Main FrontMatter property the plugin searches for',
-            control: {
-              type: 'text',
-              key: 'frontMatterProperty_gantt_this',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
-              defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Calendar definition',
-            desc: 'Name of calendar',
-            control: {
-              type: 'text', key: 'frontMatterProperty_calendar_name',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
-              defaultValue: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event calendar',
-            desc: 'Optional. Defines which calendar to apply this event to',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_calendar',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event name',
-            desc: 'Optional. Name of event',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_name',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_name,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event start date',
-            desc: 'Mandatory',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_time_start',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event end date',
-            desc: 'Optional',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_time_end',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event color',
-            desc: 'Optional. Hex color or human-readable name. Predefined are red, white, blue, green, yellow, gold, black, orange, pink and purple.',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_color',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_color,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event group',
-            desc: 'Optional',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_group',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_group,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event symbol',
-            desc: 'Optional.',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_symbol',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event icon name',
-            desc: 'Optional. Name of icon, see https://lucide.dev',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_icon_name',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Event icon color',
-            desc: 'Optional. Hex color or human-readable name',
-            control: {
-              type: 'text', key: 'frontMatterProperty_event_icon_color',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          },
-          {
-            name: 'Header in note',
-            desc: 'Optional. Clicking the event will point to header instead of file.',
-            control: {
-              type: 'text', key: 'frontMatterProperty_note_header',
-              placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
-              validate: (value: string) => testFrontMatterInput(value)
-            },
-          }
-        ]
-      },
+      this.createFrontMatterSettingDefinitions(),
+
     ]
   }
 
+  createFrontMatterSettingDefinitions(): SettingDefinitionItem {
+    return {
+      name: 'Front-matter properties', type: 'page',
+      desc: 'Configure front-matter properties the plugin uses',
+      items: [
+        {
+          name: 'This marks a note as Gantt event',
+          desc: 'Mandatory. Main FrontMatter property the plugin searches for',
+          control: {
+            type: 'text',
+            key: 'frontMatterProperty_gantt_this',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Calendar definition',
+          desc: 'Name of calendar',
+          control: {
+            type: 'text', key: 'frontMatterProperty_calendar_name',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event calendar',
+          desc: 'Optional. Defines which calendar to apply this event to',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_calendar',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event name',
+          desc: 'Optional. Name of event',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_name',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_name,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_name,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event start date',
+          desc: 'Mandatory',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_time_start',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event end date',
+          desc: 'Optional',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_time_end',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event color',
+          desc: 'Optional. Hex color or human-readable name.',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_color',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_color,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_color,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event group',
+          desc: 'Optional. Use to sort, group and color depending on group.',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_group',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_group,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_group,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event symbol',
+          desc: 'Optional.',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_symbol',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event icon name',
+          desc: 'Optional. Name of icon, see https://lucide.dev',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_icon_name',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Event icon color',
+          desc: 'Optional. Hex color or human-readable name',
+          control: {
+            type: 'text', key: 'frontMatterProperty_event_icon_color',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+        {
+          name: 'Header in note',
+          desc: 'Optional. Clicking the event will point to header instead of file.',
+          control: {
+            type: 'text', key: 'frontMatterProperty_note_header',
+            placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_note_header,
+            validate: (value: string) => testFrontMatterInput(value)
+          },
+        },
+
+        {
+          name: 'Header in note',
+          searchable: false,
+          desc: 'Optional. Clicking the event will point to header instead of file.',
+          // control: {
+          //   type: 'text', key: 'frontMatterProperty_note_header',
+          //   placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
+          //   defaultValue: DEFAULT_SETTINGS.frontMatterProperty_note_header,
+          //   validate: (value: string) => testFrontMatterInput(value)
+          // },
+          render: (setting: Setting) => {
+            setting
+              .addText(tt => tt.setValue(this.plugin.settings.frontMatterProperty_note_header).setPlaceholder(DEFAULT_SETTINGS.frontMatterProperty_note_header)
+                .onChange(async (value) => {
+                  if (testFrontMatterInput(value)) return
+                  this.plugin.settings.frontMatterProperty_note_header = value
+                  await this.plugin.saveSettings()
+                  this.update()
+                })
+              )
+              .addExtraButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset', {delay: -1})
+                .onClick(async () => {
+                  this.plugin.settings.frontMatterProperty_note_header = DEFAULT_SETTINGS.frontMatterProperty_note_header
+                  await this.plugin.saveSettings()
+                  this.update()
+                })
+              )
+          },
+        }
+      ]
+    }
+  }
+
 }
+
+// void (async () => {
+//   await this.plugin.saveSettings()
+//   this.update()
+// })()
