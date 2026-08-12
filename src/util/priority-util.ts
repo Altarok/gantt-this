@@ -12,7 +12,7 @@ function sortGroupOrCalendarSettingsByPriority(objects: Record<string, GroupOrCa
 
 /**
  * @param calendarNames will get sorted
- * @param mappedCalendarConfigs mapped to theid respective id
+ * @param mappedCalendarConfigs mapped to their respective id
  */
 function sortCalendarAxisByPriority(calendarNames: string[], mappedCalendarConfigs: Record<string, GroupOrCalendarSettings>): void {
   calendarNames.sort((a, b) => (mappedCalendarConfigs[a]?.priority ?? Infinity) - (mappedCalendarConfigs[b]?.priority ?? Infinity))

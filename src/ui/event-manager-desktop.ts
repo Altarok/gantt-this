@@ -404,19 +404,10 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.highlightElement.innerHTML = ''
     let shape: SVGElement
 
-    /*
-     * TODO create nice border around new forms
-     */
+
     if (ganttItem.displayType === 'diamond') {
 
-      // const cx = x + width / 2
-      // const cy = y + height / 2
-      // const pad = 4
-      // const points = `${cx},${y - pad} ${cx + width / 2 + pad},${cy} ${cx},${y + height + pad} ${cx - width / 2 - pad},${cy}`
-      // shape = Util.createSVGElement('polygon')
-      // shape.setAttribute('points', points)
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 , 4)
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 4)
       shape = Util.createSVGElement('polygon', 'gt-item timestamp diamond', {points})
 
     } else if (ganttItem.displayType === 'triangle') {
