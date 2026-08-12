@@ -190,9 +190,7 @@ export class GanttRenderEngine {
     this.axisG = Util.createSvg('g')
     this.chartArea.appendChild(this.axisG)
 
-    this.eventManager = createGanttEventManager(this,
-      this.plugin.settings.mouseOverEventShowBox,
-      this.plugin.settings.mouseOverEventShowVerticalLine)
+    this.eventManager = createGanttEventManager(this, this.plugin.settings)
   }
 
   handleResize() {

@@ -14,7 +14,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private verticalGuides: { upper: SVGLineElement, lower: SVGLineElement }[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private highlightElement: SVGElement | null = null
-  private readonly autoRestrictZoom: boolean
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -27,10 +26,10 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private readonly boundSvgClick: (e: MouseEvent) => void
 
   constructor(private engine: GanttRenderEngine,
+              readonly autoRestrictZoom: boolean,
               readonly mouseOverEventShowBox: boolean,
-              readonly mouseOverEventShowVerticalLine: boolean) {
-    this.autoRestrictZoom = this.engine.plugin.settings.autoRestrictZoom
-
+              readonly mouseOverEventShowVerticalLine: boolean,
+              readonly uxSwitchZoomAndPan: boolean) {
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -123,20 +122,25 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (!this.currentSvg) return
 
     if (e.ctrlKey || e.metaKey) {
-
-      this.engine.zoomTranslateX = this.engine.zoomTranslateX - Math.floor(e.deltaY / 2)
-
-      // Pan horizontally (and vertically if your timeline pans Y-axis too)
-      this.rafId ??= window.requestAnimationFrame(() => {
-        const width = this.engine.container.clientWidth || 800
-        this.engine.renderData(width)
-        this.engine.drawAxes(width)
-        this.rafId = null
-      })
-      return
+      if (this.uxSwitchZoomAndPan) this.zoom(e)
+      else this.pan(e)
     } else {
-      this.zoom(e)
+      if (this.uxSwitchZoomAndPan) this.pan(e)
+      else this.zoom(e)
     }
+  }
+
+  private pan(e: WheelEvent) {
+    this.engine.zoomTranslateX = this.engine.zoomTranslateX - Math.floor(e.deltaY / 2)
+
+    // Pan horizontally (and vertically if your timeline pans Y-axis too)
+    this.rafId ??= window.requestAnimationFrame(() => {
+      const width = this.engine.container.clientWidth || 800
+      this.engine.renderData(width)
+      this.engine.drawAxes(width)
+      this.rafId = null
+    })
+    return
   }
 
   private zoom(e: WheelEvent) {

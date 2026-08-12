@@ -2,6 +2,7 @@ import {Platform} from "obsidian"
 import {GanttRenderEngine} from './svg-drawer'
 import {GanttMobileEventManager} from "./event-manager-mobile"
 import {GanttDesktopEventManager} from './event-manager-desktop'
+import {PluginSettings} from "../const/types";
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -13,12 +14,15 @@ export type GanttEventManager = {
 }
 
 export function createGanttEventManager(renderEngine: GanttRenderEngine,
-                                        mouseOverEventShowBox: boolean,
-                                        mouseOverEventShowVerticalLine: boolean): GanttEventManager {
+                                        pluginSettings: PluginSettings): GanttEventManager {
 
   if (Platform.isMobile)
     return new GanttMobileEventManager(renderEngine)
   else
-    return new GanttDesktopEventManager(renderEngine, mouseOverEventShowBox, mouseOverEventShowVerticalLine)
+    return new GanttDesktopEventManager(renderEngine,
+      pluginSettings.autoRestrictZoom,
+      pluginSettings.mouseOverEventShowBox,
+      pluginSettings.mouseOverEventShowVerticalLine,
+      pluginSettings.uxSwitchZoomAndPan)
 
 }
