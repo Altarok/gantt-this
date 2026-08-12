@@ -27,6 +27,7 @@ export const Util = {
   drawDiamond,
   drawHexagon,
   drawTriangle,
+  drawPentagon,
   drawVerticalLine,
 
   drawMoonPhase,
@@ -238,6 +239,18 @@ function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElemen
 function drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 3)
   drawSmallShape(d, 'polygon', 'gt-item timestamp triangle', {points}, cx, cy, svgContainer)
+}
+
+/**
+ * Draw pentagon for timestamp event. SVG circle anchor is dead center.
+ * @param d event to draw
+ * @param cx horizontal center of svg to draw
+ * @param cy vertical center of svg to draw
+ * @param svgContainer
+ */
+function drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  const points = calculatePolygonPoints(iconRadius, cx, cy, 5)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer)
 }
 
 /**

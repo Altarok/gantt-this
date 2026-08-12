@@ -288,6 +288,8 @@ export class GanttRenderEngine {
             return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.dataG)
           case 'triangle':
             return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.dataG)
+          case 'pentagon':
+            return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.dataG)
           case 'hexagon':
             return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.dataG)
 
