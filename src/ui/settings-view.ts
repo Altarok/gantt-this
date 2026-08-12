@@ -44,8 +44,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     return [
       /* Source paths for input */
       {
+        heading: 'Define source paths for your Events and Calendars',
         type: 'group',
-        heading: 'Event and calendar source path selection',
         items: [
           {
             name: 'Folder to search for event definitions',
@@ -71,8 +71,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       /* Default values */
       {
-        type: 'group',
         heading: 'Default values',
+        type: 'group',
         items: [
           {
             name: 'Default event calendar',
@@ -209,7 +209,10 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       /* Advanced */
       {
-        type: 'group', heading: 'Advanced UX settings',
+        name: 'Advanced UX settings', type: 'page',
+        desc: 'Configure front-matter properties the plugin uses',
+//        heading: 'Advanced UX settings',
+//        type: 'group',
         items: [
           {
             name: 'Show box around events when hovered over',
@@ -244,15 +247,17 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       /* FrontMatter property names */
       {
-        type: 'page', name: 'FrontMatter property names',
+        name: 'Front-matter properties', type: 'page',
+        desc: 'Configure front-matter properties the plugin uses',
         items: [
           {
-            name: 'Boolean marking notes as Gantt events',
+            name: 'This marks a note as Gantt event',
             desc: 'Mandatory. Main FrontMatter property the plugin searches for',
             control: {
               type: 'text',
               key: 'frontMatterProperty_gantt_this',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
+              defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
               validate: (value: string) => testFrontMatterInput(value)
             },
           },
@@ -262,6 +267,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             control: {
               type: 'text', key: 'frontMatterProperty_calendar_name',
               placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
+              defaultValue: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
               validate: (value: string) => testFrontMatterInput(value)
             },
           },
