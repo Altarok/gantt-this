@@ -442,15 +442,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           //   validate: (value: string) => testFrontMatterInput(value)
           // },
           render: (setting: Setting) => {
-            setting
-              .addText(tt => tt.setValue(this.plugin.settings.frontMatterProperty_note_header).setPlaceholder(DEFAULT_SETTINGS.frontMatterProperty_note_header)
-                .onChange(async (value) => {
-                  if (testFrontMatterInput(value)) return
-                  this.plugin.settings.frontMatterProperty_note_header = value
-                  await this.plugin.saveSettings()
-                  this.update()
-                })
-              )
+            setting.addText(tt => tt.setValue(this.plugin.settings.frontMatterProperty_note_header).setPlaceholder(DEFAULT_SETTINGS.frontMatterProperty_note_header)
+              .onChange(async (value) => {
+                if (testFrontMatterInput(value)) return
+                this.plugin.settings.frontMatterProperty_note_header = value
+                await this.plugin.saveSettings()
+                this.update()
+              })
+            )
               .addExtraButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset', {delay: -1})
                 .onClick(async () => {
                   this.plugin.settings.frontMatterProperty_note_header = DEFAULT_SETTINGS.frontMatterProperty_note_header
