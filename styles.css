@@ -27,7 +27,8 @@
 }
 
 /* Gridlines and Axis Lines */
-.gt-axis-gridline, .gt-axis-baseline {
+.gt-axis-gridline /* , .gt-axis-baseline */
+{
   stroke: var(--background-modifier-border);
 }
 
@@ -457,7 +458,6 @@
 
 /* Vertical end-cap ticks at startDay and endDay */
 .calendar-cap-marker {
-  stroke: currentcolor;
   stroke-width: 2px;
   stroke-linecap: round;
 }

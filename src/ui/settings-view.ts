@@ -97,8 +97,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       /* Calendar list */
       {
-        type: 'list',
         heading: 'Calendars',
+        type: 'list',
         desc: 'Control calendar visibility, color and order or appearance.',
         emptyState: 'No calendar defined yet.',
         addItem: {name: 'Add calendar', action: () => openAddForm('calendars')},
@@ -153,8 +153,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       /* Group list */
       {
-        type: 'list',
         heading: 'Groups',
+        type: 'list',
         desc: 'Control group visibility, color and order or appearance.',
         emptyState: 'No group defined yet.',
         addItem: {name: 'Add group', action: () => openAddForm('groups')},
@@ -211,8 +211,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       {
         name: 'Advanced UX settings', type: 'page',
         desc: 'Configure front-matter properties the plugin uses',
-//        heading: 'Advanced UX settings',
-//        type: 'group',
         items: [
           {
             name: 'Show box around events when hovered over',
@@ -242,7 +240,23 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               type: 'toggle', key: 'autoRestrictZoom',
               defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
             }
-          }
+          },
+          {
+            name: 'Switch zoom and pan control?',
+            desc: 'By default scrolling zooms and Ctrl+scrolling pans. Activate to switch.',
+            control: {
+              type: 'toggle', key: 'uxSwitchZoomAndPan',
+              defaultValue: DEFAULT_SETTINGS.uxSwitchZoomAndPan
+            }
+          },
+          {
+            name: 'Apply calendar color to calendar axis?',
+            desc: 'This might be visually distracting.',
+            control: {
+              type: 'toggle', key: 'uxUseCalColorForCalAxis',
+              defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
+            }
+          },
         ]
       },
       /* FrontMatter property names */
