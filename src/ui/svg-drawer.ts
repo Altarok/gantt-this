@@ -316,7 +316,7 @@ export class GanttRenderEngine {
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
     const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
 
-    this.stepDays = Math.floor(totalDaysSpan / 6) + 1
+    this.stepDays = Math.floor(totalDaysSpan / (renderWidth / 120))
 
     const startDaysValue = Math.floor(this.minDays / this.stepDays) * this.stepDays - this.stepDays
     const endDaysValue = Math.ceil(this.maxDays / this.stepDays) * this.stepDays + this.stepDays
