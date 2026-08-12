@@ -4,66 +4,68 @@ Willkommen bei der Dokumentation des Gantt Timeline Plugins für Obsidian.
 Dieses Plugin ermöglicht es dir, deine Notizen und Ereignisse übersichtlich in interaktiven
 Zeitlinien darzustellen.
 
-Beispiel:
-![img.png](examples/img.png)
+![Beispielansicht der Zeitleiste](examples/img.png)
 
-- Jeder der farbigen Punkte oder Balken in der oberen Hälfte des Screenshots entspricht einem Event.
-  - Balken repräsentieren Zeitspannen.
-  - Punkte oder Symbole repräsentieren Zeitpunkte.
-- Jedes Event wird im FrontMatter einer Markdown-Datei definiert.
-- Events können gruppiert werden.
-- Beliebig viele von dir definierte Kalender können angezeigt werden.
-- Sowohl Gruppen als auch Kalender lassen sich ein- und ausblenden.
-- Sowohl Gruppen als auch Kalender lassen sich sortieren.
-- Sowohl Zeitspannen als auch Zeitpunkte lassen sich ein- oder ausblenden.
-- Zeitpunkte können mit einem icon deiner Wahl versehen werden. (QUELLE: https://lucide.dev)
-- Ausgewählte Metadaten der Events werden in einem Tooltip angezeigt.
-- Ein Klick auf Events öffnet die entsprechende Quelldatei.
-  - Oder springt direkt an einen von dir definierten Überschrift der Datei.
+### Features & Aufbau
 
-> Wichtig: Das Plugin kann deine Daten nicht löschen.
-> Es kann, wenn du das wünschst, Daten schreiben. Konkreter kann es einen Codeblock in eine Markdown-Datei einfügen.<br>
-> Außerdem besteht keine Verbindung ins Netz.
+- **Ereignisse (Events):** Jeder Punkt oder Balken in der Zeitleiste entspricht einem Event.
+  - **Balken:** Repräsentieren Zeitspannen.
+  - **Punkte / Symbole:** Repräsentieren Zeitpunkte oder Meilensteine.
+- **Dezentral im FrontMatter:** Ereignisse werden direkt in den YAML-Eigenschaften deiner Markdown-Dateien definiert.
+- **Strukturierung:** Events lassen sich nach Gruppen und benutzerdefinierten Kalendern organisieren, filtern und
+  sortieren.
+- **Flexible Sichtbarkeit:** Gruppen, Kalender, Zeitspannen und Einzelpunkte lassen sich unabhängig voneinander ein- und
+  ausblenden.
+- **Individuelles Styling:** Zeitpunkte können mit Icons von [Lucide](https://lucide.dev) versehen und farblich
+  angepasst werden.
+- **Interaktivität:**
+  - Mouseover zeigt relevante Metadaten im Tooltip an (Desktop).
+  - Ein Klick auf ein Event öffnet direkt die Quellnotiz – optional inklusive Sprung zu einer bestimmten Überschrift.
+  - Volle Navigation via Drag & Zoom (Mausrad auf Desktop, Gestensteuerung auf Mobilgeräten).
 
-# **Erste Schritte**
+> **Datensicherheit & Datenschutz:**
+> Das Plugin liest deine Notizen aus und kann auf Wunsch einen Codeblock in deine aktuelle Datei einfügen. Es löscht
+> niemals Daten in deinem Vault und stellt **keine** Netzverbindungen her.
 
-## *Gantt Chart / Zeitleiste erstellen*
+# Erste Schritte
 
-Es gibt 2 Möglichkeiten dies zu erreichen.
+## Gantt Chart / Zeitleiste erstellen
 
-1. Öffne eine Markdown-Datei und nutze das Ribbon Icon `'Gantt this: Open code block creator'` und lass dich vom Modal
-   durch die Schritte führen.
+Es gibt zwei einfache Wege, eine Zeitleiste in eine Notiz einzubetten:
 
-- Du kannst angeben in welchem Ordner das Plugin nach Events suchen darf.
-  - Ein Toggle erlaubt das rekursive Suchen nach Events in Unterordnern.
-  - Standardwert ist: Der Ordner der gerade offenen Datei.
-- Du kannst angeben in welchem Ordner das Plugin nach Kalendern suchen darf.
-  - Auch hier: Ein Toggle erlaubt das rekursive Suchen.
-  - Auch hier: Der Standardwert ist der Ordner der gerade offenen Datei.
-- Am unteren Ende des Popup kannst du deinen von dir definierten Codeblock sehen.
-- Die 2 Buttons neben dem Codeblock lassen ihn dich entweder ..
-  - .. kopieren und manuell an die Stelle deiner Wahl einfügen oder ..
-  - .. direkt an die Stelle deines Cursors schreiben.
+### Weg 1: Über den Befehl / das Ribbon-Icon (Empfohlen)
 
-2. Oder kopiere dies in eine Datei:
+1. Klicke auf das Ribbon-Icon oder nutze die Befehlspalette: `Gantt this: Open code block creator`.
+2. Das Modal führt dich schrittweise durch die Konfiguration:
 
-````
+- **Ordner für Events:** Gib an, wo nach Notizen mit Event-Daten gesucht werden soll (inklusive Toggle für rekursive
+  Suche in Unterordnern).
+- **Ordner für Kalender:** Gib an, wo benutzerdefinierte Kalenderdefinitionen liegen.
+- Standardmäßig wird jeweils der Ordner der aktuell geöffneten Datei vorgeschlagen.
+
+3. Am Ende kannst du den generierten Codeblock kopieren oder direkt an deiner aktuellen Cursorposition einfügen lassen.
+
+### Weg 2: Manuell im Editor
+
+Füge einfach folgenden Codeblock in eine beliebige Markdown-Datei ein:
+
+````markdown
 ```gantt-this
 ```
 ````
 
 ## *Gantt Chart / Zeitleiste mit Leben füllen*
 
-Um eine oder mehrere Notizen als event in deiner Zeitleiste anzuzeigen,
-füge einfach das entsprechende FrontMatter in deine Markdown-Datei ein:
+Um eine Notiz als Ereignis in deiner Zeitleiste anzuzeigen, fügst du folgende Eigenschaften in den YAML-Frontmatter der
+Notiz ein:
 
 ```yaml
 ---
-gantt-item: true           # Könnte eventuell bald wegfallen
-gantt-start: 2026-01-01
-gantt-end: 2026-01-05      # Optional, als Fallbackwert wird der Startwert ('gentt-start') genutzt 
-gantt-name: "Mein Projekt" # Optional, als Fallbackwert wird der Dateiname angezogen
-gantt-group: "Entwicklung" # Optional, als Fallbackwert wird 'general' genutzt
+gantt-item: true           # Markiert die Notiz als Event
+gantt-start: 2026-01-01    # Startdatum / Zeitpunkt
+gantt-end: 2026-01-05      # Optional: Enddatum (Fallback ist 'gantt-start')
+gantt-name: "Mein Projekt" # Optional: Name (Fallback ist der Dateiname)
+gantt-group: "Entwicklung" # Optional: Gruppe (Fallback ist 'general')
 ---
 ```
 
@@ -71,27 +73,25 @@ gantt-group: "Entwicklung" # Optional, als Fallbackwert wird 'general' genutzt
 
 Die folgende Tabelle zeigt alle verfügbaren Eigenschaften, die du in deinen Notizen verwenden kannst:
 
-| Eigenschaft            | Typ / Werte                   | Optional? | Standardwert / Fallback                     | Beschreibung                                                             |
-|------------------------|-------------------------------|-----------|---------------------------------------------|--------------------------------------------------------------------------|
-| gantt-item             | Boolean                       | Nein      | Keine (muss true sein)                      | Aktiviert die Erfassung der Notiz als Gantt-Ereignis.                    |
-| gantt-start            | String                        | Nein      | Keine (Eintrag wird sonst ignoriert)        | Startdatum oder Startwert des Ereignisses.                               |
-| gantt-end              | String                        | Ja        | Entspricht dem Startwert (gantt-start)      | Enddatum des Ereignisses. Bei identischem Wert wird ein Punkt angezeigt. |
-| gantt-name             | String                        | Ja        | Dateiname ohne Endung (file.basename)       | Name des Ereignisses in der Zeitleiste und im Tooltip.                   |
-| gantt-type             | String                        | Ja        | Standard-Kalender des Plugins               | Bestimmt den verwendeten Kalendertyp.                                    
-| gantt-group            | String                        | Ja        | 'general'                                   | Gruppe für die Zeilenanordnung und Strukturierung.                       |
-| gantt-color            | Farbe (z.B. #ff0000 oder red) | Ja        | Gruppenfarbe → Kalenderfarbe → Standardwert | Überschreibt die Farbe des Balkens oder Punktes individuell.             |
-| gantt-displayIcon      | String (Lucide-Icon)          | Ja        | Leer (kein Icon)                            | Zeigt ein Icon an (nur bei Punkt-Darstellung wirksam).                   |
-| gantt-displayIconColor | Farbe (z.B. #ff0000 oder red) | Ja        | Leer (kein Icon)                            | Zeigt ein Icon an (nur bei Punkt-Darstellung wirksam).                   |
-| gantt-symbol           | bar, point, icon, diamond     | Ja        | bar (Zeitspanne) bzw. point (Einzelpunkt)   | Legt die visuelle Darstellungsform fest.                                 |
-| gantt-linkToHeader     | String                        | Ja        | Leer (verlinkt an den Anfang)               | Verlinkt direkt auf eine spezifische Überschrift beim Klicken.           |
+| Eigenschaft            | Typ / Werte                                | Optional? | Standardwert / Fallback                        | Beschreibung                                                             |
+|------------------------|--------------------------------------------|-----------|------------------------------------------------|--------------------------------------------------------------------------|
+| gantt-item             | Boolean                                    | Nein      | `true`                                         | Markiert die Notiz als Erfassungsobjekt für das Plugin.                  |
+| gantt-start            | String                                     | Nein      | *Keiner* (Notiz wird ohne Startwert ignoriert) | Startdatum oder Startwert des Ereignisses.                               |
+| gantt-end              | String                                     | Ja        | Wert von `gantt-start`                         | Enddatum des Ereignisses. Bei identischem Wert wird ein Punkt angezeigt. |
+| gantt-name             | String                                     | Ja        | Dateiname ohne Endung (`file.basename`)        | Name des Ereignisses in der Zeitleiste und im Tooltip.                   |
+| gantt-type             | String                                     | Ja        | Standard-Kalender des Plugins                  | Bestimmt den zugewiesenen Kalendertyp.                                   |
+| gantt-group            | String                                     | Ja        | `'general'`                                    | Gruppe für die Zeilenanordnung und Strukturierung.                       |
+| gantt-color            | Farbe (z.B. `#ff0000`, `red`)              | Ja        | Gruppenfarbe → Kalenderfarbe → Standard        | Überschreibt die Hintergrundfarbe des Events individuell.                |
+| gantt-displayIcon      | String ([Lucide Icon](https://lucide.dev)) | Ja        | *Keins*                                        | Zeigt ein Icon auf dem Event an.                                         |
+| gantt-displayIconColor | Farbe (z.B. `#ff0000`, `red`)              | Ja        | Standard-Icon-Farbe                            | Legt die Farbe des Icons fest.                                           |
+| gantt-symbol           | bar, point, icon, diamond                  | Ja        | `bar` (Zeitspanne) bzw. `point` (Zeitpunkt)    | Legt die visuelle Darstellungsform des Events fest.                      |
+| gantt-linkToHeader     | String                                     | Ja        | *Keine* (Springt zum Dateianfang)              | Verlinkt beim Klicken direkt auf eine spezifische Überschrift.           |
 
 ## *Benutzerdefinierte Kalender-Definitionen*
 
-Wenn du eigene Zeitsysteme oder Kalender im Vault verwendest, kannst du diese über eine separate Notiz definieren:
+Wenn du eigene Zeitsysteme oder fiktive Kalender in deinem Vault verwendest, kannst du diese über eine separate Notiz
+definieren:
 
-| Eigenschaft           | Typ / Werte | Optional? | Standardwert / Fallback | Beschreibung                                                            |
-|-----------------------|-------------|-----------|-------------------------|-------------------------------------------------------------------------|
-| gantt-type-definition | String      | Nein      | Keine                   | Eindeutiger Identifikator des Kalenders für den Verweis via gantt-type. |
-
-
-
+| Eigenschaft             | Typ / Werte | Optional? | Standardwert / Fallback | Beschreibung                                                              |
+|:------------------------|:------------|:----------|:------------------------|:--------------------------------------------------------------------------|
+| `gantt-type-definition` | String      | **Nein**  | *Keiner*                | Eindeutiger Identifikator des Kalenders für den Verweis via `gantt-type`. |
