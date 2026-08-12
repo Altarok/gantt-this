@@ -399,15 +399,11 @@ export class GanttRenderEngine {
           this.gridG.appendChild(gridLine)
         }
 
-        const tick = Util.createSVGElement('line', Css.axis.tick, {
-          x1: xPos, y1: 0, x2: xPos, y2: 5
-        })
+        const tick = Util.createSVGElement('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
         ticksG.appendChild(tick)
 
         if (xPos - lastTextX > 80) {
-          const text = Util.createSVGElement('text', Css.axis.text, {
-            x: xPos, y: 20
-          })
+          const text = Util.createSVGElement('text', Css.axis.text, {x: xPos, y: 20})
           text.textContent = createAxisDateDescription(currDays, calendarConfig)
 
           ticksG.appendChild(text)
@@ -485,9 +481,7 @@ export class GanttRenderEngine {
         const headerG = Util.createSVGElement('g')
         individualAxisG.appendChild(headerG)
 
-        const badge = Util.createSVGElement('rect', Css.axis.labelBadge)
-        badge.setAttribute('x', '8')
-        badge.setAttribute('y', '7')
+        const badge = Util.createSVGElement('rect', Css.axis.labelBadge, {x: 8, y: 7})
 
         /* Calculate width accurately off-screen with explicit uppercase padding */
         const textWidth = this.measureTextWidth(calBadgeTextContent)
@@ -497,9 +491,7 @@ export class GanttRenderEngine {
         badge.setAttribute('width', exactWidth.toFixed(1))
         headerG.appendChild(badge)
 
-        const label = Util.createSVGElement('text', Css.axis.label)
-        label.setAttribute('x', '14')
-        label.setAttribute('y', '19')
+        const label = Util.createSVGElement('text', Css.axis.label, {x: 14, y: 19})
         label.textContent = calBadgeTextContent
 
         headerG.appendChild(label)
