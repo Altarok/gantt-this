@@ -23,6 +23,7 @@ export const Css = {
     diamond: 'gt-item timestamp diamond',
     triangle: 'gt-item timestamp triangle',
     hexagon: 'gt-item timestamp hexagon',
+    pentagram: 'gt-item timestamp pentagon',
     line: 'gt-item timestamp vertical-line',
 
     bar: 'gt-item timespan bar',

@@ -417,17 +417,22 @@ export class GanttDesktopEventManager implements GanttEventManager {
       // shape.setAttribute('points', points)
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 , 4)
-      shape = Util.createSVGElement('polygon', 'gt-item timestamp triangle', {points})
+      shape = Util.createSVGElement('polygon', 'gt-item timestamp diamond', {points})
 
     } else if (ganttItem.displayType === 'triangle') {
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 - 2, 3)
       shape = Util.createSVGElement('polygon', 'gt-item timestamp triangle', {points})
 
+    } else if (ganttItem.displayType === 'pentagon') {
+
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 5)
+      shape = Util.createSVGElement('polygon', 'gt-item timestamp pentagon', {points})
+
     } else if (ganttItem.displayType === 'hexagon') {
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 6)
-      shape = Util.createSVGElement('polygon', 'gt-item timestamp triangle', {points})
+      shape = Util.createSVGElement('polygon', 'gt-item timestamp hexagon', {points})
 
     } else {
       shape = window.document.createElementNS(svgUrl, 'ellipse')
