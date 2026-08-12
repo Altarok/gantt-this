@@ -228,13 +228,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Width of vertical line events.',
-            control: {
-              type: 'slider', key: 'uxVerticalLineEventWidth',
-              min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
-            }
-          },
-          {
             name: 'Automatically restrict min & max zoom?',
             control: {
               type: 'toggle', key: 'autoRestrictZoom',
@@ -257,6 +250,13 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
             }
           },
+          {
+            name: 'Width of vertical line events.',
+            control: {
+              type: 'slider', key: 'uxVerticalLineEventWidth',
+              min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
+            }
+          }
         ]
       },
       /* FrontMatter property names */
