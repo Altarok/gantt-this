@@ -213,6 +213,22 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         desc: 'Configure front-matter properties the plugin uses',
         items: [
           {
+            name: 'Add ribbon icon?',
+            desc: 'This would give you a live preview of the chart during setup.',
+            control: {
+              type: 'toggle', key: 'uxAddRibbonIcon',
+              defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon
+            }
+          },
+          {
+            name: 'Add plugin commands?',
+            desc: 'Commands would create templates for events, calendars and Markdown code blocks.',
+            control: {
+              type: 'toggle', key: 'uxAddCommands',
+              defaultValue: DEFAULT_SETTINGS.uxAddCommands
+            }
+          },
+          {
             name: 'Show box around events when hovered over',
             control: {type: 'toggle', key: 'mouseOverEventShowBox'}
           },
@@ -232,6 +248,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             control: {
               type: 'toggle', key: 'autoRestrictZoom',
               defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
+            }
+          },
+          {
+            name: 'Override default scroll in calendar?',
+            desc: 'By default scrolling over a calendar zooms in or out. If deactivated, you must hold Shift.',
+            control: {
+              type: 'toggle', key: 'uxOverrideNoteScrollInCalendar',
+              defaultValue: DEFAULT_SETTINGS.uxOverrideNoteScrollInCalendar
             }
           },
           {

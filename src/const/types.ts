@@ -193,6 +193,7 @@ export type PluginSettings = GanttChartSources & {
   showButtonsToHideGroups: boolean
   uxVerticalLineEventWidth: number
   autoRestrictZoom: boolean
+  uxOverrideNoteScrollInCalendar: boolean
   uxSwitchZoomAndPan: boolean
   uxUseCalColorForCalAxis: boolean
 
@@ -236,6 +237,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   showButtonsToHideGroups: false,
   uxVerticalLineEventWidth: 3,
   autoRestrictZoom: true,
+  uxOverrideNoteScrollInCalendar: true,
   uxSwitchZoomAndPan: false,
   uxUseCalColorForCalAxis: false,
 
