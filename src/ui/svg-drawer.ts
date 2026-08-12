@@ -340,6 +340,8 @@ export class GanttRenderEngine {
 
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
+      const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
+      const axisColor = this.svgDrawerData.mappedCalConfigs[calType]?.color ?? 'currentColor'
 
       const calStart = calendarConfig?.startDay as number ?? -Infinity
       const calEnd = calendarConfig?.endDay as number ?? Infinity
@@ -356,7 +358,7 @@ export class GanttRenderEngine {
       const endX = this.getXPosition(effectiveEndDay, width)
 
       const baseline = Util.createSVGElement('line', Css.axis.baseline, {
-        x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': '2.5'
+        x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': '2.5', fill: axisColor
       })
       ticksG.appendChild(baseline)
 
@@ -376,12 +378,12 @@ export class GanttRenderEngine {
         ticksG.appendChild(endCap)
       }
 
-      // if (calendarConfig?.name) {
+      // if (!calBadgeTextContent && calendarConfig?.name) {
       //   const labelX = (startX + endX) / 2
       //   const title = Util.createSVGElement('text', 'calendar-reign-title', {
       //     x: labelX, y: -10, 'text-anchor': 'middle', fill: 'currentColor'
       //   })
-      //   title.textContent = calendarConfig?.name
+      //   title.textContent = calendarConfig.name
       //   ticksG.appendChild(title)
       // }
 
@@ -478,30 +480,30 @@ export class GanttRenderEngine {
         })
       }
 
-      const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
+      if (calBadgeTextContent) {
+        /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
+        const headerG = Util.createSVGElement('g')
+        individualAxisG.appendChild(headerG)
 
-      /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
-      const headerG = Util.createSVGElement('g')
-      individualAxisG.appendChild(headerG)
+        const badge = Util.createSVGElement('rect', Css.axis.labelBadge)
+        badge.setAttribute('x', '8')
+        badge.setAttribute('y', '7')
 
-      const badge = Util.createSVGElement('rect', Css.axis.labelBadge)
-      badge.setAttribute('x', '8')
-      badge.setAttribute('y', '7')
+        /* Calculate width accurately off-screen with explicit uppercase padding */
+        const textWidth = this.measureTextWidth(calBadgeTextContent)
+        const badgePadding = 12
+        const exactWidth = textWidth + badgePadding
 
-      /* Calculate width accurately off-screen with explicit uppercase padding */
-      const textWidth = this.measureTextWidth(calBadgeTextContent)
-      const badgePadding = 12
-      const exactWidth = textWidth + badgePadding
+        badge.setAttribute('width', exactWidth.toFixed(1))
+        headerG.appendChild(badge)
 
-      badge.setAttribute('width', exactWidth.toFixed(1))
-      headerG.appendChild(badge)
+        const label = Util.createSVGElement('text', Css.axis.label)
+        label.setAttribute('x', '14')
+        label.setAttribute('y', '19')
+        label.textContent = calBadgeTextContent
 
-      const label = Util.createSVGElement('text', Css.axis.label)
-      label.setAttribute('x', '14')
-      label.setAttribute('y', '19')
-      label.textContent = calBadgeTextContent
-
-      headerG.appendChild(label)
+        headerG.appendChild(label)
+      }
 
       this.axisG.appendChild(individualAxisG)
     })
