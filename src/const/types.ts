@@ -77,7 +77,7 @@ const DEFAULT_TIMESTAMP = 'point'
 /** Timespans go from a start date to an end date */
 const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS = [DEFAULT_TIMESPAN, 'era'] as const
 /** Timespans only have a start date */
-const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP, 'box', 'vertical-line', 'diamond', 'triangle', 'hexagon','pentagon'] as const
+const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP, 'box', 'vertical-line', 'diamond', 'triangle', 'hexagon', 'pentagon'] as const
 
 type GanttItemDisplayTypeTimespans = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)[number]
 type GanttItemDisplayTypeTimestamp = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP)[number]
