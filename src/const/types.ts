@@ -186,6 +186,8 @@ export type PluginSettings = GanttChartSources & {
   /*
    * Advanced UX settings
    */
+  uxAddRibbonIcon: boolean
+  uxAddCommands: boolean
   mouseOverEventShowBox: boolean
   mouseOverEventShowVerticalLine: boolean
   showButtonsToHideGroups: boolean
@@ -227,6 +229,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   /*
    * Advanced UX settings
    */
+  uxAddRibbonIcon: false,
+  uxAddCommands: true,
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,
