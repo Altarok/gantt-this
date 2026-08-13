@@ -5,7 +5,7 @@ import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
-import {Commands} from "./commands/commands";
+// import {Commands} from './commands/commands'
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -23,7 +23,10 @@ export default class FantasyGanttPlugin extends Plugin {
     )
 
     if (this.settings.uxAddCommands) {
-      Commands.addAll(this)
+      /*
+       * TODO re-add after all other eslint chores are done
+       */
+//      Commands.addAll(this)
     }
   }
 
