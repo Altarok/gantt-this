@@ -412,22 +412,22 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (ganttItem.displayType === 'diamond') {
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 4)
-      shape = Util.createSvg('polygon', 'gt-item timestamp diamond', {points})
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
 
     } else if (ganttItem.displayType === 'triangle') {
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 + 2, 3)
-      shape = Util.createSvg('polygon', 'gt-item timestamp triangle', {points})
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
 
     } else if (ganttItem.displayType === 'pentagon') {
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 + 1, 5)
-      shape = Util.createSvg('polygon', 'gt-item timestamp pentagon', {points})
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
 
     } else if (ganttItem.displayType === 'hexagon') {
 
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 6)
-      shape = Util.createSvg('polygon', 'gt-item timestamp hexagon', {points})
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
 
     } else {
       shape = window.document.createElementNS(svgUrl, 'ellipse')
@@ -436,12 +436,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
       shape.setAttribute('rx', String(width / 2 + 3))
       shape.setAttribute('ry', String(height / 2 + 3))
     }
-
-    shape.setAttribute('stroke', 'red')
-    shape.setAttribute('stroke-width', '1')
-    shape.setAttribute('fill', 'none')
-    shape.style.pointerEvents = 'none'
-
     this.highlightElement.appendChild(shape)
   }
 

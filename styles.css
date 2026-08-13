@@ -296,13 +296,6 @@
   r: 8px;
 }
 
-.gt-item.timestamp.diamond {
-  /* empty for now */
-}
-
-.gt-item.timestamp.triangle {
-  /* empty for now */
-}
 
 .gt-item.timestamp.box {
   rx: 1px;
@@ -311,6 +304,14 @@
 
 .gt-item.timespan.bar {
   height: 16px;
+}
+
+.gt-item.timestamp.symbol-hover {
+  stroke: red;
+  stroke-width: 1;
+  fill: none;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Base styles hover reset for rectangles */
