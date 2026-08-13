@@ -1,7 +1,7 @@
 import {MarkdownPostProcessorContext, Plugin} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings/settings-view'
 import {CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
-import {readCodeBlock} from './util/code-block-reader'
+import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
