@@ -287,7 +287,6 @@
   outline-offset: 0;
 }
 
-
 .gt-item.timestamp {
   height: 16px;
   width: 16px;
@@ -312,6 +311,20 @@
 
 .gt-item.timespan.bar {
   height: 16px;
+}
+
+/* Base styles hover reset for rectangles */
+.gt-item.timestamp.box,
+.gt-item.timespan.bar {
+  outline: none;
+  outline-offset: 0;
+}
+
+/* Unified hover state for rectangles */
+.gt-item.timestamp.box:hover,
+.gt-item.timespan.bar:hover {
+  outline: 1px solid red;
+  outline-offset: 0;
 }
 
 .gt-item.timespan.era {

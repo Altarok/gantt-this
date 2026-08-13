@@ -386,7 +386,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.lastHoveredTarget = target
 
     if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
-      target.style.outline = '1px solid red'
+//      target.style.outline = '1px solid red'
       return
     }
 
