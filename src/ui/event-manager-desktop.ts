@@ -376,8 +376,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
         this.highlightElement.remove()
         this.highlightElement = null
       } else {
-        this.lastHoveredTarget.style.outline = ''
-        this.lastHoveredTarget.style.outlineOffset = ''
+        // this.lastHoveredTarget.style.outline = ''
+        // this.lastHoveredTarget.style.outlineOffset = ''
       }
     }
 
@@ -386,7 +386,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.lastHoveredTarget = target
 
     if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
-//      target.style.outline = '1px solid red'
+      // target.style.outline = '1px solid red'
       return
     }
 
@@ -416,12 +416,12 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     } else if (ganttItem.displayType === 'triangle') {
 
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 - 2, 3)
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 + 2, 3)
       shape = Util.createSvg('polygon', 'gt-item timestamp triangle', {points})
 
     } else if (ganttItem.displayType === 'pentagon') {
 
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 5)
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 + 1, 5)
       shape = Util.createSvg('polygon', 'gt-item timestamp pentagon', {points})
 
     } else if (ganttItem.displayType === 'hexagon') {
@@ -451,8 +451,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
       this.highlightElement = null
     }
     if (this.lastHoveredTarget) {
-      this.lastHoveredTarget.style.outline = ''
-      this.lastHoveredTarget.style.outlineOffset = ''
+      // this.lastHoveredTarget.style.outline = ''
+      // this.lastHoveredTarget.style.outlineOffset = ''
       this.lastHoveredTarget = null
     }
   }

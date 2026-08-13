@@ -142,7 +142,7 @@ export class GanttRenderEngine {
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
-    //    this.container.style.height = '100%' /* `${this.totalHeight}px` */
+    // this.container.style.height = '100%' /* `${this.totalHeight}px` */
   }
 
   initChartStructure() {
