@@ -13,7 +13,6 @@
   "scripts": {
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "dev": "node esbuild.config.mjs",
-    "format:json": "sort-package-json package.json",
     "lint": "eslint .",
     "lint:css": "stylelint \"styles.css\"",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
@@ -32,7 +31,6 @@
     "eslint": "^10.4.0",
     "eslint-plugin-obsidianmd": "^0.4.1",
     "obsidian": "^1.13.1",
-    "sort-package-json": "^4.0.0",
     "stylelint": "^17.13.0",
     "stylelint-config-standard": "^40.0.0",
     "tslib": "^2.8.1",

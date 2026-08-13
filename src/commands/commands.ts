@@ -1,13 +1,13 @@
 import FantasyGanttPlugin from '../main'
 import {Notice} from "obsidian";
 
-function addCommandEventFrontmatterPropertiesToFile(plugin: FantasyGanttPlugin) {
+function addCommandEventFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) {
   plugin.addCommand({
     id: 'add-gantt-frontmatter',
     name: 'Add all  Gantt properties to current file',
     editorCallback: async (editor, view) => {
       const file = view.file
-      if (!file || file.extension !== 'md') return
+      if (file?.extension !== 'md') return
 
       const {
         frontMatterProperty_gantt_this: file_marker, // boolean
@@ -23,45 +23,47 @@ function addCommandEventFrontmatterPropertiesToFile(plugin: FantasyGanttPlugin) 
         frontMatterProperty_note_header: note_header
       } = plugin.settings
 
-      try {
-        // Set properties if they don't already exist
-        await plugin.app.fileManager.processFrontMatter(file, (frontmatter) => {
-          frontmatter[file_marker] = frontmatter[file_marker] ?? true
-          frontmatter[lower_date] = frontmatter[lower_date] ?? ''
-          frontmatter[upper_date] = frontmatter[upper_date] ?? ''
-          frontmatter[event_name] = frontmatter[event_name] ?? file.basename
-          frontmatter[event_group] = frontmatter[event_group] ?? 'general'
-          frontmatter[event_color] = frontmatter[event_color] ?? plugin.settings.fallbackColor
-          frontmatter[event_symbol] = frontmatter[event_symbol] ?? 'point|triangle|diamond|pentagon|hexagon or era|bar for timespans'
-          frontmatter[calendar] = frontmatter[calendar] ?? 'gregorian'
-          frontmatter[icon_name] = frontmatter[icon_name] ?? ''
-          frontmatter[icon_color] = frontmatter[icon_color] ?? plugin.settings.fallbackColorForIcons
-          frontmatter[note_header] = frontmatter[note_header] ?? ''
-        })
 
-        new Notice('Gantt properties added to frontmatter.')
-      } catch (error) {
-        console.error('Failed to update frontmatter:', error)
-        new Notice('Failed to update frontmatter.')
-      }
+      // Set properties if they don't already exist
+      await plugin.app.fileManager.processFrontMatter(file, (frontMatter: Record<string, unknown>) => {
+//          if (!frontMatter[file_marker]) frontMatter[file_marker] = true
+
+        frontMatter[file_marker] = frontMatter[file_marker] ?? true
+        frontMatter[lower_date] = frontMatter[lower_date] ?? ''
+        frontMatter[upper_date] = frontMatter[upper_date] ?? ''
+        frontMatter[event_name] = frontMatter[event_name] ?? file.basename
+        frontMatter[event_group] = frontMatter[event_group] ?? 'general'
+        frontMatter[event_color] = frontMatter[event_color] ?? plugin.settings.fallbackColor
+        frontMatter[event_symbol] = frontMatter[event_symbol] ?? 'point|triangle|diamond|pentagon|hexagon or era|bar for timespans'
+        frontMatter[calendar] = frontMatter[calendar] ?? 'gregorian'
+        frontMatter[icon_name] = frontMatter[icon_name] ?? ''
+        frontMatter[icon_color] = frontMatter[icon_color] ?? plugin.settings.fallbackColorForIcons
+        frontMatter[note_header] = frontMatter[note_header] ?? ''
+      }).then(() => {
+        new Notice('Gantt properties added to front-matter.')
+      }).catch(() => {
+        new Notice('Failed to update front-matter.')
+      })
+
+
     }
   })
 
 
 }
 
-function addCommandCalendarFrontmatterPropertiesToFile(plugin: FantasyGanttPlugin) {
-
-}
-
-function addCommandOpenMarkdownCodeBlock(plugin: FantasyGanttPlugin) {
-
-}
+//function addCommandCalendarFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) {
+//
+//}
+//
+//function addCommandOpenMarkdownCodeBlock(plugin: FantasyGanttPlugin) {
+//
+//}
 
 function addAll(plugin: FantasyGanttPlugin) {
-  addCommandEventFrontmatterPropertiesToFile(plugin)
-  addCommandCalendarFrontmatterPropertiesToFile(plugin)
-  addCommandOpenMarkdownCodeBlock(plugin)
+  addCommandEventFrontMatterPropertiesToFile(plugin)
+//  addCommandCalendarFrontMatterPropertiesToFile(plugin)
+//  addCommandOpenMarkdownCodeBlock(plugin)
 }
 
 export const Commands = {

@@ -1,7 +1,10 @@
+# Gantt this
+
+Obsidian plugin able to show a Gantt chart for multiple fantasy calendars.
+
 > [!NOTE]
 > This is an automated translation of the German README (`LIESMICH.md`).
 
-# Obsidian Gantt Timeline Plugin
 
 Welcome to the documentation for the Gantt Timeline Plugin for Obsidian.
 This plugin allows you to clearly display your notes and events in interactive timelines.
@@ -56,7 +59,7 @@ Simply paste the following code block into any Markdown file:
 
 ## *Populating Your Gantt Chart / Timeline*
 
-To display one or more notes as events in your timeline, add the corresponding properties to the YAML frontmatter of
+To display one or more notes as events in your timeline, add the corresponding properties to the YAML frontMatter of
 your Markdown file:
 
 ```yaml
