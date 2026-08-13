@@ -11,7 +11,6 @@ import {EpochOffsetDefinition} from '../const/types'
  * @param offsetConfig = { year: number, month: number, day: number } | number, defined by user
  */
 export function runOffsetCalculations(offsetConfig?: EpochOffsetDefinition): number {
-
   if (typeof offsetConfig === 'number') {
     return offsetConfig
   } else if (offsetConfig && typeof offsetConfig === 'object') {

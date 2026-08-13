@@ -8,7 +8,18 @@ import {isCustomLeapYear} from './leap-year-calc'
 export function parseEventDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {
 
   if (!input || !config) return null
-  const cleanInput = input.toString().trim()
+
+  let cleanInput: string // e.g. 2026-08-13
+  if (input === 'today') {
+    const now = new Date()
+    const delimiter = config.delimiter ?? '-'
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    cleanInput = `${year}${delimiter}${month}${delimiter}${day}`
+  } else {
+    cleanInput = input.toString().trim()
+  }
 
   let result: ParsedDate | null = null
 
