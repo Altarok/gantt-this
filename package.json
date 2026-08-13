@@ -2,7 +2,7 @@
   "name": "gantt-this",
   "version": "1.0.0",
   "private": true,
-  "description": "Proof of concept for TTRPG Gantt timeline",
+  "description": "A Gantt chart able to work with TTRPG calendars.",
   "keywords": [
     "obsidian",
     "obsidian-plugin"
