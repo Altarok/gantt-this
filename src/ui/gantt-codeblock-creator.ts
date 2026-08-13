@@ -26,8 +26,7 @@ export class CodeBlockCreatorModal extends Modal {
    * </div>
    */
   onOpen() {
-    this.modalEl.style.width = '90vw'
-    this.modalEl.style.maxWidth = '90vw'
+    this.modalEl.addClass('gt-modal-width')
 
     const {contentEl} = this
 

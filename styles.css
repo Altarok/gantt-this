@@ -27,12 +27,8 @@
 }
 
 /* Gridlines and Axis Lines */
-.gt-axis-gridline /* , .gt-axis-baseline */
-{
-  stroke: var(--background-modifier-border);
-}
-
 .gt-axis-gridline {
+  stroke: var(--background-modifier-border);
   stroke-width: 1;
   stroke-dasharray: 4 4;
   opacity: 0.4;
@@ -157,7 +153,7 @@
 }
 
 .gt-chart-container {
-  width: 100% !important;
+  width: 100%;
   overflow: hidden;
   padding: 0; /* Ensures zero internal space around the chart */
   margin: 0;
@@ -165,7 +161,7 @@
 
 /* Force full width on the generated SVG */
 .gt-chart-container svg {
-  width: 100% !important;
+  width: 100%;
   height: auto;
   display: block;
 }
@@ -287,7 +283,10 @@
 /* Interactive Timeline Elements */
 .gt-item {
   cursor: pointer;
+  outline: none;
+  outline-offset: 0;
 }
+
 
 .gt-item.timestamp {
   height: 16px;
@@ -360,6 +359,7 @@
   padding: 1px;
   display: block;
 }
+
 
 /* Move pointer-events directly to the element class or a generic SVG helper */
 .gt-prevent-user-interactions {
@@ -469,4 +469,9 @@
   opacity: 0.85;
   pointer-events: none;
   user-select: none;
+}
+
+.gt-modal-width {
+  width: 90vw;
+  max-width: 90vw;
 }

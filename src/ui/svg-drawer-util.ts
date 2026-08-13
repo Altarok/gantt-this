@@ -1,4 +1,4 @@
-import {setIcon} from 'obsidian'
+import {sanitizeHTMLToDom, setIcon} from 'obsidian'
 import {Css} from '../const/constants'
 import {GanttChartConfig, GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
 import {ManualSvg} from './manual-svg-icons'
@@ -323,7 +323,7 @@ export function drawMoonPhase(cx: number,
 
   if (color) g.style.color = color
 
-  g.innerHTML = innerContent
+  g.appendChild(sanitizeHTMLToDom(innerContent))
   svgContainer.appendChild(g)
 }
 

@@ -94,7 +94,7 @@ export class GanttRender {
       }
     }
 
-    const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+    const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
     const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: EventIDs.tooltip}})
 
     const hoverTitle = tooltip.createDiv({cls: Css.tooltip.title})

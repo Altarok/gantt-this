@@ -59,8 +59,7 @@ export class GanttRenderEngine {
               public readonly hoverTitle: HTMLElement,
               public readonly hoverDates: HTMLElement,
               public readonly plugin: FantasyGanttPlugin,
-              public readonly codeBlockContent: CodeBlockContent
-  ) {
+              public readonly codeBlockContent: CodeBlockContent) {
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     // this.transitionToPredefinedBounds()
@@ -143,13 +142,13 @@ export class GanttRenderEngine {
 
     const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
     this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
-    this.container.style.height = '100%' /* `${this.totalHeight}px` */
+    //    this.container.style.height = '100%' /* `${this.totalHeight}px` */
   }
 
   initChartStructure() {
     if (this.eventManager) this.eventManager.destroy()
 
-    this.container.innerHTML = ''
+    this.container.empty() // .innerHTML = ''
 
     this.svg = Util.createSvg('svg', Css.svg.canvas)
     this.svg.setAttribute('height', this.totalHeight.toString())
