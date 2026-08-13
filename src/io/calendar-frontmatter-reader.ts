@@ -44,7 +44,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
     /* Cache calendar: */
     plugin.calendarConfigsCache.set(calendarId, newCalendarConfig)
     return newCalendarConfig
-  } catch (_error) {
+  } catch {
     new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarId}'`)
     return null
   }
