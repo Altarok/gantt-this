@@ -57,10 +57,10 @@ export type CalendarConfig = {
   name?: string
   displayName?: string
   /* Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
-  epochGregorian: EpochOffsetDefinition
+  sharedOffset: EpochOffsetDefinition
   startDay?: EpochOffsetDefinition
   endDay?: EpochOffsetDefinition
-  /* Not defined by user, calculated based on epochGregorian */
+  /* Not defined by user, calculated based on shared offset */
   offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in Markdown */
   type: CalendarConfigType
   delimiter: string

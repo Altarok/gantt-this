@@ -66,9 +66,9 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   if (!details) return `Error: No details found for ${config.id}`
 
   const isLeapLocal = (customYear: number): boolean => {
-    if (details.leapYearRule?.ruleType === 'gregorian' && typeof config.epochGregorian === 'object') {
+    if (details.leapYearRule?.ruleType === 'gregorian' && typeof config.sharedOffset === 'object') {
       // Convert custom year back to target Gregorian year based on epoch
-      const epochYear = config.epochGregorian.year
+      const epochYear = config.sharedOffset.year
       const targetGregorianYear = epochYear + (customYear - 1)
       return isLeapYear(targetGregorianYear)
     }
@@ -128,7 +128,7 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   let dayOfPeriod = 1
   const isLeap = isLeapLocal(year)
 
-  if (details.months.length > 0) {
+  if (details.months?.length > 0) {
     for (let m = 0; m < details.months.length; m++) {
       const monthDef = details.months[m]
       if (!monthDef) break

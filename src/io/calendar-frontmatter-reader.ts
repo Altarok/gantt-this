@@ -37,7 +37,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
     const newCalendarConfig = parseYaml(match[1]) as CalendarConfig
 
     /* Calculate offset once! */
-    newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.epochGregorian)
+    newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.sharedOffset)
     newCalendarConfig.startDay = newCalendarConfig.startDay ? runOffsetCalculations(newCalendarConfig.startDay) : undefined
     newCalendarConfig.endDay = newCalendarConfig.endDay ? runOffsetCalculations(newCalendarConfig.endDay) : undefined
 

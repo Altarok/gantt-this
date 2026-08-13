@@ -171,7 +171,8 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
 
   if (width > iconSize) {
     const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
-    if (width > 2 * iconSize) addTextIfFitting(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, x1, y + iconRadius, width, hasIcon, svgContainer)
+//    if (width > 2 * iconSize) addTextIfFitting(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, x1, y + iconRadius, width, hasIcon, svgContainer)
+    if (width > 2 * iconSize) addTextIfFitting(`${d.name}`, x1, y + iconRadius, width, hasIcon, svgContainer)
   }
 }
 
