@@ -64,8 +64,6 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 
 /** Parse _rule-based_ event date. */
 function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: CalendarConfig): ParsedDate | null {
-  console.error(`Going to parse event date: ${input}`)
-
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */
 
