@@ -345,6 +345,7 @@ function calculatePolygonPoints(radius: number,
   const points: string[] = []
 
   // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
+  // value chosen to make triangle and pentagon point up
   const startAngle = -Math.PI / 2
 
   for (let i = 0; i < numCorners; i++) {
