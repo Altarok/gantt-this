@@ -406,8 +406,6 @@ export class GanttRenderEngine {
 
       if (showMoonPhases) {
 
-        debugger
-
         const moons = calendarConfig?.moons ?? []
         const moonCount = moons?.length ?? 0
 
@@ -435,13 +433,10 @@ export class GanttRenderEngine {
           const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX
 
           // Determine cycle integer range covering visible bounds
-//          const minK = Math.floor((/* effectiveStartDay */  startDaysValue) / L) - 1
-//          const maxK = Math.ceil((/* effectiveEndDay */  endDaysValue) / L) + 1
-
+          // const minK = Math.floor((startDaysValue) / L) - 1
+          // const maxK = Math.ceil((endDaysValue) / L) + 1
           const minK = Math.floor(effectiveStartDay / L) - 1
           const maxK = Math.ceil(effectiveEndDay / L) + 1
-
-//          debugger
 
           // Helper closure to handle visibility bounds checking & drawing
           const renderPhaseIfVisible = (x: number, exactDay: number, phaseIndex: number) => {
