@@ -79,7 +79,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
   const format = details.format
 
   /* Ensure the input has exactly the number of blocks expected by this calendar */
-  if (parts.length !== format.length) return null
+  if (parts.length !== format.length) debugger //  return null
 
   /* Dynamically extract values based on the configuration format mapping */
   let year = 1
