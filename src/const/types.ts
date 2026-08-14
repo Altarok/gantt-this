@@ -234,7 +234,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
    * Advanced UX settings
    */
   uxAddRibbonIcon: false,
-  uxAddCommands: true,
+  uxAddCommands: false,
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,

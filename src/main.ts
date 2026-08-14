@@ -5,7 +5,6 @@ import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
-// import {Commands} from './commands/commands'
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -14,7 +13,7 @@ export default class FantasyGanttPlugin extends Plugin {
   async onload() {
     await this.loadSettings()
 
-    this.addSettingTab(new FantasyGanttSettingTab(this.app, this))
+    this.addSettingTab(new FantasyGanttSettingTab(this))
 
     this.registerMarkdownCodeBlockProcessor(Consts.CODEBLOCK_ID, this.registerCalendar.bind(this) /* (source, el, ctx) */)
 
