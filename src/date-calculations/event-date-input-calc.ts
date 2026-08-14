@@ -1,5 +1,7 @@
 import {CalendarConfig, ParsedDate, RuleBasedDetails} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
+import {createAxisDateDescription} from '../util/dates'
+import {Consts} from '../const/constants'
 
 
 /**
@@ -11,21 +13,19 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
 
   let cleanInput: string // e.g. 2026-08-13
   if (input === 'today') {
-    const now = new Date()
-    const delimiter = config.delimiter ?? '-'
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
-    const day = String(now.getDate()).padStart(2, '0')
-    cleanInput = `${year}${delimiter}${month}${delimiter}${day}`
+    // 1. Calculate today's absolute day count (days since Unix epoch or system epoch)
+    const todayEpochDays: number = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) + (config.sharedOffset as number) + Consts.DAYS_FROM_0_12_31_TO_1_1_1970
+    // 2. Pass today's day count into your description generator
+    cleanInput = createAxisDateDescription(todayEpochDays, config)
   } else {
     cleanInput = input.toString().trim()
   }
 
   let result: ParsedDate | null = null
 
-  if (config?.type === 'positional') {
+  if (config.type === 'positional') {
     result = parseEventDateWithPositionalConfig(cleanInput, config)
-  } else if (config?.type === 'rule-based') {
+  } else if (config.type === 'rule-based') {
     result = parseEventDateWithRuleBasedConfig(cleanInput, config)
   }
 
