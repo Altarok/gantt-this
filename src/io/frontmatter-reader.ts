@@ -11,7 +11,7 @@ function isMatchingCalendarDefinition(frontMatter: FrontMatterCache, settings: P
 /*
  * Default key: 'gantt-item'
  */
-function isFileRelevant(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
+function isFileMarkedAsEvent(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
   return frontMatter[settings.frontMatterProperty_gantt_this] === true
 }
 
@@ -93,7 +93,7 @@ function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettin
 
 export const FrontMatterUtil = {
   isMatchingCalendarDefinition,
-  isFileRelevant,
+  isFileRelevant: isFileMarkedAsEvent,
   getEventCalendarName,
   getEventColor,
   getEventGroup,

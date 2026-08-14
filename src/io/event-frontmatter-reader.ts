@@ -10,10 +10,11 @@ import {
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, TFile} from 'obsidian'
-import {Colors, Consts} from '../const/constants'
+import {Colors} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../util/dates'
+import {getFilteredFiles} from './file-collector'
 
 
 /**
@@ -40,7 +41,6 @@ export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
     const frontMatter = cache?.frontmatter
 
     if (!frontMatter) continue
-    if (!FrontMatterUtil.isFileRelevant(frontMatter, plugin.settings)) continue
 
     const {startDate, endDate} = FrontMatterUtil.getEventTimestamps(frontMatter, plugin.settings)
 
@@ -120,24 +120,6 @@ function createItem(
   }
 }
 
-function getFilteredFiles(plugin: FantasyGanttPlugin,
-                          pluginSettings: PluginSettings,
-                          codeBlockContent: CodeBlockContent): TFile[] {
-  const allFiles = plugin.app.vault.getMarkdownFiles()
-
-  let eventSourcePath = codeBlockContent.eventPath ?? pluginSettings.eventPath
-  /* Normalize root path reference */
-  if (eventSourcePath === Consts.ROOT_PATH) eventSourcePath = Consts.ROOT_PATH_NORMALIZED
-
-  return allFiles.filter(f => {
-    const parentPath = f.parent?.path ?? ''
-
-    if (codeBlockContent.eventPathSearchRecursive ?? pluginSettings.eventPathSearchRecursive)
-      return eventSourcePath === '' || parentPath === eventSourcePath || parentPath.startsWith(eventSourcePath + Consts.DIR_SEPARATOR)
-    else
-      return parentPath === eventSourcePath
-  })
-}
 
 /**
  * Returns event item color. In priority, if given, returns ...
