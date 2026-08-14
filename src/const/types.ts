@@ -188,6 +188,7 @@ export type PluginSettings = GanttChartSources & {
   /*
    * Advanced UX settings
    */
+  uxDefaultEventSymbol: GanttItemDisplayTypeTimestamp
   uxAddRibbonIcon: boolean
   uxAddCommands: boolean
   mouseOverEventShowBox: boolean
@@ -235,6 +236,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   /*
    * Advanced UX settings
    */
+  uxDefaultEventSymbol: DEFAULT_TIMESTAMP,
   uxAddRibbonIcon: false,
   uxAddCommands: false,
   mouseOverEventShowBox: true,
