@@ -1,6 +1,6 @@
 import {ColorComponent, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {DEFAULT_SETTINGS, isCalendarIdentifier} from '../const/types'
+import {DEFAULT_SETTINGS, GroupOrCalendarSettings} from '../const/types'
 import {AddEntryModal} from './settings-util'
 
 const VISIBLE_ICON = 'eye' /* an open eye */
@@ -15,10 +15,19 @@ function testFrontMatterInput(value: string): string | undefined {
   return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must match ^[a-zA-Z0-9_.-]+$.' /* input NOK */
 }
 
+function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
+  if (!value || calendars?.length === 0) return false
+  for (const cal of calendars)
+    if (cal.id === value)
+      return true
+  return false
+}
+
 export class FantasyGanttSettingTab extends PluginSettingTab {
   constructor(public readonly plugin: FantasyGanttPlugin) {
     super(plugin.app, plugin)
   }
+
 
   private openAddForm(target: 'groups' | 'calendars') {
     new AddEntryModal(this.plugin, (entry) => {
@@ -81,7 +90,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               type: 'text',
               key: 'defaultCalendar',
               placeholder: DEFAULT_SETTINGS.defaultCalendar,
-              validate: (value: string) => isCalendarIdentifier(value) ? undefined : 'Not a known calendar!'
+              defaultValue: DEFAULT_SETTINGS.defaultCalendar,
+              validate: (value: string) => isKnownCalendar(value, this.plugin.settings.calendars) ? undefined : 'Not a known calendar!'
             }
           },
           {
@@ -326,14 +336,23 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       items: [
         {
           name: 'Gantt event marker',
-          desc: 'Mandatory, but soon-to-be-optional. Main FrontMatter property the plugin searches for.',
+          desc: 'Primary frontmatter property used to identify Gantt events. Can be disabled using the toggle below.',
           control: {
             type: 'text',
             key: 'frontMatterProperty_gantt_this',
             placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
             defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
+            disabled: () => this.plugin.settings.frontMatterProperty_gantt_this_optional,
             validate: (value: string) => testFrontMatterInput(value)
           },
+        },
+        {
+          name: 'Make Gantt event marker optional?',
+          desc: 'Enabling this saves one property per file, but offers less control.',
+          control: {
+            type: 'toggle', key: 'frontMatterProperty_gantt_this_optional',
+            defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this_optional
+          }
         },
         {
           name: 'Calendar definition',

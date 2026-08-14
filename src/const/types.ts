@@ -204,6 +204,7 @@ export type PluginSettings = GanttChartSources & {
   frontMatterProperty_calendar_name: string
 
   frontMatterProperty_gantt_this: string
+  frontMatterProperty_gantt_this_optional: boolean /* activate to save 1 front-matter property */
   frontMatterProperty_event_time_start: string
   frontMatterProperty_event_time_end: string
   frontMatterProperty_event_name: string
@@ -250,6 +251,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_calendar_name: 'gantt-type-definition', // string, activates file as calendar source
 
   frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
+  frontMatterProperty_gantt_this_optional: true,
   frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian'
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
