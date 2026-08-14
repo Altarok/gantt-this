@@ -406,6 +406,8 @@ export class GanttRenderEngine {
 
       if (showMoonPhases) {
 
+        debugger
+
         const moons = calendarConfig?.moons ?? []
         const moonCount = moons?.length ?? 0
 
@@ -433,8 +435,24 @@ export class GanttRenderEngine {
           const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX
 
           // Determine cycle integer range covering visible bounds
-          const minK = Math.floor((effectiveStartDay /* startDaysValue */ + O) / L) - 1
-          const maxK = Math.ceil((effectiveEndDay /* endDaysValue */ + O) / L) + 1
+//          const minK = Math.floor((/* effectiveStartDay */  startDaysValue) / L) - 1
+//          const maxK = Math.ceil((/* effectiveEndDay */  endDaysValue) / L) + 1
+
+          const minK = Math.floor(effectiveStartDay / L) - 1
+          const maxK = Math.ceil(effectiveEndDay / L) + 1
+
+//          debugger
+
+          // Helper closure to handle visibility bounds checking & drawing
+          const renderPhaseIfVisible = (x: number, exactDay: number, phaseIndex: number) => {
+            if (exactDay < effectiveStartDay || exactDay > effectiveEndDay)
+              return
+            if (exactDay < startDaysValue || exactDay > endDaysValue)
+              return
+
+            if (x >= 0 && x <= renderWidth)
+              Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
+          }
 
           for (let k = minK; k <= maxK; k++) {
             // 1. New Moon (Progress 0.0) -> Phase Index 0
@@ -456,14 +474,6 @@ export class GanttRenderEngine {
               const thirdQuarterDay = (k + 0.75) * L - O
               renderPhaseIfVisible(this.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3)
             }
-          }
-
-          // Helper closure to handle visibility bounds checking & drawing
-          function renderPhaseIfVisible(x: number, exactDay: number, phaseIndex: number) {
-            if (effectiveEndDay < exactDay || effectiveStartDay > exactDay) return
-            if (exactDay >= startDaysValue && exactDay <= endDaysValue)
-              if (x >= 0 && x <= renderWidth)
-                Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
           }
         })
       }

@@ -1,4 +1,4 @@
-import {sanitizeHTMLToDom, setIcon} from 'obsidian'
+import {setIcon} from 'obsidian'
 import {Css} from '../const/constants'
 import {GanttChartConfig, GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
 import {ManualSvg} from './manual-svg-icons'
@@ -282,7 +282,7 @@ function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, widt
   svgContainer.appendChild(line)
 }
 
-const moonSvgs: Record<number, string> = {
+const moonSvgs: Record<number, DocumentFragment> = {
   0: ManualSvg.newMoon,
   1: ManualSvg.crescentHalfMoon,
   2: ManualSvg.fullMoon,
@@ -310,7 +310,7 @@ export function drawMoonPhase(cx: number,
   const innerContent = moonSvgs[phase]
   if (!innerContent) return
 
-  const iconSize = Math.max(19 - moonCount, 12)// Math.floor(16 / moonCount)
+  const iconSize = Math.max(19 - moonCount, 12)
   const halfSize = iconSize / 2
   const x = cx - halfSize
   const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
@@ -323,7 +323,7 @@ export function drawMoonPhase(cx: number,
 
   if (color) g.style.color = color
 
-  g.appendChild(sanitizeHTMLToDom(innerContent))
+  g.appendChild(innerContent.cloneNode(true)) // do not use g.innerHTML = innerContent
   svgContainer.appendChild(g)
 }
 
