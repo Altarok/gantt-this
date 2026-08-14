@@ -63,7 +63,7 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   const monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
   const dayFinal = day.toString().padStart(2, '0')
 
-  const format = (ruleBasedDetails?.outputFormat ?? ruleBasedDetails?.format) || ['year', 'month', 'day']
+  const format = (ruleBasedDetails?.outputFormat ?? ruleBasedDetails?.format) ?? ['year', 'month', 'day']
   const outputParts = format.map(component => {
     if (component === 'year') return yearString
     if (component === 'month') return monthFinal
@@ -71,7 +71,7 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
     return ''
   })
 
-  return outputParts.filter(Boolean).join(config.delimiter) + suffix
+  return outputParts.filter(Boolean).join(delimiter) + suffix
 
   // return `${yearString}${delimiter}${}${delimiter}${}${suffix}`
 }

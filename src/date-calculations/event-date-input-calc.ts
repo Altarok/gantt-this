@@ -113,7 +113,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
   /* Handle Ordinal Dates (No month block in the format) */
   if (!monthName) {
     const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
-    if (day < 1 || day > maxDays) null
+    if (day < 1 || day > maxDays) return null
 
     const days = daysFromYears + day + calendarConfig.offsetToDayZero
     return {
