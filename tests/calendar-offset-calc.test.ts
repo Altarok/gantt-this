@@ -11,32 +11,32 @@ import {runOffsetCalculations} from '../src/date-calculations/calendar-offset-ca
 describe('Calendar offset calculations are done correctly for', () => {
 
   it('gregorian calendar', () => {
-    const calculatedOffsetToDayZero = runOffsetCalculations(gregorianConfig.epochGregorian)
+    const calculatedOffsetToDayZero = runOffsetCalculations(gregorianConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(gregorianConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(0)
   })
 
 
   it('gregorian calendar without months', () => {
-    const calculatedOffsetToDayZero = runOffsetCalculations(gregorianWithoutMonthsConfig.epochGregorian)
+    const calculatedOffsetToDayZero = runOffsetCalculations(gregorianWithoutMonthsConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(gregorianWithoutMonthsConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(0)
   })
 
   it('shire calendar', () => {
-    const calculatedOffsetToDayZero = runOffsetCalculations(shireConfig.epochGregorian)
+    const calculatedOffsetToDayZero = runOffsetCalculations(shireConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(shireConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(-8)
   })
 
   it('mayan calendar', () => {
-    const calculatedOffsetToDayZero = runOffsetCalculations(mayanConfig.epochGregorian)
+    const calculatedOffsetToDayZero = runOffsetCalculations(mayanConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(mayanConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(-1_137_507)
   })
 
   it('french revolution calendar', () => {
-    const calculatedOffsetToDayZero = runOffsetCalculations(frenchRevolutionConfig.epochGregorian)
+    const calculatedOffsetToDayZero = runOffsetCalculations(frenchRevolutionConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(frenchRevolutionConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(654_415)
   })

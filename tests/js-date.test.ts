@@ -6,22 +6,22 @@ import {describe, expect, it} from 'vitest'
 const zeroOffset = -719162
 
 /**
- * @param epochGregorian beware that month has an offset of 1 -> month input = 1 -> january
+ * @param sharedOffset beware that month has an offset of 1 -> month input = 1 -> january
  */
-const newOffsetDate = (epochGregorian: { year: number, month: number, day: number } | number = 0) => {
+const newOffsetDate = (sharedOffset: { year: number, month: number, day: number } | number = 0) => {
   /* Always start with Monday, 1 AD January 1st */
   const date = new Date('0001-01-01')
 
-  if (typeof epochGregorian === 'number') {
-    date.setDate(date.getDate() + epochGregorian as number)
+  if (typeof sharedOffset === 'number') {
+    date.setDate(date.getDate() + sharedOffset as number)
   } else {
-    date.setFullYear(epochGregorian.year, epochGregorian.month - 1, epochGregorian.day)
+    date.setFullYear(sharedOffset.year, sharedOffset.month - 1, sharedOffset.day)
   }
   return date
 }
 
 
-describe('EpochGregorian date offset calculation', () => {
+describe('Shared offset date calculation', () => {
 
   it('works without offset', () => {
 

@@ -3,7 +3,7 @@ import {CalendarConfig} from '../src/const/types'
 export const gregorianConfig: CalendarConfig = {
   id: 'gregorian',
   name: 'Gregorian Calendar',
-  epochGregorian: 0,
+  sharedOffset: 0,
   offsetToDayZero: 0,
   type: 'rule-based',
   delimiter: '-',
@@ -31,7 +31,7 @@ export const gregorianConfig: CalendarConfig = {
 export const gregorianWithoutMonthsConfig: CalendarConfig = {
   id: 'gregorian-no-months',
   name: 'Gregorian Calendar without months',
-  epochGregorian: 0,
+  sharedOffset: 0,
   offsetToDayZero: 0,
   type: 'rule-based',
   delimiter: '.',
@@ -46,7 +46,7 @@ export const gregorianWithoutMonthsConfig: CalendarConfig = {
 export const shireConfig: CalendarConfig = {
   id: 'shire',
   name: 'Shire Reckoning',
-  epochGregorian: {year: 0, month: 12, day: 23},
+  sharedOffset: {year: 0, month: 12, day: 23},
   offsetToDayZero: -8,
   type: 'rule-based',
   delimiter: '-',
@@ -83,7 +83,7 @@ export const shireConfig: CalendarConfig = {
 export const mayanConfig: CalendarConfig = {
   id: 'mayan',
   name: 'Mayan Long Count',
-  epochGregorian: {year: -3114, month: 8, day: 11},
+  sharedOffset: {year: -3114, month: 8, day: 11},
   offsetToDayZero: -1_137_507,
   type: 'positional',
   delimiter: '.',
@@ -99,7 +99,7 @@ export const mayanConfig: CalendarConfig = {
 export const frenchRevolutionConfig: CalendarConfig = {
   id: 'french-revolution',
   name: 'French Revolution',
-  epochGregorian: {year: 1792, month: 9, day: 22},
+  sharedOffset: {year: 1792, month: 9, day: 22},
   offsetToDayZero: 654415,
   type: 'rule-based',
   delimiter: '-',

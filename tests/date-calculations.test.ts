@@ -14,19 +14,19 @@ import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
 describe('Verify test data is configured correctly', () => {
 
   it('test gregorian epoch gregorian', () => {
-    const {epochGregorian} = gregorianConfig
+    const {sharedOffset} = gregorianConfig
 
     let offsetTo1_1_1970 = 0
-    if (typeof epochGregorian === 'number') {
-      offsetTo1_1_1970 = epochGregorian
-    } else if (typeof epochGregorian === 'object') {
+    if (typeof sharedOffset === 'number') {
+      offsetTo1_1_1970 = sharedOffset
+    } else if (typeof sharedOffset === 'object') {
       const date = new Date('0001-01-01')
-      date.setUTCFullYear(epochGregorian.year!, (epochGregorian.month ?? 1) - 1, epochGregorian.day ?? 1)
+      date.setUTCFullYear(sharedOffset.year!, (sharedOffset.month ?? 1) - 1, sharedOffset.day ?? 1)
       offsetTo1_1_1970 = Math.round(date.getTime() / Consts.MILLIS_IN_1_DAY)
     }
 
-    const locallyCalculatedOffsetToDayZero = typeof epochGregorian === 'number'
-      ? epochGregorian
+    const locallyCalculatedOffsetToDayZero = typeof sharedOffset === 'number'
+      ? sharedOffset
       : Consts.DAYS_FROM_0_12_31_TO_1_1_1970 + offsetTo1_1_1970
 
     expect(locallyCalculatedOffsetToDayZero).toBe(gregorianConfig.offsetToDayZero)
@@ -40,10 +40,10 @@ describe('Verify test data is configured correctly', () => {
 
 
   it('test shire epoch gregorian', () => {
-    const {epochGregorian} = shireConfig
+    const {sharedOffset} = shireConfig
 
     const date = new Date('0001-01-01')
-    if (typeof epochGregorian === 'object') date.setUTCFullYear(epochGregorian.year, epochGregorian.month - 1, epochGregorian.day)
+    if (typeof sharedOffset === 'object') date.setUTCFullYear(sharedOffset.year, sharedOffset.month - 1, sharedOffset.day)
     const dateTime = date.getTime()
     const offsetTo1_1_1970 = Math.round(dateTime / Consts.MILLIS_IN_1_DAY)
 
@@ -60,10 +60,10 @@ describe('Verify test data is configured correctly', () => {
 
 
   it('test mayan epoch gregorian', () => {
-    const {epochGregorian} = mayanConfig
+    const {sharedOffset} = mayanConfig
 
     const date = new Date('0001-01-01')
-    if (typeof epochGregorian === 'object') date.setUTCFullYear(epochGregorian.year, epochGregorian.month - 1, epochGregorian.day)
+    if (typeof sharedOffset === 'object') date.setUTCFullYear(sharedOffset.year, sharedOffset.month - 1, sharedOffset.day)
     const offsetTo1_1_1970 = Math.round(date.getTime() / Consts.MILLIS_IN_1_DAY)
 
     const locallyCalculatedOffsetToDayZero = Consts.DAYS_FROM_0_12_31_TO_1_1_1970 + offsetTo1_1_1970
@@ -79,10 +79,10 @@ describe('Verify test data is configured correctly', () => {
 
 
   it('test french revolution epoch gregorian', () => {
-    const {epochGregorian} = frenchRevolutionConfig
+    const {sharedOffset} = frenchRevolutionConfig
 
     const date = new Date('0001-01-01')
-    if (typeof epochGregorian === 'object') date.setUTCFullYear(epochGregorian.year, epochGregorian.month - 1, epochGregorian.day)
+    if (typeof sharedOffset === 'object') date.setUTCFullYear(sharedOffset.year, sharedOffset.month - 1, sharedOffset.day)
     const offsetTo1_1_1970 = Math.round(date.getTime() / Consts.MILLIS_IN_1_DAY)
 
     const locallyCalculatedOffsetToDayZero = Consts.DAYS_FROM_0_12_31_TO_1_1_1970 + offsetTo1_1_1970
