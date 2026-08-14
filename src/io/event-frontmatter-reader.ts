@@ -9,7 +9,7 @@ import {
 } from '../const/types'
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import FantasyGanttPlugin from '../main'
-import {FrontMatterCache, TFile} from 'obsidian'
+import {FrontMatterCache, Notice, TFile} from 'obsidian'
 import {Colors} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
@@ -81,19 +81,31 @@ function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfi
     return {days: date, display: createAxisDateDescription(date, calendarConfig)}
 }
 
-function createItem(
-  plugin: FantasyGanttPlugin,
-  startDate: string,
-  endDate: string,
-  /** Calendar to use for event */
-  calendarId: string,
-  config: CalendarConfig | null,
-  file: TFile, frontMatter: FrontMatterCache, id: number): GanttItem | null {
+function createItem(plugin: FantasyGanttPlugin,
+                    startDate: string,
+                    endDate: string,
+                    /** Calendar to use for event */
+                    calendarId: string,
+                    config: CalendarConfig | null,
+                    file: TFile, frontMatter: FrontMatterCache,
+                    id: number): GanttItem | null {
 
-  const startRes: ParsedDate | null = parseEventDate(startDate, config)
+  let startRes: ParsedDate | null = null
+  let endRes: ParsedDate | null = null
+
+  try {
+    startRes = parseEventDate(startDate, config)
+  } catch {
+    new Notice(`Failed to parse event date: ${startDate} in file ${file.name}`)
+  }
+
+  try {
+    endRes = endDate ? parseEventDate(endDate, config) : startRes
+  } catch {
+    new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
+  }
+
   if (!startRes) return null
-
-  const endRes: ParsedDate | null = endDate ? parseEventDate(endDate, config) : startRes
   if (!endRes) return null
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days

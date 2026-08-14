@@ -23,11 +23,13 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
 
   let result: ParsedDate | null = null
 
+
   if (config.type === 'positional') {
     result = parseEventDateWithPositionalConfig(cleanInput, config)
   } else if (config.type === 'rule-based') {
     result = parseEventDateWithRuleBasedConfig(cleanInput, config)
   }
+
 
   return result
 }
@@ -62,6 +64,7 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 
 /** Parse _rule-based_ event date. */
 function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: CalendarConfig): ParsedDate | null {
+  console.error(`Going to parse event date: ${input}`)
 
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */
@@ -79,7 +82,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
   const format = details.format
 
   /* Ensure the input has exactly the number of blocks expected by this calendar */
-  if (parts.length !== format.length) debugger //  return null
+  // if (parts.length !== format.length) return null
 
   /* Dynamically extract values based on the configuration format mapping */
   let year = 1
@@ -88,7 +91,9 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
 
   for (let i = 0; i < format.length; i++) {
     const componentType = format[i]
-    const partValue = parts[i]!
+    const partValue = parts[i]
+
+    if (!partValue) break
 
     if (componentType === 'year') {
       year = parseInt(partValue, 10) * yearMultiplicator
@@ -110,7 +115,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
   /* Handle Ordinal Dates (No month block in the format) */
   if (!monthName) {
     const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
-    if (day < 1 || day > maxDays) return null
+    if (day < 1 || day > maxDays) null
 
     const days = daysFromYears + day + calendarConfig.offsetToDayZero
     return {

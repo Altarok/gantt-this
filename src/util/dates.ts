@@ -57,7 +57,23 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
   const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
   const suffix = suffixRaw ? ` ${suffixRaw}` : ''
 
-  return `${yearString}${config.delimiter}${month.toString().padStart(2, '0')}${config.delimiter}${day.toString().padStart(2, '0')}${suffix}`
+  const {delimiter, ruleBasedDetails} = config
+
+  const monthDef = ruleBasedDetails?.months ?.[month]
+  const monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
+  const dayFinal = day.toString().padStart(2, '0')
+
+  const format = (ruleBasedDetails?.outputFormat ?? ruleBasedDetails?.format) || ['year', 'month', 'day']
+  const outputParts = format.map(component => {
+    if (component === 'year') return yearString
+    if (component === 'month') return monthFinal
+    if (component === 'day') return dayFinal
+    return ''
+  })
+
+  return outputParts.filter(Boolean).join(config.delimiter) + suffix
+
+  // return `${yearString}${delimiter}${}${delimiter}${}${suffix}`
 }
 
 function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig) {
@@ -152,7 +168,7 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   }
 
   /* Construct the dynamic string based on details.format */
-  const format = details.format || ['year', 'month', 'day']
+  const format = (details.outputFormat ?? details.format) || ['year', 'month', 'day']
   const outputParts = format.map(component => {
     if (component === 'year') {
       const absYear = Math.abs(year)

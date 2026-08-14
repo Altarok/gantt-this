@@ -45,6 +45,7 @@ export type RuleBasedDetails = {
    * For '195-2026' (Ordinal), format is ['day', 'year']
    */
   format: DateFormatComponent[]
+  outputFormat?: DateFormatComponent[]
 }
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
