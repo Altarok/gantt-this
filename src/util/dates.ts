@@ -1,4 +1,4 @@
-import {CalendarConfig} from '../const/types'
+import {CalendarConfig, DateFormatComponent} from '../const/types'
 import {isCustomLeapYear, isLeapYear} from '../date-calculations/leap-year-calc'
 
 /**
@@ -10,7 +10,7 @@ function getDaysToYearStart(year: number): number {
   return y * 365 + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400)
 }
 
-function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
+function parseDaysToGregorianDateString(days: number, config: CalendarConfig, asInput: boolean) {
   let remainingDays = days
 
   let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
@@ -45,38 +45,45 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig) {
     }
   }
 
-  if (month > 12) {
-    month -= 12
+  const {delimiter, ruleBasedDetails} = config
+  const monthCount = ruleBasedDetails?.months?.length ?? 12
+
+  if (month > monthCount) {
+    month -= monthCount
     year += 1
   }
 
   const absYear = Math.abs(year)
   const paddedYear = absYear.toString().padStart(4, '0')
-  const yearString = year < 0 ? `-${paddedYear}` : paddedYear
+
   const day = remainingDays
   const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
   const suffix = suffixRaw ? ` ${suffixRaw}` : ''
 
-  const {delimiter, ruleBasedDetails} = config
 
-  const monthDef = ruleBasedDetails?.months ?.[month]
+  const monthDef = ruleBasedDetails?.months ?.[month - 1]
   const monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
   const dayFinal = day.toString().padStart(2, '0')
 
-  const format = (ruleBasedDetails?.outputFormat ?? ruleBasedDetails?.format) ?? ['year', 'month', 'day']
+  let format: DateFormatComponent[]
+  if (asInput)
+    format = ruleBasedDetails?.format ?? ['year', 'month', 'day']
+  else
+    format = (ruleBasedDetails?.outputFormat ?? ruleBasedDetails?.format) ?? ['year', 'month', 'day']
+
   const outputParts = format.map(component => {
-    if (component === 'year') return yearString
+    if (component === 'year') return paddedYear
     if (component === 'month') return monthFinal
     if (component === 'day') return dayFinal
     return ''
   })
 
-  return outputParts.filter(Boolean).join(delimiter) + suffix
+  const prefix = year < 0 ? '-' : ''
 
-  // return `${yearString}${delimiter}${}${delimiter}${}${suffix}`
+  return prefix + outputParts.filter(Boolean).join(delimiter) + suffix
 }
 
-function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig) {
+function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig, asInput: boolean) {
 
   const details = config.ruleBasedDetails
   if (!details) return `Error: No details found for ${config.id}`
@@ -158,7 +165,7 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
       if (remainingDays > monthDays) {
         remainingDays -= monthDays
       } else {
-        monthName = monthDef.shortname ?? monthDef.name
+        monthName = monthDef.shortname ?? monthDef.name ?? String(m + 1)
         dayOfPeriod = remainingDays
         break
       }
@@ -168,13 +175,14 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   }
 
   /* Construct the dynamic string based on details.format */
-  const format = (details.outputFormat ?? details.format) || ['year', 'month', 'day']
+  let format: DateFormatComponent[]
+  if (asInput)
+    format = details?.format ?? ['year', 'month', 'day']
+  else
+    format = (details?.outputFormat ?? details?.format) ?? ['year', 'month', 'day']
+
   const outputParts = format.map(component => {
-    if (component === 'year') {
-      const absYear = Math.abs(year)
-      const paddedYear = absYear.toString().padStart(4, '0')
-      return year < 0 ? `-${paddedYear}` : year.toString()
-    }
+    if (component === 'year') return Math.abs(year).toString().padStart(4, '0')
     if (component === 'month') return monthName
     if (component === 'day') return dayOfPeriod.toString()
     return ''
@@ -183,13 +191,15 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig)
   const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
   const suffix = suffixRaw ? ` ${suffixRaw}` : ''
 
-  return outputParts.filter(Boolean).join(config.delimiter) + suffix
+  const prefix = year < 0 ? '-' : ''
+
+  return prefix + outputParts.filter(Boolean).join(config.delimiter) + suffix
 }
 
 /* Update the axis label formatter inside the Gantt render engine class */
 
 // called during runtime, to get axis description
-export function createAxisDateDescription(days: number, config: CalendarConfig | undefined): string {
+export function createAxisDateDescription(days: number, config: CalendarConfig | undefined, asInput: boolean = false): string {
 
   /* Workaround: fall back to default gregorian, but since 1970 */
   if (!config)
@@ -197,9 +207,9 @@ export function createAxisDateDescription(days: number, config: CalendarConfig |
 
   if (config.type === 'rule-based') {
     if (config.id === 'gregorian') {
-      return parseDaysToGregorianDateString(days, config)
+      return parseDaysToGregorianDateString(days, config, asInput)
     } else {
-      return parseDaysToNonGregorianDateString(days, config)
+      return parseDaysToNonGregorianDateString(days, config, asInput)
     }
   }
 

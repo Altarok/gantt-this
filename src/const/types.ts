@@ -12,7 +12,7 @@ export function isCalendarIdentifier(value: string): value is CalendarConfigType
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type MonthDefinition = {
-  name: string
+  name?: string
   shortname?: string
   days: number
   /* For calendars like the Hobbit/Shire calendar where mid-year festivals or Yule days sit between months and don't belong to any month. */

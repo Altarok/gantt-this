@@ -105,22 +105,22 @@ describe('Creation of axis date description works for', () => {
   const french = (days: number) => createAxisDateDescription(frenchRevolutionConfig.offsetToDayZero + days, frenchRevolutionConfig)
 
   it('default gregorian dates', () => {
-    expect(gregorian(1)).toBe('0001-01-01')
-    expect(gregorian(334)).toBe('0001-11-30')
-    expect(gregorian(365)).toBe('0001-12-31')
-    expect(gregorian(366)).toBe('0002-01-01')
-    expect(gregorian(367)).toBe('0002-01-02')
-    expect(gregorian(397)).toBe('0002-02-01')
-    expect(gregorian(3650)).toBe('0010-12-29')
+    expect(gregorian(1)).toBe('0001-Jan-01')
+    expect(gregorian(334)).toBe('0001-Nov-30')
+    expect(gregorian(365)).toBe('0001-Dec-31')
+    expect(gregorian(366)).toBe('0002-Jan-01')
+    expect(gregorian(367)).toBe('0002-Jan-02')
+    expect(gregorian(397)).toBe('0002-Feb-01')
+    expect(gregorian(3650)).toBe('0010-Dec-29')
   })
 
   it('non-positive gregorian dates', () => {
-    expect(gregorian(0)).toBe('0000-12-31')
-    expect(gregorian(-1)).toBe('0000-12-30')
-    expect(gregorian(-31)).toBe('0000-11-30')
-    expect(gregorian(-365)).toBe('0000-01-01') // year zero is a leap year
-    expect(gregorian(-366)).toBe('-0001-12-31')
-    expect(gregorian(-3650)).toBe('-0009-01-03') // 3 leap years > shift 3 days
+    expect(gregorian(0)).toBe('0000-Dec-31')
+    expect(gregorian(-1)).toBe('0000-Dec-30')
+    expect(gregorian(-31)).toBe('0000-Nov-30')
+    expect(gregorian(-365)).toBe('0000-Jan-01') // year zero is a leap year
+    expect(gregorian(-366)).toBe('-0001-Dec-31')
+    expect(gregorian(-3650)).toBe('-0009-Jan-03') // 3 leap years > shift 3 days
   })
 
   it('default french-revolution dates', () => {
@@ -168,7 +168,7 @@ describe('Creation of axis date description works for', () => {
 describe('Parse days to date format', () => {
 
   it('gregorian', () => {
-    expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-01-01')
+    expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-Jan-01')
   })
 
   it('gregorian without months', () => {
@@ -195,7 +195,7 @@ describe('Parse days to date format', () => {
 
     const s = createAxisDateDescription(expected.days, gregorianConfig)
 
-    expect(s).toBe('1970-01-01')
+    expect(s).toBe('1970-Jan-01')
   })
 
 })

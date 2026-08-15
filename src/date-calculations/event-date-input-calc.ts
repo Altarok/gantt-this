@@ -16,7 +16,7 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
     // 1. Calculate today's absolute day count (days since Unix epoch or system epoch)
     const todayEpochDays: number = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) + (config.sharedOffset as number) + Consts.DAYS_FROM_0_12_31_TO_1_1_1970
     // 2. Pass today's day count into your description generator
-    cleanInput = createAxisDateDescription(todayEpochDays, config)
+    cleanInput = createAxisDateDescription(todayEpochDays, config, true)
   } else {
     cleanInput = input.toString().trim()
   }
@@ -124,8 +124,9 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
 
   /* Handle Standard/Intercalary Month Dates */
   const months = details.months
+
   const monthIndex = typeof (monthName) === 'number' ? monthName - 1 :
-    months.findIndex(m => m.name.toLowerCase() === monthName.toLowerCase() || m.shortname?.toLowerCase() === monthName.toLowerCase())
+    months.findIndex(m => m.name?.toLowerCase() === monthName.toLowerCase() || m.shortname?.toLowerCase() === monthName.toLowerCase())
   if (monthIndex === -1) return null
 
   let allowedDays = months[monthIndex]!.days
@@ -143,7 +144,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
     }
   }
 
-  const monthNameFinal = months[monthIndex]!.shortname ?? months[monthIndex]!.name
+  const monthNameFinal = months[monthIndex]!.shortname ?? months[monthIndex]!.name ?? String(monthIndex + 1)
 
   return {
     days: daysFromYears + daysFromCurrentYearMonths + day + calendarConfig.offsetToDayZero,

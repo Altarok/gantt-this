@@ -19,7 +19,7 @@ function isFileMarkedAsEvent(frontMatter: FrontMatterCache, settings: PluginSett
  * Default key: 'gantt-type'
  */
 function getEventCalendarName(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  return (frontMatter[settings.frontMatterProperty_event_calendar] as string ?? settings.defaultCalendar).trim().toLowerCase()
+  return (frontMatter[settings.frontMatterProperty_event_calendar] as string ?? settings.defaultCalendar).trim() // .toLowerCase()
 }
 
 /*
@@ -33,8 +33,7 @@ function getEventColor(frontMatter: FrontMatterCache, settings: PluginSettings):
  * Default key: 'gantt-group'
  */
 function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-// TODO add trim()
-  return (frontMatter[settings.frontMatterProperty_event_group] as string ?? 'general').toLowerCase()
+  return (frontMatter[settings.frontMatterProperty_event_group] as string ?? 'general').trim() // .toLowerCase()
 }
 
 /*
