@@ -68,9 +68,9 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
 //  if (value && !isGanttItemDisplayType(value)) value = undefined
 
   if (isTimeSpan) {
-    return GanttItemDisplayTypes.isTimespan(value) ? value : GanttItemDisplayTypes.DEFAULT_TIMESPAN as GanttItemDisplayType
+    return GanttItemDisplayTypes.isTimespan(value) ? value : settings.uxDefaultTimespanEventSymbol as GanttItemDisplayType
   } else {
-    return GanttItemDisplayTypes.isTimestamp(value) ? value : GanttItemDisplayTypes.DEFAULT_TIMESTAMP as GanttItemDisplayType
+    return GanttItemDisplayTypes.isTimestamp(value) ? value : settings.uxDefaultTimestampEventSymbol as GanttItemDisplayType
   }
 }
 

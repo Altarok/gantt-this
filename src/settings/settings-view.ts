@@ -251,7 +251,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           name: 'Event symbol',
           desc: 'Default event symbol for timestamp events.',
           control: {
-            type: 'dropdown', key: 'uxDefaultEventSymbol',
+            type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
             options: {
               'point': 'point',
               'box': 'box',
@@ -261,7 +261,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               'hexagon': 'hexagon',
               'pentagon': 'pentagon'
             },
-            defaultValue: DEFAULT_SETTINGS.uxDefaultEventSymbol
+            defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
           }
         },
         {

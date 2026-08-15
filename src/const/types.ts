@@ -99,7 +99,6 @@ function isGanttItemDisplayTypeTimestamp(value: string): value is GanttItemDispl
 
 /** Calendar event display types */
 export const GanttItemDisplayTypes = {
-  DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP,
   GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS, GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP,
   isTimespan: isGanttItemDisplayTypeTimespan,
   isTimestamp: isGanttItemDisplayTypeTimestamp
@@ -188,7 +187,8 @@ export type PluginSettings = GanttChartSources & {
   /*
    * Advanced UX settings
    */
-  uxDefaultEventSymbol: GanttItemDisplayTypeTimestamp
+  uxDefaultTimespanEventSymbol: GanttItemDisplayTypeTimespans
+  uxDefaultTimestampEventSymbol: GanttItemDisplayTypeTimestamp
   uxAddRibbonIcon: boolean
   uxAddCommands: boolean
   mouseOverEventShowBox: boolean
@@ -236,7 +236,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   /*
    * Advanced UX settings
    */
-  uxDefaultEventSymbol: DEFAULT_TIMESTAMP,
+  uxDefaultTimespanEventSymbol: DEFAULT_TIMESPAN,
+  uxDefaultTimestampEventSymbol: DEFAULT_TIMESTAMP,
   uxAddRibbonIcon: false,
   uxAddCommands: false,
   mouseOverEventShowBox: true,
