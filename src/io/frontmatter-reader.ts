@@ -33,6 +33,7 @@ function getEventColor(frontMatter: FrontMatterCache, settings: PluginSettings):
  * Default key: 'gantt-group'
  */
 function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings): string {
+// TODO add trim()
   return (frontMatter[settings.frontMatterProperty_event_group] as string ?? 'general').toLowerCase()
 }
 
