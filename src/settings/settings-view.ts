@@ -1,10 +1,14 @@
 import {ColorComponent, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {DEFAULT_SETTINGS, GroupOrCalendarSettings} from '../const/types'
+import {DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
 import {AddEntryModal} from './settings-util'
 
 const VISIBLE_ICON = 'eye' /* an open eye */
 const INVISIBLE_ICON = 'eye-off' /* an open eye, but with strike through */
+
+function toRecord(strings: readonly string[]): Record<string, string> {
+  return Object.fromEntries(strings.map((s) => [s, s]))
+}
 
 /**
  * Validate FrontMatter input
@@ -252,15 +256,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           desc: 'Default event symbol for timestamp events.',
           control: {
             type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
-            options: {
-              'point': 'point',
-              'box': 'box',
-              'vertical-line': 'vertical-line',
-              'diamond': 'diamond',
-              'triangle': 'triangle',
-              'hexagon': 'hexagon',
-              'pentagon': 'pentagon'
-            },
+            options: toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
             defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
           }
         },

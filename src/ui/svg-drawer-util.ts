@@ -22,13 +22,15 @@ export const Util = {
   drawBar,
   drawEra,
 
-  drawPoint,
-  drawBox,
-  drawDiamond,
-  drawHexagon,
-  drawTriangle,
-  drawPentagon,
-  drawVerticalLine,
+  drawPoint, // default
+  drawTriangle, // 3 corners
+  drawBox, // 4 square
+  drawDiamond, // 4 square, corner pointing up
+  drawPentagon, // 5
+  drawStar, // 5
+  drawHexagon, // 6
+  drawOctagon, // 8
+  drawVerticalLine, // |
 
   drawMoonPhase,
 
@@ -254,6 +256,11 @@ function drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGEle
   drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer)
 }
 
+function drawStar(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  const points = calculatePolygonPoints(iconRadius, cx, cy, 10, 0.382)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer)
+}
+
 /**
  * Draw hexagon for timestamp event. SVG circle anchor is dead center.
  * @param d event to draw
@@ -263,6 +270,11 @@ function drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGEle
  */
 function drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 6)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer)
+}
+
+function drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+  const points = calculatePolygonPoints(iconRadius, cx, cy, 8, 1, 1/8)
   drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer)
 }
 
@@ -335,26 +347,32 @@ export function drawMoonPhase(cx: number,
  * @param cx - X coordinate of the circle center
  * @param cy - Y coordinate of the circle center
  * @param numCorners - Number of corners/vertices of the polygon
+ * @param altRadiusFactor - alternative radius factor for more complex forms (e.g. stars)
+ * @param additionalRotation - alternative rotation for more complex forms (e.g. octagon)
  * @returns String in format 'x1,y1 x2,y2 x3,y3 ...' suitable for SVG polygon points
  *          The first point is always at (cx, cy + radius)
  */
 function calculatePolygonPoints(radius: number,
                                 cx: number,
                                 cy: number,
-                                numCorners: number): string {
+                                numCorners: number,
+                                altRadiusFactor = 1,
+                                additionalRotation = 0): string {
   const points: string[] = []
 
   // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
   // value chosen to make triangle and pentagon point up
-  const startAngle = -Math.PI / 2
+  const startAngle = -Math.PI / 2 + Math.PI * additionalRotation
 
   for (let i = 0; i < numCorners; i++) {
     // Calculate angle for this vertex (going clockwise)
     const angle = startAngle - (2 * Math.PI * i / numCorners)
 
+    const iterRad = (i % 2 === 0) ? 1 : altRadiusFactor
+
     // Calculate x and y coordinates
-    const x = cx + radius * Math.cos(angle)
-    const y = cy + radius * Math.sin(angle)
+    const x = cx + radius * Math.cos(angle) * iterRad
+    const y = cy + radius * Math.sin(angle) * iterRad
 
     points.push(`${x},${y}`);
   }

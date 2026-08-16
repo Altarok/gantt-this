@@ -283,9 +283,12 @@ export class GanttRenderEngine {
             return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.dataG)
           case 'pentagon':
             return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.dataG)
+          case 'star':
+            return Util.drawStar(d, x1, laneY + halfRowHeight, this.dataG)
           case 'hexagon':
             return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.dataG)
-
+          case 'octagon':
+            return Util.drawOctagon(d, x1, laneY + halfRowHeight, this.dataG)
         }
 
       }) // end loop group.items.forEach(GanttItem)

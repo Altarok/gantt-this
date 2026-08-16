@@ -5,9 +5,9 @@ export const CALENDAR_CONFIG_TYPES = [
 ] as const
 export type CalendarConfigType = (typeof CALENDAR_CONFIG_TYPES)[number]
 
-export function isCalendarIdentifier(value: string): value is CalendarConfigType {
-  return (CALENDAR_CONFIG_TYPES as readonly string[]).includes(value)
-}
+// export function isCalendarIdentifier(value: string): value is CalendarConfigType {
+//   return (CALENDAR_CONFIG_TYPES as readonly string[]).includes(value)
+// }
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
@@ -81,11 +81,13 @@ const DEFAULT_TIMESTAMP = 'point'
 
 /** Timespans go from a start date to an end date */
 const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS = [DEFAULT_TIMESPAN, 'era'] as const
-/** Timespans only have a start date */
-const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP, 'box', 'vertical-line', 'diamond', 'triangle', 'hexagon', 'pentagon'] as const
-
 type GanttItemDisplayTypeTimespans = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)[number]
-type GanttItemDisplayTypeTimestamp = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP)[number]
+
+/** Timespans only have a start date */
+const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP,
+  'triangle', 'box', 'diamond', 'pentagon', 'hexagon',
+  'octagon', 'star', 'vertical-line'] as const
+export type GanttItemDisplayTypeTimestamp = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP)[number]
 
 export type GanttItemDisplayType = GanttItemDisplayTypeTimespans | GanttItemDisplayTypeTimestamp
 
