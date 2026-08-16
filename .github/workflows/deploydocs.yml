@@ -1,0 +1,57 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  workflow_dispatch:  # manual trigger; add 'push' if you want auto-deploy too
+    # inputs: {}      # optional: add manual inputs if you like
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # Download and prepare Kiln binary (CI-only, no repo changes)
+      - name: Setup Kiln
+        run: |
+          curl -L -o kiln https://github.com/otaleghani/kiln/releases/latest/download/kiln_linux_amd64
+          chmod +x kiln
+
+      # Build site from ./docs into ./public
+      - name: Build Site
+        run: |
+          ./kiln generate \
+            --input ./docs \
+            --output ./public \
+            --url "https://cepeu.github.io/gantt-this/"
+
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
