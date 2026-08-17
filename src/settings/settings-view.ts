@@ -1,6 +1,6 @@
 import {ColorComponent, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
+import {ControlKeyMapped, DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
 import {AddEntryModal} from './settings-util'
 
 const VISIBLE_ICON = 'eye' /* an open eye */
@@ -164,28 +164,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-          .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-            .onClick(async () => {
-              cal.visible = !cal.visible
-              void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-              await this.plugin.saveSettings()
-            })
-          )
-          .addColorPicker(c => cc = c
-            .setValue(cal.color ?? this.plugin.settings.fallbackColor)
-            .onChange(async (value) => {
-                cal.color = value
+            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                cal.visible = !cal.visible
+                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                 await this.plugin.saveSettings()
-              }
+              })
             )
-          )
-          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-            .onClick(async () => {
-              cc.setValue(this.plugin.settings.fallbackColor)
-              cal.color = this.plugin.settings.fallbackColor
-              await this.plugin.saveSettings()
-            })
-          )
+            .addColorPicker(c => cc = c
+              .setValue(cal.color ?? this.plugin.settings.fallbackColor)
+              .onChange(async (value) => {
+                  cal.color = value
+                  await this.plugin.saveSettings()
+                }
+              )
+            )
+            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+              .onClick(async () => {
+                cc.setValue(this.plugin.settings.fallbackColor)
+                cal.color = this.plugin.settings.fallbackColor
+                await this.plugin.saveSettings()
+              })
+            )
         },
       }))
     }
@@ -222,28 +222,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-          .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-            .onClick(async () => {
-              group.visible = !group.visible
-              void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-              await this.plugin.saveSettings()
-            })
-          )
-          .addColorPicker(c => cc = c
-            .setValue(group.color ?? this.plugin.settings.fallbackColor)
-            .onChange(async (value) => {
-                group.color = value
+            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                group.visible = !group.visible
+                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                 await this.plugin.saveSettings()
-              }
+              })
             )
-          )
-          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-            .onClick(async () => {
-              cc.setValue(this.plugin.settings.fallbackColor)
-              group.color = this.plugin.settings.fallbackColor
-              await this.plugin.saveSettings()
-            })
-          )
+            .addColorPicker(c => cc = c
+              .setValue(group.color ?? this.plugin.settings.fallbackColor)
+              .onChange(async (value) => {
+                  group.color = value
+                  await this.plugin.saveSettings()
+                }
+              )
+            )
+            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+              .onClick(async () => {
+                cc.setValue(this.plugin.settings.fallbackColor)
+                group.color = this.plugin.settings.fallbackColor
+                await this.plugin.saveSettings()
+              })
+            )
         },
       }))
     }
@@ -310,22 +310,44 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
           }
         },
+        // {
+        //   name: 'Override default scroll in calendar?',
+        //   desc: 'By default, scrolling over a calendar zooms in or out. If deactivated, you must hold Shift.',
+        //   control: {
+        //     type: 'toggle', key: 'uxOverrideNoteScrollInCalendar',
+        //     defaultValue: DEFAULT_SETTINGS.uxOverrideNoteScrollInCalendar
+        //   }
+        // },
         {
-          name: 'Override default scroll in calendar?',
-          desc: 'By default, scrolling over a calendar zooms in or out. If deactivated, you must hold Shift.',
+          name: 'Button to zoom with',
+          desc: 'By default, zooming is done while holding shift.',
           control: {
-            type: 'toggle', key: 'uxOverrideNoteScrollInCalendar',
-            defaultValue: DEFAULT_SETTINGS.uxOverrideNoteScrollInCalendar
+            type: 'dropdown', key: 'uxZoomButton', options: ControlKeyMapped,
+            validate: value => {
+              return (value !== this.plugin.settings.uxPanButton) ? undefined /* OK */ : 'Must differ from pan button.' /* NOK */
+            },
+            defaultValue: DEFAULT_SETTINGS.uxZoomButton
           }
         },
         {
-          name: 'Switch zoom and pan control?',
-          desc: 'By default, scrolling zooms and Ctrl+scrolling pans. Activate to switch.',
+          name: 'Button to pan with',
+          desc: 'By default, panning is done while holding Ctrl (Win) / Meta (MacOS).',
           control: {
-            type: 'toggle', key: 'uxSwitchZoomAndPan',
-            defaultValue: DEFAULT_SETTINGS.uxSwitchZoomAndPan
+            type: 'dropdown', key: 'uxPanButton', options: ControlKeyMapped,
+            validate: value => {
+              return (value !== this.plugin.settings.uxZoomButton) ? undefined /* OK */ : 'Must differ from zoom button.' /* NOK */
+            },
+            defaultValue: DEFAULT_SETTINGS.uxPanButton
           }
         },
+        // {
+        //   name: 'Switch zoom and pan control?',
+        //   desc: 'By default, scrolling zooms and Ctrl+scrolling pans. Activate to switch.',
+        //   control: {
+        //     type: 'toggle', key: 'uxSwitchZoomAndPan',
+        //     defaultValue: DEFAULT_SETTINGS.uxSwitchZoomAndPan
+        //   }
+        // },
         {
           name: 'Apply calendar color to calendar axis?',
           desc: 'This might be visually distracting.',

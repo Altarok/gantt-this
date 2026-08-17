@@ -1,4 +1,4 @@
-import {GanttItem} from '../const/types'
+import {ControlKey, GanttItem} from '../const/types'
 import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
 import {GanttEventManager} from './event-manager'
@@ -29,7 +29,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
               readonly autoRestrictZoom: boolean,
               readonly mouseOverEventShowBox: boolean,
               readonly mouseOverEventShowVerticalLine: boolean,
-              readonly uxSwitchZoomAndPan: boolean) {
+              readonly uxZoomButton: ControlKey,
+              readonly uxPanButton: ControlKey) {
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -117,16 +118,26 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.startTranslateX = this.engine.zoomTranslateX
   }
 
+  private isModifierActive(e: WheelEvent, key: ControlKey): boolean {
+    switch (key) {
+      case 'ctrl':
+        return e.ctrlKey || e.metaKey
+      case 'alt':
+        return e.altKey
+      case 'shift':
+        return e.shiftKey
+    }
+  }
+
   private handleSvgWheel(e: WheelEvent) {
-    e.preventDefault()
     if (!this.currentSvg) return
 
-    if (e.ctrlKey || e.metaKey) {
-      if (this.uxSwitchZoomAndPan) this.zoom(e)
-      else this.pan(e)
-    } else {
-      if (this.uxSwitchZoomAndPan) this.pan(e)
-      else this.zoom(e)
+    if (this.isModifierActive(e, this.uxZoomButton)) {
+      e.preventDefault()
+      this.zoom(e)
+    } else if (this.isModifierActive(e, this.uxPanButton)) {
+      e.preventDefault()
+      this.pan(e)
     }
   }
 

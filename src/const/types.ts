@@ -179,6 +179,14 @@ export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
   margin: { top: number, right: number, bottom: number, left: number }
 }
 
+export type ControlKey = 'ctrl' | 'alt' | 'shift'
+// export type ModifierKeySetting = 'ctrl' | 'alt' | 'shift' | 'none'
+export const ControlKeyMapped = {
+  'alt': 'alt',
+  'ctrl': 'ctrl / meta',
+  'shift': 'shift'
+}
+
 export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   fallbackColor: string
@@ -198,8 +206,10 @@ export type PluginSettings = GanttChartSources & {
   showButtonsToHideGroups: boolean
   uxVerticalLineEventWidth: number
   autoRestrictZoom: boolean
-  uxOverrideNoteScrollInCalendar: boolean
-  uxSwitchZoomAndPan: boolean
+  // uxOverrideNoteScrollInCalendar: boolean
+  // uxSwitchZoomAndPan: boolean
+  uxPanButton: ControlKey
+  uxZoomButton: ControlKey
   uxUseCalColorForCalAxis: boolean
 
   /*
@@ -247,8 +257,10 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   showButtonsToHideGroups: false,
   uxVerticalLineEventWidth: 3,
   autoRestrictZoom: true,
-  uxOverrideNoteScrollInCalendar: true,
-  uxSwitchZoomAndPan: false,
+  // uxOverrideNoteScrollInCalendar: true,
+  // uxSwitchZoomAndPan: false,
+  uxPanButton: 'shift',
+  uxZoomButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
 
   /*

@@ -23,6 +23,6 @@ export function createGanttEventManager(renderEngine: GanttRenderEngine,
       pluginSettings.autoRestrictZoom,
       pluginSettings.mouseOverEventShowBox,
       pluginSettings.mouseOverEventShowVerticalLine,
-      pluginSettings.uxSwitchZoomAndPan)
-
+      pluginSettings.uxZoomButton,
+      pluginSettings.uxPanButton)
 }
