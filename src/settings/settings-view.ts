@@ -19,6 +19,7 @@ function testFrontMatterInput(value: string): string | undefined {
   return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must match ^[a-zA-Z0-9_.-]+$.' /* input NOK */
 }
 
+
 function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
   if (!value || calendars?.length === 0) return false
   for (const cal of calendars)
@@ -34,9 +35,11 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
 
   private openAddForm(target: 'groups' | 'calendars') {
-    new AddEntryModal(this.plugin, (entry) => {
-      const list = this.plugin.settings[target]
 
+    const existingIds: string[] = (target === 'groups') ? this.plugin.settings.groups.map(g => g.id) : this.plugin.settings.calendars.map(c => c.id)
+
+    new AddEntryModal(this.plugin, existingIds, (entry) => {
+      const list = this.plugin.settings[target]
       // Set priority to the end of the current list
       const newEntry = {...entry, priority: list.length}
 
@@ -161,28 +164,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                cal.visible = !cal.visible
-                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+          .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+            .onClick(async () => {
+              cal.visible = !cal.visible
+              void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+              await this.plugin.saveSettings()
+            })
+          )
+          .addColorPicker(c => cc = c
+            .setValue(cal.color ?? this.plugin.settings.fallbackColor)
+            .onChange(async (value) => {
+                cal.color = value
                 await this.plugin.saveSettings()
-              })
+              }
             )
-            .addColorPicker(c => cc = c
-              .setValue(cal.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  cal.color = value
-                  await this.plugin.saveSettings()
-                }
-              )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.plugin.settings.fallbackColor)
-                cal.color = this.plugin.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+          )
+          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+            .onClick(async () => {
+              cc.setValue(this.plugin.settings.fallbackColor)
+              cal.color = this.plugin.settings.fallbackColor
+              await this.plugin.saveSettings()
+            })
+          )
         },
       }))
     }
@@ -219,28 +222,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                group.visible = !group.visible
-                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+          .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+            .onClick(async () => {
+              group.visible = !group.visible
+              void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+              await this.plugin.saveSettings()
+            })
+          )
+          .addColorPicker(c => cc = c
+            .setValue(group.color ?? this.plugin.settings.fallbackColor)
+            .onChange(async (value) => {
+                group.color = value
                 await this.plugin.saveSettings()
-              })
+              }
             )
-            .addColorPicker(c => cc = c
-              .setValue(group.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  group.color = value
-                  await this.plugin.saveSettings()
-                }
-              )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.plugin.settings.fallbackColor)
-                group.color = this.plugin.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+          )
+          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+            .onClick(async () => {
+              cc.setValue(this.plugin.settings.fallbackColor)
+              group.color = this.plugin.settings.fallbackColor
+              await this.plugin.saveSettings()
+            })
+          )
         },
       }))
     }

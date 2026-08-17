@@ -489,3 +489,27 @@
   width: 90vw;
   max-width: 90vw;
 }
+
+/* --- work in progress --- */
+
+.bases-toolbar-gantt-custom .text-icon-button {
+  cursor: pointer;
+}
+
+/* Optional: match active toggle state if you are toggling a feature */
+.bases-toolbar-gantt-custom .text-icon-button.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.setting-item-description.is-error {
+  color: var(--text-error);
+  font-weight: var(--font-semibold);
+}
+
+/* Visually indicate disabled state on the CTA button */
+.setting-item button.mod-cta:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

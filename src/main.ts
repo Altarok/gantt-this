@@ -1,11 +1,11 @@
 import {MarkdownPostProcessorContext, Plugin} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings/settings-view'
-import {CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
+import {BaseKeys, CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
 import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
-// import {ExampleViewType, GanttThisBasesView} from "./base"
+import {ExampleViewType, GanttThisBasesView} from "./base"
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -16,7 +16,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     this.addSettingTab(new FantasyGanttSettingTab(this))
 
-    this.registerMarkdownCodeBlockProcessor(Consts.CODEBLOCK_ID, this.registerCalendar.bind(this) /* (source, el, ctx) */)
+    this.registerMarkdownCodeBlockProcessor(Consts.CODEBLOCK_ID, this.registerCalendar.bind(this))
 
     if (this.settings.uxAddRibbonIcon) this.addRibbonIcon('lucide-chart-bar-stacked', 'Gantt this: Open code block creator', () =>
       new CodeBlockCreatorModal(this.app, this).open()
@@ -29,12 +29,29 @@ export default class FantasyGanttPlugin extends Plugin {
 //      Commands.addAll(this)
     }
 
-    // this.registerBasesView(ExampleViewType, {
-    //   name: 'Gantt this',
-    //   icon: 'lucide-chart-bar-stacked',
-    //   factory: (controller, containerEl) => new GanttThisBasesView(controller, containerEl)
-    // })
+    this.registerBasesView(ExampleViewType, {
+      name: 'Gantt chart',
+      icon: 'lucide-chart-bar-stacked',
+      factory: (controller, containerEl) => {
+        return new GanttThisBasesView(this, controller, containerEl)
+      },
+      options: () => (
+        [
+          {
+            type: 'folder', displayName: 'Use calendars in', key: BaseKeys.calPath,
+            placeholder: 'Pre-set by plugin settings',
+            default: this.settings.calendarPath
+          },
+          {
+            type: 'toggle', displayName: 'Search sub-folders', key: BaseKeys.calPathRec,
+            default: this.settings.calendarPathSearchRecursive
+          },
+          {type: 'text', displayName: 'Lower bound date', key: BaseKeys.lbd},
+          {type: 'text', displayName: 'Upper bound date', key: BaseKeys.ubd}
+        ]
+      ) /* end options */
 
+    }) /* end registerBasesView() */
   }
 
   async loadSettings() {
@@ -64,7 +81,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const codeBlockContent = readCodeBlock(currentFile.parent.path, source)
 
-    const render = new GanttRender(this)
+    const render = new GanttRender(this, null)
 
     await render.renderGantt(el, this.settings, codeBlockContent, ctx)
   }

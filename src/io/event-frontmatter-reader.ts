@@ -27,10 +27,15 @@ export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
                                              partialPluginSettings: PluginSettings,
                                              codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
 
+  const files: TFile[] = getFilteredFiles(plugin, partialPluginSettings, codeBlockContent)
+  return parseFiles(plugin, partialPluginSettings, codeBlockContent, files)
+}
+
+export async function parseFiles(plugin: FantasyGanttPlugin,
+                                 partialPluginSettings: PluginSettings,
+                                 codeBlockContent: CodeBlockContent, files: TFile[]): Promise<GanttItem[]> {
   const items: GanttItem[] = []
   let incrementalId = 0
-
-  const files: TFile[] = getFilteredFiles(plugin, partialPluginSettings, codeBlockContent)
 
   const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
     plugin.settings.calendars.map((c) => [c.id, c])

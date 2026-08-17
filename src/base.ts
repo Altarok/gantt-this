@@ -1,21 +1,164 @@
-// import {BasesView, QueryController} from 'obsidian'
+import {BasesView, Notice, QueryController} from 'obsidian'
+import {GanttRender} from './ui/svg-drawer-prestep'
+import {BaseKeys, CodeBlockContent} from './const/types'
+import FantasyGanttPlugin from './main'
+
+export const ExampleViewType = 'example-view'
+
+export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
+  readonly type = ExampleViewType
+//  hoverPopover: HoverPopover | null
+  private readonly containerEl: HTMLElement
+  private toolbarEl: HTMLElement | null = null
+
+  constructor(readonly plugin: FantasyGanttPlugin,
+              readonly controller: QueryController,
+              parentEl: HTMLElement) {
+    super(controller)
+    this.containerEl = parentEl.createDiv('bases-example-view-container')
+  }
+
+//  onload(): void {
+//    super.onload()
+//    this.injectToolbarButton()
+//  }
 //
-// export const ExampleViewType = 'example-view'
+//  private injectToolbarButton(): void {
+//    // Find the container parent of your view to locate the sibling toolbar
+//    const viewEl = this.containerEl.closest('.bases-view') || this.containerEl.parentElement
+//    const toolbar = viewEl?.parentElement?.querySelector('.bases-toolbar')
 //
-// export class GanttThisBasesView extends BasesView {
-//   readonly type = ExampleViewType
-//   private containerEl: HTMLElement
 //
-//   constructor(controller: QueryController, parentEl: HTMLElement) {
-//     super(controller)
-//     this.containerEl = parentEl.createDiv('bases-example-view-container')
-//   }
+//    // Prevent duplicate buttons when onDataUpdated fires multiple times
+//    if (!toolbar || toolbar.querySelector('.bases-toolbar-gantt-custom')) return
 //
-//   // onDataUpdated is called by Obsidian whenever there is a configuration
-//   // or data change in the vault which may affect your view. For now,
-//   // simply draw "Hello World" to screen.
-//   public onDataUpdated(): void {
-//     this.containerEl.empty()
-//     this.containerEl.createDiv({text: 'Hello World'})
-//   }
-// }
+//    /*
+//     * TODO evtl frueher setzen
+//     *
+//     * const newItem = toolbar.querySelector('.bases-toolbar-new-item-menu')
+//if (newItem) {
+//  toolbar.insertBefore(customItem, newItem)
+//} else {
+//  toolbar.appendChild(customItem)
+//}
+//     *
+//     *
+//     * oder nach properties
+//     *
+//     * const propsItem = toolbar.querySelector('.bases-toolbar-properties-menu')
+//if (propsItem?.nextSibling) {
+//  toolbar.insertBefore(customItem, propsItem.nextSibling)
+//}
+//     *
+//     */
+//
+//    // Create the outer wrapper matching Bases toolbar item structure
+//    const customItem = toolbar.createDiv({
+//      cls: 'bases-toolbar-item bases-toolbar-gantt-custom'
+//    })
+//
+//    // Create the inner button matching Obsidian/Bases button structure
+//    const button = customItem.createDiv({
+//      cls: 'text-icon-button',
+//      attr: {tabindex: '0', role: 'button', 'aria-label': 'Reset Zoom'}
+//    })
+//
+//    const iconSpan = button.createSpan({cls: 'text-button-icon'})
+//    setIcon(iconSpan, 'lucide-rotate-ccw') // Using standard Obsidian Lucide icons
+//
+//    button.createSpan({
+//      cls: 'text-button-label',
+//      text: 'Reset Zoom'
+//    })
+//
+//    // Event Handler
+//    this.plugin.registerDomEvent(button, 'click', (evt: MouseEvent) => {
+//      evt.preventDefault()
+//      this.handleCustomAction()
+//    })
+//
+//    // Keyboard navigation support (Enter / Space)
+//    this.plugin.registerDomEvent(button, 'keydown', (evt: KeyboardEvent) => {
+//      if (evt.key === 'Enter' || evt.key === ' ') {
+//        evt.preventDefault()
+//        this.handleCustomAction()
+//      }
+//    })
+//  }
+//
+//  private handleCustomAction(): void {
+//    // Custom action logic here (e.g., reset SVG zoom, trigger refresh)
+//  }
+//
+//  onunload(): void {
+//    // Clean up DOM injections when the view closes
+//    this.toolbarEl?.remove()
+//    super.onunload()
+//  }
+
+  public onDataUpdated(): void {
+    this.containerEl.empty()
+    const files = this.preFilterFiles()
+
+    /* Omit event path stuff - use base filters instead! */
+    const codeBlockContent: CodeBlockContent = {
+      calendarPath: this.calendarPath,
+      calendarPathSearchRecursive: this.calendarPathSearchRecursive,
+      lowerBoundDate: this.lowerBoundDate,
+      upperBoundDate: this.upperBoundDate
+    }
+
+    const render = new GanttRender(this.plugin, files)
+
+    try {
+      void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)
+    } catch {
+      new Notice('Failed to render Gantt chart base!')
+    }
+  }
+
+  private preFilterFiles() {
+    const checkboxMarkerProperty = this.plugin.settings.frontMatterProperty_gantt_this
+    const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
+    const startDateProperty = this.plugin.settings.frontMatterProperty_event_time_start
+
+    /* Pre-filter files */
+    return this.data.data.map(entry => entry.file)
+    .filter(file => {
+      const cache = this.plugin.app.metadataCache.getFileCache(file)
+      const frontmatter = cache?.frontmatter
+      if (!frontmatter) return false
+
+      const hasStartDate = Boolean(frontmatter[startDateProperty])
+      const hasValidMarker = isCheckboxMarkerOptional || frontmatter[checkboxMarkerProperty] === true
+
+      // Check if note contains the required frontmatter properties
+      return hasStartDate && hasValidMarker
+    })
+  }
+
+  private getStringValue(key: string): string | undefined {
+    return this.config.get(key) ? String(this.config.get(key)) : undefined
+  }
+
+  private getBoolValue(key: string): boolean | undefined {
+    return this.config.get(key) ? this.config.get(key) === true : undefined
+  }
+
+  private get calendarPath(): string {
+    return this.getStringValue(BaseKeys.calPath) ?? this.plugin.settings.calendarPath
+  }
+
+  private get calendarPathSearchRecursive(): boolean {
+    return this.getBoolValue(BaseKeys.calPathRec) ?? this.plugin.settings.calendarPathSearchRecursive
+  }
+
+  private get lowerBoundDate(): string | undefined {
+    return this.getStringValue(BaseKeys.lbd)
+  }
+
+  private get upperBoundDate(): string | undefined {
+    return this.getStringValue(BaseKeys.ubd)
+  }
+
+}

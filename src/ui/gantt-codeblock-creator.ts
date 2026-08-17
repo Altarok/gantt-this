@@ -43,7 +43,7 @@ export class CodeBlockCreatorModal extends Modal {
       const pluginSettings: PluginSettings = mergeSettings(globalSettings, output)
       const noCodeBlockContent: CodeBlockContent = {}
 
-      const render = new GanttRender(this.plugin)
+      const render = new GanttRender(this.plugin, null)
 
       void render.renderGantt(previewEl, pluginSettings, noCodeBlockContent)
     }
@@ -57,10 +57,6 @@ export class CodeBlockCreatorModal extends Modal {
     }
 
     new GenericModal(contentEl, modalInput).display()
-
-    // contentEl.style.width = '90vw'
-    // contentEl.style.maxWidth = '90vw'
-
     contentEl.focus()
   }
 

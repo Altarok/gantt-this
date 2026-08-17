@@ -5,19 +5,30 @@ import {
   Notice,
   Platform,
   sanitizeHTMLToDom,
-  setIcon
+  setIcon,
+  TFile
 } from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css, EventIDs} from '../const/constants'
-import {CodeBlockContent, PluginSettings} from '../const/types'
+import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
-import {getGanttDataFromFolder} from '../io/event-frontmatter-reader'
+import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ManualSvg} from './manual-svg-icons'
 
 const step = Platform.isMobile ? 0.4 : 0.25
 
 export class GanttRender {
-  constructor(readonly plugin: FantasyGanttPlugin) {
+  constructor(readonly plugin: FantasyGanttPlugin,
+              readonly filesFilteredByBase: TFile[] | null) {
+  }
+
+  private async getGanttItems(pluginSettings: PluginSettings,
+                              codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
+    if (this.filesFilteredByBase !== null) {
+      return parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase)
+    }
+
+    return getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
   }
 
   async renderGantt(el: HTMLElement,
@@ -43,15 +54,24 @@ export class GanttRender {
         window.clearTimeout(updateTimeout)
       }
 
+      this.plugin.calendarConfigsCache.clear()
+
+      if (this.filesFilteredByBase !== null) {
+        parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase)
+        .then(updatedData => {
+          if (renderEngine) renderEngine.updateData(updatedData)
+        })
+        .catch(err => new Notice('Failed: ' + err))
+        return
+      }
+
+
       /* Debounce by 500ms to let Obsidian's internal indexing finish completely */
       updateTimeout = window.setTimeout(() => {
         new Notice('Re-rendering Gantt...')
-        this.plugin.calendarConfigsCache.clear()
         getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
         .then(updatedData => {
-          if (renderEngine) {
-            renderEngine.updateData(updatedData)
-          }
+          if (renderEngine) renderEngine.updateData(updatedData)
         })
         .catch(err => new Notice('Failed: ' + err))
       }, 500)
@@ -111,7 +131,7 @@ export class GanttRender {
 
     /* Perform data load in async way */
     this.plugin.calendarConfigsCache.clear()
-    const data = await getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
+    const data = await this.getGanttItems(pluginSettings, codeBlockContent)
 
     /* Instantiate the engine */
     renderEngine = new GanttRenderEngine(
