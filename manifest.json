@@ -1,7 +1,7 @@
 {
 	"id": "gantt-this",
 	"name": "Gantt this",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"minAppVersion": "1.13.0",
 	"description": "A Gantt chart able to work with TTRPG calendars.",
 	"author": "Altarok",
