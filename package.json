@@ -1,8 +1,8 @@
 {
   "name": "gantt-this",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
-  "description": "A Gantt chart able to work with TTRPG calendars.",
+  "description": "A Gantt chart showing multiple TTRPG calendars at once.",
   "keywords": [
     "obsidian",
     "obsidian-plugin"
