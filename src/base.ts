@@ -108,7 +108,12 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
       upperBoundDate: this.upperBoundDate
     }
 
-    const render = new GanttRender(this.plugin, files)
+    const selectedProperties: string[] = this.config.getOrder()
+    const selectedFronMatterProperties = selectedProperties
+      .filter(s => s.startsWith('note.'))
+      .map(s => s.slice(5))
+
+    const render = new GanttRender(this.plugin, files, selectedFronMatterProperties)
 
     try {
       void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)
@@ -124,17 +129,17 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
 
     /* Pre-filter files */
     return this.data.data.map(entry => entry.file)
-    .filter(file => {
-      const cache = this.plugin.app.metadataCache.getFileCache(file)
-      const frontmatter = cache?.frontmatter
-      if (!frontmatter) return false
+      .filter(file => {
+        const cache = this.plugin.app.metadataCache.getFileCache(file)
+        const frontmatter = cache?.frontmatter
+        if (!frontmatter) return false
 
-      const hasStartDate = Boolean(frontmatter[startDateProperty])
-      const hasValidMarker = isCheckboxMarkerOptional || frontmatter[checkboxMarkerProperty] === true
+        const hasStartDate = Boolean(frontmatter[startDateProperty])
+        const hasValidMarker = isCheckboxMarkerOptional || frontmatter[checkboxMarkerProperty] === true
 
-      // Check if note contains the required frontmatter properties
-      return hasStartDate && hasValidMarker
-    })
+        // Check if note contains the required frontmatter properties
+        return hasStartDate && hasValidMarker
+      })
   }
 
   private getStringValue(key: string): string | undefined {

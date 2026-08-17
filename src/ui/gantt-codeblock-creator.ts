@@ -43,7 +43,7 @@ export class CodeBlockCreatorModal extends Modal {
       const pluginSettings: PluginSettings = mergeSettings(globalSettings, output)
       const noCodeBlockContent: CodeBlockContent = {}
 
-      const render = new GanttRender(this.plugin, null)
+      const render = new GanttRender(this.plugin, null, null)
 
       void render.renderGantt(previewEl, pluginSettings, noCodeBlockContent)
     }

@@ -81,7 +81,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const codeBlockContent = readCodeBlock(currentFile.parent.path, source)
 
-    const render = new GanttRender(this, null)
+    const render = new GanttRender(this, null, null)
 
     await render.renderGantt(el, this.settings, codeBlockContent, ctx)
   }

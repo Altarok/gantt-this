@@ -19,7 +19,8 @@ const step = Platform.isMobile ? 0.4 : 0.25
 
 export class GanttRender {
   constructor(readonly plugin: FantasyGanttPlugin,
-              readonly filesFilteredByBase: TFile[] | null) {
+              readonly filesFilteredByBase: TFile[] | null,
+              readonly selectedFrontmatterProperties: string[] | null) {
   }
 
   private async getGanttItems(pluginSettings: PluginSettings,
@@ -58,10 +59,10 @@ export class GanttRender {
 
       if (this.filesFilteredByBase !== null) {
         parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase)
-        .then(updatedData => {
-          if (renderEngine) renderEngine.updateData(updatedData)
-        })
-        .catch(err => new Notice('Failed: ' + err))
+          .then(updatedData => {
+            if (renderEngine) renderEngine.updateData(updatedData)
+          })
+          .catch(err => new Notice('Failed: ' + err))
         return
       }
 
@@ -70,10 +71,10 @@ export class GanttRender {
       updateTimeout = window.setTimeout(() => {
         new Notice('Re-rendering Gantt...')
         getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
-        .then(updatedData => {
-          if (renderEngine) renderEngine.updateData(updatedData)
-        })
-        .catch(err => new Notice('Failed: ' + err))
+          .then(updatedData => {
+            if (renderEngine) renderEngine.updateData(updatedData)
+          })
+          .catch(err => new Notice('Failed: ' + err))
       }, 500)
     }
 
