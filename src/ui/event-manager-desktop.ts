@@ -429,6 +429,16 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 6)
       shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
 
+    } else if (ganttItem.displayType === 'octagon') {
+
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 8, 1, 1 / 16)
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
+
+    } else if (ganttItem.displayType === 'star') {
+
+      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 10, 0.382)
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
+
     } else {
       shape = window.document.createElementNS(svgUrl, 'ellipse')
       shape.setAttribute('cx', String(x + width / 2))

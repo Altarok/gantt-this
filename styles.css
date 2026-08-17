@@ -308,7 +308,7 @@
 
 .gt-item.timestamp.symbol-hover {
   stroke: red;
-  stroke-width: 1;
+  stroke-width: 1px;
   fill: none;
   pointer-events: none;
   user-select: none;
