@@ -125,42 +125,42 @@ describe('Creation of axis date description works for', () => {
 
   it('default french-revolution dates', () => {
     /* day 1 is 1792-Sep-22 */
-    expect(french(1)).toBe('1-Vendémiaire-1')
-    expect(french(2)).toBe('1-Vendémiaire-2')
-    expect(french(3)).toBe('1-Vendémiaire-3')
-    expect(french(31)).toBe('1-Brumaire-1')
-    expect(french(61)).toBe('1-Frimaire-1')
-    expect(french(365)).toBe('1-leap_days-5')
-    expect(french(366)).toBe('1-leap_days-6') // 1792 is leap
+    expect(french(1)).toBe('0001-Vendémiaire-1')
+    expect(french(2)).toBe('0001-Vendémiaire-2')
+    expect(french(3)).toBe('0001-Vendémiaire-3')
+    expect(french(31)).toBe('0001-Brumaire-1')
+    expect(french(61)).toBe('0001-Frimaire-1')
+    expect(french(365)).toBe('0001-leap_days-5')
+    expect(french(366)).toBe('0001-leap_days-6') // 1792 is leap
 
     // 2-5 years
-    expect(french(365 * 2)).toBe('2-leap_days-4')
-    expect(french(365 * 3)).toBe('3-leap_days-4')
-    expect(french(365 * 4)).toBe('4-leap_days-4')
-    expect(french(365 * 5)).toBe('5-leap_days-4')
-    expect(french(365 * 6)).toBe('6-leap_days-3') // skipped 1 leap year
+    expect(french(365 * 2)).toBe('0002-leap_days-4')
+    expect(french(365 * 3)).toBe('0003-leap_days-4')
+    expect(french(365 * 4)).toBe('0004-leap_days-4')
+    expect(french(365 * 5)).toBe('0005-leap_days-4')
+    expect(french(365 * 6)).toBe('0006-leap_days-3') // skipped 1 leap year
   })
 
   it('non-positive french-revolution dates', () => {
-    expect(french(0)).toBe('0-leap_days-5')
-    expect(french(-1)).toBe('0-leap_days-4')
-    expect(french(-2)).toBe('0-leap_days-3')
-    expect(french(-3)).toBe('0-leap_days-2')
-    expect(french(-4)).toBe('0-leap_days-1')
+    expect(french(0)).toBe('0000-leap_days-5')
+    expect(french(-1)).toBe('0000-leap_days-4')
+    expect(french(-2)).toBe('0000-leap_days-3')
+    expect(french(-3)).toBe('0000-leap_days-2')
+    expect(french(-4)).toBe('0000-leap_days-1')
 
     /* check months */
-    expect(french(-34)).toBe('0-Fructidor-1')
-    expect(french(-64)).toBe('0-Thermidor-1')
-    expect(french(-94)).toBe('0-Messidor-1')
-    expect(french(-124)).toBe('0-Prairial-1')
-    expect(french(-154)).toBe('0-Floréal-1')
-    expect(french(-184)).toBe('0-Germinal-1')
-    expect(french(-214)).toBe('0-Ventôse-1')
-    expect(french(-244)).toBe('0-Pluviôse-1')
-    expect(french(-274)).toBe('0-Nivôse-1')
-    expect(french(-304)).toBe('0-Frimaire-1')
-    expect(french(-334)).toBe('0-Brumaire-1')
-    expect(french(-364)).toBe('0-Vendémiaire-1')
+    expect(french(-34)).toBe('0000-Fructidor-1')
+    expect(french(-64)).toBe('0000-Thermidor-1')
+    expect(french(-94)).toBe('0000-Messidor-1')
+    expect(french(-124)).toBe('0000-Prairial-1')
+    expect(french(-154)).toBe('0000-Floréal-1')
+    expect(french(-184)).toBe('0000-Germinal-1')
+    expect(french(-214)).toBe('0000-Ventôse-1')
+    expect(french(-244)).toBe('0000-Pluviôse-1')
+    expect(french(-274)).toBe('0000-Nivôse-1')
+    expect(french(-304)).toBe('0000-Frimaire-1')
+    expect(french(-334)).toBe('0000-Brumaire-1')
+    expect(french(-364)).toBe('0000-Vendémiaire-1')
   })
 })
 
@@ -172,22 +172,22 @@ describe('Parse days to date format', () => {
   })
 
   it('gregorian without months', () => {
-    expect(createAxisDateDescription(1, gregorianWithoutMonthsConfig)).toBe('1.1')
-    expect(createAxisDateDescription(2, gregorianWithoutMonthsConfig)).toBe('1.2')
-    expect(createAxisDateDescription(3, gregorianWithoutMonthsConfig)).toBe('1.3')
+    expect(createAxisDateDescription(1, gregorianWithoutMonthsConfig)).toBe('0001.1')
+    expect(createAxisDateDescription(2, gregorianWithoutMonthsConfig)).toBe('0001.2')
+    expect(createAxisDateDescription(3, gregorianWithoutMonthsConfig)).toBe('0001.3')
 
-    expect(createAxisDateDescription(1 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.1')
-    expect(createAxisDateDescription(2 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.2')
-    expect(createAxisDateDescription(3 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('3.3')
+    expect(createAxisDateDescription(1 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.1')
+    expect(createAxisDateDescription(2 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.2')
+    expect(createAxisDateDescription(3 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.3')
 
     /* add 400 years + 97 leap days */
-    expect(createAxisDateDescription(1 + 400 * 365 + 97, gregorianWithoutMonthsConfig)).toBe('401.1')
-    expect(createAxisDateDescription(1 + 400 * 365 + 97 + 222, gregorianWithoutMonthsConfig)).toBe('401.223')
+    expect(createAxisDateDescription(1 + 400 * 365 + 97, gregorianWithoutMonthsConfig)).toBe('0401.1')
+    expect(createAxisDateDescription(1 + 400 * 365 + 97 + 222, gregorianWithoutMonthsConfig)).toBe('0401.223')
 
   })
 
   it('shire', () => {
-    expect(createAxisDateDescription(-7, shireConfig)).toBe('1-2. Yule-1')
+    expect(createAxisDateDescription(-7, shireConfig)).toBe('0001-2. Yule-1')
   })
 
   it('have reversible in- and output', () => {
