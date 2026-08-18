@@ -32,53 +32,52 @@
 
 ### Advanced UX Settings
 
-- **`uxDefaultEventSymbol`**: Default symbol for timestamp events. Options: `point`, `box`, `vertical-line`, `diamond`,
-  `triangle`, `hexagon`, `pentagon`.
-- **`uxAddRibbonIcon`**: Show a ribbon icon in the Obsidian UI to quickly open a live chart preview.
-- **`uxAddCommands`**: Add plugin commands (currently work-in-progress / disabled in UI).
-- **`mouseOverEventShowBox`**: Show an overlay box around an event when hovered.
-- **`mouseOverEventShowVerticalLine`**: Show a vertical line on hover to compare dates.
-- **`showButtonsToHideGroups`**: Add toolbar buttons that allow hiding/showing groups individually.
-- **`autoRestrictZoom`**: Automatically constrain min/max zoom to reasonable bounds for the current data.
-- **`uxOverrideNoteScrollInCalendar`**: When enabled, normal scroll over a calendar zooms; when disabled you must hold
-  Shift to zoom.
-- **`uxSwitchZoomAndPan`**: Swap the default scroll behavior so that scrolling pans and Ctrl+scroll zooms (toggle to
-  switch behavior).
-- **`uxUseCalColorForCalAxis`**: Apply calendar color to its axis (may be visually noisy; optional).
-- **`uxVerticalLineEventWidth`**: Numeric width for events drawn as vertical lines (slider 1–10).
+- **Event symbol**: Default symbol for timestamp events.
+  - Options: `point`, `triangle`, `box`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star` and
+    `vertical-line`.
+- **Add ribbon icon**: Show a ribbon icon in the Obsidian UI to quickly open a live chart preview.
+- **Add plugin commands**: Add plugin commands (currently work-in-progress / disabled in UI).
+- **Show overlay box**: Show an overlay box around an event when hovered.
+- **Show overlay vertical line**: Show a vertical line on hover to compare dates.
+- **Group visibility toggles**: Add toolbar buttons that allow hiding/showing groups individually.
+- **Restrict minimum and maximum zoom**: Automatically constrain min/max zoom to reasonable bounds for the current data.
+  - Minimum zoom would fit your complete dataset on the screen.
+  - Maximum zoom would show adjacent days.
+- **Zoom key**: Key to hold while scrolling to zoom in or out.
+- **Pan key**: Key to hold while scrolling to pan horizontally.
+  - Both options offer Ctrl, Alt, and Shift. (Ctrl, Option, Shift on MacOS)
+- **Color-code calendar axis**: Apply calendar color to its axis (may be visually noisy; optional).
+- **Vertical line event width**: Numeric width, in pixels, for events drawn as vertical lines (slider 1–10).
 
 ### Frontmatter Properties
 
 These settings let you adapt the plugin to use different frontmatter keys in your notes.
 
-- **`frontMatterProperty_gantt_this`**: Primary boolean frontmatter key that marks a file as containing Gantt events.
+- **Gantt event marker**: Primary boolean frontmatter key that marks a file as containing Gantt events.
   Default: `gantt-item`.
-- **`frontMatterProperty_gantt_this_optional`**: If enabled, the primary marker becomes optional (saves one property per
+- **Marker may be optional**: If enabled, the primary marker becomes optional (saves one property per
   file but reduces explicit control).
-- **`frontMatterProperty_calendar_name`**: Frontmatter key used to identify a calendar definition file. Default:
+- **Calendar definition**: Frontmatter key used to identify a calendar definition file. Default:
   `gantt-type-definition`.
-- **`frontMatterProperty_event_calendar`**: Frontmatter key that defines which calendar an event belongs to. Default:
+- **Event calendar**: Frontmatter key that defines which calendar an event belongs to. Default:
   `gantt-type`.
-- **`frontMatterProperty_event_name`**: Frontmatter key for the event name. Default: `gantt-name`.
-- **`frontMatterProperty_event_time_start`**: Frontmatter key for the event start date (mandatory). Default:
+- **Event name**: Frontmatter key for the event name. Default: `gantt-name`.
+- **Event start date**: Frontmatter key for the event start date (mandatory). Default:
   `gantt-start`.
-- **`frontMatterProperty_event_time_end`**: Frontmatter key for the event end date (optional). Default: `gantt-end`.
-- **`frontMatterProperty_event_color`**: Frontmatter key for event color (hex or name). Default: `gantt-color`.
-- **`frontMatterProperty_event_group`**: Frontmatter key for the event's group (used to sort and color events). Default:
-  `gantt-group`.
-- **`frontMatterProperty_event_symbol`**: Frontmatter key to override the event symbol per-event. Default:
-  `gantt-symbol`.
-- **`frontMatterProperty_event_icon_name`**: Frontmatter key for an icon name (Lucide icons). Default:
-  `gantt-displayIcon`.
-- **`frontMatterProperty_event_icon_color`**: Frontmatter key for the icon color. Default: `gantt-displayIconColor`.
-- **`frontMatterProperty_note_header`**: Frontmatter key for a note-internal header; when set clicking the event will
+- **Event end date**: Frontmatter key for the event end date (optional). Default: `gantt-end`.
+- **Event color**: Frontmatter key for event color (hex or name). Default: `gantt-color`.
+- **Event group**: Frontmatter key for the event's group (used to sort and color events). Default: `gantt-group`.
+- **Event symbol**: Frontmatter key to override the event symbol per-event. Default: `gantt-symbol`.
+- **Event icon**: Frontmatter key for an icon name (Lucide icons). Default: `gantt-displayIcon`.
+- **Event icon color**: Frontmatter key for the icon color. Default: `gantt-displayIconColor`.
+- **Target header**: Frontmatter key for a note-internal header; when set clicking the event will
   navigate to that header instead of top-of-note. Default: `gantt-linkToHeader`.
 
 ### Notes & Usage Tips
 
 - Use `Calendars` to register calendar definitions (files that define non-Gregorian calendars). Calendar `id` values are
   used in frontmatter to map events to calendars.
-- The `Default valuesV section allows you to set global fallbacks for color and calendar when individual events omit
+- The `Default values` section allows you to set global fallbacks for color and calendar when individual events omit
   them.
 - The `Groups` mechanism is useful to build lanes and logical separations for events (for example, locations, factions,
   or categories).
