@@ -121,7 +121,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private isModifierActive(e: WheelEvent, key: ControlKey): boolean {
     switch (key) {
       case 'ctrl':
-        return e.ctrlKey || e.metaKey
+        return e.ctrlKey
       case 'alt':
         return e.altKey
       case 'shift':

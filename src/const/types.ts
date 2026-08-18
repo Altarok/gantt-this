@@ -182,8 +182,8 @@ export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
 export type ControlKey = 'ctrl' | 'alt' | 'shift'
 // export type ModifierKeySetting = 'ctrl' | 'alt' | 'shift' | 'none'
 export const ControlKeyMapped = {
-  'alt': 'alt',
-  'ctrl': 'ctrl / meta',
+  'alt': 'alt / option',
+  'ctrl': 'ctrl / cmd',
   'shift': 'shift'
 }
 

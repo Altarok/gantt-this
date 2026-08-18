@@ -4,7 +4,7 @@ import {ControlKeyMapped, DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalend
 import {AddEntryModal} from './settings-util'
 
 const VISIBLE_ICON = 'eye' /* an open eye */
-const INVISIBLE_ICON = 'eye-off' /* an open eye, but with strike through */
+const INVISIBLE_ICON = 'eye-off' /* an open eye, with strike-through */
 
 function toRecord(strings: readonly string[]): Record<string, string> {
   return Object.fromEntries(strings.map((s) => [s, s]))
@@ -16,7 +16,7 @@ function toRecord(strings: readonly string[]): Record<string, string> {
  * @return undefined if the input is fine, otherwise a string explaining why it isn't
  */
 function testFrontMatterInput(value: string): string | undefined {
-  return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must match ^[a-zA-Z0-9_.-]+$.' /* input NOK */
+  return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must only contain letters, numbers, hyphens, underscores, and dots.' /* input NOK */
 }
 
 
@@ -92,7 +92,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         items: [
           {
             name: 'Default event calendar',
-            desc: `Fallback value for event property 'gantt-type'. Default: ${DEFAULT_SETTINGS.defaultCalendar}`,
+            desc: `Fallback value for the event property 'gantt-type'. Default: ${DEFAULT_SETTINGS.defaultCalendar}`,
             control: {
               type: 'text',
               key: 'defaultCalendar',
@@ -164,28 +164,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                cal.visible = !cal.visible
-                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+          .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+            .onClick(async () => {
+              cal.visible = !cal.visible
+              void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+              await this.plugin.saveSettings()
+            })
+          )
+          .addColorPicker(c => cc = c
+            .setValue(cal.color ?? this.plugin.settings.fallbackColor)
+            .onChange(async (value) => {
+                cal.color = value
                 await this.plugin.saveSettings()
-              })
+              }
             )
-            .addColorPicker(c => cc = c
-              .setValue(cal.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  cal.color = value
-                  await this.plugin.saveSettings()
-                }
-              )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.plugin.settings.fallbackColor)
-                cal.color = this.plugin.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+          )
+          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+            .onClick(async () => {
+              cc.setValue(this.plugin.settings.fallbackColor)
+              cal.color = this.plugin.settings.fallbackColor
+              await this.plugin.saveSettings()
+            })
+          )
         },
       }))
     }
@@ -222,28 +222,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                group.visible = !group.visible
-                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+          .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+            .onClick(async () => {
+              group.visible = !group.visible
+              void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+              await this.plugin.saveSettings()
+            })
+          )
+          .addColorPicker(c => cc = c
+            .setValue(group.color ?? this.plugin.settings.fallbackColor)
+            .onChange(async (value) => {
+                group.color = value
                 await this.plugin.saveSettings()
-              })
+              }
             )
-            .addColorPicker(c => cc = c
-              .setValue(group.color ?? this.plugin.settings.fallbackColor)
-              .onChange(async (value) => {
-                  group.color = value
-                  await this.plugin.saveSettings()
-                }
-              )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.plugin.settings.fallbackColor)
-                group.color = this.plugin.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+          )
+          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+            .onClick(async () => {
+              cc.setValue(this.plugin.settings.fallbackColor)
+              group.color = this.plugin.settings.fallbackColor
+              await this.plugin.saveSettings()
+            })
+          )
         },
       }))
     }
@@ -264,15 +264,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           }
         },
         {
-          name: 'Add ribbon icon?',
-          desc: 'Adds a ribbon icon to quickly open a live chart preview. More options to come.',
+          name: 'Add ribbon icon',
+          // TODO more options to come
+          desc: 'Adds a ribbon icon to quickly open a live chart preview.',
           control: {
             type: 'toggle', key: 'uxAddRibbonIcon',
             defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon
           }
         },
         {
-          name: 'Add plugin commands? - Work in progress',
+          name: 'Add plugin commands',
           desc: 'Adds commands to insert event properties, calendar definitions, and code blocks.',
           control: {
             type: 'toggle', key: 'uxAddCommands',
@@ -281,83 +282,75 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           }
         },
         {
-          name: 'Show overlay box?',
-          desc: 'Show a box around events when hovered over.',
+          name: 'Show overlay box',
+          desc: 'Highlight hovered events with a bounding box.',
           control: {
             type: 'toggle', key: 'mouseOverEventShowBox',
             defaultValue: DEFAULT_SETTINGS.mouseOverEventShowBox
           }
         },
         {
-          name: 'Show overlay vertical?',
-          desc: 'Show a vertical line over events when hovered over. Use for date comparison.',
+          name: 'Show vertical guide line',
+          desc: 'Display a vertical guide line under the cursor for precise date comparison.',
           control: {
             type: 'toggle', key: 'mouseOverEventShowVerticalLine',
             defaultValue: DEFAULT_SETTINGS.mouseOverEventShowVerticalLine
           }
         },
         {
-          name: 'Extend toolbar with buttons to hide groups individually.',
+          name: 'Group visibility toggles',
+          desc: 'Add buttons to the toolbar for hiding or showing individual groups.',
           control: {
             type: 'toggle', key: 'showButtonsToHideGroups',
             defaultValue: DEFAULT_SETTINGS.showButtonsToHideGroups
           }
         },
         {
-          name: 'Automatically restrict min & max zoom?',
+          name: 'Restrict minimum and maximum zoom',
+          desc: 'Maximum zoom shows adjacent days; minimum zoom fits your complete dataset.',
           control: {
             type: 'toggle', key: 'autoRestrictZoom',
             defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
           }
         },
-        // {
-        //   name: 'Override default scroll in calendar?',
-        //   desc: 'By default, scrolling over a calendar zooms in or out. If deactivated, you must hold Shift.',
+        // { // TODO wip
+        //   name: 'Enable visual canvas zoom',
+        //   desc: 'Scale the entire chart visually instead of adjusting the timeline date range.',
         //   control: {
-        //     type: 'toggle', key: 'uxOverrideNoteScrollInCalendar',
-        //     defaultValue: DEFAULT_SETTINGS.uxOverrideNoteScrollInCalendar
+        //     type: 'toggle',
+        //     key: 'uxEnableVisualZoom',
+        //     defaultValue: DEFAULT_SETTINGS.uxEnableVisualZoom
         //   }
         // },
         {
-          name: 'Button to zoom with',
-          desc: 'By default, zooming is done while holding shift.',
+          name: 'Zoom key',
+          desc: 'Key to hold while scrolling to zoom in or out.',
           control: {
             type: 'dropdown', key: 'uxZoomButton', options: ControlKeyMapped,
-            validate: value => {
-              return (value !== this.plugin.settings.uxPanButton) ? undefined /* OK */ : 'Must differ from pan button.' /* NOK */
-            },
+            validate: value => (value !== this.plugin.settings.uxPanButton) ? undefined : 'Must differ from pan button.',
             defaultValue: DEFAULT_SETTINGS.uxZoomButton
           }
         },
         {
-          name: 'Button to pan with',
-          desc: 'By default, panning is done while holding Ctrl (Win) / Meta (MacOS).',
+          name: 'Pan key',
+          desc: 'Key to hold while scrolling to pan horizontally.',
           control: {
             type: 'dropdown', key: 'uxPanButton', options: ControlKeyMapped,
-            validate: value => {
-              return (value !== this.plugin.settings.uxZoomButton) ? undefined /* OK */ : 'Must differ from zoom button.' /* NOK */
-            },
+            validate: value => (value !== this.plugin.settings.uxZoomButton) ? undefined : 'Must differ from zoom button.',
             defaultValue: DEFAULT_SETTINGS.uxPanButton
           }
         },
-        // {
-        //   name: 'Switch zoom and pan control?',
-        //   desc: 'By default, scrolling zooms and Ctrl+scrolling pans. Activate to switch.',
-        //   control: {
-        //     type: 'toggle', key: 'uxSwitchZoomAndPan',
-        //     defaultValue: DEFAULT_SETTINGS.uxSwitchZoomAndPan
-        //   }
-        // },
         {
-          name: 'Apply calendar color to calendar axis?',
-          desc: 'This might be visually distracting.',
+          name: 'Color-code calendar axis',
+          desc: 'Apply the corresponding calendar color directly to the calendar axis.',
           control: {
             type: 'toggle', key: 'uxUseCalColorForCalAxis',
             defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
           }
         },
         {
-          name: 'Width of vertical line events.',
+          name: 'Vertical line event width',
+          desc: 'Set the line stroke width (in pixels) for vertical line events.',
           control: {
             type: 'slider', key: 'uxVerticalLineEventWidth',
             min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
@@ -370,7 +363,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   private createFrontMatterSettingDefinitions(): SettingDefinitionItem {
     return {
       name: 'Frontmatter properties', type: 'page',
-      desc: 'Configure frontmatter properties the plugin uses.',
+      desc: 'Configure frontmatter properties used by the plugin.',
       items: [
         {
           name: 'Gantt event marker',
@@ -394,7 +387,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         },
         {
           name: 'Calendar definition',
-          desc: 'Name of the calendar.',
+          desc: 'Property name used to identify calendar definition files.',
           control: {
             type: 'text', key: 'frontMatterProperty_calendar_name',
             placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
@@ -424,7 +417,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         },
         {
           name: 'Event start date',
-          desc: 'Mandatory',
+          desc: 'Mandatory property defining event start dates.',
           control: {
             type: 'text', key: 'frontMatterProperty_event_time_start',
             placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
@@ -434,7 +427,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         },
         {
           name: 'Event end date',
-          desc: 'Optional',
+          desc: 'Optional property defining event end dates.',
           control: {
             type: 'text', key: 'frontMatterProperty_event_time_end',
             placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
@@ -464,7 +457,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         },
         {
           name: 'Event symbol',
-          desc: 'Optional.',
+          desc: 'Optional property overriding the event symbol.',
           control: {
             type: 'text', key: 'frontMatterProperty_event_symbol',
             placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
@@ -494,7 +487,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         },
         {
           name: 'Target Header',
-          desc: 'Optional. Clicking the event will point to a header instead of the file.',
+          desc: 'Optional property. Clicking an event scrolls to this specific header within the note.',
           control: {
             type: 'text', key: 'frontMatterProperty_note_header',
             placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
