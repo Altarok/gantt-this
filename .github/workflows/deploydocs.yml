@@ -2,12 +2,9 @@ name: Deploy Docs to GitHub Pages
 
 on:
   workflow_dispatch:  # manual trigger; add 'push' if you want auto-deploy too
-    # inputs: {}      # optional: add manual inputs if you like
+  # inputs: {}      # optional: add manual inputs if you like
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: { }
 
 concurrency:
   group: "pages"
@@ -17,17 +14,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af68 # v4.2.2
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@1c7f16816159cb0f036061ea37553822411638d8 # v5.0.0
 
       # Download and prepare Kiln binary (CI-only, no repo changes)
       - name: Setup Kiln
         run: |
-          curl -L -o kiln https://github.com/otaleghani/kiln/releases/latest/download/kiln_linux_amd64
+          set -euo pipefail
+          KILN_VERSION="v0.9.5" # Replace with exact target version
+          KILN_SHA256="141c31a490dfd82452183f60189f7c7f108d359c7d0a8394d929ecf42369a7a5"
+          
+          curl -sSL -o kiln "https://github.com/otaleghani/kiln/releases/download/${KILN_VERSION}/kiln_linux_amd64"
+          echo "${KILN_SHA256}  kiln" | sha256sum -c -
           chmod +x kiln
 
       # Build site from ./docs into ./public
@@ -36,15 +43,19 @@ jobs:
           ./kiln generate \
             --input ./docs \
             --output ./public \
-            --url "https://cepeu.github.io/gantt-this/"
+            --url "https://Altarok.github.io/gantt-this/"
 
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: ./public
 
   deploy:
+    permissions:
+      pages: write
+      id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -54,4 +65,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db596a1080d31c2ff7a64147d372b01005a754 # v4.0.5
