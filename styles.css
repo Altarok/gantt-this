@@ -542,10 +542,10 @@
 /* Property Value (Second Column) */
 .gantt-tooltip-table td:last-child {
   color: var(--text-normal);
-  word-break: break-word;
+  word-break: keep-all;
 }
 
 /* Subtle separator between rows */
 .gantt-tooltip-table tr:not(:last-child) td {
-  border-bottom: 1px solid var(--background-modifier-border-focus, rgba(255, 255, 255, 0.05));
+  border-bottom: 1px solid var(--background-modifier-border-focus, rgb(255 255 255 / 5%));
 }

@@ -438,9 +438,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
       if (this.highlightElement) {
         this.highlightElement.remove()
         this.highlightElement = null
-        // } else {
-        // this.lastHoveredTarget.style.outline = ''
-        // this.lastHoveredTarget.style.outlineOffset = ''
+//      } else {
+//        this.lastHoveredTarget.style.outline = ''
+//        this.lastHoveredTarget.style.outlineOffset = ''
       }
     }
 
@@ -503,11 +503,11 @@ export class GanttDesktopEventManager implements GanttEventManager {
       shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
 
     } else {
-      shape = window.document.createElementNS(svgUrl, 'ellipse')
-      shape.setAttribute('cx', String(x + width / 2))
-      shape.setAttribute('cy', String(y + height / 2))
-      shape.setAttribute('rx', String(width / 2 + 3))
-      shape.setAttribute('ry', String(height / 2 + 3))
+      shape = Util.createSvg('circle', 'gt-item timestamp symbol-hover', {
+        cx: String(x + width / 2),
+        cy: String(y + height / 2),
+        r: String(width / 2 + 3)
+      })
     }
     this.highlightElement.appendChild(shape)
   }
@@ -518,8 +518,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
       this.highlightElement = null
     }
     if (this.lastHoveredTarget) {
-      // this.lastHoveredTarget.style.outline = ''
-      // this.lastHoveredTarget.style.outlineOffset = ''
       this.lastHoveredTarget = null
     }
   }
