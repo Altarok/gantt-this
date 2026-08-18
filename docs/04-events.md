@@ -1,3 +1,8 @@
+---
+title: Event Definitions
+order: 4
+---
+
 # Event frontmatter properties
 
 ## Features & Structure

@@ -1,7 +1,16 @@
 ---
-title: Home
+title: Documentation
+order: 0
 ---
 
-<meta http-equiv="refresh" content="0; url=01-getting-started/" />
+# Gantt This Documentation
 
-If you are not redirected automatically, follow this [link to Getting Started](01-Setup_first_steps.md).
+Welcome to the documentation for **Gantt This**. Select a topic from the sidebar or click a section below to get
+started:
+
+- [Introduction](01-introduction)
+- [Getting Started](02-getting-started)
+- [Calendar Definitions](03-calendars)
+- [Event Definitions](04-events)
+- [Plugin Settings](05-plugin-settings)
+- [FAQ](99-FAQ)

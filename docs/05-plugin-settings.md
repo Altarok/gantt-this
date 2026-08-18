@@ -1,4 +1,9 @@
-# Settings Tab
+---
+title: Plugin Settings
+order: 5
+---
+
+# Plugin Settings
 
 ### Source Paths
 

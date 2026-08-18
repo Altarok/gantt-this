@@ -1,3 +1,8 @@
+---
+title: Calendar Definitions
+order: 3
+---
+
 # Calendar properties
 
 ## Calendar Frontmatter Properties

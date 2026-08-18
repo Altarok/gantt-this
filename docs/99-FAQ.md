@@ -1,3 +1,8 @@
+---
+title: FAQ
+order: 99
+---
+
 # FAQ
 
 ## Do I need to use the properties the plugin is pre-configured with?

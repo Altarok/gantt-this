@@ -1,3 +1,8 @@
+---
+title: Getting Started
+order: 2
+---
+
 # Setup
 
 ## Fundamentals and first steps
@@ -157,7 +162,8 @@ After it renders you should see this when you hover your mouse over the blue poi
 Congratulations! You got your first calendar and event running and displayed!
 
 You might like to take a look at:
-[Calendar properties](02-Calendar_properties.md)
-[Frontmatter properties](03-Event_frontmatter_properties.md)
-[More fundamentals](04-More_fundamentals.md)
-[Advanced topics](05-Advanced_topics.md)
+
+- [Calendar Definitions](03-calendars)
+- [Event Definitions](04-events)
+- [Plugin Settings](05-plugin-settings)
+- [FAQ](99-FAQ)

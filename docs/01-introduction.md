@@ -1,3 +1,8 @@
+---
+title: Introduction
+order: 1
+---
+
 # Gantt-This
 
 ## Foreword (by CePeU)
@@ -47,4 +52,4 @@ We are continuously adding ideas and suggestions from the community. The main fe
 
 ## Next: Setup and First Steps
 
-- [Setup](01-Setup_first_steps.md)
+- [Setup](02-getting-started)
