@@ -273,7 +273,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 
   frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
   frontMatterProperty_gantt_this_optional: true,
-  frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian'
+  frontMatterProperty_event_calendar: 'gantt-type', // name of matching calendar or 'gregorian' TODO rename to gantt-calendar
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
   frontMatterProperty_event_name: 'gantt-name', // ... or filename
