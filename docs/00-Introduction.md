@@ -1,37 +1,50 @@
 # Gantt-This
 
-## Short foreword
-Gant-this is an Obsidian MD plugin that allows for the creation of arbitrary calendars as they are most often used and needed for fantasy roleplaying nerds and display them in a gant chart like view.
+## Foreword (by CePeU)
 
-There are other plugins like excelent Chronos Timeline plugin and if it was not for those special needs of us TTRPG nerds then that would have been more than sufficient.
+*Gantt-This* is an Obsidian plugin designed to create arbitrary calendars — the kind most often needed by fantasy
+roleplaying nerds — and display them in a Gantt-chart-like view.
 
-I had a plugin like this in my mind for over a year and maybe longer till I and Altarok meet on Joshs Obsidian TTRPG Community discord channel and Altarok proposed that he would be interested in an interesting project to code.
+There are other plugins available, such as the excellent Chronos Timeline plugin, which would be more than sufficient if
+it weren't for the special needs of TTRPG players.
 
-Well I could hardly believe him but here we are :).
+I had an idea for a plugin like this for over a year (and maybe longer) until Altarok and I met on Josh's Obsidian TTRPG
+Community Discord server. Altarok mentioned that he was looking for an interesting project to code.
 
-Be aware that most of the work has been done by Altarok and as you see I am left to write a more or less meaningfull documentation. That should give you an idea about my usefullness ... :)
+Well, I could hardly believe it, but here we are! :)
 
-## Design goals
+Please note that most of the coding work was done by Altarok, leaving me to write a more or less meaningful document.
+That should give you an idea of my usefulness... :)
 
-Our goal was to make a zoomable gant chart like calendar view so a GM can quickly navigate his calendar, see what events are relevant for him/her and have a good overview of the timeline of his campaign.
+## Design Goals
 
-Thus ease of use and a multitude of display options were important. Also obviously a certain flexibility in creating specific calendars and events for TTRPG purposes. The plugin is not limited to TTRPG though - Altarok for example implemented (just for fun) a mayan calendar.
+Our goal was to build a zoomable, Gantt-chart-style calendar view so a Game Master can quickly navigate their timeline,
+see which events are relevant, and keep a clear overview of their campaign.
+
+Ease of use and a variety of display options were top priorities, alongside the flexibility to create custom calendars
+and events for TTRPG purposes.
+However, the plugin isn't limited to tabletop games—Altarok even implemented a Mayan calendar just for fun.
 
 > **Data Safety & Privacy:**
-> The plugin reads your notes and can insert a code block into your current file upon request. It never deletes data
-> from your vault and makes **no** network connections.
+> The plugin reads your notes and can insert a code block into your active file upon request. It never deletes
+> data from your vault and makes **no** network connections.
 
-## Next steps
-The plugin is new but quite stable. It has gone into wider testing and is already started to be tested by several users in their campaigns.
-We are in the process to add more and more ideas and suggestions from the community. The next big steps we are considering are:
-- bases support
-- intraday time support (aka hours, minutes and maybe seconds)
-- even more calendars
-- a lot of smaller improvements
-- your ideas if you let us know what you are missing
+## Next Steps
 
-## How to reach us
-Discord:
+The plugin is brand new but quite stable. It has moved into wider testing and is already being used in several active
+campaigns.
+We are continuously adding ideas and suggestions from the community. The main features on our roadmap include:
 
-## Go on to setup and first steps
-[Setup](01-Setup_first_steps.md)
+- Obsidian Bases support
+- Intraday time support (hours, minutes, and seconds)
+- Additional pre-configured calendars
+- Numerous quality-of-life improvements
+- Your ideas—let us know what you'd like to see!
+
+## How to Reach Us
+
+- [Discord](https://discord.com/channels/925322340995313686/1537348136954105946)
+
+## Next: Setup and First Steps
+
+- [Setup](01-Setup_first_steps.md)
