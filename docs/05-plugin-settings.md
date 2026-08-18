@@ -20,27 +20,27 @@ order: 5
 
 ### Calendars & Groups
 
-Two lists display the calendars & groups currently known to the plugin.
+Two lists display the calendars and groups currently known to the plugin. Both lists function identically:
 
-- **Both lists work identically**
-  - The calendar list defines which calendars the plugin knows about and how they appear.
-  - The group list defines which groups the plugin knows about and how they appear.
+- **Calendar list**: Defines which calendars the plugin recognizes and how they appear.
+- **Group list**: Defines which groups the plugin recognizes and how they appear.
 
-Each entry contains the following options.
+#### Entry Properties
 
 - **ID**: A unique identifier
   - Used by frontmatter `gantt-type`/`gantt-type-definition` for calendars.
   - Used by frontmatter `gantt-group` for groups.
-  - Hint: These are __NOT CASE-SENSITIVE__!
-- **Visibility**: Defines whether related events are shown on the chart.
-- **Color**: Optional color, used to color related events and axis.
-- **Priority**: Sort the lists to influence the order of appearance on the chart
+  - *Note: These are __NOT CASE-SENSITIVE__!*
+- **Visibility**: Toggles whether related events are shown on the chart.
+- **Color**: Optional color applied to color related events and axis.
+- **Priority**: Order of appearance in the list determines sorting in the chart.
 
-- **Controls in the list**
-  - Add an entry by clicking the plus icon in the list header.
-  - Delete an entry by clicking the X icon.
-  - Reset the color to the default event color by clicking the reset button next to the color picker.
-  - Reorder elements by drag-and-dropping the 3-vertical-lines symbol.
+#### List Controls
+
+- **Add entry**: Click the `+` icon in the list header.
+- **Delete entry**: Click the `X` icon.
+- **Reset color**: Click the reset button next to the color picker to revert to the default event color.
+- **Reorder**: Drag and drop using the handle icon (`⋮`).
 
 ### Advanced UX Settings
 
