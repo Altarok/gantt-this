@@ -18,22 +18,29 @@ order: 5
 - **`fallbackColor`**: Default color used for events when no color is provided. Default: `#1565C0`.
 - **`fallbackColorForIcons`**: Default icon color when an event has an icon but no icon color. Default: `#FF8800`.
 
-### Calendars
+### Calendars & Groups
 
-- The `Calendars` list controls which calendar definitions the plugin knows about and how they appear.
-- Each calendar entry contains:
-  - **`id`**: Calendar identifier (used by frontmatter `gantt-type`/`gantt-type-definition`).
-  - **`visible`**: Whether the calendar is shown on the chart.
-  - **`color`**: Optional calendar color (used for event coloring or axis coloring when enabled).
-  - **`priority`**: Order of appearance on the axis; lower priority appears first.
-- Controls in the list: Add a calendar, reorder calendars (sets `priority`), delete a calendar, toggle visibility (
-  eye/eye-off), and pick/reset color.
+Two lists display the calendars & groups currently known to the plugin.
 
-### Groups
+- **Both lists work identically**
+  - The calendar list defines which calendars the plugin knows about and how they appear.
+  - The group list defines which groups the plugin knows about and how they appear.
 
-- The `Groups` list controls named groupings for events (used to group and color events in lanes).
-- Each group entry contains `id`, `visible`, optional `color`, and `priority` for ordering.
-- Controls: Add group, reorder, delete, toggle visibility, and pick/reset color.
+Each entry contains the following options.
+
+- **ID**: A unique identifier
+  - Used by frontmatter `gantt-type`/`gantt-type-definition` for calendars.
+  - Used by frontmatter `gantt-group` for groups.
+  - Hint: These are __NOT CASE-SENSITIVE__!
+- **Visibility**: Defines whether related events are shown on the chart.
+- **Color**: Optional color, used to color related events and axis.
+- **Priority**: Sort the lists to influence the order of appearance on the chart
+
+- **Controls in the list**
+  - Add an entry by clicking the plus icon in the list header.
+  - Delete an entry by clicking the X icon.
+  - Reset the color to the default event color by clicking the reset button next to the color picker.
+  - Reorder elements by drag-and-dropping the 3-vertical-lines symbol.
 
 ### Advanced UX Settings
 
