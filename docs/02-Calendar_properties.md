@@ -10,7 +10,7 @@ If you use custom time systems or fictional calendars in your vault, you can def
 
 ## Calendar YAML Block Properties
 
-- **`id`**: (string, required) Unique identifier for the calendar. Used by events' `gantt-type` to reference this
+- **`id`**: (string, required) Unique identifier for the calendar. Used by events `gantt-type` to reference this
   calendar.
 - **`name`**: (string, optional) Human-friendly internal name for the calendar.
 - **`displayName`**: (string, optional) Display name shown in the UI (if different from `name`).
@@ -35,7 +35,7 @@ If you use custom time systems or fictional calendars in your vault, you can def
 - **`ruleBasedDetails`**: (object, rule-based/gregorian only) Contains details for month names, leap-year handling, and
   formatting:
   - **`months`**: array of month objects `{ name: string, shortname?: string, days: number, isIntercalary?: boolean }`
-    describing month order and lengths. `isIntercalary` marks days that do not belong to any month (e.g., Yule events).
+    describing month order and lengths. `isIntercalary` marks days that do not belong to any month (e.g., Yule days).
   - **`leapYearRule`**: object
     `{ ruleType: 'gregorian'|'interval'|'none', intervalYears?: number, extraDays?: number, applyToMonthIndex?: number }`
     describing how leap days are applied. `interval` with `intervalYears` adds every N years; `gregorian` uses the
@@ -50,7 +50,7 @@ If you use custom time systems or fictional calendars in your vault, you can def
   `{ offset: number, cycle: number, color?: string }` where `offset` shifts the phase, `cycle` is the length in days,
   and `color` is used for display.
 
-### Notes on Types and Parsing:
+### Notes on Types and Parsing
 
 - Epoch offsets (`sharedOffset`, `startDay`, `endDay`) may be provided as a single integer (days) or as a
   `{ year, month, day }` object; the plugin converts them to absolute day offsets.
