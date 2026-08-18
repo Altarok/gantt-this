@@ -1,3 +1,5 @@
+import {FrontMatterCache} from "obsidian";
+
 export const CALENDAR_CONFIG_TYPES = [
   'positional',
   'rule-based',
@@ -129,6 +131,7 @@ export type GanttItem = {
   color?: string
   link?: string
   lane?: number
+  frontMatter: FrontMatterCache
 }
 
 export type GanttGroup = {
@@ -187,6 +190,25 @@ export const ControlKeyMapped = {
   'shift': 'shift'
 }
 
+/**
+ * Front-matter property names configurable by user
+ */
+export type ConfigurableFrontmatterPropertyNames = {
+  frontMatterProperty_calendar_name: string
+  frontMatterProperty_gantt_this: string
+  frontMatterProperty_gantt_this_optional: boolean /* activate to save 1 front-matter property */
+  frontMatterProperty_event_time_start: string
+  frontMatterProperty_event_time_end: string
+  frontMatterProperty_event_name: string
+  frontMatterProperty_event_color: string
+  frontMatterProperty_event_group: string
+  frontMatterProperty_event_symbol: string
+  frontMatterProperty_event_calendar: string
+  frontMatterProperty_event_icon_name: string
+  frontMatterProperty_event_icon_color: string
+  frontMatterProperty_note_header: string
+}
+
 export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   fallbackColor: string
@@ -211,26 +233,7 @@ export type PluginSettings = GanttChartSources & {
   uxPanButton: ControlKey
   uxZoomButton: ControlKey
   uxUseCalColorForCalAxis: boolean
-
-  /*
-   * Front-matter property names
-   */
-  frontMatterProperty_calendar_name: string
-
-  frontMatterProperty_gantt_this: string
-  frontMatterProperty_gantt_this_optional: boolean /* activate to save 1 front-matter property */
-  frontMatterProperty_event_time_start: string
-  frontMatterProperty_event_time_end: string
-  frontMatterProperty_event_name: string
-  frontMatterProperty_event_color: string
-  frontMatterProperty_event_group: string
-  frontMatterProperty_event_symbol: string
-  frontMatterProperty_event_calendar: string
-  frontMatterProperty_event_icon_name: string
-  frontMatterProperty_event_icon_color: string
-  frontMatterProperty_note_header: string
-
-}
+} & ConfigurableFrontmatterPropertyNames
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   eventPath: '/',

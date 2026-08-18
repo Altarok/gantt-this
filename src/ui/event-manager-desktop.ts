@@ -245,6 +245,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
 
     /* Set tooltip title */
+    this.clarTooltip()
     this.setTooltipTitle(d)
     this.setTooltipContent(d);
 
@@ -257,6 +258,11 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
   }
 
+  private clarTooltip() {
+    this.engine.hoverTitle.textContent = ''
+    this.engine.hoverDates.textContent = ''
+  }
+
   private setTooltipTitle(d: GanttItem) {
     this.engine.hoverTitle.textContent = `Day ${d.startDays}: ${d.name}`
   }
@@ -267,19 +273,38 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     if (hasSelectedBaseProperties) {
       const selectedProps = this.engine.selectedFrontmatterProperties!
-      this.engine.hoverDates.textContent = this.createBasesTooltipContent(d, selectedProps)
+      this.createBasesTooltipContent(d, selectedProps)
     } else {
       this.engine.hoverDates.textContent = this.createFallbackTooltipContent(d)
     }
   }
 
-  private get pluginSettings() {
-    return this.engine.plugin.settings
-  }
+  private createBasesTooltipContent(d: GanttItem, selectedProps: string[]) {
+    const properties: { key: string, value: string }[]
+      = FrontMatterUtil.readUnknownProperties(d, selectedProps)
 
-  private createBasesTooltipContent(d: GanttItem, selectedProps: string[]): string {
-    const properties: string[] = FrontMatterUtil.readUnknownProperites(d, selectedProps, this.pluginSettings)
-    return properties.join('<br>')
+    if (properties.length === 0) return
+
+    const table = window.createEl('table')
+    table.addClass('gantt-tooltip-table') // Easy to target with CSS
+
+    for (const p of properties) {
+      // If 'item' is a formatted string like "Key: Value", split it; otherwise adapt to your data shape
+      // const [key, ...valueParts] = item.split(':')
+      // const value = valueParts.join(':').trim()
+
+      const row = table.insertRow()
+
+      const cellKey = row.insertCell()
+      cellKey.textContent = p.key
+      cellKey.style.fontWeight = 'bold'
+      cellKey.style.paddingRight = '8px'
+
+      const cellVal = row.insertCell()
+      cellVal.textContent = p.value
+    }
+
+    this.engine.hoverDates.appendChild(table)
   }
 
   private createFallbackTooltipContent(d: GanttItem): string {
@@ -415,7 +440,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
       if (this.highlightElement) {
         this.highlightElement.remove()
         this.highlightElement = null
-      } else {
+        // } else {
         // this.lastHoveredTarget.style.outline = ''
         // this.lastHoveredTarget.style.outlineOffset = ''
       }
@@ -500,4 +525,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
       this.lastHoveredTarget = null
     }
   }
+
+//  private get pluginSettings() {
+//    return this.engine.plugin.settings
+//  }
+
 }

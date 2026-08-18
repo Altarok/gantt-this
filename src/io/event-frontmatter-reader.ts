@@ -92,7 +92,8 @@ function createItem(plugin: FantasyGanttPlugin,
                     /** Calendar to use for event */
                     calendarId: string,
                     config: CalendarConfig | null,
-                    file: TFile, frontMatter: FrontMatterCache,
+                    file: TFile,
+                    frontMatter: FrontMatterCache,
                     id: number): GanttItem | null {
 
   let startRes: ParsedDate | null = null
@@ -133,7 +134,8 @@ function createItem(plugin: FantasyGanttPlugin,
     displayIconColor: FrontMatterUtil.getEventIconColor(frontMatter, plugin.settings),
     calendarType: calendarId,
     color,
-    link: file.path + FrontMatterUtil.getHeaderToLinkTo(frontMatter, plugin.settings)
+    link: file.path + FrontMatterUtil.getHeaderToLinkTo(frontMatter, plugin.settings),
+    frontMatter
   }
 }
 

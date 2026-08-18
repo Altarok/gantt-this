@@ -110,7 +110,14 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
     }
 
     const selectedProperties: string[] = this.config.getOrder()
-    const selectedFronMatterProperties = selectedProperties.filter(s => s.startsWith('note.')).map(s => s.slice(5)).filter(Boolean)
+    const selectedFronMatterProperties = selectedProperties
+    //    .filter(s => s.startsWith('note.'))
+    .map(s => {
+        if (s.startsWith('formula.')) return s.slice(8)
+        else if (s.startsWith('file.') || s.startsWith('note.')) return s.slice(5)
+        else return ''
+      }
+    ).filter(Boolean)
 
     const render = new GanttRender(this.plugin, files, selectedFronMatterProperties)
 

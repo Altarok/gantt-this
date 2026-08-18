@@ -104,23 +104,16 @@ function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettin
   return (value ? `#${value}` : '')
 }
 
-function readUnknownProperites(d: GanttItem, selectedProperties: string[], settings: PluginSettings): string[] {
+function readUnknownProperties(d: GanttItem, selectedProperties: string[]): { key: string, value: string }[] {
+  const {frontMatter: fm} = d
+  if (!fm) return []
 
+  let values: { key: string, value: string }[] = []
 
-  for (const key of selectedProperties) switch (key) { // keeps order, while Objects.keys does not
+  for (const key of selectedProperties) if (fm[key])  // keeps order, while Objects.keys does not
+    values.push({key, value: fm[key] as string})
 
-
-//    const value = eventData.frontmatter?.[propertyKey];
-//
-//    // 2. Skip or render based on whether the property exists on this specific event
-//    if (value !== undefined) {
-//      // Append key/value pair to the tooltip DOM in this exact order
-//    }
-
-  }
-
-
-  return ['foo', 'bar']
+  return values
 }
 
 
@@ -137,5 +130,5 @@ export const FrontMatterUtil = {
   hasStartDate,
   getEventTimestamps,
   getHeaderToLinkTo,
-  readUnknownProperites
+  readUnknownProperties
 }
