@@ -297,8 +297,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
       const cellKey = row.insertCell()
       cellKey.textContent = p.key
-      cellKey.style.fontWeight = 'bold'
-      cellKey.style.paddingRight = '8px'
 
       const cellVal = row.insertCell()
       cellVal.textContent = p.value
