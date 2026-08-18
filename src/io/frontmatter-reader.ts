@@ -79,7 +79,7 @@ function getStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): 
 }
 
 function getEndDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
+  return frontMatter[settings.frontMatterProperty_event_time_end] as string ?? undefined
 }
 
 function hasStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
