@@ -2,10 +2,10 @@
 
 ## Fundamentals and first steps
 
-To help you understand what you need to do to setup a gantt this chart in your obsidian note, here is an explanation of
-the fundamental workings of the gantt-this plugin.
+To help you understand what you need to do to set up a Gantt-This chart in your Obsidian note, here is an explanation of
+the fundamental workings of the Gantt-This plugin.
 
-The plugin renders a gantt chart from a codeblock as is usually done with other Obsidian plugins. To create that
+The plugin renders a Gantt chart from a codeblock as is usually done with other Obsidian plugins. To create that
 codeblock nothing more is needed than:
 
 ````markdown
@@ -14,8 +14,8 @@ codeblock nothing more is needed than:
 ````
 
 Of course without a calendar or events you will see exactly nothing.
-So as a first step you will need a calendar. Each calendar definition is stored as a yaml definition in a yaml codeblock
-in a note. This calendar definition is stored in a separate note which you create in obsidian and put into a folder of
+So as a first step you will need a calendar. Each calendar definition is stored in a YAML codeblock
+in a note. This calendar definition is stored in a separate note which you create in Obsidian and put into a folder of
 your choice. For future reference we will store this in the folder "calendardefinitions".
 
 This is an example for a TTRPG calendar of one of my favorite RPGs:
@@ -23,18 +23,18 @@ This is an example for a TTRPG calendar of one of my favorite RPGs:
 ````markdown
 ```yaml
 id: example # unique id for each calendar
-name: Example Kalender # a calendar name as shown in the gantt chart
+name: Example Calendar # a calendar name as shown in the Gantt chart
 sharedOffset: 0
 startDay: 1
 type: rule-based
 delimiter: "-"
 ruleBasedDetails:
   daysInStandardYear: 365
-  format: # input format of dates
+  format: # optional. date input format, as read in event notes
     - "year"
     - "month"
     - "day"
-  outputformat: # output format of dates (for display)
+  outputFormat: # optional. date output format, as seen in Gantt chart
     - "day"
     - "month"
     - "year"
@@ -65,7 +65,7 @@ ruleBasedDetails:
       days: 30
     - name: Namenloser
       days: 5
-moons: # definition of moons and moon cycles
+moons: # optional. define multiple moons
    - {offset: 10, cycle: 28, color: "#928440"}
 ```
 ````
@@ -74,14 +74,14 @@ There are more options to a calendar definition and many are optional but this s
 start from and adjust to your needs.
 
 The next step is to define a front matter field for THIS note of the type:
-gant-typed-definition: example   
-or whatever else you name your calendar
+gantt-type-definition: example
+or whatever else you named your calendar.
 
-Be aware that the frontmatter value (here: example) and the calendar id in the yaml code block must match exactly.
+Be aware that the frontmatter value (here: example) and the calendar id in the YAML code block must match exactly.
 
-It will looke like this:
+It will look like this:
 
-```markdownd
+```markdown
 ---
 gantt-type-definition: example
 ---
@@ -97,20 +97,20 @@ the root. Ideally you will input a specific folder like "Calendars" or similar. 
 ![calendarfolders](images/calendarfolders.webp)
 
 For our case "Search sub-folders" would not be strictly necessary but I included it anyway. Also note that "Search
-sub-folders" for event definitions makes much sense because your events probably will be spread accross your vault.
+sub-folders" for event definitions makes much sense because your events probably will be spread across your vault.
 
-The next step is to tell the plugin to use a specific calendar. This as also done in the settings.
+The next step is to tell the plugin to use a specific calendar. This is also done in the settings.
 
 ![settingsCalendarAdd](images/settingsCalendarAdd.webp)
 
-As you see allready 4 calendars have been added. Each calendar can be set as visible or non visisble and each calendar
-can get a default color. The hal calendar has a default of green.
+As you see already 4 calendars have been added. Each calendar can be set as visible or non-visible and each calendar
+can get a default color. The Hal calendar has a default of green.
 
-You add the calendar by choosing the "+" sign beside the Calendars heading and inputing the id of the calendar you want
+You add the calendar by choosing the "+" sign beside the Calendars heading and inputting the id of the calendar you want
 to add (this would be "example" in our case).
 
 Now after we have set up the calendar the next step is to create an event definition. This is done by creating a
-markdown file and adding frontmatter properties.
+Markdown file and adding frontmatter properties.
 
 The plugin will look for files with the following frontmatter properties: gantt-start and gantt-type
 
@@ -123,9 +123,9 @@ gantt-start: 1000-01-20
 ---
 ```
 
-This will create an event for the example calendar in the year 1000 in the first year of the month on day 20.
+This will create an event for the example calendar in the year 1000 on the 20th day of the first month.
 
-Finally we need to add a gantt chart to one of our notes. As mentioned above create a new note and add a code block of
+Finally, we need to add a Gantt chart to one of our notes. As mentioned above create a new note and add a code block of
 the gantt-this type like this:
 
 ### Option 1: Via Command / Ribbon Icon (Recommended)
@@ -154,7 +154,7 @@ After it renders you should see this when you hover your mouse over the blue poi
 
 ![firstCalendarEvent](images/firstCalendarEvent.webp)
 
-Gratulation! You got your first calendar and event running and displayed!
+Congratulations! You got your first calendar and event running and displayed!
 
 You might like to take a look at:
 [Calendar properties](02-Calendar_properties.md)
