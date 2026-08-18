@@ -245,7 +245,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
 
     /* Set tooltip title */
-    this.clarTooltip()
+    this.clearTooltip()
     this.setTooltipTitle(d)
     this.setTooltipContent(d);
 
@@ -258,13 +258,13 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
   }
 
-  private clarTooltip() {
+  private clearTooltip() {
     this.engine.hoverTitle.textContent = ''
     this.engine.hoverDates.textContent = ''
   }
 
   private setTooltipTitle(d: GanttItem) {
-    this.engine.hoverTitle.textContent = `Day ${d.startDays}: ${d.name}`
+    this.engine.hoverTitle.textContent = d.name // `Day ${d.startDays}: ${d.name}`
   }
 
   private setTooltipContent(d: GanttItem) {
