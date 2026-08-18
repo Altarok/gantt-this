@@ -59,7 +59,8 @@ export class GanttRenderEngine {
               public readonly hoverTitle: HTMLElement,
               public readonly hoverDates: HTMLElement,
               public readonly plugin: FantasyGanttPlugin,
-              public readonly codeBlockContent: CodeBlockContent) {
+              public readonly codeBlockContent: CodeBlockContent,
+              public readonly selectedFrontmatterProperties: string[] | null) {
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     // this.transitionToPredefinedBounds()

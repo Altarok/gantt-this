@@ -172,6 +172,7 @@
 
 /* Tooltip implementation matching Obsidian spec */
 .gt-tooltip {
+  white-space: pre-line; /* Or pre-wrap */
   left: var(--mouse-x);
   top: var(--mouse-y);
   border: 1px solid var(--background-modifier-border);

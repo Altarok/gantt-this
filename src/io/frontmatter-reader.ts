@@ -1,5 +1,5 @@
 import {FrontMatterCache} from 'obsidian'
-import {GanttItemDisplayType, GanttItemDisplayTypes, PluginSettings} from '../const/types'
+import {GanttItem, GanttItemDisplayType, GanttItemDisplayTypes, PluginSettings} from '../const/types'
 
 /*
  * Default key: 'gantt-type-definition'
@@ -104,6 +104,26 @@ function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettin
   return (value ? `#${value}` : '')
 }
 
+function readUnknownProperites(d: GanttItem, selectedProperties: string[], settings: PluginSettings): string[] {
+
+
+  for (const key of selectedProperties) switch (key) { // keeps order, while Objects.keys does not
+
+
+//    const value = eventData.frontmatter?.[propertyKey];
+//
+//    // 2. Skip or render based on whether the property exists on this specific event
+//    if (value !== undefined) {
+//      // Append key/value pair to the tooltip DOM in this exact order
+//    }
+
+  }
+
+
+  return ['foo', 'bar']
+}
+
+
 export const FrontMatterUtil = {
   isMatchingCalendarDefinition,
   isFileMarkedAsEvent,
@@ -116,5 +136,6 @@ export const FrontMatterUtil = {
   getEventSymbol,
   hasStartDate,
   getEventTimestamps,
-  getHeaderToLinkTo
+  getHeaderToLinkTo,
+  readUnknownProperites
 }

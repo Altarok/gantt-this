@@ -59,10 +59,10 @@ export class GanttRender {
 
       if (this.filesFilteredByBase !== null) {
         parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase)
-          .then(updatedData => {
-            if (renderEngine) renderEngine.updateData(updatedData)
-          })
-          .catch(err => new Notice('Failed: ' + err))
+        .then(updatedData => {
+          if (renderEngine) renderEngine.updateData(updatedData)
+        })
+        .catch(err => new Notice('Failed: ' + err))
         return
       }
 
@@ -71,10 +71,10 @@ export class GanttRender {
       updateTimeout = window.setTimeout(() => {
         new Notice('Re-rendering Gantt...')
         getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
-          .then(updatedData => {
-            if (renderEngine) renderEngine.updateData(updatedData)
-          })
-          .catch(err => new Notice('Failed: ' + err))
+        .then(updatedData => {
+          if (renderEngine) renderEngine.updateData(updatedData)
+        })
+        .catch(err => new Notice('Failed: ' + err))
       }, 500)
     }
 
@@ -142,7 +142,8 @@ export class GanttRender {
       hoverTitle,
       hoverDates,
       this.plugin,
-      codeBlockContent
+      codeBlockContent,
+      this.selectedFrontmatterProperties
     )
 
     reloadBtn.addEventListener('click', () => refreshChartCallback())

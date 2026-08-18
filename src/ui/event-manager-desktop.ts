@@ -3,6 +3,7 @@ import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {Util} from './svg-drawer-util'
+import {FrontMatterUtil} from "../io/frontmatter-reader";
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -243,10 +244,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
       doc.body.appendChild(tooltip)
     }
 
-    this.engine.hoverTitle.textContent = `Day ${d.startDays}: ${d.name}`
-    this.engine.hoverDates.textContent = d.displayType === 'bar'
-      ? `${d.startDateDisplay} to ${d.endDateDisplay}`
-      : d.startDateDisplay
+    /* Set tooltip title */
+    this.setTooltipTitle(d)
+    this.setTooltipContent(d);
 
     this.engine.tooltip.classList.add(Css.tooltip.isActive)
 
@@ -255,6 +255,35 @@ export class GanttDesktopEventManager implements GanttEventManager {
     } else {
       this.engine.tooltip.removeAttribute('data-link')
     }
+  }
+
+  private setTooltipTitle(d: GanttItem) {
+    this.engine.hoverTitle.textContent = `Day ${d.startDays}: ${d.name}`
+  }
+
+  private setTooltipContent(d: GanttItem) {
+
+    const hasSelectedBaseProperties = Boolean((this.engine.selectedFrontmatterProperties?.length ?? 0) > 0)
+
+    if (hasSelectedBaseProperties) {
+      const selectedProps = this.engine.selectedFrontmatterProperties!
+      this.engine.hoverDates.textContent = this.createBasesTooltipContent(d, selectedProps)
+    } else {
+      this.engine.hoverDates.textContent = this.createFallbackTooltipContent(d)
+    }
+  }
+
+  private get pluginSettings() {
+    return this.engine.plugin.settings
+  }
+
+  private createBasesTooltipContent(d: GanttItem, selectedProps: string[]): string {
+    const properties: string[] = FrontMatterUtil.readUnknownProperites(d, selectedProps, this.pluginSettings)
+    return properties.join('<br>')
+  }
+
+  private createFallbackTooltipContent(d: GanttItem): string {
+    return d.displayType === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
   }
 
   private handleWindowMouseUp() {
