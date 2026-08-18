@@ -73,13 +73,26 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
   }
 }
 
+
+function getStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  return frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
+}
+
+function getEndDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
+  return frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
+}
+
+function hasStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
+  return Boolean(getStartDate(frontMatter, settings))
+}
+
 /*
  * Default keys: 'gantt-start' & 'gantt-end'
  */
 function getEventTimestamps(frontMatter: FrontMatterCache, settings: PluginSettings):
   { startDate?: string, endDate?: string } {
-  const startDate = frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
-  const endDate = frontMatter[settings.frontMatterProperty_event_time_end] as string ?? undefined
+  const startDate = getStartDate(frontMatter, settings)
+  const endDate = getEndDate(frontMatter, settings)
   return {startDate, endDate}
 }
 
@@ -93,7 +106,7 @@ function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettin
 
 export const FrontMatterUtil = {
   isMatchingCalendarDefinition,
-  isFileRelevant: isFileMarkedAsEvent,
+  isFileMarkedAsEvent,
   getEventCalendarName,
   getEventColor,
   getEventGroup,
@@ -101,6 +114,7 @@ export const FrontMatterUtil = {
   getEventIconID,
   getEventIconColor,
   getEventSymbol,
+  hasStartDate,
   getEventTimestamps,
   getHeaderToLinkTo
 }

@@ -2,6 +2,7 @@ import {BasesView, Notice, QueryController} from 'obsidian'
 import {GanttRender} from './ui/svg-drawer-prestep'
 import {BaseKeys, CodeBlockContent} from './const/types'
 import FantasyGanttPlugin from './main'
+import {FrontMatterUtil} from './io/frontmatter-reader'
 
 export const ExampleViewType = 'example-view'
 
@@ -109,9 +110,7 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
     }
 
     const selectedProperties: string[] = this.config.getOrder()
-    const selectedFronMatterProperties = selectedProperties
-      .filter(s => s.startsWith('note.'))
-      .map(s => s.slice(5))
+    const selectedFronMatterProperties = selectedProperties.filter(s => s.startsWith('note.')).map(s => s.slice(5)).filter(Boolean)
 
     const render = new GanttRender(this.plugin, files, selectedFronMatterProperties)
 
@@ -123,23 +122,21 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
   }
 
   private preFilterFiles() {
-    const checkboxMarkerProperty = this.plugin.settings.frontMatterProperty_gantt_this
     const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
-    const startDateProperty = this.plugin.settings.frontMatterProperty_event_time_start
 
     /* Pre-filter files */
     return this.data.data.map(entry => entry.file)
-      .filter(file => {
-        const cache = this.plugin.app.metadataCache.getFileCache(file)
-        const frontmatter = cache?.frontmatter
-        if (!frontmatter) return false
+    .filter(file => {
+      const cache = this.plugin.app.metadataCache.getFileCache(file)
+      const frontmatter = cache?.frontmatter
+      if (!frontmatter) return false
 
-        const hasStartDate = Boolean(frontmatter[startDateProperty])
-        const hasValidMarker = isCheckboxMarkerOptional || frontmatter[checkboxMarkerProperty] === true
+      const hasStartDate = FrontMatterUtil.hasStartDate(frontmatter, this.plugin.settings)
+      const hasValidMarker = isCheckboxMarkerOptional || FrontMatterUtil.isFileMarkedAsEvent(frontmatter, this.plugin.settings)
 
-        // Check if note contains the required frontmatter properties
-        return hasStartDate && hasValidMarker
-      })
+      // Check if note contains the required frontmatter properties
+      return hasStartDate && hasValidMarker
+    })
   }
 
   private getStringValue(key: string): string | undefined {

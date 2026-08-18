@@ -2,7 +2,7 @@ import {TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {CodeBlockContent, PluginSettings} from '../const/types'
 import {Consts} from '../const/constants'
-import {FrontMatterUtil} from "./frontmatter-reader";
+import {FrontMatterUtil} from './frontmatter-reader'
 
 export function getFilteredFiles(plugin: FantasyGanttPlugin,
                                  pluginSettings: PluginSettings,
@@ -33,6 +33,6 @@ export function getFilteredFiles(plugin: FantasyGanttPlugin,
     if (frontMatterProperty_gantt_this_optional)
       return true
     else
-      return FrontMatterUtil.isFileRelevant(frontMatter, plugin.settings)
+      return FrontMatterUtil.isFileMarkedAsEvent(frontMatter, plugin.settings)
   })
 }
