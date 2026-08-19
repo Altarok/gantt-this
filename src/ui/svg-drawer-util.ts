@@ -274,7 +274,7 @@ function drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElem
 }
 
 function drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
-  const points = calculatePolygonPoints(iconRadius, cx, cy, 8, 1, 1/8)
+  const points = calculatePolygonPoints(iconRadius, cx, cy, 8, 1, 1 / 8)
   drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer)
 }
 

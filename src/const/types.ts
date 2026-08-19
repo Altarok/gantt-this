@@ -103,7 +103,7 @@ function isGanttItemDisplayTypeTimestamp(value: string): value is GanttItemDispl
 
 /** Calendar event display types */
 export const GanttItemDisplayTypes = {
-  GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS, GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP,
+  GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP,
   isTimespan: isGanttItemDisplayTypeTimespan,
   isTimestamp: isGanttItemDisplayTypeTimestamp
 }
