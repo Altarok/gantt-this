@@ -180,7 +180,7 @@
   padding: 10px;
   border-radius: 6px;
   pointer-events: none; /* Prevents tooltip from breaking hover states */
-  max-width: 250px;
+  max-width: 360px;
   font-size: var(--font-small-size);
   color: var(--text-normal);
   position: fixed;
@@ -189,6 +189,8 @@
   visibility: hidden;
   transition: opacity 0.1s ease;
   background-color: var(--background-primary-alt);
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .gt-tooltip.is-active {
