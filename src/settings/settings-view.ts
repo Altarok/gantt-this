@@ -55,36 +55,10 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
    * https://docs.obsidian.md/plugins/guides/migrate-declarative-settings
    */
   getSettingDefinitions(): SettingDefinitionItem[] {
-
-
     return [
       /* Source paths for input */
-      {
-        heading: 'Define source paths for your Events and Calendars',
-        type: 'group',
-        items: [
-          {
-            name: 'Folder to search for event definitions',
-            desc: 'Can be searched recursively',
-            control: {type: 'folder', key: 'eventPath', includeRoot: true}
-          },
-          {
-            name: 'Search sub-folders?',
-            control: {type: 'toggle', key: 'eventPathSearchRecursive'}
-            // .setTooltip('Search recursively?', {delay: -1})
-          },
-          {
-            name: 'Folder to search for calendar definitions',
-            desc: 'Can be searched recursively',
-            control: {type: 'folder', key: 'calendarPath', includeRoot: true}
-          },
-          {
-            name: 'Search sub-folders?',
-            control: {type: 'toggle', key: 'calendarPathSearchRecursive'}
-            // .setTooltip('Search recursively?', {delay: -1})
-          }
-        ]
-      },
+      this.createDataSourceSelectionGroup(),
+
       /* Default values */
       {
         heading: 'Default values',
@@ -125,11 +99,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       /* Group list */
       this.createGroupList(),
 
+      {
+        heading: 'Advanced',
+        type: 'group',
+      },
       /* Advanced UX settings */
       this.createAdvancedUxSettingDefinition(),
       /* FrontMatter property names */
       this.createFrontMatterSettingDefinitions()
-
     ]
   }
 
@@ -251,7 +228,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private createAdvancedUxSettingDefinition(): SettingDefinitionItem {
     return {
-      name: 'Advanced UX settings', type: 'page',
+      name: 'Advanced', type: 'page',
       desc: 'Change the UI to your liking.',
       items: [
         {
@@ -500,4 +477,32 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   }
 
 
+  private createDataSourceSelectionGroup(): SettingDefinitionItem {
+    return {
+      heading: 'Define source paths for your Events and Calendars',
+      type: 'group',
+      items: [
+        {
+          name: 'Folder to search for event definitions',
+          desc: 'Can be searched recursively',
+          control: {type: 'folder', key: 'eventPath', includeRoot: true}
+        },
+        {
+          name: 'Search sub-folders?',
+          control: {type: 'toggle', key: 'eventPathSearchRecursive'}
+          // .setTooltip('Search recursively?', {delay: -1})
+        },
+        {
+          name: 'Folder to search for calendar definitions',
+          desc: 'Can be searched recursively',
+          control: {type: 'folder', key: 'calendarPath', includeRoot: true}
+        },
+        {
+          name: 'Search sub-folders?',
+          control: {type: 'toggle', key: 'calendarPathSearchRecursive'}
+          // .setTooltip('Search recursively?', {delay: -1})
+        }
+      ]
+    }
+  }
 }
