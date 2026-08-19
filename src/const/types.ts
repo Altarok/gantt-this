@@ -209,6 +209,11 @@ export type ConfigurableFrontmatterPropertyNames = {
   frontMatterProperty_note_header: string
 }
 
+export type HideableSettingPages = {
+  hideSettingsPageUx: boolean
+  hideSettingsPageFrontmatterProperties: boolean
+}
+
 export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   fallbackColor: string
@@ -233,7 +238,7 @@ export type PluginSettings = GanttChartSources & {
   uxPanButton: ControlKey
   uxZoomButton: ControlKey
   uxUseCalColorForCalAxis: boolean
-} & ConfigurableFrontmatterPropertyNames
+} & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   eventPath: '/',
@@ -282,7 +287,10 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_symbol: 'gantt-symbol', // diamond ... or auto-(bar | point)
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // icon name from https://lucide.dev
   frontMatterProperty_event_icon_color: 'gantt-displayIconColor',  // color for said icon
-  frontMatterProperty_note_header: 'gantt-linkToHeader' // note-internal header to link to
+  frontMatterProperty_note_header: 'gantt-linkToHeader', // note-internal header to link to
+
+  hideSettingsPageUx: true,
+  hideSettingsPageFrontmatterProperties: true
 } as const
 
 /**  Data updated on a redraw, not while panning or zooming */

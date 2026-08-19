@@ -388,8 +388,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
-      const upper = Util.createSvg('line', 'gt-item vertical-overlay'/* , {'pointer-events': 'none'} */)
-      const lower = Util.createSvg('line', 'gt-item vertical-overlay'/* , {'pointer-events': 'none'} */)
+      const upper = Util.createSvg('line', 'gt-item vertical-overlay')
+      const lower = Util.createSvg('line', 'gt-item vertical-overlay')
       if (svg.firstChild) {
         svg.insertBefore(upper, svg.firstChild)
         svg.insertBefore(lower, svg.firstChild)
@@ -412,10 +412,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
    * @param x
    * @private
    */
-  private updateLine(ganttItem: GanttItem, lines: {
-    upper: SVGLineElement,
-    lower: SVGLineElement
-  }, x: number/* , height: number */) {
+  private updateLine(ganttItem: GanttItem, lines: { upper: SVGLineElement, lower: SVGLineElement }, x: number) {
 
     const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.config.margin.top
 
