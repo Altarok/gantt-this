@@ -24,5 +24,7 @@ export function createGanttEventManager(renderEngine: GanttRenderEngine,
       pluginSettings.mouseOverEventShowBox,
       pluginSettings.mouseOverEventShowVerticalLine,
       pluginSettings.uxZoomButton,
-      pluginSettings.uxPanButton)
+      pluginSettings.uxPanButton,
+      pluginSettings.customTooltipButton,
+      pluginSettings.nativeTooltipButton)
 }

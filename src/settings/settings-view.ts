@@ -1,6 +1,12 @@
 import {ColorComponent, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {ControlKeyMapped, DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
+import {
+  ControlKeyMapped,
+  DEFAULT_SETTINGS,
+  GanttItemDisplayTypes,
+  GroupOrCalendarSettings,
+  OptionalControlKeyMapped
+} from '../const/types'
 import {AddEntryModal} from './settings-util'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
@@ -19,7 +25,6 @@ function toRecord(strings: readonly string[]): Record<string, string> {
 function testFrontMatterInput(value: string): string | undefined {
   return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must only contain letters, numbers, hyphens, underscores, and dots.' /* input NOK */
 }
-
 
 function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
   if (!value || calendars?.length === 0) return false
@@ -327,12 +332,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       //     defaultValue: DEFAULT_SETTINGS.uxEnableVisualZoom
       //   }
       // },
+
+      /* --------- Zooming and Panning --------- */
       {
         name: 'Zoom key',
         desc: 'Key to hold while scrolling to zoom in or out.',
         control: {
           type: 'dropdown', key: 'uxZoomButton', options: ControlKeyMapped,
-          validate: value => (value !== this.settings.uxPanButton) ? undefined : 'Must differ from pan button.',
+          validate: value => (value !== this.settings.uxPanButton) ? undefined : 'Must differ from pan key.',
           defaultValue: DEFAULT_SETTINGS.uxZoomButton
         }
       },
@@ -341,10 +348,30 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         desc: 'Key to hold while scrolling to pan horizontally.',
         control: {
           type: 'dropdown', key: 'uxPanButton', options: ControlKeyMapped,
-          validate: value => (value !== this.settings.uxZoomButton) ? undefined : 'Must differ from zoom button.',
+          validate: value => (value !== this.settings.uxZoomButton) ? undefined : 'Must differ from zoom key.',
           defaultValue: DEFAULT_SETTINGS.uxPanButton
         }
       },
+      /* --------- Tooltips --------- */
+      {
+        name: 'Custom tooltip key',
+        desc: 'Key to hold while hovering over events. Tooltip will show selected properties.',
+        control: {
+          type: 'dropdown', key: 'customTooltipButton', options: OptionalControlKeyMapped,
+          validate: value => (value !== this.settings.nativeTooltipButton) ? undefined : 'Must differ from native tooltip key.',
+          defaultValue: DEFAULT_SETTINGS.customTooltipButton
+        }
+      },
+      {
+        name: 'Native tooltip key',
+        desc: 'Key to hold while hovering over events. Tooltip will show the native file preview.',
+        control: {
+          type: 'dropdown', key: 'nativeTooltipButton', options: OptionalControlKeyMapped,
+          validate: value => (value !== this.settings.customTooltipButton) ? undefined : 'Must differ from custom tooltip key.',
+          defaultValue: DEFAULT_SETTINGS.nativeTooltipButton
+        }
+      },
+      /* --------- + --------- */
       {
         name: 'Color-code calendar axis',
         desc: 'Apply the corresponding calendar color directly to the calendar axis.',

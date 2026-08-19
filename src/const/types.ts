@@ -183,13 +183,15 @@ export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
 }
 
 export type ControlKey = 'ctrl' | 'alt' | 'shift'
-// export type ModifierKeySetting = 'ctrl' | 'alt' | 'shift' | 'none'
 export const ControlKeyMapped = {
   'alt': 'alt / option',
   'ctrl': 'ctrl / cmd',
   'shift': 'shift'
 }
-
+export type OptionalControlKey = ControlKey | 'none'
+export const OptionalControlKeyMapped = {
+  'none': 'none', ...ControlKeyMapped
+}
 /**
  * Front-matter property names configurable by user
  */
@@ -237,6 +239,8 @@ export type PluginSettings = GanttChartSources & {
   // uxSwitchZoomAndPan: boolean
   uxPanButton: ControlKey
   uxZoomButton: ControlKey
+  customTooltipButton: OptionalControlKey
+  nativeTooltipButton: OptionalControlKey
   uxUseCalColorForCalAxis: boolean
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
@@ -269,6 +273,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   // uxSwitchZoomAndPan: false,
   uxPanButton: 'shift',
   uxZoomButton: 'ctrl',
+  customTooltipButton: 'none',
+  nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
 
   /*
