@@ -14,3 +14,7 @@ started:
 - [Event Definitions](04-events)
 - [Plugin Settings](05-plugin-settings)
 - [FAQ](99-FAQ)
+
+Click to find plugin in [Obsidian Community](https://community.obsidian.md/plugins/gantt-this).
+
+Click to find [GitHub repository](https://github.com/Altarok/gantt-this).
