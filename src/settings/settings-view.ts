@@ -69,7 +69,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         type: 'group',
         items: [
           {
-            name: 'Default event calendar',
+            name: 'Event calendar',
             desc: `Fallback value for the event property 'gantt-type'. Default: ${DEFAULT_SETTINGS.defaultCalendar}`,
             control: {
               type: 'text',
@@ -80,7 +80,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Default event color',
+            name: 'Event color',
             desc: `Fallback value for event property '${this.settings.frontMatterProperty_event_color}'.`,
             control: {
               type: 'color', key: 'fallbackColor',
@@ -88,7 +88,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Default icon color',
+            name: 'Icon color',
             desc: `Fallback value for event property '${this.settings.frontMatterProperty_event_icon_color}'.`,
             control: {
               type: 'color', key: 'fallbackColorForIcons',
@@ -372,13 +372,13 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     if (this.settings.hideSettingsPageUx) return {
       type: 'page',
-      name: 'Advanced',
+      name: 'Display and controls',
       desc: 'Change the UI to your liking.',
       items
     }
     else return {
       type: 'group',
-      heading: 'Advanced',
+      heading: 'Display and controls',
       desc: 'Change the UI to your liking.',
       items: items
     }
