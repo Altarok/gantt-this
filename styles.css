@@ -180,6 +180,7 @@
   padding: 10px;
   border-radius: 6px;
   pointer-events: none; /* Prevents tooltip from breaking hover states */
+  width: max-content;
   max-width: 360px;
   font-size: var(--font-small-size);
   color: var(--text-normal);
@@ -519,9 +520,8 @@
 /* Gantt Tooltip Table Styling */
 .gantt-tooltip-table {
   border-collapse: collapse;
-  width: 100%;
-  max-width: 100%;
-  table-layout: fixed;
+  width: auto;
+  margin: 0 auto;
   font-size: var(--font-ui-smaller, 0.85em);
   color: var(--text-normal);
 }
