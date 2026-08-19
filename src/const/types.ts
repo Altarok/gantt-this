@@ -283,8 +283,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // icon name from https://lucide.dev
   frontMatterProperty_event_icon_color: 'gantt-displayIconColor',  // color for said icon
   frontMatterProperty_note_header: 'gantt-linkToHeader' // note-internal header to link to
-
-
 } as const
 
 /**  Data updated on a redraw, not while panning or zooming */
