@@ -32,8 +32,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   constructor(public readonly plugin: FantasyGanttPlugin) {
     super(plugin.app, plugin)
   }
-
-
+  
   private openAddForm(target: 'groups' | 'calendars') {
 
     const existingIds: string[] = (target === 'groups') ? this.plugin.settings.groups.map(g => g.id) : this.plugin.settings.calendars.map(c => c.id)

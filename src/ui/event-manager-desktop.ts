@@ -259,11 +259,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.setTooltipTitle(d)
     this.setTooltipContent(d)
 
-    tooltip.style.position = 'fixed'
     tooltip.style.left = `${event.clientX + 15}px`
     tooltip.style.top = `${event.clientY + 15}px`
-    tooltip.style.pointerEvents = 'none'
-    tooltip.style.zIndex = '9999'
 
     this.engine.tooltip.classList.add(Css.tooltip.isActive)
 
@@ -393,8 +390,13 @@ export class GanttDesktopEventManager implements GanttEventManager {
     while (this.verticalGuides.length < count) {
       const upper = Util.createSvg('line', 'gt-item vertical-overlay'/* , {'pointer-events': 'none'} */)
       const lower = Util.createSvg('line', 'gt-item vertical-overlay'/* , {'pointer-events': 'none'} */)
-      svg.appendChild(upper)
-      svg.appendChild(lower)
+      if (svg.firstChild) {
+        svg.insertBefore(upper, svg.firstChild)
+        svg.insertBefore(lower, svg.firstChild)
+      } else {
+        svg.appendChild(upper)
+        svg.appendChild(lower)
+      }
       this.verticalGuides.push({upper, lower})
     }
   }
