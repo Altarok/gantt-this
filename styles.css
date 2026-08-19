@@ -518,6 +518,8 @@
 .gantt-tooltip-table {
   border-collapse: collapse;
   width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
   font-size: var(--font-ui-smaller, 0.85em);
   color: var(--text-normal);
 }
@@ -541,7 +543,7 @@
 /* Property Value (Second Column) */
 .gantt-tooltip-table td:last-child {
   color: var(--text-normal);
-  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 /* Subtle separator between rows */
