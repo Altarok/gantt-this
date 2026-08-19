@@ -18,7 +18,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
-  private readonly boundWindowMouseUp: () => void
+  private readonly boundWindowMouseUp: (e: MouseEvent) => void
   private readonly boundSvgMouseDown: (e: MouseEvent) => void
   private readonly boundSvgWheel: (e: WheelEvent) => void
   private readonly boundSvgMouseOver: (e: MouseEvent) => void
@@ -54,22 +54,26 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private activeWindow: Window | null = null
 
   public attachSvgListeners() {
-
     this.detachListeners()
 
     this.currentSvg = this.engine.svg
     if (!this.currentSvg) return
 
     this.activeWindow = this.currentSvg.ownerDocument.defaultView ?? window
-    this.activeWindow.addEventListener('mousemove', this.boundWindowMouseMove)
-    this.activeWindow.addEventListener('mouseup', this.boundWindowMouseUp)
+    const plugin = this.engine.plugin
 
-    this.currentSvg.addEventListener('mousedown', this.boundSvgMouseDown)
-    this.currentSvg.addEventListener('wheel', this.boundSvgWheel, {passive: false})
-    this.currentSvg.addEventListener('mouseover', this.boundSvgMouseOver)
-    this.currentSvg.addEventListener('mousemove', this.boundSvgMouseMove)
-    this.currentSvg.addEventListener('mouseleave', this.boundSvgMouseLeave)
-    this.currentSvg.addEventListener('click', this.boundSvgClick)
+    plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
+    plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
+    plugin.registerDomEvent(this.activeWindow, 'blur', () => this.hideTooltip(/*'window blur'*/))
+
+    const svgEl = this.currentSvg as unknown as HTMLElement
+
+    plugin.registerDomEvent(svgEl, 'mousedown', this.boundSvgMouseDown)
+    plugin.registerDomEvent(svgEl, 'wheel', this.boundSvgWheel, {passive: false})
+    plugin.registerDomEvent(svgEl, 'mouseover', this.boundSvgMouseOver)
+    plugin.registerDomEvent(svgEl, 'mousemove', this.boundSvgMouseMove)
+    plugin.registerDomEvent(svgEl, 'mouseleave', this.boundSvgMouseLeave)
+    plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
   }
 
   private detachListeners() {
@@ -95,9 +99,10 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
-    const doc = this.activeDocument
-    doc.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
-    doc.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
+    /* Set coordinates for tooltip*/
+    // const doc = this.activeDocument
+    // doc.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
+    // doc.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
 
     if (this.isDragging) {
       const deltaX = e.clientX - this.startX
@@ -173,49 +178,43 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.engine.drawAxes(width)
   }
 
-  private handleSvgMouseOver(event: MouseEvent) {
-    const target = event.target as HTMLElement
-    if (target?.hasAttribute('data-id')) {
-      const rawId = target.getAttribute('data-id')
-      if (rawId === null) return
-      const id = Number(rawId)
-      const dataObj = this.engine.rawData.find(d => d.id === id)
-      if (dataObj) {
-        this.showTooltip(dataObj)
-        this.showHighlightAroundElement(target, dataObj)
-        this.showVerticalGuide(target, dataObj)
-      }
-    }
+  private handleSvgMouseOver(e: MouseEvent): void {
+    this.showOrHideTooltip(e)
   }
 
-  private handleSvgMouseMove(event: MouseEvent) {
-    const target = event.target as HTMLElement
-    if (target?.hasAttribute('data-id')) {
-      /* classList.contains() throws a runtime exception on strings containing spaces */
-      if (!this.engine.tooltip.classList.contains(Css.tooltip.isActive)) {
-        const rawId = target.getAttribute('data-id')
-        if (rawId === null) return
-        const id = Number(rawId)
-        const dataObj = this.engine.rawData.find(d => d.id === id)
-        if (dataObj) this.showTooltip(dataObj)
-      }
+  private handleSvgMouseMove(e: MouseEvent): void {
+    this.showOrHideTooltip(e)
+  }
+
+  private showOrHideTooltip(e: MouseEvent) {
+    const target = e.target as HTMLElement
+    if (!target?.hasAttribute('data-id')) return this.hideTooltip()
+
+    const rawId = target.getAttribute('data-id')
+    if (rawId === null) return this.hideTooltip()
+    const id = Number(rawId)
+    const dataObj = this.engine.rawData.find(d => d.id === id)
+    if (!dataObj) return this.hideTooltip()
+
+    if (e.ctrlKey) {
+      this.hideTooltip()
+      this.showNativePreview(e, target, dataObj.link)
     } else {
-      this.engine.tooltip.classList.remove(Css.tooltip.isActive)
-
-      /* Clean up if mouse drifted off a data element onto empty SVG space */
-      this.hideHighlightAroundElement()
-
-      this.hideVerticalGuide()
+      this.showCustomTooltip(dataObj, e)
+      this.showHighlightAroundElement(target, dataObj)
+      this.showVerticalGuide(target, dataObj)
     }
   }
+
 
   private handleSvgMouseLeave() {
+    this.hideTooltip()
+  }
+
+  /* Clean up if mouse drifted off a data element onto empty SVG space */
+  private hideTooltip() {
     this.engine.tooltip.classList.remove(Css.tooltip.isActive)
-
-    /* Clean up using the tracked reference instead of event.target */
     this.hideHighlightAroundElement()
-
-    /* Remove the vertical guideline */
     this.hideVerticalGuide()
   }
 
@@ -233,7 +232,19 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
   }
 
-  private showTooltip(d: GanttItem) {
+  private showNativePreview(event: MouseEvent, target: HTMLElement, link?: string) {
+    if (!link) return
+
+    this.engine.plugin.app.workspace.trigger('hover-link', {
+      event,
+      source: 'gantt-this',
+      hoverParent: this.engine.container,
+      targetEl: target,
+      linktext: link,
+    })
+  }
+
+  private showCustomTooltip(d: GanttItem, event: MouseEvent) {
     if (d.displayType === 'era') return
 
     const doc = this.activeDocument
@@ -244,10 +255,15 @@ export class GanttDesktopEventManager implements GanttEventManager {
       doc.body.appendChild(tooltip)
     }
 
-    /* Set tooltip title */
     this.clearTooltip()
     this.setTooltipTitle(d)
-    this.setTooltipContent(d);
+    this.setTooltipContent(d)
+
+    tooltip.style.position = 'fixed'
+    tooltip.style.left = `${event.clientX + 15}px`
+    tooltip.style.top = `${event.clientY + 15}px`
+    tooltip.style.pointerEvents = 'none'
+    tooltip.style.zIndex = '9999'
 
     this.engine.tooltip.classList.add(Css.tooltip.isActive)
 
@@ -310,7 +326,10 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseUp() {
-    this.isDragging = false
+    if (this.isDragging) {
+      this.isDragging = false
+      this.hideTooltip(/*'handleWindowMouseUp'*/)
+    }
     this.stopAnimation()
   }
 
@@ -372,17 +391,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
-      const upper = window.document.createElementNS(svgUrl, 'line')
-      upper.setAttribute('stroke', 'red')
-      upper.setAttribute('stroke-width', '1.5')
-      upper.setAttribute('stroke-dasharray', '4 4')
-
-      const lower = window.document.createElementNS(svgUrl, 'line')
-      lower.setAttribute('stroke', 'red')
-      lower.setAttribute('stroke-width', '1.5')
-      lower.setAttribute('stroke-dasharray', '4 4')
-
-
+      const upper = Util.createSvg('line', 'gt-item vertical-overlay'/* , {'pointer-events': 'none'} */)
+      const lower = Util.createSvg('line', 'gt-item vertical-overlay'/* , {'pointer-events': 'none'} */)
       svg.appendChild(upper)
       svg.appendChild(lower)
       this.verticalGuides.push({upper, lower})
@@ -438,21 +448,14 @@ export class GanttDesktopEventManager implements GanttEventManager {
       if (this.highlightElement) {
         this.highlightElement.remove()
         this.highlightElement = null
-//      } else {
-//        this.lastHoveredTarget.style.outline = ''
-//        this.lastHoveredTarget.style.outlineOffset = ''
       }
     }
 
     if (ganttItem.displayType === 'era') return
+    if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') return
+    if (ganttItem.displayType === 'vertical-line') return
 
     this.lastHoveredTarget = target
-
-    if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
-      // target.style.outline = '1px solid red'
-      return
-    }
-
     const svg = target.closest('svg')
     if (!svg) return
 
@@ -470,46 +473,36 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     this.highlightElement.innerHTML = ''
     let shape: SVGElement
+    let points: string
 
-
-    if (ganttItem.displayType === 'diamond') {
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 4)
-      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
-
-    } else if (ganttItem.displayType === 'triangle') {
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 + 2, 3)
-      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
-
-    } else if (ganttItem.displayType === 'pentagon') {
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2 + 1, 5)
-      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
-
-    } else if (ganttItem.displayType === 'hexagon') {
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 6)
-      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
-
-    } else if (ganttItem.displayType === 'octagon') {
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 8, 1, 1 / 16)
-      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
-
-    } else if (ganttItem.displayType === 'star') {
-
-      const points = Util.calculatePolygonPoints(11, x + width / 2, y + height / 2, 10, 0.382)
-      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
-
-    } else {
+    if (ganttItem.displayType === 'point') {
       shape = Util.createSvg('circle', 'gt-item timestamp symbol-hover', {
-        cx: String(x + width / 2),
-        cy: String(y + height / 2),
-        r: String(width / 2 + 3)
+        cx: String(x + width / 2), cy: String(y + height / 2), r: String(width / 2 + 3)
       })
+    } else {
+      const centreX = x + width / 2
+      const centreY = y + height / 2
+      points = this.calculatePolygonPointsForOverlay(centreX, centreY, ganttItem.displayType)
+      shape = Util.createSvg('polygon', 'gt-item timestamp symbol-hover', {points})
     }
     this.highlightElement.appendChild(shape)
+  }
+
+  private calculatePolygonPointsForOverlay(x: number, y: number, symbol: 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'octagon' | 'star') {
+    switch (symbol) {
+      case 'triangle':
+        return Util.calculatePolygonPoints(11, x, y + 2, 3)
+      case 'diamond':
+        return Util.calculatePolygonPoints(11, x, y, 4)
+      case 'pentagon':
+        return Util.calculatePolygonPoints(11, x, y + 1, 5)
+      case 'hexagon':
+        return Util.calculatePolygonPoints(11, x, y, 6)
+      case 'octagon':
+        return Util.calculatePolygonPoints(11, x, y, 8, 1, 1 / 8)
+      case 'star':
+        return Util.calculatePolygonPoints(12, x, y + 1, 10, 0.382)
+    }
   }
 
   private hideHighlightAroundElement() {

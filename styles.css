@@ -342,7 +342,7 @@
   user-select: none;
 }
 
-.gt-item.vertical-line {
+.gt-item.timestamp.vertical-line {
   stroke: red;
 }
 
