@@ -1,4 +1,4 @@
-import {FrontMatterCache} from "obsidian";
+import {FrontMatterCache} from 'obsidian'
 
 export const CALENDAR_CONFIG_TYPES = [
   'positional',
@@ -188,10 +188,10 @@ export const ControlKeyMapped = {
   'ctrl': 'ctrl / cmd',
   'shift': 'shift'
 }
-export type OptionalControlKey = ControlKey | 'none'
-export const OptionalControlKeyMapped = {
-  'none': 'none', ...ControlKeyMapped
-}
+// export type OptionalControlKey = ControlKey | 'none'
+// export const OptionalControlKeyMapped = {
+//   'none': 'none', ...ControlKeyMapped
+// }
 /**
  * Front-matter property names configurable by user
  */
@@ -239,8 +239,8 @@ export type PluginSettings = GanttChartSources & {
   // uxSwitchZoomAndPan: boolean
   uxPanButton: ControlKey
   uxZoomButton: ControlKey
-  customTooltipButton: OptionalControlKey
-  nativeTooltipButton: OptionalControlKey
+  // customTooltipButton: OptionalControlKey
+  // nativeTooltipButton: OptionalControlKey
   uxUseCalColorForCalAxis: boolean
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
@@ -273,8 +273,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   // uxSwitchZoomAndPan: false,
   uxPanButton: 'shift',
   uxZoomButton: 'ctrl',
-  customTooltipButton: 'none',
-  nativeTooltipButton: 'ctrl',
+  // customTooltipButton: 'none',
+  // nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
 
   /*

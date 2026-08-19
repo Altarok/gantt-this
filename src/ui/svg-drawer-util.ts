@@ -374,8 +374,8 @@ function calculatePolygonPoints(radius: number,
     const x = cx + radius * Math.cos(angle) * iterRad
     const y = cy + radius * Math.sin(angle) * iterRad
 
-    points.push(`${x},${y}`);
+    points.push(`${x},${y}`)
   }
 
-  return points.join(' ');
+  return points.join(' ')
 }

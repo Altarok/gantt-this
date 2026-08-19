@@ -3,7 +3,6 @@ import {isCustomLeapYear} from './leap-year-calc'
 import {createAxisDateDescription} from '../util/dates'
 import {Consts} from '../const/constants'
 
-
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
  */

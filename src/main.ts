@@ -5,7 +5,7 @@ import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './ui/svg-drawer-prestep'
-import {ExampleViewType, GanttThisBasesView} from "./base"
+import {ExampleViewType, GanttThisBasesView} from './base'
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS

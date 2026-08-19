@@ -2,7 +2,7 @@ import {Platform} from "obsidian"
 import {GanttRenderEngine} from './svg-drawer'
 import {GanttMobileEventManager} from "./event-manager-mobile"
 import {GanttDesktopEventManager} from './event-manager-desktop'
-import {PluginSettings} from "../const/types";
+import {PluginSettings} from '../const/types'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -24,7 +24,5 @@ export function createGanttEventManager(renderEngine: GanttRenderEngine,
       pluginSettings.mouseOverEventShowBox,
       pluginSettings.mouseOverEventShowVerticalLine,
       pluginSettings.uxZoomButton,
-      pluginSettings.uxPanButton,
-      pluginSettings.customTooltipButton,
-      pluginSettings.nativeTooltipButton)
+      pluginSettings.uxPanButton)
 }

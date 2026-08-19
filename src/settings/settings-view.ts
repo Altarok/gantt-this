@@ -1,12 +1,6 @@
 import {ColorComponent, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {
-  ControlKeyMapped,
-  DEFAULT_SETTINGS,
-  GanttItemDisplayTypes,
-  GroupOrCalendarSettings,
-  OptionalControlKeyMapped
-} from '../const/types'
+import {ControlKeyMapped, DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
 import {AddEntryModal} from './settings-util'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
@@ -177,28 +171,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-          .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-            .onClick(async () => {
-              cal.visible = !cal.visible
-              void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-              await this.plugin.saveSettings()
-            })
-          )
-          .addColorPicker(c => cc = c
-            .setValue(cal.color ?? this.settings.fallbackColor)
-            .onChange(async (value) => {
-                cal.color = value
+            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                cal.visible = !cal.visible
+                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                 await this.plugin.saveSettings()
-              }
+              })
             )
-          )
-          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-            .onClick(async () => {
-              cc.setValue(this.settings.fallbackColor)
-              cal.color = this.settings.fallbackColor
-              await this.plugin.saveSettings()
-            })
-          )
+            .addColorPicker(c => cc = c
+              .setValue(cal.color ?? this.settings.fallbackColor)
+              .onChange(async (value) => {
+                  cal.color = value
+                  await this.plugin.saveSettings()
+                }
+              )
+            )
+            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+              .onClick(async () => {
+                cc.setValue(this.settings.fallbackColor)
+                cal.color = this.settings.fallbackColor
+                await this.plugin.saveSettings()
+              })
+            )
         },
       }))
     }
@@ -235,28 +229,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-          .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-            .onClick(async () => {
-              group.visible = !group.visible
-              void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-              await this.plugin.saveSettings()
-            })
-          )
-          .addColorPicker(c => cc = c
-            .setValue(group.color ?? this.settings.fallbackColor)
-            .onChange(async (value) => {
-                group.color = value
+            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+              .onClick(async () => {
+                group.visible = !group.visible
+                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
                 await this.plugin.saveSettings()
-              }
+              })
             )
-          )
-          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-            .onClick(async () => {
-              cc.setValue(this.settings.fallbackColor)
-              group.color = this.settings.fallbackColor
-              await this.plugin.saveSettings()
-            })
-          )
+            .addColorPicker(c => cc = c
+              .setValue(group.color ?? this.settings.fallbackColor)
+              .onChange(async (value) => {
+                  group.color = value
+                  await this.plugin.saveSettings()
+                }
+              )
+            )
+            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+              .onClick(async () => {
+                cc.setValue(this.settings.fallbackColor)
+                group.color = this.settings.fallbackColor
+                await this.plugin.saveSettings()
+              })
+            )
         },
       }))
     }
@@ -317,7 +311,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       {
         name: 'Restrict minimum and maximum zoom',
-        desc: 'Maximum zoom shows adjacent days; minimum zoom fits your complete dataset.',
+        desc: 'Maximum zoom shows adjacent days, minimum zoom fits your complete dataset.',
         control: {
           type: 'toggle', key: 'autoRestrictZoom',
           defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
@@ -353,24 +347,24 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         }
       },
       /* --------- Tooltips --------- */
-      {
-        name: 'Custom tooltip key',
-        desc: 'Key to hold while hovering over events. Tooltip will show selected properties.',
-        control: {
-          type: 'dropdown', key: 'customTooltipButton', options: OptionalControlKeyMapped,
-          validate: value => (value !== this.settings.nativeTooltipButton) ? undefined : 'Must differ from native tooltip key.',
-          defaultValue: DEFAULT_SETTINGS.customTooltipButton
-        }
-      },
-      {
-        name: 'Native tooltip key',
-        desc: 'Key to hold while hovering over events. Tooltip will show the native file preview.',
-        control: {
-          type: 'dropdown', key: 'nativeTooltipButton', options: OptionalControlKeyMapped,
-          validate: value => (value !== this.settings.customTooltipButton) ? undefined : 'Must differ from custom tooltip key.',
-          defaultValue: DEFAULT_SETTINGS.nativeTooltipButton
-        }
-      },
+      // {
+      //   name: 'Custom tooltip key',
+      //   desc: 'Key to hold while hovering over events. Tooltip will show selected properties.',
+      //   control: {
+      //     type: 'dropdown', key: 'customTooltipButton', options: OptionalControlKeyMapped,
+      //     validate: value => (value !== this.settings.nativeTooltipButton) ? undefined : 'Must differ from native tooltip key.',
+      //     defaultValue: DEFAULT_SETTINGS.customTooltipButton
+      //   }
+      // },
+      // {
+      //   name: 'Native tooltip key',
+      //   desc: 'Key to hold while hovering over events. Tooltip will show the native file preview.',
+      //   control: {
+      //     type: 'dropdown', key: 'nativeTooltipButton', options: OptionalControlKeyMapped,
+      //     validate: value => (value !== this.settings.customTooltipButton) ? undefined : 'Must differ from custom tooltip key.',
+      //     defaultValue: DEFAULT_SETTINGS.nativeTooltipButton
+      //   }
+      // },
       /* --------- + --------- */
       {
         name: 'Color-code calendar axis',

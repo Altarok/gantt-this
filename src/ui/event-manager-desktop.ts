@@ -1,9 +1,9 @@
-import {ControlKey, GanttItem, OptionalControlKey} from '../const/types'
+import {ControlKey, GanttItem} from '../const/types'
 import {Css, svgUrl} from '../const/constants'
 import {GanttRenderEngine} from './svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {Util} from './svg-drawer-util'
-import {FrontMatterUtil} from "../io/frontmatter-reader";
+import {FrontMatterUtil} from '../io/frontmatter-reader'
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -15,7 +15,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private verticalGuides: { upper: SVGLineElement, lower: SVGLineElement }[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private highlightElement: SVGElement | null = null
-  private lastMouseEvent: MouseEvent | null = null
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -26,17 +25,13 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private readonly boundSvgMouseMove: (e: MouseEvent) => void
   private readonly boundSvgMouseLeave: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
-  private readonly boundWindowKeyDown: (e: KeyboardEvent) => void
-  private readonly boundWindowKeyUp: (e: KeyboardEvent) => void
 
   constructor(private engine: GanttRenderEngine,
               readonly autoRestrictZoom: boolean,
               readonly mouseOverEventShowBox: boolean,
               readonly mouseOverEventShowVerticalLine: boolean,
               readonly uxZoomButton: ControlKey,
-              readonly uxPanButton: ControlKey,
-              readonly customTooltipButton: OptionalControlKey,
-              readonly nativeTooltipButton: OptionalControlKey) {
+              readonly uxPanButton: ControlKey) {
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -46,8 +41,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.boundSvgMouseMove = this.handleSvgMouseMove.bind(this)
     this.boundSvgMouseLeave = this.handleSvgMouseLeave.bind(this)
     this.boundSvgClick = this.handleSvgClick.bind(this)
-    this.boundWindowKeyDown = this.handleWindowKeyDown.bind(this)
-    this.boundWindowKeyUp = this.handleWindowKeyUp.bind(this)
 
     this.initGlobalListeners()
     this.attachSvgListeners()
@@ -56,8 +49,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private initGlobalListeners() {
     window.addEventListener('mousemove', this.boundWindowMouseMove)
     window.addEventListener('mouseup', this.boundWindowMouseUp)
-    window.addEventListener('keydown', this.boundWindowKeyDown)
-    window.addEventListener('keyup', this.boundWindowKeyUp)
   }
 
   private activeWindow: Window | null = null
@@ -73,8 +64,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
     plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(this.activeWindow, 'keydown', this.boundWindowKeyDown)
-    plugin.registerDomEvent(this.activeWindow, 'keyup', this.boundWindowKeyUp)
     plugin.registerDomEvent(this.activeWindow, 'blur', () => this.hideTooltip(/*'window blur'*/))
 
     const svgEl = this.currentSvg as unknown as HTMLElement
@@ -91,8 +80,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (this.activeWindow) {
       this.activeWindow.removeEventListener('mousemove', this.boundWindowMouseMove)
       this.activeWindow.removeEventListener('mouseup', this.boundWindowMouseUp)
-      this.activeWindow.removeEventListener('keydown', this.boundWindowKeyDown)
-      this.activeWindow.removeEventListener('keyup', this.boundWindowKeyUp)
       this.activeWindow = null
     }
 
@@ -112,8 +99,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
-    this.lastMouseEvent = e
-
     /* Set coordinates for tooltip*/
     // const doc = this.activeDocument
     // doc.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
@@ -139,7 +124,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.startTranslateX = this.engine.zoomTranslateX
   }
 
-  private isModifierActive(e: MouseEvent, key: OptionalControlKey): boolean {
+  private isModifierActive(e: MouseEvent, key: ControlKey): boolean {
     switch (key) {
       case 'ctrl':
         return e.ctrlKey
@@ -147,8 +132,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
         return e.altKey
       case 'shift':
         return e.shiftKey
-      case 'none':
-        return !e.shiftKey && !e.ctrlKey && !e.altKey
     }
   }
 
@@ -174,7 +157,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
       this.engine.drawAxes(width)
       this.rafId = null
     })
-    return
   }
 
   private zoom(e: WheelEvent) {
@@ -204,8 +186,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private showOrHideTooltip(e: MouseEvent) {
-    this.lastMouseEvent = e
-
     const target = e.target as HTMLElement
     if (!target?.hasAttribute('data-id')) return this.hideTooltip()
 
@@ -215,20 +195,17 @@ export class GanttDesktopEventManager implements GanttEventManager {
     const dataObj = this.engine.rawData.find(d => d.id === id)
     if (!dataObj) return this.hideTooltip()
 
-    if (this.isModifierActive(e, this.nativeTooltipButton)) {
+    if (e.ctrlKey) {
       this.hideTooltip()
       this.showNativePreview(e, target, dataObj.link)
-    } else if (this.isModifierActive(e, this.customTooltipButton)) {
+    } else {
       this.showCustomTooltip(dataObj, e)
       this.showHighlightAroundElement(target, dataObj)
       this.showVerticalGuide(target, dataObj)
-    } else {
-      this.hideTooltip()
     }
   }
 
   private handleSvgMouseLeave() {
-    this.lastMouseEvent = null
     this.hideTooltip()
   }
 
@@ -253,15 +230,11 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
   }
 
-  private showNativePreview(event: MouseEvent, target: HTMLElement, link?: string) {
-    if (!link) return
+  private showNativePreview(event: MouseEvent, targetEl: HTMLElement, linktext?: string) {
+    if (!linktext) return
 
     this.engine.plugin.app.workspace.trigger('hover-link', {
-      event,
-      source: 'gantt-this',
-      hoverParent: this.engine.container,
-      targetEl: target,
-      linktext: link,
+      event, targetEl, linktext, source: 'gantt-this', hoverParent: this.engine.container,
     })
   }
 
@@ -535,34 +508,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
     }
   }
 
-//  private get pluginSettings() {
-//    return this.engine.plugin.settings
-//  }
-
-  private handleWindowKeyDown(e: KeyboardEvent) {
-    if (!['Control', 'Alt', 'Shift'].includes(e.key)) return
-    this.processModifierChange(e)
-  }
-
-  private handleWindowKeyUp(e: KeyboardEvent) {
-    if (!['Control', 'Alt', 'Shift'].includes(e.key)) return
-    this.processModifierChange(e)
-  }
-
-  private processModifierChange(e: KeyboardEvent) {
-    // 1. If active over an element, update tooltips/previews dynamically
-    if (this.lastMouseEvent) {
-      if (this.isDragging) {
-
-      } else {
-        this.showOrHideTooltip(this.lastMouseEvent)
-      }
-    }
-
-    // 2. Optional: Modify active drag behavior if dragging
-    if (this.isDragging) {
-      // Example: Snap to grid or lock axis if e.shiftKey is true
-    }
-  }
+  //  private get pluginSettings() {
+  //    return this.engine.plugin.settings
+  //  }
 
 }
