@@ -2,8 +2,9 @@
 
 Obsidian plugin able to show a Gantt chart for multiple fantasy calendars.
 
-> [!NOTE]
-> This is an automated translation of the German README (`LIESMICH.md`).
+> See this for more extensive documentation: https://altarok.github.io/gantt-this/
+
+> Hint: This is an automated translation of the German README (`LIESMICH.md`).
 
 
 Welcome to the documentation for the Gantt Timeline Plugin for Obsidian.

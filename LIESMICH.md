@@ -1,5 +1,7 @@
 # Obsidian Gantt Timeline Plugin
 
+> Erweiterte Dokumentation: https://altarok.github.io/gantt-this/
+
 Willkommen bei der Dokumentation des Gantt Timeline Plugins für Obsidian.
 Dieses Plugin ermöglicht es dir, deine Notizen und Ereignisse übersichtlich in interaktiven
 Zeitlinien darzustellen.
