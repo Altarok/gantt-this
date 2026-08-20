@@ -34,7 +34,6 @@ export class GanttMobileEventManager implements GanttEventManager {
     this.attachSvgListeners()
   }
 
-
   public attachSvgListeners() {
     this.detachListeners()
 

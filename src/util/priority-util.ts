@@ -79,18 +79,6 @@ function fixGroupOrCalendarSettingsPrioritySetupIfBroken(grpOrCals: Record<strin
   return {min: min ?? 0, max: max ?? 0, changed}
 }
 
-// function switchValues(a: GroupOrCalendarSettings, b: GroupOrCalendarSettings): boolean {
-//
-//   if (a.priority === undefined || b.priority == undefined) return false
-//
-//   const temp = b.priority
-//   b.priority = a.priority
-//   a.priority = temp
-//
-//   return true
-// }
-
-
 export const Priorities = {
   sortGroupOrCalendarSettingsByPriority,
 
@@ -99,6 +87,5 @@ export const Priorities = {
 
   fixPrioritiesIfNecessary: fixGroupOrCalendarSettingsPrioritySetupIfBroken,
   fixGanttGroupPrioritySetupIfBroken
-  // , switchValues
 }
 

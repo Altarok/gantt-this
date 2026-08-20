@@ -1,4 +1,4 @@
-import {ControlKey} from '../const/types'
+import {ControlKey, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {TooltipManager} from './tooltip-manager-desktop'
@@ -20,13 +20,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private readonly boundSvgMouseMove: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  constructor(private engine: GanttRenderEngine,
-              readonly autoRestrictZoom: boolean,
-              readonly mouseOverEventShowBox: boolean,
-              readonly mouseOverEventShowVerticalLine: boolean,
-              readonly uxZoomKey: ControlKey,
-              readonly uxPanKey: ControlKey) {
-    // this.currentSvg = this.engine.svg
+  constructor(readonly engine: GanttRenderEngine,
+              readonly pluginSettings: PluginSettings) {
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -46,7 +41,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   public attachSvgListeners() {
 
-    const tooltipManager = new TooltipManager(this.engine, this.mouseOverEventShowBox, this.mouseOverEventShowVerticalLine);
+    const tooltipManager = new TooltipManager(this.engine, this.pluginSettings)
 
     this.detachListeners()
 
@@ -58,7 +53,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
     plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(this.activeWindow, 'blur', () => tooltipManager.hideTooltip())
+    plugin.registerDomEvent(this.activeWindow, 'blur', () => tooltipManager.hideTooltip('blur'))
 
     const svgEl = this.currentSvg as unknown as HTMLElement
 
@@ -124,10 +119,10 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private handleSvgWheel(e: WheelEvent) {
     if (!this.currentSvg) return
 
-    if (this.isModifierActive(e, this.uxZoomKey)) {
+    if (this.isModifierActive(e, this.settings.uxZoomButton)) {
       e.preventDefault()
       this.zoom(e)
-    } else if (this.isModifierActive(e, this.uxPanKey)) {
+    } else if (this.isModifierActive(e, this.settings.uxPanButton)) {
       e.preventDefault()
       this.pan(e)
     }
@@ -152,9 +147,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
     const mouseX = e.clientX - rect.left - this.engine.config.margin.left
 
     let zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-    if (this.autoRestrictZoom && this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
+    if (this.settings.autoRestrictZoom && this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
     let nextScale = this.engine.zoomScale * zoomFactor
-    if (this.autoRestrictZoom && nextScale < 0.5) nextScale = 0.5
+    if (this.settings.autoRestrictZoom && nextScale < 0.5) nextScale = 0.5
 
     this.engine.zoomTranslateX = mouseX - (mouseX - this.engine.zoomTranslateX) * (nextScale / this.engine.zoomScale)
     this.engine.zoomScale = nextScale
@@ -198,5 +193,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   private handleSvgMouseMove(): void {
     /* needs to exist for drag events */
+  }
+
+  private get settings(){
+    return this.pluginSettings
   }
 }
