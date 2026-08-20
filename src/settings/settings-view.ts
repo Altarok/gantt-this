@@ -7,26 +7,6 @@ import {AddEntryModal} from './settings-util'
 const VISIBLE_ICON = 'eye' /* an open eye */
 const INVISIBLE_ICON = 'eye-off' /* an open eye, with strike-through */
 
-function toRecord(strings: readonly string[]): Record<string, string> {
-  return Object.fromEntries(strings.map((s) => [s, s]))
-}
-
-/**
- * Validate FrontMatter input
- * @param value
- * @return undefined if the input is fine, otherwise a string explaining why it isn't
- */
-function testFrontMatterInput(value: string): string | undefined {
-  return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must only contain letters, numbers, hyphens, underscores, and dots.' /* input NOK */
-}
-
-function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
-  if (!value || calendars?.length === 0) return false
-  for (const cal of calendars)
-    if (cal.id === value)
-      return true
-  return false
-}
 
 export class FantasyGanttSettingTab extends PluginSettingTab {
   constructor(public readonly plugin: FantasyGanttPlugin) {
@@ -62,41 +42,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       /* Source paths for input */
       this.createDataSourceSelectionGroup(),
 
-      /* Default values */
-      {
-        heading: 'Default values',
-        type: 'group',
-        items: [
-          {
-            name: 'Event calendar',
-            desc: `Fallback value for the event property 'gantt-type'. Default: ${DEFAULT_SETTINGS.defaultCalendar}`,
-            control: {
-              type: 'text',
-              key: 'defaultCalendar',
-              placeholder: DEFAULT_SETTINGS.defaultCalendar,
-              defaultValue: DEFAULT_SETTINGS.defaultCalendar,
-              validate: (value: string) => isKnownCalendar(value, this.settings.calendars) ? undefined : 'Not a known calendar!'
-            }
-          },
-          {
-            name: 'Event color',
-            desc: `Fallback value for event property '${this.settings.frontMatterProperty_event_color}'.`,
-            control: {
-              type: 'color', key: 'fallbackColor',
-              defaultValue: DEFAULT_SETTINGS.fallbackColor
-            }
-          },
-          {
-            name: 'Icon color',
-            desc: `Fallback value for event property '${this.settings.frontMatterProperty_event_icon_color}'.`,
-            control: {
-              type: 'color', key: 'fallbackColorForIcons',
-              defaultValue: DEFAULT_SETTINGS.fallbackColorForIcons
-            }
-          }
-        ]
-      },
-
       /* Calendar list */
       this.createCalendarList(),
       /* Group list */
@@ -106,6 +51,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         heading: 'Advanced',
         type: 'group',
       },
+
       /* Advanced UX settings */
       this.createAdvancedUxSettingDefinition(),
       /* FrontMatter property names */
@@ -115,25 +61,27 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private createDataSourceSelectionGroup(): SettingDefinitionItem {
     return {
-      heading: 'Define source paths for your Events and Calendars',
+      heading: 'Data paths',
       type: 'group',
       items: [
         {
-          name: 'Folder to search for event definitions',
-          desc: 'Can be searched recursively',
-          control: {type: 'folder', key: 'eventPath', includeRoot: true}
+          name: 'Event path',
+          desc: 'Folder to search for event definitions. Can be overwritten for each chart.',
+          control: {type: 'folder', key: 'eventPath', includeRoot: true, defaultValue: DEFAULT_SETTINGS.eventPath}
         },
         {
-          name: 'Search sub-folders?',
+          name: 'Search recursively',
+          desc: 'Search sub-folders of event path.',
           control: {type: 'toggle', key: 'eventPathSearchRecursive'}
         },
         {
-          name: 'Folder to search for calendar definitions',
-          desc: 'Can be searched recursively',
-          control: {type: 'folder', key: 'calendarPath', includeRoot: true}
+          name: 'Calendar path',
+          desc: 'Folder to search for calendar definitions.  Can be overwritten for each chart.',
+          control: {type: 'folder', key: 'calendarPath', includeRoot: true, defaultValue: DEFAULT_SETTINGS.calendarPath}
         },
         {
-          name: 'Search sub-folders?',
+          name: 'Search recursively',
+          desc: 'Search sub-folders of calendar path.',
           control: {type: 'toggle', key: 'calendarPathSearchRecursive'}
         }
       ]
@@ -171,28 +119,28 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-            .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                cal.visible = !cal.visible
-                void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+          .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+            .onClick(async () => {
+              cal.visible = !cal.visible
+              void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+              await this.plugin.saveSettings()
+            })
+          )
+          .addColorPicker(c => cc = c
+            .setValue(cal.color ?? this.settings.fallbackColor)
+            .onChange(async (value) => {
+                cal.color = value
                 await this.plugin.saveSettings()
-              })
+              }
             )
-            .addColorPicker(c => cc = c
-              .setValue(cal.color ?? this.settings.fallbackColor)
-              .onChange(async (value) => {
-                  cal.color = value
-                  await this.plugin.saveSettings()
-                }
-              )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.settings.fallbackColor)
-                cal.color = this.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+          )
+          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+            .onClick(async () => {
+              cc.setValue(this.settings.fallbackColor)
+              cal.color = this.settings.fallbackColor
+              await this.plugin.saveSettings()
+            })
+          )
         },
       }))
     }
@@ -229,94 +177,185 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         render: (setting: Setting) => {
           let cc: ColorComponent
           setting
-            .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-              .onClick(async () => {
-                group.visible = !group.visible
-                void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+          .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+            .onClick(async () => {
+              group.visible = !group.visible
+              void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+              await this.plugin.saveSettings()
+            })
+          )
+          .addColorPicker(c => cc = c
+            .setValue(group.color ?? this.settings.fallbackColor)
+            .onChange(async (value) => {
+                group.color = value
                 await this.plugin.saveSettings()
-              })
+              }
             )
-            .addColorPicker(c => cc = c
-              .setValue(group.color ?? this.settings.fallbackColor)
-              .onChange(async (value) => {
-                  group.color = value
-                  await this.plugin.saveSettings()
-                }
-              )
-            )
-            .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-              .onClick(async () => {
-                cc.setValue(this.settings.fallbackColor)
-                group.color = this.settings.fallbackColor
-                await this.plugin.saveSettings()
-              })
-            )
+          )
+          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+            .onClick(async () => {
+              cc.setValue(this.settings.fallbackColor)
+              group.color = this.settings.fallbackColor
+              await this.plugin.saveSettings()
+            })
+          )
         },
       }))
     }
   }
 
   private createAdvancedUxSettingDefinition(): SettingDefinitionItem {
-    const items: SettingDefinition[] = [
+    const items: SettingDefinitionItem[] = [
       {
-        name: 'Event symbol',
-        desc: 'Default event symbol for timestamp events.',
-        control: {
-          type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
-          options: toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
-          defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
-        }
+        heading: 'Events',
+        type: 'group',
+        items: [
+          {
+            name: 'Symbol',
+            desc: `Default symbol used for timestamp events. Used when not given in property: '${this.settings.frontMatterProperty_event_symbol}'`,
+            control: {
+              type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
+              options: toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
+              defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
+            }
+          },
+          {
+            name: 'Calendar',
+            desc: `Default calendar used for events. Used when not given in property: ${this.settings.frontMatterProperty_event_calendar}'`,
+            control: {
+              type: 'text', key: 'defaultCalendar',
+              placeholder: DEFAULT_SETTINGS.defaultCalendar, defaultValue: DEFAULT_SETTINGS.defaultCalendar,
+              validate: (value: string) => isKnownCalendar(value, this.settings.calendars) ? undefined : 'Not a known calendar!'
+            }
+          },
+          {
+            name: 'Color',
+            desc: `Default color for events. Used when not given in property: '${this.settings.frontMatterProperty_event_color}'`,
+            control: {
+              type: 'color', key: 'fallbackColor',
+              defaultValue: DEFAULT_SETTINGS.fallbackColor
+            }
+          },
+          {
+            name: 'Icon color',
+            desc: `Default color for event icons. Used when not given in property: '${this.settings.frontMatterProperty_event_icon_color}'`,
+            control: {
+              type: 'color', key: 'fallbackColorForIcons',
+              defaultValue: DEFAULT_SETTINGS.fallbackColorForIcons
+            }
+          },
+          {
+            name: 'Vertical line width',
+            desc: 'Set the line stroke width (in pixels) for vertical line events.',
+            control: {
+              type: 'slider', key: 'uxVerticalLineEventWidth',
+              min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
+            }
+          }
+        ]
       },
       {
-        name: 'Add ribbon icon',
-        // TODO more options to come
-        desc: 'Adds a ribbon icon to quickly open a live chart preview.',
-        control: {
-          type: 'toggle', key: 'uxAddRibbonIcon',
-          defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon
-        }
+        heading: 'Event overlay',
+        type: 'group',
+        items: [
+          {
+            name: 'Show overlay',
+            desc: 'Highlight hovered events with a bounding box.',
+            control: {
+              type: 'toggle', key: 'mouseOverEventShowBox',
+              defaultValue: DEFAULT_SETTINGS.mouseOverEventShowBox
+            }
+          },
+          {
+            name: 'Show vertical line',
+            desc: 'Display a vertical guide line under the cursor for precise date comparison.',
+            control: {
+              type: 'toggle', key: 'mouseOverEventShowVerticalLine',
+              defaultValue: DEFAULT_SETTINGS.mouseOverEventShowVerticalLine
+            }
+          },
+          {
+            name: 'Color',
+            desc: 'Color for overlay.',
+            control: {
+              type: 'color', key: 'uxVerticalOverlayColor',
+              defaultValue: DEFAULT_SETTINGS.uxVerticalOverlayColor,
+            },
+          },
+        ]
       },
       {
-        name: 'Add plugin commands',
-        desc: 'Adds commands to insert event properties, calendar definitions, and code blocks.',
-        control: {
-          type: 'toggle', key: 'uxAddCommands',
-          disabled: true,
-          defaultValue: DEFAULT_SETTINGS.uxAddCommands
-        }
+        heading: 'Zooming and Panning',
+        type: 'group',
+        items: [
+          {
+            name: 'Restrict minimum and maximum zoom',
+            desc: 'Maximum zoom shows adjacent days, minimum zoom fits your complete dataset.',
+            control: {
+              type: 'toggle', key: 'autoRestrictZoom',
+              defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
+            }
+          },
+          {
+            name: 'Zoom key',
+            desc: 'Key to hold while scrolling to zoom in or out.',
+            control: {
+              type: 'dropdown', key: 'uxZoomButton', options: ControlKeyMapped,
+              validate: value => (value !== this.settings.uxPanButton) ? undefined : 'Must differ from pan key.',
+              defaultValue: DEFAULT_SETTINGS.uxZoomButton
+            }
+          },
+          {
+            name: 'Pan key',
+            desc: 'Key to hold while scrolling to pan horizontally.',
+            control: {
+              type: 'dropdown', key: 'uxPanButton', options: ControlKeyMapped,
+              validate: value => (value !== this.settings.uxZoomButton) ? undefined : 'Must differ from zoom key.',
+              defaultValue: DEFAULT_SETTINGS.uxPanButton
+            }
+          },
+          {
+            name: 'Zoom and pan buttons',
+            desc: 'Adds 4 buttons to chart toolbar: pan left, zoom out, zoom in, and pan right',
+            control: {
+              type: 'toggle', key: 'showPanAndZoomButtonsInToolbar',
+              defaultValue: DEFAULT_SETTINGS.showPanAndZoomButtonsInToolbar
+            }
+          }
+        ]
       },
       {
-        name: 'Show overlay box',
-        desc: 'Highlight hovered events with a bounding box.',
-        control: {
-          type: 'toggle', key: 'mouseOverEventShowBox',
-          defaultValue: DEFAULT_SETTINGS.mouseOverEventShowBox
-        }
+        heading: 'Gantt chart',
+        type: 'group',
+        items: [
+          {
+            name: 'Moons',
+            desc: 'Show moons on calendar axis.',
+            control: {
+              type: 'toggle', key: 'uxShowMoons',
+              defaultValue: DEFAULT_SETTINGS.uxShowMoons
+            }
+          },
+          {
+            name: 'Group visibility toggles',
+            desc: 'Add buttons to the toolbar for hiding or showing individual groups.',
+            control: {
+              type: 'toggle', key: 'showButtonsToHideGroups',
+              defaultValue: DEFAULT_SETTINGS.showButtonsToHideGroups
+            }
+          },
+          {
+            name: 'Color-code calendar axis',
+            desc: 'Apply the corresponding calendar color directly to the calendar axis.',
+            control: {
+              type: 'toggle', key: 'uxUseCalColorForCalAxis',
+              defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
+            }
+          },
+        ]
       },
-      {
-        name: 'Show vertical guide line',
-        desc: 'Display a vertical guide line under the cursor for precise date comparison.',
-        control: {
-          type: 'toggle', key: 'mouseOverEventShowVerticalLine',
-          defaultValue: DEFAULT_SETTINGS.mouseOverEventShowVerticalLine
-        }
-      },
-      {
-        name: 'Group visibility toggles',
-        desc: 'Add buttons to the toolbar for hiding or showing individual groups.',
-        control: {
-          type: 'toggle', key: 'showButtonsToHideGroups',
-          defaultValue: DEFAULT_SETTINGS.showButtonsToHideGroups
-        }
-      },
-      {
-        name: 'Restrict minimum and maximum zoom',
-        desc: 'Maximum zoom shows adjacent days, minimum zoom fits your complete dataset.',
-        control: {
-          type: 'toggle', key: 'autoRestrictZoom',
-          defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
-        }
-      },
+
+
       // { // TODO wip
       //   name: 'Enable visual canvas zoom',
       //   desc: 'Scale the entire chart visually instead of adjusting the timeline date range.',
@@ -327,61 +366,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       //   }
       // },
 
-      /* --------- Zooming and Panning --------- */
-      {
-        name: 'Zoom key',
-        desc: 'Key to hold while scrolling to zoom in or out.',
-        control: {
-          type: 'dropdown', key: 'uxZoomButton', options: ControlKeyMapped,
-          validate: value => (value !== this.settings.uxPanButton) ? undefined : 'Must differ from pan key.',
-          defaultValue: DEFAULT_SETTINGS.uxZoomButton
-        }
-      },
-      {
-        name: 'Pan key',
-        desc: 'Key to hold while scrolling to pan horizontally.',
-        control: {
-          type: 'dropdown', key: 'uxPanButton', options: ControlKeyMapped,
-          validate: value => (value !== this.settings.uxZoomButton) ? undefined : 'Must differ from zoom key.',
-          defaultValue: DEFAULT_SETTINGS.uxPanButton
-        }
-      },
-      /* --------- Tooltips --------- */
-      // {
-      //   name: 'Custom tooltip key',
-      //   desc: 'Key to hold while hovering over events. Tooltip will show selected properties.',
-      //   control: {
-      //     type: 'dropdown', key: 'customTooltipButton', options: OptionalControlKeyMapped,
-      //     validate: value => (value !== this.settings.nativeTooltipButton) ? undefined : 'Must differ from native tooltip key.',
-      //     defaultValue: DEFAULT_SETTINGS.customTooltipButton
-      //   }
-      // },
-      // {
-      //   name: 'Native tooltip key',
-      //   desc: 'Key to hold while hovering over events. Tooltip will show the native file preview.',
-      //   control: {
-      //     type: 'dropdown', key: 'nativeTooltipButton', options: OptionalControlKeyMapped,
-      //     validate: value => (value !== this.settings.customTooltipButton) ? undefined : 'Must differ from custom tooltip key.',
-      //     defaultValue: DEFAULT_SETTINGS.nativeTooltipButton
-      //   }
-      // },
-      /* --------- + --------- */
-      {
-        name: 'Color-code calendar axis',
-        desc: 'Apply the corresponding calendar color directly to the calendar axis.',
-        control: {
-          type: 'toggle', key: 'uxUseCalColorForCalAxis',
-          defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
-        }
-      },
-      {
-        name: 'Vertical line event width',
-        desc: 'Set the line stroke width (in pixels) for vertical line events.',
-        control: {
-          type: 'slider', key: 'uxVerticalLineEventWidth',
-          min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
-        }
-      },
       /*
        * TODO activate once users are satisfied
        */
@@ -389,20 +373,46 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,
       // control: { type: 'toggle', key: 'hideSettingsPageUx', defaultValue: DEFAULT_SETTINGS.hideSettingsPageUx }
       // }
+      {
+        heading: 'Plugin',
+        type: 'group',
+        items: [
+          {
+            name: 'Add ribbon icon',
+            // TODO more options to come
+            desc: 'Adds a ribbon icon to quickly open a live chart preview.',
+            control: {
+              type: 'toggle', key: 'uxAddRibbonIcon',
+              defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon
+            }
+          },
+          {
+            name: 'Add plugin commands',
+            desc: 'Adds commands to insert event properties, calendar definitions, and code blocks.',
+            control: {
+              type: 'toggle', key: 'uxAddCommands',
+              disabled: true,
+              defaultValue: DEFAULT_SETTINGS.uxAddCommands
+            }
+          }
+        ]
+      }
+
     ]
 
-    if (this.settings.hideSettingsPageUx) return {
+    // if (this.settings.hideSettingsPageUx)
+    return {
       type: 'page',
       name: 'Display and controls',
       desc: 'Change the UI to your liking.',
       items
     }
-    else return {
-      type: 'group',
-      heading: 'Display and controls',
-      desc: 'Change the UI to your liking.',
-      items: items
-    }
+    // else return {
+    //   type: 'group',
+    //   heading: 'Display and controls',
+    //   desc: 'Change the UI to your liking.',
+    //   items: items
+    // }
   }
 
   private createFrontMatterSettingDefinitions(): SettingDefinitionItem {
@@ -561,3 +571,25 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
   }
 
 }
+
+/**
+ * Validate FrontMatter input
+ * @param value
+ * @return undefined if the input is fine, otherwise a string explaining why it isn't
+ */
+function testFrontMatterInput(value: string): string | undefined {
+  return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must only contain letters, numbers, hyphens, underscores, and dots.' /* input NOK */
+}
+
+function toRecord(strings: readonly string[]): Record<string, string> {
+  return Object.fromEntries(strings.map((s) => [s, s]))
+}
+
+export function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
+  if (!value || calendars?.length === 0) return false
+  for (const cal of calendars)
+    if (cal.id === value)
+      return true
+  return false
+}
+

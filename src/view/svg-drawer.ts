@@ -11,7 +11,7 @@ import {
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
-import {createGanttEventManager, GanttEventManager} from './event-manager'
+import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
@@ -55,9 +55,9 @@ export class GanttRenderEngine {
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
-              public readonly tooltip: HTMLElement,
-              public readonly hoverTitle: HTMLElement,
-              public readonly hoverDates: HTMLElement,
+              // public readonly tooltip: HTMLElement,
+              // public readonly hoverTitle: HTMLElement,
+              // public readonly hoverDates: HTMLElement,
               public readonly plugin: FantasyGanttPlugin,
               public readonly codeBlockContent: CodeBlockContent,
               public readonly selectedFrontmatterProperties: string[] | null) {

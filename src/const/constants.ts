@@ -44,8 +44,8 @@ export const Css = {
     tooltip: 'gt-tooltip',
     dates: 'gt-tooltip-dates',
     isActive: 'is-active',
-    link: 'gt-tooltip-link',
     title: 'gt-tooltip-title',
+    link: 'gt-tooltip-link',
   },
   settings: {
     container: 'gt-settings-container',
@@ -81,9 +81,9 @@ export const Colors: Record<string, string> = {
   purple: '#9400d3',
 } as const
 
-export const EventIDs = {
-  tooltip: 'gantt-tooltip-element'
-} as const
+// export const EventIDs = {
+//   tooltip: 'gantt-tooltip-element'
+// } as const
 
 export const svgUrl = 'http://www.w3.org/2000/svg'
 

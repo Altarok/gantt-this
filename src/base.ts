@@ -1,16 +1,20 @@
 import {BasesView, Notice, QueryController} from 'obsidian'
-import {GanttRender} from './ui/svg-drawer-prestep'
+import {GanttRender} from './view/svg-drawer-prestep'
 import {BaseKeys, CodeBlockContent} from './const/types'
 import FantasyGanttPlugin from './main'
 import {FrontMatterUtil} from './io/frontmatter-reader'
 
-export const ExampleViewType = 'example-view'
+/*
+ * TODO change to 'gantt-this-view'
+ * Sadly, this is a breaking change for users!
+ * They'd have to manually change the base file.
+ */
+export const GanttBaseViewExampleName = 'example-view'
 
-export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
-  readonly type = ExampleViewType
-//  hoverPopover: HoverPopover | null
+export class GanttThisBasesView extends BasesView {
+  readonly type = GanttBaseViewExampleName
   private readonly containerEl: HTMLElement
-  private toolbarEl: HTMLElement | null = null
+
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly controller: QueryController,
@@ -19,6 +23,82 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
     this.containerEl = parentEl.createDiv('bases-example-view-container')
   }
 
+  public onDataUpdated(): void {
+    this.containerEl.empty()
+    const files = this.preFilterFiles()
+
+    /* Omit event path stuff - use base filters instead! */
+    const codeBlockContent: CodeBlockContent = {
+      calendarPath: this.calendarPath,
+      calendarPathSearchRecursive: this.calendarPathSearchRecursive,
+      lowerBoundDate: this.lowerBoundDate,
+      upperBoundDate: this.upperBoundDate
+    }
+
+    const selectedProperties: string[] = this.config.getOrder()
+    const selectedFronMatterProperties = selectedProperties
+    .map(s => {
+        if (s.startsWith('formula.')) return s.slice(8)
+        else if (s.startsWith('file.') || s.startsWith('note.')) return s.slice(5)
+        else return ''
+      }
+    ).filter(Boolean)
+
+    const render = new GanttRender(this.plugin, files, selectedFronMatterProperties)
+
+    try {
+      void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)
+    } catch {
+      new Notice('Failed to render Gantt chart base!')
+    }
+  }
+
+  private preFilterFiles() {
+    const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
+
+    /* Pre-filter files */
+    return this.data.data.map(entry => entry.file)
+    .filter(file => {
+      const cache = this.plugin.app.metadataCache.getFileCache(file)
+      const frontmatter = cache?.frontmatter
+      if (!frontmatter) return false
+
+      const hasStartDate = FrontMatterUtil.hasStartDate(frontmatter, this.plugin.settings)
+      const hasValidMarker = isCheckboxMarkerOptional || FrontMatterUtil.isFileMarkedAsEvent(frontmatter, this.plugin.settings)
+
+      // Check if note contains the required frontmatter properties
+      return hasStartDate && hasValidMarker
+    })
+  }
+
+  private getStringValue(key: string): string | undefined {
+    return this.config.get(key) ? String(this.config.get(key)) : undefined
+  }
+
+  private getBoolValue(key: string): boolean | undefined {
+    return this.config.get(key) ? this.config.get(key) === true : undefined
+  }
+
+  private get calendarPath(): string {
+    return this.getStringValue(BaseKeys.calPath) ?? this.plugin.settings.calendarPath
+  }
+
+  private get calendarPathSearchRecursive(): boolean {
+    return this.getBoolValue(BaseKeys.calPathRec) ?? this.plugin.settings.calendarPathSearchRecursive
+  }
+
+  private get lowerBoundDate(): string | undefined {
+    return this.getStringValue(BaseKeys.lbd)
+  }
+
+  private get upperBoundDate(): string | undefined {
+    return this.getStringValue(BaseKeys.ubd)
+  }
+
+  /*
+   * TODO test code used to overwrite toolbar
+   */
+// private toolbarEl: HTMLElement | null = null
 //  onload(): void {
 //    super.onload()
 //    this.injectToolbarButton()
@@ -96,78 +176,5 @@ export class GanttThisBasesView extends BasesView /*implements HoverParent*/ {
 //    this.toolbarEl?.remove()
 //    super.onunload()
 //  }
-
-  public onDataUpdated(): void {
-    this.containerEl.empty()
-    const files = this.preFilterFiles()
-
-    /* Omit event path stuff - use base filters instead! */
-    const codeBlockContent: CodeBlockContent = {
-      calendarPath: this.calendarPath,
-      calendarPathSearchRecursive: this.calendarPathSearchRecursive,
-      lowerBoundDate: this.lowerBoundDate,
-      upperBoundDate: this.upperBoundDate
-    }
-
-    const selectedProperties: string[] = this.config.getOrder()
-    const selectedFronMatterProperties = selectedProperties
-    //    .filter(s => s.startsWith('note.'))
-    .map(s => {
-        if (s.startsWith('formula.')) return s.slice(8)
-        else if (s.startsWith('file.') || s.startsWith('note.')) return s.slice(5)
-        else return ''
-      }
-    ).filter(Boolean)
-
-    const render = new GanttRender(this.plugin, files, selectedFronMatterProperties)
-
-    try {
-      void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)
-    } catch {
-      new Notice('Failed to render Gantt chart base!')
-    }
-  }
-
-  private preFilterFiles() {
-    const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
-
-    /* Pre-filter files */
-    return this.data.data.map(entry => entry.file)
-    .filter(file => {
-      const cache = this.plugin.app.metadataCache.getFileCache(file)
-      const frontmatter = cache?.frontmatter
-      if (!frontmatter) return false
-
-      const hasStartDate = FrontMatterUtil.hasStartDate(frontmatter, this.plugin.settings)
-      const hasValidMarker = isCheckboxMarkerOptional || FrontMatterUtil.isFileMarkedAsEvent(frontmatter, this.plugin.settings)
-
-      // Check if note contains the required frontmatter properties
-      return hasStartDate && hasValidMarker
-    })
-  }
-
-  private getStringValue(key: string): string | undefined {
-    return this.config.get(key) ? String(this.config.get(key)) : undefined
-  }
-
-  private getBoolValue(key: string): boolean | undefined {
-    return this.config.get(key) ? this.config.get(key) === true : undefined
-  }
-
-  private get calendarPath(): string {
-    return this.getStringValue(BaseKeys.calPath) ?? this.plugin.settings.calendarPath
-  }
-
-  private get calendarPathSearchRecursive(): boolean {
-    return this.getBoolValue(BaseKeys.calPathRec) ?? this.plugin.settings.calendarPathSearchRecursive
-  }
-
-  private get lowerBoundDate(): string | undefined {
-    return this.getStringValue(BaseKeys.lbd)
-  }
-
-  private get upperBoundDate(): string | undefined {
-    return this.getStringValue(BaseKeys.ubd)
-  }
 
 }

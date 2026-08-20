@@ -1,4 +1,4 @@
-import {GanttRenderEngine} from './svg-drawer'
+import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 
 export class GanttMobileEventManager implements GanttEventManager {

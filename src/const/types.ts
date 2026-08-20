@@ -234,11 +234,14 @@ export type PluginSettings = GanttChartSources & {
   mouseOverEventShowVerticalLine: boolean
   showButtonsToHideGroups: boolean
   uxVerticalLineEventWidth: number
+  uxVerticalOverlayColor: string
+  uxShowMoons: boolean
   autoRestrictZoom: boolean
   // uxOverrideNoteScrollInCalendar: boolean
   // uxSwitchZoomAndPan: boolean
-  uxPanButton: ControlKey
+  uxPanButton: ControlKey // TODO #v2.0.0 rename to '..Key'
   uxZoomButton: ControlKey
+  showPanAndZoomButtonsInToolbar: boolean
   // customTooltipButton: OptionalControlKey
   // nativeTooltipButton: OptionalControlKey
   uxUseCalColorForCalAxis: boolean
@@ -268,11 +271,14 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,
   uxVerticalLineEventWidth: 3,
+  uxVerticalOverlayColor: '#ff0000',
+  uxShowMoons: true,
   autoRestrictZoom: true,
   // uxOverrideNoteScrollInCalendar: true,
   // uxSwitchZoomAndPan: false,
   uxPanButton: 'shift',
   uxZoomButton: 'ctrl',
+  showPanAndZoomButtonsInToolbar: true,
   // customTooltipButton: 'none',
   // nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,

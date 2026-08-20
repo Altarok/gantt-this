@@ -4,8 +4,8 @@ import {BaseKeys, CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './cons
 import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
-import {GanttRender} from './ui/svg-drawer-prestep'
-import {ExampleViewType, GanttThisBasesView} from './base'
+import {GanttRender} from './view/svg-drawer-prestep'
+import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -29,7 +29,7 @@ export default class FantasyGanttPlugin extends Plugin {
 //      Commands.addAll(this)
     }
 
-    this.registerBasesView(ExampleViewType, {
+    this.registerBasesView(GanttBaseViewExampleName, {
       name: 'Gantt chart',
       icon: 'lucide-chart-bar-stacked',
       factory: (controller, containerEl) => {

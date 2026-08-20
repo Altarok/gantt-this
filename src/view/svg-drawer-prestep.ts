@@ -9,7 +9,7 @@ import {
   TFile
 } from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {Css, EventIDs} from '../const/constants'
+import {Css} from '../const/constants'
 import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
@@ -31,6 +31,7 @@ export class GanttRender {
 
     return getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
   }
+
 
   async renderGantt(el: HTMLElement,
                     pluginSettings: PluginSettings,
@@ -66,7 +67,6 @@ export class GanttRender {
         return
       }
 
-
       /* Debounce by 500ms to let Obsidian's internal indexing finish completely */
       updateTimeout = window.setTimeout(() => {
         new Notice('Re-rendering Gantt...')
@@ -86,12 +86,23 @@ export class GanttRender {
     /* Create 6 pan, zoom, settings buttons */
     const zoomGroupEl = toolbar.createDiv({cls: 'gt-toolbar-zoom-group'})
 
-    const panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
-    const zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
-    const zoomResetBtn = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset zoom'}) // manual svg icon
+    const {showPanAndZoomButtonsInToolbar} = pluginSettings
+
+    let panLeftBtn: HTMLButtonElement | null = null
+    let zoomOutBtn: HTMLButtonElement | null = null
+    let zoomInBtn: HTMLButtonElement | null = null
+    let panRightBtn: HTMLButtonElement | null = null
+
+    if (showPanAndZoomButtonsInToolbar) {
+      panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
+      zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
+    }
+    const zoomResetBtn = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset view'})
     zoomResetBtn.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
-    const zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
-    const panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
+    if (showPanAndZoomButtonsInToolbar) {
+      zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
+      panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
+    }
     const settingsBtn = createIconButton(zoomGroupEl, 'settings', 'Plugin settings')
 
     if (this.plugin.settings.showButtonsToHideGroups) {
@@ -116,19 +127,13 @@ export class GanttRender {
     }
 
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
-    const tooltip = window.document.body.createDiv({cls: Css.tooltip.tooltip, attr: {id: EventIDs.tooltip}})
-
-    const hoverTitle = tooltip.createDiv({cls: Css.tooltip.title})
-    const hoverDates = tooltip.createDiv({cls: Css.tooltip.dates})
-    tooltip.createDiv({text: 'Click to open active note file', cls: Css.tooltip.link})
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */
     let renderEngine: GanttRenderEngine | null = null
     let updateTimeout: number | null = null
 
-
     /* Register the child lifecycle component synchronously before ANY 'await' */
-    ctx?.addChild(new GanttLifecycleComponent(el, tooltip, this.plugin))
+    ctx?.addChild(new GanttLifecycleComponent(el, this.plugin, refreshChartCallback))
 
     /* Perform data load in async way */
     this.plugin.calendarConfigsCache.clear()
@@ -138,9 +143,6 @@ export class GanttRender {
     renderEngine = new GanttRenderEngine(
       chartContainer,
       data,
-      tooltip,
-      hoverTitle,
-      hoverDates,
       this.plugin,
       codeBlockContent,
       this.selectedFrontmatterProperties
@@ -152,11 +154,11 @@ export class GanttRender {
     togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))
     toggleGrouping.addEventListener('change', () => renderEngine.toggleGrouping(toggleGrouping.checked))
 
-    panLeftBtn.addEventListener('click', () => renderEngine.panLeft(step))
-    zoomOutBtn.addEventListener('click', () => renderEngine.zoomOut())
+    panLeftBtn?.addEventListener('click', () => renderEngine.panLeft(step))
+    zoomOutBtn?.addEventListener('click', () => renderEngine.zoomOut())
     zoomResetBtn.addEventListener('click', () => renderEngine.resetZoom())
-    zoomInBtn.addEventListener('click', () => renderEngine.zoomIn())
-    panRightBtn.addEventListener('click', () => renderEngine.panRight(step))
+    zoomInBtn?.addEventListener('click', () => renderEngine.zoomIn())
+    panRightBtn?.addEventListener('click', () => renderEngine.panRight(step))
 
     settingsBtn.addEventListener('click', () => {
         const settingApi = (this.plugin.app as unknown as {
@@ -185,23 +187,17 @@ function createIconButton(parentEl: HTMLElement, icon: string, title: string,): 
 class GanttLifecycleComponent extends MarkdownRenderChild {
   private events: EventRef[] = []
 
-  constructor(containerEl: HTMLElement,
-              private tooltipEl: HTMLElement,
-              private plugin: FantasyGanttPlugin) {
+  constructor(containerEl: HTMLElement, private plugin: FantasyGanttPlugin, readonly refreshChartCallback: () => void) {
     super(containerEl)
   }
 
   onload() {
     /* Register listeners with reference tracking */
-    // this.events.push(this.plugin.app.metadataCache.on('changed', this.refreshChartCallback))
-    // this.events.push(this.plugin.app.metadataCache.on('resolved', this.refreshChartCallback))
+    this.events.push(this.plugin.app.metadataCache.on('changed', this.refreshChartCallback))
+    this.events.push(this.plugin.app.metadataCache.on('resolved', this.refreshChartCallback))
   }
 
   onunload() {
-    /* Remove the DOM tooltip element */
-    if (this.tooltipEl) {
-      this.tooltipEl.remove()
-    }
     /* Cleanly unbind listeners from the global event loop when code block is closed */
     this.events.forEach(eventRef => this.plugin.app.metadataCache.offref(eventRef))
     this.events = []
