@@ -7,8 +7,9 @@ const DESCRIPTION = `Must be unique. Allowed: letters, numbers, spaces, '-' and 
 const DESCRIPTION_DUPLICATE = 'This ID is already in use. Please choose another.'
 const DESCRIPTION_INVALID = 'Invalid format! Use only letters, numbers, spaces, hyphens, and underscores.'
 
-const getRandomHexColor = (): string =>
-  `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`
+function getRandomHexColor(): string {
+  return `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`
+}
 
 export class AddEntryModal extends Modal {
   private result: Partial<GroupOrCalendarSettings> = {}
@@ -58,7 +59,10 @@ export class AddEntryModal extends Modal {
       })
     })
 
-    new Setting(contentEl).setDesc('Choose a color').addColorPicker(c => c.setValue(this.plugin.settings.fallbackColor).onChange(v => this.result.color = v))
+    new Setting(contentEl)
+    .setDesc('Choose a color')
+    .addColorPicker(c => c.setValue(getRandomHexColor())
+    .onChange(v => this.result.color = v))
 
     new Setting(contentEl).addButton(btn => {
       btn.setButtonText('Add')
