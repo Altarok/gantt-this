@@ -133,9 +133,8 @@ export type GanttItem = {
   lane?: number
   frontMatter: FrontMatterCache
   file: TFile
-  _related?: number[] // experimental
-  // _predecessors?: number[] // experimental
-  // _successors?: number[] // experimental
+  _predecessors?: number[] // experimental
+  _successors?: number[] // experimental
 }
 
 export type GanttGroup = {

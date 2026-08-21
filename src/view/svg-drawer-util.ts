@@ -123,12 +123,15 @@ function truncateText(text: string, maxWidth: number, charWidthEstimate = 7): st
  * @param hasIcon moves text to the right if true
  * @param svgContainer
  */
-function addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement): void {
+function addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement, isTimeSpan: boolean): void {
   const textSpacing = textLeftPadding + (hasIcon ? iconSize : 0)
   const availableTextWidth = width - textSpacing
 
   if (availableTextWidth > 0) {
-    const textSvg = createSvg('text', Css.item.text, {x: x + textSpacing, y: y})
+    const textSvg = createSvg('text', isTimeSpan ? Css.item.textTimespan : Css.item.textTimestamp, {
+      x: x + textSpacing,
+      y: y
+    })
     textSvg.textContent = truncateText(text, availableTextWidth)
     svgContainer.appendChild(textSvg)
   }
@@ -151,7 +154,7 @@ function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: 
 
   if (width > iconSize) {
     const hasIcon = addIconIfPresent(d, x1, y - iconRadius, svgContainer)
-    if (width > 2 * iconSize) addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer)
+    if (width > 2 * iconSize) addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer, true)
   }
 }
 
@@ -174,7 +177,7 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
   if (width > iconSize) {
     const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
     const text = `${d.name}` // `Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`
-    if (width > 2 * iconSize) addTextIfFitting(text, x1, y + iconRadius, width, hasIcon, svgContainer)
+    if (width > 2 * iconSize) addTextIfFitting(text, x1, y + iconRadius, width, hasIcon, svgContainer, true)
   }
 }
 
@@ -198,7 +201,7 @@ function drawSmallShape(d: GanttItem,
   addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
 
   const availableWidth = 200 // Or calculate based on container bounds/remaining width
-  addTextIfFitting(d.name, x + iconRadius, y, availableWidth, false, svgContainer)
+  addTextIfFitting(d.name, x + iconRadius, y, availableWidth, false, svgContainer, false)
 }
 
 /**
@@ -297,7 +300,7 @@ function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, widt
   svgContainer.appendChild(line)
 
   const availableWidth = 200 // Or calculate based on container bounds/remaining width
-  addTextIfFitting(d.name, x1, y2 - iconRadius, availableWidth, false, svgContainer)
+  addTextIfFitting(d.name, x1, y2 - iconRadius, availableWidth, false, svgContainer, false)
 }
 
 const moonSvgs: Record<number, DocumentFragment> = {

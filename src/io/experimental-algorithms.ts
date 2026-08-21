@@ -20,24 +20,48 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     const {frontMatter} = item
     if (!frontMatter) return
 
-    const predecessor = frontMatter.predecessor as string[]
-    const successor = frontMatter.successor as string[]
-    if (!predecessor && !successor) return
-
+    const predecessors = frontMatter.predecessor as string[]
+    const successors = frontMatter.successor as string[]
+    if (!predecessors && !successors) return
 
     // console.log(`${item.file.basename} -> [${predecessor?.length ?? '_'}] / [${successor?.length ?? '_'}]`)
     // // console.log(predecessor)
     // // console.log(successor)
 
-    if (predecessor) for (const p of predecessor) if (p) {
-      // const filename = p
+    if (predecessors) for (const p of predecessors) if (p) {
 
+      const cleanFilename = stripObsidianLinkBrackets(p)
+
+      if (cleanFilename && filenameToItem[cleanFilename]) {
+        filenameToItem[cleanFilename].forEach(ii => {
+            ii._successors?.push(item.id)
+            item._predecessors?.push(ii.id)
+          }
+        )
+      }
     }
 
+    if (successors) for (const s of successors) if (s) {
 
+      const cleanFilename = stripObsidianLinkBrackets(s)
+
+      if (cleanFilename && filenameToItem[cleanFilename]) {
+        filenameToItem[cleanFilename].forEach(ii => {
+            ii._predecessors?.push(item.id)
+            item._successors?.push(ii.id)
+          }
+        )
+      }
+    }
+
+    debugger
   })
 
 
   // debugger
 
+}
+
+function stripObsidianLinkBrackets(input: string): string {
+  return input.replace(/\[\[|]]/g, "");
 }

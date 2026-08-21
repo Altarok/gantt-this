@@ -7,6 +7,8 @@ order: 4
 
 ![2026-08-21_16h40_34.png](images/2026-08-21_16h40_34.png)
 
+The screenshot show all possible event symbols and some randomly chosen icons.
+
 ## Features & Structure
 
 - **Events:** Each point or bar in the timeline corresponds to an event.

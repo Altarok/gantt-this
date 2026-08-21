@@ -343,12 +343,20 @@
   user-select: none;
 }
 
-.gt-item.text-overlay {
-  fill: whitesmoke;
+.gt-item.text-timespan {
   font-size: 14px;
   dominant-baseline: middle;
   pointer-events: none;
   user-select: none;
+  fill: black;
+}
+
+.gt-item.text-timestamp {
+  font-size: 14px;
+  dominant-baseline: middle;
+  pointer-events: none;
+  user-select: none;
+  fill: var(--text-normal);
 }
 
 .gt-item.timestamp.vertical-line {
