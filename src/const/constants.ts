@@ -1,5 +1,3 @@
-export const __DEBUG__ = false
-
 export const Css = {
   wrapper: 'gt-wrapper',
   toolbar: 'gt-toolbar',
