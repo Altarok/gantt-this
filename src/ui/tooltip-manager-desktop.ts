@@ -85,7 +85,7 @@ export class TooltipManager implements HoverParent {
 
     const g = tooltip.createDiv({cls: 'gt-tooltip'})
 
-    g.createDiv({text: d.name, cls: 'gt-tooltip-title'})
+    g.createDiv({text: d.name + this.getTooltipTitleSuffix(d), cls: 'gt-tooltip-title'})
     const table = g.createEl('table', {cls: 'gt-tooltip-table'})
     g.createDiv({text: 'Click to open in new tab', cls: 'gt-tooltip-link'})
 
@@ -120,7 +120,7 @@ export class TooltipManager implements HoverParent {
   }
 
   private createFallbackTooltipContent(d: GanttItem): string {
-    return d.displayType === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
+    return d.displayType === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay;
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
@@ -312,6 +312,10 @@ export class TooltipManager implements HoverParent {
     return null
   }
 
+  private getTooltipTitleSuffix(d: GanttItem) {
+    return this.addDaySuffixToTooltipTitle ? ` (day ${d.startDays})` : ''
+  }
+
   get settings(): PluginSettings {
     return this.engine.plugin.settings
   }
@@ -319,4 +323,9 @@ export class TooltipManager implements HoverParent {
   get overlayColor(): string {
     return this.settings.uxVerticalOverlayColor
   }
+
+  get addDaySuffixToTooltipTitle(): boolean {
+    return this.settings.uxAddDaySuffixToTooltipTitle
+  }
+
 }

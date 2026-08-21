@@ -337,6 +337,15 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
+            name: 'Tooltip',
+            desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
+            control: {
+              type: 'toggle', key: 'uxAddDaySuffixToTooltipTitle',
+              defaultValue: DEFAULT_SETTINGS.uxAddDaySuffixToTooltipTitle
+            }
+          },
+
+          {
             name: 'Group visibility toggles',
             desc: 'Add buttons to the toolbar for hiding or showing individual groups.',
             control: {

@@ -115,7 +115,10 @@ export class GanttRenderEngine {
 
       groupedMap.forEach((items, groupName) => {
         const {processedData, totalLanes} = this.calculateStacking(items)
-        const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight + this.config.groupHeaderHeight
+        const groupContentLanes = totalLanes > 0 ? totalLanes : 0
+        const groupHeight = /* Math.max(1, totalLanes) */
+          groupContentLanes * this.config.rowHeight + /* this.config.groupHeaderHeight */
+          (this.config.enableGrouping ? this.config.groupHeaderHeight : 0)
         this.groups.push({
           name: groupName,
           items: processedData,
@@ -127,7 +130,9 @@ export class GanttRenderEngine {
       })
     } else {
       const {processedData, totalLanes} = this.calculateStacking(activeData)
-      const groupHeight = Math.max(1, totalLanes) * this.config.rowHeight
+      const groupContentLanes = totalLanes > 0 ? totalLanes : 0
+      const groupHeight = /* Math.max(1, totalLanes) */
+        groupContentLanes * this.config.rowHeight
       this.groups.push({
         name: 'All',
         items: processedData,
@@ -276,8 +281,12 @@ export class GanttRenderEngine {
             return Util.drawPoint(d, x1, laneY + halfRowHeight, this.dataG)
           case 'box':
             return Util.drawBox(d, x1, laneY + halfRowHeight, this.dataG)
-          case 'vertical-line':
-            return Util.drawVerticalLine(d, x1, firstYValue, totalChartHeight + this.config.margin.top, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
+          case 'vertical-line': {
+            const isInGeneralGroup = d.group === 'general'
+            const y: number = isInGeneralGroup ? firstYValue : group.yOffset
+            const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+            return Util.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
+          }
           case 'diamond':
             return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.dataG)
           case 'triangle':
@@ -673,9 +682,16 @@ export class GanttRenderEngine {
   }
 
   private calculateStacking(items: GanttItem[]) {
-    const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
+
+    const eras = items.filter(i => i.displayType === 'era')
+    const nonEras = items.filter(i => i.displayType !== 'era')
+    .sort((a, b) => a.startDays - b.startDays)
+
+    // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
+
+
     const lanes: GanttItem[][] = []
-    sorted.forEach(item => {
+    nonEras.forEach(item => {
       let placed = false
       for (let i = 0; i < lanes.length; i++) {
         const lane = lanes[i]
@@ -695,7 +711,9 @@ export class GanttRenderEngine {
         item.lane = lanes.length - 1
       }
     })
-    return {processedData: sorted, totalLanes: lanes.length}
+    const processedData = [...eras, ...nonEras]
+
+    return {processedData, totalLanes: lanes.length}
   }
 
   private getXPosition(days: number, width: number): number {

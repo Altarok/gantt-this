@@ -133,6 +133,9 @@ export type GanttItem = {
   lane?: number
   frontMatter: FrontMatterCache
   file: TFile
+  _related?: number[] // experimental
+  // _predecessors?: number[] // experimental
+  // _successors?: number[] // experimental
 }
 
 export type GanttGroup = {
@@ -246,6 +249,7 @@ export type PluginSettings = GanttChartSources & {
   // customTooltipButton: OptionalControlKey
   // nativeTooltipButton: OptionalControlKey
   uxUseCalColorForCalAxis: boolean
+  uxAddDaySuffixToTooltipTitle: boolean
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -283,6 +287,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   // customTooltipButton: 'none',
   // nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
+  uxAddDaySuffixToTooltipTitle: false,
 
   /*
    * Front-matter property names

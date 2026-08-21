@@ -344,6 +344,7 @@
 }
 
 .gt-item.text-overlay {
+  fill: whitesmoke;
   font-size: 14px;
   dominant-baseline: middle;
   pointer-events: none;

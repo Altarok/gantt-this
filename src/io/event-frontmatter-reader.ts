@@ -15,6 +15,7 @@ import {FrontMatterUtil} from './frontmatter-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../util/dates'
 import {getFilteredFiles} from './file-collector'
+import {Experimental} from "./experimental-algorithms";
 
 /**
  * Search and filter files, then parse to {@link GanttItem}s.
@@ -68,7 +69,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
   parseCodeBlockContent(plugin, codeBlockContent)
 
-  // experimental_findPredecessorsAndSuccessors(items)
+  Experimental.findPredecessorsAndSuccessors(items)
 
   return items
 }

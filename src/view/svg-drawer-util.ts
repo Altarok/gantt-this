@@ -173,8 +173,8 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
 
   if (width > iconSize) {
     const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
-//    if (width > 2 * iconSize) addTextIfFitting(`Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`, x1, y + iconRadius, width, hasIcon, svgContainer)
-    if (width > 2 * iconSize) addTextIfFitting(`${d.name}`, x1, y + iconRadius, width, hasIcon, svgContainer)
+    const text = `${d.name}` // `Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`
+    if (width > 2 * iconSize) addTextIfFitting(text, x1, y + iconRadius, width, hasIcon, svgContainer)
   }
 }
 
@@ -196,6 +196,9 @@ function drawSmallShape(d: GanttItem,
   if (d.color) el.setAttribute('fill', d.color)
   svgContainer.appendChild(el)
   addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
+
+  const availableWidth = 200 // Or calculate based on container bounds/remaining width
+  addTextIfFitting(d.name, x + iconRadius, y, availableWidth, false, svgContainer)
 }
 
 /**
@@ -292,6 +295,9 @@ function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, widt
   const line = createSvg('line', Css.item.line, {x1, x2: x1, y1, y2, 'stroke-width': width, 'data-id': d.id})
   if (d.color) line.setAttribute('stroke', d.color)
   svgContainer.appendChild(line)
+
+  const availableWidth = 200 // Or calculate based on container bounds/remaining width
+  addTextIfFitting(d.name, x1, y2 - iconRadius, availableWidth, false, svgContainer)
 }
 
 const moonSvgs: Record<number, DocumentFragment> = {
