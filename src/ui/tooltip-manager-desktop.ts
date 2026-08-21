@@ -1,4 +1,4 @@
-import {HoverParent, HoverPopover, Notice} from 'obsidian'
+import {HoverParent, HoverPopover} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
 import {svgUrl} from '../const/constants'
 import {GanttRenderEngine} from '../view/svg-drawer'
@@ -305,7 +305,8 @@ export class TooltipManager implements HoverParent {
   /* Clean up if mouse drifted off a data element onto empty SVG space */
   hideTooltip(_msg?: string): null {
     if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
-    // if (msg) new Notice(`Hide tooltip: ${msg}`)
+    // if (_msg && __DEBUG__) new Notice(`Hide tooltip: ${_msg}`)
+    // else if (_msg) console-log(`Hide tooltip: ${_msg}`)
     this.hideHighlightAroundElement()
     this.hideVerticalGuide()
     return null

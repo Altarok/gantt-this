@@ -1,5 +1,35 @@
+import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent} from '../const/types'
 import {isCustomLeapYear, isLeapYear} from '../date-calculations/leap-year-calc'
+import {Consts} from '../const/constants'
+
+const TODAY = 'today'
+const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
+
+export const Dates = {
+  TODAY,
+  parseDescriptiveDateToValidInput
+}
+
+/**
+ * @param input starts with 'TODAY'
+ * @param config
+ */
+function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig) {
+  // calculate today absolute day count (since day 0)
+  let absoluteDay: number = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+    + (config.sharedOffset as number)  // config.sharedOffset was parsed to a number by now
+    + Consts.DAYS_FROM_0_12_31_TO_1_1_1970
+
+  if (input.length > TODAY.length) {
+    const suffix = input.slice(TODAY.length).trim()
+    if (TODAY_SUFFIX_PATTERN.test(suffix)) absoluteDay += Number(suffix)
+    else new Notice(`Failed to parse descriptive date '${input}'.'`)
+  }
+
+  // pass calculated day count into description generator
+  return createAxisDateDescription(absoluteDay, config, true)
+}
 
 /**
  * Calculates days from 0001-01-01 (Day 1) to Jan 1st of `year`.

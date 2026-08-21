@@ -16,9 +16,9 @@ import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../util/dates'
 import {getFilteredFiles} from './file-collector'
 
-
 /**
- * Search files and parse to GanttItem
+ * Search and filter files, then parse to {@link GanttItem}s.
+ * Call from outside Obsidian's Bases.
  * @param plugin
  * @param partialPluginSettings partial plugin settings
  * @param codeBlockContent user input in Markdown block
@@ -31,6 +31,10 @@ export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
   return parseFiles(plugin, partialPluginSettings, codeBlockContent, files)
 }
 
+/**
+ * Parse given files to {@link GanttItem}s.
+ * Call from outside Obsidian's Bases.
+ */
 export async function parseFiles(plugin: FantasyGanttPlugin,
                                  partialPluginSettings: PluginSettings,
                                  codeBlockContent: CodeBlockContent, files: TFile[]): Promise<GanttItem[]> {
@@ -63,6 +67,8 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
   }
 
   parseCodeBlockContent(plugin, codeBlockContent)
+
+  // experimental_findPredecessorsAndSuccessors(items)
 
   return items
 }
@@ -135,8 +141,9 @@ function createItem(plugin: FantasyGanttPlugin,
     calendarType: calendarId,
     color,
     link: file.path + FrontMatterUtil.getHeaderToLinkTo(frontMatter, plugin.settings),
-    frontMatter
-  }
+    frontMatter,
+    file
+  } // as GanttItem
 }
 
 

@@ -12,7 +12,7 @@ function getRandomHexColor(): string {
 }
 
 export class AddEntryModal extends Modal {
-  private result: Partial<GroupOrCalendarSettings> = {}
+
   private existingIds: Set<string>
 
   constructor(readonly plugin: FantasyGanttPlugin,
@@ -23,6 +23,8 @@ export class AddEntryModal extends Modal {
   }
 
   onOpen() {
+    const result: Partial<GroupOrCalendarSettings> = {visible: true, color: getRandomHexColor()}
+
     const {contentEl} = this
     contentEl.empty()
     contentEl.createEl('h2', {text: 'Add new item'})
@@ -35,7 +37,7 @@ export class AddEntryModal extends Modal {
     .addText(text => {
       text.onChange((value) => {
         const trimmed = value.trim()
-        this.result.id = trimmed
+        result.id = trimmed
 
         // Validation checks
         const isValidFormat = ID_REGEX.test(trimmed)
@@ -59,28 +61,24 @@ export class AddEntryModal extends Modal {
       })
     })
 
-    new Setting(contentEl)
-    .setDesc('Choose a color')
-    .addColorPicker(c => c.setValue(getRandomHexColor())
-    .onChange(v => this.result.color = v))
+    new Setting(contentEl).setDesc('Choose a color').addColorPicker(c => c.setValue(result.color!).onChange(v => result.color = v))
 
     new Setting(contentEl).addButton(btn => {
       btn.setButtonText('Add')
       .setCta()
       .onClick(() => {
-        if (!this.result.id || !ID_REGEX.test(this.result.id) || this.existingIds.has(this.result.id)) {
+        if (!result.id || !ID_REGEX.test(result.id) || this.existingIds.has(result.id)) {
           new Notice('Please enter a valid, unique ID.')
           return
         }
 
         this.close()
-        this.onSubmit(this.result as GroupOrCalendarSettings)
+        this.onSubmit(result as GroupOrCalendarSettings)
       })
 
       addButton = btn.buttonEl
       addButton.disabled = true // Initially disabled until user types a valid ID
     })
-
 
   }
 
