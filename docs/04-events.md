@@ -5,6 +5,8 @@ order: 4
 
 # Event frontmatter properties
 
+![2026-08-21_16h40_34.png](images/2026-08-21_16h40_34.png)
+
 ## Features & Structure
 
 - **Events:** Each point or bar in the timeline corresponds to an event.
@@ -13,7 +15,7 @@ order: 4
 - **Decentralized in Frontmatter:** Events are defined directly within the YAML properties of your Markdown files.
 - **Structuring:** Events can be organized, filtered, and sorted by groups and custom calendars.
 - **Flexible Visibility:** Groups, calendars, time spans, and individual points can be shown or hidden independently.
-- **Custom Styling:** Points in time can be customized with icons from [Lucide](https://lucide.dev) and custom colors.
+- **Custom Styling:** Points in time can be customized with icons from Obsidian's cache and custom colors.
 - **Interactivity:**
   - Mouseover displays relevant metadata in a tooltip (Desktop).
   - Clicking an event directly opens the source note—optionally jumping to a specific heading.
@@ -52,4 +54,6 @@ The following table lists all available properties you can use in your notes:
 | `gantt-symbol`           | `bar`, `point`, `icon`, `diamond`          | Yes       | `bar` (time span) or `point` (point in time)        | Sets the visual representation format of the event.                       |
 | `gantt-linkToHeader`     | String                                     | Yes       | *None* (Jumps to top of file)                       | Links directly to a specific heading when clicked.                        |
 
-\*: Property `gantt-item` *may* be defined as optional in the settings. 
+\*: Property `gantt-item` *may* be defined as optional in the settings.
+
+*All of these can be renamed to your liking*.
