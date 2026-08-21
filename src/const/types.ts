@@ -1,4 +1,4 @@
-import {FrontMatterCache} from 'obsidian'
+import {FrontMatterCache, TFile} from 'obsidian'
 
 export const CALENDAR_CONFIG_TYPES = [
   'positional',
@@ -132,6 +132,7 @@ export type GanttItem = {
   link?: string
   lane?: number
   frontMatter: FrontMatterCache
+  file: TFile
 }
 
 export type GanttGroup = {
