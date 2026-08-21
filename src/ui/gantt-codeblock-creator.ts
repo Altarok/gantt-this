@@ -60,7 +60,6 @@ export class CodeBlockCreatorModal extends Modal {
     contentEl.focus()
   }
 
-
   onClose() {
     this.contentEl.empty()
   }

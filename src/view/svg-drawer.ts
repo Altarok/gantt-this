@@ -320,7 +320,7 @@ export class GanttRenderEngine {
     this.activeAxesList.forEach((calType, index) => {
       const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight)
       const tickPixelSpacing = (this.stepDays / (this.maxDays - this.minDays)) * renderWidth * this.zoomScale
-      const showMoonPhases: boolean = tickPixelSpacing >= 24
+      const showMoonPhases: boolean = this.plugin.settings.uxShowMoons && tickPixelSpacing >= 24
 
       this.svgDrawerData.drawnCals[calType] = {
         y1: currentAxisYStart,

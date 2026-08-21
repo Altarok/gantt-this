@@ -19,10 +19,5 @@ export function createGanttEventManager(renderEngine: GanttRenderEngine,
   if (Platform.isMobile)
     return new GanttMobileEventManager(renderEngine)
   else
-    return new GanttDesktopEventManager(renderEngine,
-      pluginSettings.autoRestrictZoom,
-      pluginSettings.mouseOverEventShowBox,
-      pluginSettings.mouseOverEventShowVerticalLine,
-      pluginSettings.uxZoomButton,
-      pluginSettings.uxPanButton)
+    return new GanttDesktopEventManager(renderEngine, pluginSettings)
 }

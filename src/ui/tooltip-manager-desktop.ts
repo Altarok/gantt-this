@@ -1,4 +1,4 @@
-import {HoverParent, HoverPopover} from 'obsidian'
+import {HoverParent, HoverPopover, Notice} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
 import {svgUrl} from '../const/constants'
 import {GanttRenderEngine} from '../view/svg-drawer'
@@ -14,10 +14,8 @@ export class TooltipManager implements HoverParent {
   private highlightElement: SVGElement | null = null
   private lastHoverTarget: HTMLElement | null = null
 
-
   constructor(readonly engine: GanttRenderEngine,
-              readonly mouseOverEventShowBox: boolean,
-              readonly mouseOverEventShowVerticalLine: boolean) {
+              readonly pluginSettings: PluginSettings) {
     this.setupDelegatedHover()
   }
 
@@ -26,7 +24,10 @@ export class TooltipManager implements HoverParent {
     this.engine.container.addEventListener('mouseover', (evt: MouseEvent) => {
 
       let hoverData: { target: HTMLElement, ganttItem: GanttItem } | null = this.getTargetAndMatchingEvent(evt)
-      if (!hoverData) return this.hideTooltip()
+      if (!hoverData) {
+        this.hideTooltip()
+        return
+      }
 
       const {target, ganttItem} = hoverData
 
@@ -34,12 +35,11 @@ export class TooltipManager implements HoverParent {
        * At THIS point we decided to really show a tooltip
        */
 
-      if (this.lastHoverTarget) {
-        delete this.lastHoverTarget.dataset.hasPopover
-      }
+      if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
 
       /* CTRL key is reserved for native file preview */
       if (evt.ctrlKey) {
+        if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
         this.showNativePreview(evt, target, ganttItem.link)
         return
       }
@@ -54,19 +54,12 @@ export class TooltipManager implements HoverParent {
       /* create single popover attached to the hovered event */
       const popover = new HoverPopover(this, target, -1)
 
-      popover.hoverEl.setCssProps({
-        'min-width': '0',
-        'width': 'max-content',
-        'max-width': 'fit-content',
-        'box-sizing': 'border-box'
-      })
-
       /* populate content based on event data  */
       this.setTooltipContent(ganttItem, popover.hoverEl)
 
       popover.hoverEl.addEventListener('mouseleave', () => {
         /* Reset marker when popover closes/leaves */
-        this.hideTooltip()
+        this.hideTooltip('mouse leave')
         delete target.dataset.hasPopover
       })
     })
@@ -75,14 +68,15 @@ export class TooltipManager implements HoverParent {
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
 
     const target = evt.target as HTMLElement // Find the closest task element (works for SVG rects or HTML bars)
-    if (!target?.hasAttribute('data-id')) return null // is it a gantt chart with data?
+    if (!target?.hasAttribute('data-id')) return this.hideTooltip('not data-id') // is it a gantt chart with data?
     const rawId = target.getAttribute('data-id') // extract data ID (unique)
-    if (rawId === null) return null
+    if (rawId === null) return this.hideTooltip('data-id is null')
     const id = Number(rawId)
     const ganttItem: GanttItem | undefined = this.engine.rawData.find(d => d.id === id) // is it a GanttItem?
-    if (!ganttItem) return null
+    if (!ganttItem) return this.hideTooltip('target not a GanttItem')
 
-    if (!target || target.dataset.hasPopover === 'true') return null // already hovering said target?
+    if (!target) return this.hideTooltip('target missing')
+    if (target.dataset.hasPopover === 'true') return this.hideTooltip('target already has a popover') // already hovering said target?
 
     return {target, ganttItem}
   }
@@ -130,7 +124,7 @@ export class TooltipManager implements HoverParent {
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
-    if (!this.mouseOverEventShowVerticalLine) return
+    if (!this.pluginSettings.mouseOverEventShowVerticalLine) return
     if (ganttItem.displayType === 'era') return
 
     const svg = target.closest('svg')
@@ -230,7 +224,7 @@ export class TooltipManager implements HoverParent {
 
   /** Show box around hovered element. */
   private showHighlightAroundElement(target: HTMLElement, ganttItem: GanttItem) {
-    if (!this.mouseOverEventShowBox) return
+    if (!this.pluginSettings.mouseOverEventShowBox) return
 
     if (this.lastHoveredTarget && this.lastHoveredTarget !== target) {
       if (this.highlightElement) {
@@ -309,9 +303,12 @@ export class TooltipManager implements HoverParent {
   }
 
   /* Clean up if mouse drifted off a data element onto empty SVG space */
-  hideTooltip() {
+  hideTooltip(_msg?: string): null {
+    if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
+    // if (msg) new Notice(`Hide tooltip: ${msg}`)
     this.hideHighlightAroundElement()
     this.hideVerticalGuide()
+    return null
   }
 
   get settings(): PluginSettings {
