@@ -7,6 +7,9 @@ const DESCRIPTION = `Must be unique. Allowed: letters, numbers, spaces, '-' and 
 const DESCRIPTION_DUPLICATE = 'This ID is already in use. Please choose another.'
 const DESCRIPTION_INVALID = 'Invalid format! Use only letters, numbers, spaces, hyphens, and underscores.'
 
+const getRandomHexColor = (): string =>
+  `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`
+
 export class AddEntryModal extends Modal {
   private result: Partial<GroupOrCalendarSettings> = {}
   private existingIds: Set<string>

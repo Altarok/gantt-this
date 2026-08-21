@@ -50,7 +50,7 @@
   ry: 8px;
   fill: var(--text-accent);
   opacity: 1;
-  filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%)));
+  filter: drop-shadow(0 2px 4px var(--shadow-color, var(--background-modifier-border)));
   pointer-events: none;
   user-select: none;
 }
@@ -230,7 +230,8 @@
 
 /* Subtle separator between rows */
 .gt-tooltip-table tr:not(:last-child) td {
-  border-bottom: 1px solid var(--background-modifier-border-focus, rgb(255 255 255 / 5%));
+  /* border-bottom: 1px solid var(--background-modifier-border-focus, rgb(255 255 255 / 5%)); */
+  border-bottom: 1px solid var(--background-modifier-border);
 }
 
 /* Break out of Obsidian's readable line width constraints for this specific code block type */
@@ -292,7 +293,7 @@
   ry: 9px;
   fill: var(--background-modifier-border);
   opacity: 0.6;
-  filter: drop-shadow(0 2px 4px var(--shadow-color, rgb(0 0 0 / 25%))); /* Replaced rgb(0 0 0 / 100%) */
+  filter: drop-shadow(0 2px 4px var(--shadow-color, var(--background-modifier-border))); /* Replaced rgb(0 0 0 / 100%) */
   pointer-events: none;
   user-select: none;
 }
@@ -530,13 +531,19 @@
   pointer-events: none;
 }
 
-/*
-.popover.hover-popover,
-.popover.hover-popover .popover-content,
+/* .popover.hover-popover,
+.popover.hover-popover .popover-content, */
 .popover.hover-popover .gt-tooltip {
   min-width: 0;
   width: max-content;
   max-width: fit-content;
   box-sizing: border-box;
+}
+
+/*
+.popover.hover-popover {
+  width: unset;
+  min-width: fit-content;
+  !*max-width: 500px;
 }
 */
