@@ -55,7 +55,7 @@ function getEventIconID(frontMatter: FrontMatterCache, settings: PluginSettings)
  * Default key: 'gantt-displayIconColor'
  */
 function getEventIconColor(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_icon_color] as string ?? undefined
+  return frontMatter[settings.frontMatterProperty_event_icon_color] as string ?? settings.fallbackColorForIcons ?? undefined
 }
 
 /*

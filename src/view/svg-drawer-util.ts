@@ -200,8 +200,8 @@ function drawSmallShape(d: GanttItem,
   svgContainer.appendChild(el)
   addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
 
-  const availableWidth = 200 // Or calculate based on container bounds/remaining width
-  addTextIfFitting(d.name, x + iconRadius, y, availableWidth, false, svgContainer, false)
+  // const availableWidth = 200 // Or calculate based on container bounds/remaining width
+  // addTextIfFitting(d.name, x + iconRadius, y, availableWidth, false, svgContainer, false)
 }
 
 /**
@@ -299,8 +299,8 @@ function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, widt
   if (d.color) line.setAttribute('stroke', d.color)
   svgContainer.appendChild(line)
 
-  const availableWidth = 200 // Or calculate based on container bounds/remaining width
-  addTextIfFitting(d.name, x1, y2 - iconRadius, availableWidth, false, svgContainer, false)
+  // const availableWidth = 200 // Or calculate based on container bounds/remaining width
+  // addTextIfFitting(d.name, x1, y2 - iconRadius, availableWidth, false, svgContainer, false)
 }
 
 const moonSvgs: Record<number, DocumentFragment> = {
