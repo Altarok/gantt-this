@@ -55,7 +55,7 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     }
 
     // debugger
-    
+
   })
 
   // debugger

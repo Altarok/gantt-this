@@ -143,7 +143,8 @@ function createItem(plugin: FantasyGanttPlugin,
     color,
     link: file.path + FrontMatterUtil.getHeaderToLinkTo(frontMatter, plugin.settings),
     frontMatter,
-    file
+    file,
+    _predecessors: [], _successors: []
   } // as GanttItem
 }
 

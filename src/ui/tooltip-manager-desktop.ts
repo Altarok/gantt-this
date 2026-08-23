@@ -49,6 +49,7 @@ export class TooltipManager implements HoverParent {
       target.dataset.hasPopover = 'true' // mark element to not duplicate popover on internal mouse moves
 
       this.showHighlightAroundElement(target, ganttItem)
+      this.experimental_showHighlightAroundRelatedElements(target, ganttItem)
       this.showVerticalGuide(target, ganttItem)
 
       /* create single popover attached to the hovered event */
@@ -65,6 +66,10 @@ export class TooltipManager implements HoverParent {
     })
   }
 
+  private getEventById(id: number): GanttItem | undefined {
+    return this.engine.rawData.find(d => d.id === id) // is it a GanttItem?
+  }
+
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
 
     const target = evt.target as HTMLElement // Find the closest task element (works for SVG rects or HTML bars)
@@ -72,7 +77,7 @@ export class TooltipManager implements HoverParent {
     const rawId = target.getAttribute('data-id') // extract data ID (unique)
     if (rawId === null) return this.hideTooltip('data-id is null')
     const id = Number(rawId)
-    const ganttItem: GanttItem | undefined = this.engine.rawData.find(d => d.id === id) // is it a GanttItem?
+    const ganttItem: GanttItem | undefined = this.getEventById(id)
     if (!ganttItem) return this.hideTooltip('target not a GanttItem')
 
     if (!target) return this.hideTooltip('target missing')
@@ -220,6 +225,23 @@ export class TooltipManager implements HoverParent {
       lines?.lower?.remove()
     }
     this.verticalGuides = []
+  }
+
+  /**
+   * TODO experimental!!
+   *
+   * @param target
+   * @param ganttItem
+   * @private
+   */
+  private experimental_showHighlightAroundRelatedElements(target: HTMLElement, ganttItem: GanttItem) {
+
+    const predecessorsItems: GanttItem[] = ganttItem._predecessors?.forEach(p => this.getEventById(p)) ?? []
+    const successorsItems: GanttItem[] = ganttItem._successors?.forEach(s => this.getEventById(s)) ?? []
+
+    const relatedItems: GanttItem[] = [...predecessorsItems, ...successorsItems]
+
+
   }
 
   /** Show box around hovered element. */
