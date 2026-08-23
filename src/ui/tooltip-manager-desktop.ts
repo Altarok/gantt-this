@@ -67,7 +67,9 @@ export class TooltipManager implements HoverParent {
   }
 
   private getEventById(id: number): GanttItem | undefined {
-    return this.engine.rawData.find(d => d.id === id) // is it a GanttItem?
+    const find = this.engine.rawData.find(d => d.id === id);
+    // debugger
+    return find // is it a GanttItem?
   }
 
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
@@ -236,11 +238,26 @@ export class TooltipManager implements HoverParent {
    */
   private experimental_showHighlightAroundRelatedElements(target: HTMLElement, ganttItem: GanttItem) {
 
-    const predecessorsItems: GanttItem[] = ganttItem._predecessors?.forEach(p => this.getEventById(p)) ?? []
-    const successorsItems: GanttItem[] = ganttItem._successors?.forEach(s => this.getEventById(s)) ?? []
+    const predecessorsItems = ganttItem._predecessors?.map(p => this.getEventById(p)) ?? []
+    const successorsItems = ganttItem._successors?.map(s => this.getEventById(s)) ?? []
 
-    const relatedItems: GanttItem[] = [...predecessorsItems, ...successorsItems]
+    const allRelated: GanttItem[] = [...predecessorsItems.filter(x => x !== undefined),
+      ...successorsItems.filter(x => x !== undefined)]
 
+    const relatedItems: GanttItem[] = Array.from(
+      new Map(allRelated.map(item => [item.id, item])).values()
+    )
+
+    debugger
+
+    let svgs = relatedItems.map(item => this.engine.findSvgElementById(item.id))
+    svgs = svgs.filter(Boolean)
+
+    debugger
+
+    svgs.forEach(s => {
+      s?.setCssProps({stroke: 'red', fill: 'red'})
+    })
 
   }
 
@@ -265,6 +282,9 @@ export class TooltipManager implements HoverParent {
 
     const svgRect = svg.getBoundingClientRect()
     const targetRect = target.getBoundingClientRect()
+
+    // debugger
+
     const x = targetRect.left - svgRect.left
     const y = targetRect.top - svgRect.top
     const width = targetRect.width

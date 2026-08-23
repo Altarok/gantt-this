@@ -685,7 +685,7 @@ export class GanttRenderEngine {
 
     const eras = items.filter(i => i.displayType === 'era')
     const nonEras = items.filter(i => i.displayType !== 'era')
-    .sort((a, b) => a.startDays - b.startDays)
+      .sort((a, b) => a.startDays - b.startDays)
 
     // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
 
@@ -720,6 +720,18 @@ export class GanttRenderEngine {
     const renderWidth = width - this.config.margin.left - this.config.margin.right
     const percentage = (days - this.minDays) / (this.maxDays - this.minDays)
     return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
+  }
+
+    // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
+    //   const selector = `[data-id="${id}"]`
+    //   return Array.from(this.dataG.querySelectorAll<T>(selector))
+    // }
+
+  findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
+    const selector = `[data-id="${id}"q]`
+    const querySelector = this.dataG.querySelector<T>(selector)
+    debugger
+    return querySelector
   }
 
 }
