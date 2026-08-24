@@ -71,8 +71,6 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
   Experimental.findPredecessorsAndSuccessors(items)
 
-  debugger
-
   return items
 }
 

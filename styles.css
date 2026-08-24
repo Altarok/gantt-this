@@ -330,6 +330,24 @@
   user-select: none;
 }
 
+.gt-item.symbol-hover-related {
+  stroke-width: 1px;
+  fill: none;
+  pointer-events: none;
+  user-select: none;
+  overflow: visible;
+}
+
+.theme-dark .gt-item.symbol-hover-related {
+  stroke: #fff;
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px #fff);
+}
+
+.theme-light .gt-item.symbol-hover-related {
+  stroke: #000;
+  filter: drop-shadow(0 0 3px #000) drop-shadow(0 0 6px #000);
+}
+
 /* Base styles hover reset for rectangles */
 .gt-item.timestamp.box,
 .gt-item.timespan.bar {
@@ -549,10 +567,10 @@
   box-sizing: border-box;
 }
 
-/*
-.popover.hover-popover {
-  width: unset;
-  min-width: fit-content;
-  !*max-width: 500px;
+.gt-dependency-arrow {
+  stroke: var(--interactive-accent);
+  stroke-width: 2px;
+  stroke-dasharray: 4; /* Optional: dotted/dashed connector */
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px var(--interactive-accent));
 }
-*/

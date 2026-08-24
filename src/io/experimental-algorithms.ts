@@ -14,7 +14,7 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     if (!filenameToItem[basename]) {
       filenameToItem[basename] = [item]
     } else {
-      filenameToItem[basename]!.push(item)
+      filenameToItem[basename]?.push(item)
     }
   })
 
@@ -29,7 +29,7 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     const successors = frontMatter.successor as string[]
     if (!predecessors && !successors) return
 
-    console.log(`${item.file.basename} -> [${predecessors?.length ?? '_'}] / [${successors?.length ?? '_'}]`)
+    // console.log(`${item.file.basename} -> [${predecessors?.length ?? '_'}] / [${successors?.length ?? '_'}]`)
     // // console.log(predecessor)
     // // console.log(successor)
 
@@ -61,6 +61,9 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
       }
     }
 
+    /*
+     * cleanup duplicates!!
+     */
     // debugger
 
   })

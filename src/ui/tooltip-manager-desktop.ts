@@ -4,15 +4,20 @@ import {svgUrl} from '../const/constants'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {Util} from '../view/svg-drawer-util'
 import {FrontMatterUtil} from '../io/frontmatter-reader'
+import {GanttConnectorDrawer} from './arrow-drawer'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
+
+type HighLightTarget = { item: GanttItem, svg: SVGElement }
+type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
 export class TooltipManager implements HoverParent {
   hoverPopover: HoverPopover | null = null;
   private verticalGuides: VerticalOverlay[] = []
   private lastHoveredTarget: HTMLElement | null = null
-  private highlightElement: SVGElement | null = null
+  private highlightElements: SVGElement[] = []
   private lastHoverTarget: HTMLElement | null = null
+  private connectorDrawer = new GanttConnectorDrawer()
 
   constructor(readonly engine: GanttRenderEngine,
               readonly pluginSettings: PluginSettings) {
@@ -49,7 +54,6 @@ export class TooltipManager implements HoverParent {
       target.dataset.hasPopover = 'true' // mark element to not duplicate popover on internal mouse moves
 
       this.showHighlightAroundElement(target, ganttItem)
-      this.experimental_showHighlightAroundRelatedElements(target, ganttItem)
       this.showVerticalGuide(target, ganttItem)
 
       /* create single popover attached to the hovered event */
@@ -67,9 +71,7 @@ export class TooltipManager implements HoverParent {
   }
 
   private getEventById(id: number): GanttItem | undefined {
-    const find = this.engine.rawData.find(d => d.id === id);
-    // debugger
-    return find // is it a GanttItem?
+    return this.engine.rawData.find(d => d.id === id) // is it a GanttItem?
   }
 
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
@@ -232,33 +234,38 @@ export class TooltipManager implements HoverParent {
   /**
    * TODO experimental!!
    *
-   * @param target
    * @param ganttItem
-   * @private
    */
-  private experimental_showHighlightAroundRelatedElements(target: HTMLElement, ganttItem: GanttItem) {
+  private experimental_showHighlightAroundRelatedElements(ganttItem: GanttItem): RelatedTargets {
 
-    const predecessorsItems = ganttItem._predecessors?.map(p => this.getEventById(p)) ?? []
-    const successorsItems = ganttItem._successors?.map(s => this.getEventById(s)) ?? []
+    // type HighLightTarget = { item: GanttItem, svg: SVGElement }
+    // type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
-    const allRelated: GanttItem[] = [...predecessorsItems.filter(x => x !== undefined),
-      ...successorsItems.filter(x => x !== undefined)]
+    const predecessorsRaw = ganttItem._predecessors?.map(p =>
+      this.getEventById(p)
+    ).filter(x => x !== undefined) ?? []
 
-    const relatedItems: GanttItem[] = Array.from(
-      new Map(allRelated.map(item => [item.id, item])).values()
-    )
+    const successorsRaw = ganttItem._successors?.map(s =>
+      this.getEventById(s)
+    ).filter(x => x !== undefined) ?? []
 
-    debugger
+    const predecessorItems = Array.from(new Map(predecessorsRaw.map(p => [p.id, p])).values()) // => distinct
+    const successorItems = Array.from(new Map(successorsRaw.map(p => [p.id, p])).values()) // => distinct
 
-    let svgs = relatedItems.map(item => this.engine.findSvgElementById(item.id))
-    svgs = svgs.filter(Boolean)
+    const predecessors: HighLightTarget[] = []
+    const successors: HighLightTarget[] = []
 
-    debugger
-
-    svgs.forEach(s => {
-      s?.setCssProps({stroke: 'red', fill: 'red'})
+    predecessorItems.forEach(item => {
+      const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
+      if (svg) predecessors.push({item, svg})
     })
 
+    successorItems.forEach(item => {
+      const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
+      if (svg) successors.push({item, svg})
+    })
+
+    return {predecessors, successors}
   }
 
   /** Show box around hovered element. */
@@ -266,55 +273,85 @@ export class TooltipManager implements HoverParent {
     if (!this.pluginSettings.mouseOverEventShowBox) return
 
     if (this.lastHoveredTarget && this.lastHoveredTarget !== target) {
-      if (this.highlightElement) {
-        this.highlightElement.remove()
-        this.highlightElement = null
-      }
+      this.hideHighlightAroundElement()
     }
 
-    if (ganttItem.displayType === 'era') return
-    // if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') return
-    if (ganttItem.displayType === 'vertical-line') return
+    if (ganttItem.displayType === 'era' || ganttItem.displayType === 'vertical-line') return
 
     this.lastHoveredTarget = target
-    const svg = target.closest('svg')
-    if (!svg) return
+    const svgBackground = target.closest('svg')
+    if (!svgBackground) return
 
-    const svgRect = svg.getBoundingClientRect()
-    const targetRect = target.getBoundingClientRect()
+    this.addHighLightAroundSvg(ganttItem, svgBackground, target)
+  }
 
-    // debugger
 
-    const x = targetRect.left - svgRect.left
-    const y = targetRect.top - svgRect.top
-    const width = targetRect.width
-    const height = targetRect.height
+  private addHighLightAroundSvg(ganttItem: GanttItem, svgBackground: SVGElement, target: SVGElement | HTMLElement) {
 
-    if (!this.highlightElement) {
-      this.highlightElement = window.document.createElementNS(svgUrl, 'g')
-      svg.appendChild(this.highlightElement)
-    }
+    const relatedTargets: RelatedTargets = this.experimental_showHighlightAroundRelatedElements(ganttItem)
 
-    this.highlightElement.innerHTML = ''
-    let shape: SVGElement
-    let points: string
+    this.createShape(ganttItem, target, svgBackground, 'gt-item symbol-hover')
+
+    relatedTargets.predecessors.forEach(r => {
+      this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
+
+      this.connectorDrawer.drawCurvedArrow(r.svg, target, svgBackground)
+    })
+
+    relatedTargets.successors.forEach(r => {
+      this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
+
+      /* switch start and end in this loop */
+      this.connectorDrawer.drawCurvedArrow(target, r.svg, svgBackground)
+    })
+
+  }
+
+  private createShape(ganttItem: GanttItem,
+                      target: SVGElement | HTMLElement,
+                      backgroundContainer: SVGElement,
+                      cssClass: string): void {
+
+    const targetRect: DOMRect = target.getBoundingClientRect()
+    const svgRect: DOMRect = backgroundContainer.getBoundingClientRect()
+
+    const x: number = targetRect.left - svgRect.left
+    const y: number = targetRect.top - svgRect.top
+    const width: number = targetRect.width
+    const height: number = targetRect.height
+
+    let shape: SVGElement | null
 
     const centreX = x + width / 2
     const centreY = y + height / 2
 
-    if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
-      shape = Util.createSvg('rect', 'gt-item symbol-hover', {
+    if (ganttItem.displayType === 'era' || ganttItem.displayType === 'vertical-line') {
+      shape = null // duplicate code added as fallback after method was split
+    } else if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
+      shape = Util.createSvg('rect', cssClass, {
         x: x - 1, y: y - 1, width: width + 2, height: height + 2, stroke: this.overlayColor
       })
     } else if (ganttItem.displayType === 'point') {
-      shape = Util.createSvg('circle', 'gt-item symbol-hover', {
+      shape = Util.createSvg('circle', cssClass, {
         cx: String(centreX), cy: String(centreY), r: String(width / 2 + 3), stroke: this.overlayColor
       })
     } else {
-      points = this.calculatePolygonPointsForOverlay(centreX, centreY, ganttItem.displayType)
-      shape = Util.createSvg('polygon', 'gt-item symbol-hover', {points, stroke: this.overlayColor})
+      const points = this.calculatePolygonPointsForOverlay(centreX, centreY, ganttItem.displayType)
+      shape = Util.createSvg('polygon', cssClass, {points, stroke: this.overlayColor})
     }
-    this.highlightElement.appendChild(shape)
+
+    if (shape) {
+      const highlightElement: SVGGElement = window.document.createElementNS(svgUrl, 'g')
+      highlightElement.innerHTML = ''
+      highlightElement.appendChild(shape)
+
+      this.highlightElements.push(highlightElement)
+
+      if (highlightElement) {
+        backgroundContainer.insertBefore(highlightElement, backgroundContainer.firstChild)
+      }
+    }
+
   }
 
   private calculatePolygonPointsForOverlay(x: number, y: number, symbol: 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'octagon' | 'star') {
@@ -335,21 +372,20 @@ export class TooltipManager implements HoverParent {
   }
 
   private hideHighlightAroundElement() {
-    if (this.highlightElement) {
-      this.highlightElement.remove()
-      this.highlightElement = null
-    }
-    if (this.lastHoveredTarget) {
-      this.lastHoveredTarget = null
+    this.connectorDrawer.clearArrows()
+    if (this.highlightElements) {
+      this.highlightElements.forEach(el => el.remove())
+      this.highlightElements = []
     }
   }
 
   /* Clean up if mouse drifted off a data element onto empty SVG space */
   hideTooltip(_msg?: string): null {
     if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
-    // if (_msg) new Notice(`Hide tooltip: ${_msg}`)
-    // else if (_msg) console-log(`Hide tooltip: ${_msg}`)
     this.hideHighlightAroundElement()
+    if (this.lastHoveredTarget) {
+      this.lastHoveredTarget = null
+    }
     this.hideVerticalGuide()
     return null
   }

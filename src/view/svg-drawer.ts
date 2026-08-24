@@ -157,6 +157,16 @@ export class GanttRenderEngine {
     this.container.empty() // .innerHTML = ''
 
     this.svg = Util.createSvg('svg', Css.svg.canvas)
+
+    const defsHTML = `
+  <defs>
+    <marker id="gt-arrow-head" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent)" />
+    </marker>
+  </defs>
+`
+    this.svg.insertAdjacentHTML('afterbegin', defsHTML)
+
     this.svg.setAttribute('height', this.totalHeight.toString())
     this.container.appendChild(this.svg)
 
@@ -685,7 +695,7 @@ export class GanttRenderEngine {
 
     const eras = items.filter(i => i.displayType === 'era')
     const nonEras = items.filter(i => i.displayType !== 'era')
-      .sort((a, b) => a.startDays - b.startDays)
+    .sort((a, b) => a.startDays - b.startDays)
 
     // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
 
@@ -722,16 +732,14 @@ export class GanttRenderEngine {
     return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
   }
 
-    // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
-    //   const selector = `[data-id="${id}"]`
-    //   return Array.from(this.dataG.querySelectorAll<T>(selector))
-    // }
+  // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
+  //   const selector = `[data-id="${id}"]`
+  //   return Array.from(this.dataG.querySelectorAll<T>(selector))
+  // }
 
   findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
-    const selector = `[data-id="${id}"q]`
-    const querySelector = this.dataG.querySelector<T>(selector)
-    debugger
-    return querySelector
+    const selector = `[data-id="${id}"]`
+    return this.dataG.querySelector<T>(selector)
   }
 
 }
