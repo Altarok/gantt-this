@@ -1,5 +1,9 @@
 import {Util} from '../view/svg-drawer-util'
 
+
+type Point = { x: number, y: number }
+
+
 export class GanttConnectorDrawer {
   private activeArrows: SVGElement[] = []
 
@@ -8,12 +12,22 @@ export class GanttConnectorDrawer {
     const fromRect = fromEl.getBoundingClientRect()
     const toRect = toEl.getBoundingClientRect()
 
+    let startPoint: Point
+    let endPoint: Point
+
+    if (fromRect.bottom > toRect.top) {
+      startPoint = centerOfLowerBound(containerRect, fromRect)
+      endPoint = centerOfLeftBound(containerRect, toRect)
+    }
+
+
     // 1. Calculate relative anchor points (e.g., right edge of source to left edge of target)
     const startX = fromRect.left - containerRect.left + fromRect.width / 2
     const startY = fromRect.top + fromRect.height / 2 - containerRect.top
 
     const endX = toRect.left - containerRect.left
     const endY = toRect.top + toRect.height / 2 - containerRect.top
+
 
     // 2. Control points for smooth horizontal S-curve (cubic bezier)
     const dx = Math.abs(endX - startX) * 0.5
@@ -40,3 +54,19 @@ export class GanttConnectorDrawer {
     this.activeArrows = []
   }
 }
+
+
+function centerOfLowerBound(containerRect: DOMRect, rect: DOMRect): Point {
+  return {
+    x: rect.left - containerRect.left + rect.width / 2,
+    y: rect.top + rect.height / 2 - containerRect.top
+  }
+}
+
+function centerOfLeftBound(containerRect: DOMRect, rect: DOMRect): Point {
+  return {
+    x: rect.left - containerRect.left + rect.width / 2,
+    y: rect.top + rect.height / 2 - containerRect.top
+  }
+}
+
