@@ -10,7 +10,6 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
 
   items.forEach(item => {
     const basename = item.file.basename
-    // debugger
     if (!filenameToItem[basename]) {
       filenameToItem[basename] = [item]
     } else {
@@ -18,7 +17,6 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     }
   })
 
-  // debugger
 
   items.forEach(item => {
 
@@ -33,7 +31,6 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     // // console.log(predecessor)
     // // console.log(successor)
 
-    // debugger
 
     if (predecessors) for (const p of predecessors) if (p) {
 
@@ -62,9 +59,8 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
     }
 
     /*
-     * cleanup duplicates!!
+     * TODO cleanup duplicates!!
      */
-    // debugger
 
   })
 
