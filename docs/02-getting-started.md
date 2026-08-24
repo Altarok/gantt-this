@@ -88,7 +88,7 @@ It will look like this:
 
 ```markdown
 ---
-gantt-type-definition: example
+gantt-calendar-definition: example
 ---
 ```
 
@@ -123,12 +123,12 @@ For our example we need this:
 
 ```markdown
 ---
-gantt-type: example
+gantt-calendar: example
 gantt-start: 1000-01-20
 ---
 ```
 
-This will create an event for the example calendar in the year 1000 on the 20th day of the first month.
+This will create an event for the `example` calendar in the year 1000 on the 20th day of the first month.
 
 Finally, we need to add a Gantt chart to one of our notes. As mentioned above create a new note and add a code block of
 the gantt-this type like this:
