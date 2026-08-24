@@ -74,6 +74,9 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
 }
 
 
+/*
+ * TODO add fallback file.basename for daily notes
+ */
 function getStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
   return frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
 }
