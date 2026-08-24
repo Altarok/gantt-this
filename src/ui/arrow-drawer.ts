@@ -1,6 +1,6 @@
 import {Util} from '../view/svg-drawer-util'
 
-
+const diff = 3
 type Point = { x: number, y: number }
 
 
@@ -15,18 +15,24 @@ export class GanttConnectorDrawer {
     let startPoint: Point
     let endPoint: Point
 
-    if (fromRect.bottom > toRect.top) {
+    if (Math.abs(fromRect.y - toRect.y) < 1) {
+      startPoint = centerOfRightBound(containerRect, fromRect)
+      endPoint = centerOfLeftBound(containerRect, toRect)
+    } else if (fromRect.bottom > toRect.top) {
       startPoint = centerOfLowerBound(containerRect, fromRect)
+      endPoint = centerOfLeftBound(containerRect, toRect)
+    } else { // if (fromRect.top < toRect.bottom) {
+      startPoint = centerOfUpperBound(containerRect, fromRect)
       endPoint = centerOfLeftBound(containerRect, toRect)
     }
 
 
     // 1. Calculate relative anchor points (e.g., right edge of source to left edge of target)
-    const startX = fromRect.left - containerRect.left + fromRect.width / 2
-    const startY = fromRect.top + fromRect.height / 2 - containerRect.top
+    const startX = startPoint.x
+    const startY = startPoint.y
 
-    const endX = toRect.left - containerRect.left
-    const endY = toRect.top + toRect.height / 2 - containerRect.top
+    const endX = endPoint.x
+    const endY = endPoint.y
 
 
     // 2. Control points for smooth horizontal S-curve (cubic bezier)
@@ -40,8 +46,7 @@ export class GanttConnectorDrawer {
 
     // 3. Create path
     const path = Util.createSvg('path', 'gt-dependency-arrow', {
-      d: pathData,
-      fill: 'none',
+      d: pathData, fill: 'none',
       'marker-end': 'url(#gt-arrow-head)' // SVG marker definition
     })
 
@@ -58,15 +63,29 @@ export class GanttConnectorDrawer {
 
 function centerOfLowerBound(containerRect: DOMRect, rect: DOMRect): Point {
   return {
-    x: rect.left - containerRect.left + rect.width / 2,
-    y: rect.top + rect.height / 2 - containerRect.top
+    x: rect.left + (rect.width / 2) - containerRect.left,
+    y: rect.top - containerRect.top - diff
+  }
+}
+
+function centerOfUpperBound(containerRect: DOMRect, rect: DOMRect): Point {
+  return {
+    x: rect.left + (rect.width / 2) - containerRect.left,
+    y: rect.bottom - containerRect.top + diff
   }
 }
 
 function centerOfLeftBound(containerRect: DOMRect, rect: DOMRect): Point {
   return {
-    x: rect.left - containerRect.left + rect.width / 2,
-    y: rect.top + rect.height / 2 - containerRect.top
+    x: rect.left - containerRect.left - diff,
+    y: rect.top + (rect.height / 2) - containerRect.top
   }
 }
 
+
+function centerOfRightBound(containerRect: DOMRect, rect: DOMRect): Point {
+  return {
+    x: rect.right - containerRect.left + diff,
+    y: rect.top + (rect.height / 2) - containerRect.top
+  }
+}

@@ -348,6 +348,15 @@
   filter: drop-shadow(0 0 3px #000) drop-shadow(0 0 6px #000);
 }
 
+.gt-dependency-arrow {
+  stroke: var(--interactive-accent);
+  stroke-width: 1px;
+  /*stroke-dasharray: 4; !* Optional: dotted/dashed connector *!*/
+  pointer-events: none;
+  /*filter: drop-shadow(0 0 3px var(--interactive-accent));*/
+}
+
+
 /* Base styles hover reset for rectangles */
 .gt-item.timestamp.box,
 .gt-item.timespan.bar {
@@ -567,10 +576,3 @@
   box-sizing: border-box;
 }
 
-.gt-dependency-arrow {
-  stroke: var(--interactive-accent);
-  stroke-width: 2px;
-  stroke-dasharray: 4; /* Optional: dotted/dashed connector */
-  pointer-events: none;
-  filter: drop-shadow(0 0 3px var(--interactive-accent));
-}
