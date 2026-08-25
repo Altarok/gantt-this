@@ -61,10 +61,7 @@ export class GanttThisBasesView extends BasesView {
     .filter(file => {
       const cache = this.plugin.app.metadataCache.getFileCache(file)
       const frontmatter = cache?.frontmatter
-      if (!frontmatter) {
-        debugger
-        return false
-      }
+      if (!frontmatter) return false
 
       const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || FrontMatterUtil.hasStartDate(frontmatter, this.plugin.settings)
       const hasValidMarker = isCheckboxMarkerOptional || FrontMatterUtil.isFileMarkedAsEvent(frontmatter, this.plugin.settings)
