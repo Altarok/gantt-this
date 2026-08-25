@@ -1,6 +1,6 @@
 import {Util} from '../view/svg-drawer-util'
 
-const diff = 3
+const diff = 2
 type Point = { x: number, y: number }
 
 

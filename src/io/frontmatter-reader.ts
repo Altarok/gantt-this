@@ -73,7 +73,6 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
   }
 }
 
-
 /*
  * TODO add fallback file.basename for daily notes
  */

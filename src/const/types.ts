@@ -232,6 +232,7 @@ export type PluginSettings = GanttChartSources & {
   uxDefaultTimespanEventSymbol: GanttItemDisplayTypeTimespans
   uxDefaultTimestampEventSymbol: GanttItemDisplayTypeTimestamp
   uxAddRibbonIcon: boolean
+  uxAddRibbonIconMobile: boolean
   uxAddCommands: boolean
   mouseOverEventShowBox: boolean
   mouseOverEventShowVerticalLine: boolean
@@ -249,6 +250,7 @@ export type PluginSettings = GanttChartSources & {
   // nativeTooltipButton: OptionalControlKey
   uxUseCalColorForCalAxis: boolean
   uxAddDaySuffixToTooltipTitle: boolean
+  useFilenameAsFallbackStartDate: boolean
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -270,6 +272,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   uxDefaultTimespanEventSymbol: DEFAULT_TIMESPAN,
   uxDefaultTimestampEventSymbol: DEFAULT_TIMESTAMP,
   uxAddRibbonIcon: false,
+  uxAddRibbonIconMobile: false,
   uxAddCommands: false,
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
@@ -287,7 +290,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   // nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
   uxAddDaySuffixToTooltipTitle: false,
-
+  useFilenameAsFallbackStartDate: false,
   /*
    * Front-matter property names
    */

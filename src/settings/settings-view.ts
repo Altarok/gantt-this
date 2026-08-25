@@ -251,7 +251,15 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               type: 'slider', key: 'uxVerticalLineEventWidth',
               min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
             }
-          }
+          },
+          {
+            name: 'Filename as start date',
+            desc: 'Use filename as start date when not given. (experimental setting)',
+            control: {
+              type: 'toggle', key: 'useFilenameAsFallbackStartDate',
+              defaultValue: DEFAULT_SETTINGS.useFilenameAsFallbackStartDate
+            }
+          },
         ]
       },
       {
@@ -282,6 +290,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               defaultValue: DEFAULT_SETTINGS.uxVerticalOverlayColor,
             },
           },
+          {
+            name: 'Tooltip',
+            desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
+            control: {
+              type: 'toggle', key: 'uxAddDaySuffixToTooltipTitle',
+              defaultValue: DEFAULT_SETTINGS.uxAddDaySuffixToTooltipTitle
+            }
+          }
         ]
       },
       {
@@ -337,15 +353,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Tooltip',
-            desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
-            control: {
-              type: 'toggle', key: 'uxAddDaySuffixToTooltipTitle',
-              defaultValue: DEFAULT_SETTINGS.uxAddDaySuffixToTooltipTitle
-            }
-          },
-
-          {
             name: 'Group visibility toggles',
             desc: 'Add buttons to the toolbar for hiding or showing individual groups.',
             control: {
@@ -387,12 +394,20 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         type: 'group',
         items: [
           {
-            name: 'Add ribbon icon',
+            name: 'Add ribbon icon (desktop only)',
             // TODO more options to come
             desc: 'Adds a ribbon icon to quickly open a live chart preview.',
             control: {
               type: 'toggle', key: 'uxAddRibbonIcon',
               defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon
+            }
+          },
+          {
+            name: 'Add menu option (mobile ony)',
+            desc: 'Adds a menu option to quickly open a live chart preview.',
+            control: {
+              type: 'toggle', key: 'uxAddRibbonIconMobile',
+              defaultValue: DEFAULT_SETTINGS.uxAddRibbonIconMobile
             }
           },
           {

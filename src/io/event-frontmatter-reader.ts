@@ -52,9 +52,12 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
     if (!frontMatter) continue
 
-    const {startDate, endDate} = FrontMatterUtil.getEventTimestamps(frontMatter, plugin.settings)
+    let {startDate, endDate} = FrontMatterUtil.getEventTimestamps(frontMatter, plugin.settings)
 
-    if (startDate === undefined || startDate === null || startDate === '') continue
+    if (startDate === undefined || startDate === null || startDate === '') {
+      if ( plugin.settings.useFilenameAsFallbackStartDate) startDate = file.basename
+      else continue
+    }
 
     const calendarId: string = FrontMatterUtil.getEventCalendarName(frontMatter, plugin.settings)
 
