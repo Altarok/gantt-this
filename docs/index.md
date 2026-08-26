@@ -13,6 +13,8 @@ started:
 - [Calendar Definitions](03-calendars)
 - [Event Definitions](04-events)
 - [Plugin Settings](05-plugin-settings)
+- [Roadmap](90-roadmap)
+- [Changelog](91-changelog)
 - [FAQ](99-FAQ)
 
 Click to find plugin in [Obsidian Community](https://community.obsidian.md/plugins/gantt-this).
