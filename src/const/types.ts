@@ -253,6 +253,7 @@ export type PluginSettings = GanttChartSources & {
   uxUseCalColorForCalAxis: boolean
   uxAddDaySuffixToTooltipTitle: boolean
   useFilenameAsFallbackStartDate: boolean
+  uxRerenderCooldownSeconds: number
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -263,9 +264,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   defaultCalendar: 'gregorian',
   fallbackColor: '#1565C0',
   fallbackColorForIcons: '#FF8800',
-  calendars: [
-    {id: 'gregorian', visible: true, priority: 0},
-  ],
+  calendars: [{id: 'gregorian', visible: true, priority: 0}],
   groups: [],
 
   /*
@@ -293,6 +292,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   uxUseCalColorForCalAxis: false,
   uxAddDaySuffixToTooltipTitle: false,
   useFilenameAsFallbackStartDate: false,
+  uxRerenderCooldownSeconds: 5,
+
   /*
    * Front-matter property names
    */

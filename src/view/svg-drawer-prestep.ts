@@ -18,9 +18,13 @@ import {ManualSvg} from './manual-svg-icons'
 const step = Platform.isMobile ? 0.4 : 0.25
 
 export class GanttRender {
+  private readonly rerenderCooldownMs: number
+  private lastRenderTimestamp = 0
+
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly filesFilteredByBase: TFile[] | null,
               readonly selectedFrontmatterProperties: string[] | null) {
+    this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
   }
 
   private async getGanttItems(pluginSettings: PluginSettings,
@@ -31,7 +35,6 @@ export class GanttRender {
 
     return getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
   }
-
 
   async renderGantt(el: HTMLElement,
                     pluginSettings: PluginSettings,
@@ -56,26 +59,22 @@ export class GanttRender {
         window.clearTimeout(updateTimeout)
       }
 
-      this.plugin.calendarConfigsCache.clear()
+      const now = Date.now()
+      const elapsed = now - this.lastRenderTimestamp
+      const remainingCooldown = Math.max(500, this.rerenderCooldownMs - elapsed)
 
-      if (this.filesFilteredByBase !== null) {
-        parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase)
-        .then(updatedData => {
-          if (renderEngine) renderEngine.updateData(updatedData)
-        })
-        .catch(err => new Notice('Failed: ' + err))
-        return
-      }
-
-      /* Debounce by 500ms to let Obsidian's internal indexing finish completely */
+      /* debounce to let Obsidian's internal indexing finish completely */
       updateTimeout = window.setTimeout(() => {
+        this.lastRenderTimestamp = Date.now()
+        this.plugin.calendarConfigsCache.clear()
         new Notice('Re-rendering Gantt...')
-        getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
+
+        this.getGanttItems(pluginSettings, codeBlockContent)
         .then(updatedData => {
           if (renderEngine) renderEngine.updateData(updatedData)
         })
-        .catch(err => new Notice('Failed: ' + err))
-      }, 500)
+        .catch(() => new Notice('Failed to reload Gantt.'))
+      }, remainingCooldown)
     }
 
     const reloadBtn = createIconButton(toolbar, 'refresh-cw', 'Reload data')

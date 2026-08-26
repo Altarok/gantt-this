@@ -15,7 +15,6 @@ export class GanttThisBasesView extends BasesView {
   readonly type = GanttBaseViewExampleName
   private readonly containerEl: HTMLElement
 
-
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly controller: QueryController,
               parentEl: HTMLElement) {

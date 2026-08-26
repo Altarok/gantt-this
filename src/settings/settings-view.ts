@@ -368,6 +368,15 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
             }
           },
+          {
+            name: 'Re-render cooldown',
+            desc: 'For those nerds changing files every second.',
+            control: {
+              type: 'slider', key: 'uxRerenderCooldownSeconds',
+              min: 0, max: 30, step: 1,
+              defaultValue: DEFAULT_SETTINGS.uxRerenderCooldownSeconds
+            }
+          },
         ]
       },
 
