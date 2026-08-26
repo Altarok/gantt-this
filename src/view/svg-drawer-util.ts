@@ -122,16 +122,16 @@ function truncateText(text: string, maxWidth: number, charWidthEstimate = 7): st
  * @param width of surrounding svg
  * @param hasIcon moves text to the right if true
  * @param svgContainer
+ * @param isTimeSpan true for 'era' or 'bar' events, necessary to decide which CSS magic to apply
  */
 function addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement, isTimeSpan: boolean): void {
   const textSpacing = textLeftPadding + (hasIcon ? iconSize : 0)
   const availableTextWidth = width - textSpacing
 
+  const cssClass = isTimeSpan ? Css.item.textTimespan : Css.item.textTimestamp
+
   if (availableTextWidth > 0) {
-    const textSvg = createSvg('text', isTimeSpan ? Css.item.textTimespan : Css.item.textTimestamp, {
-      x: x + textSpacing,
-      y: y
-    })
+    const textSvg = createSvg('text', cssClass, {x: x + textSpacing, y})
     textSvg.textContent = truncateText(text, availableTextWidth)
     svgContainer.appendChild(textSvg)
   }
@@ -190,18 +190,20 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
  * @param x center of svg
  * @param y center of svg
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
 function drawSmallShape(d: GanttItem,
                         shape: 'circle' | 'polygon' | 'rect', cssClass: string,
                         attrs: Record<string, string | number>, x: number, y: number,
-                        svgContainer: SVGElement): void {
+                        svgContainer: SVGElement,
+                        availableWidth: number): void {
   const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
   if (d.color) el.setAttribute('fill', d.color)
   svgContainer.appendChild(el)
-  addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
+  addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer);
 
-  // const availableWidth = 200 // Or calculate based on container bounds/remaining width
-  // addTextIfFitting(d.name, x + iconRadius, y, availableWidth, false, svgContainer, false)
+  const textX = x + iconRadius
+  addTextIfFitting(d.name, textX, y, availableWidth, false, svgContainer, false)
 }
 
 /**
@@ -210,9 +212,13 @@ function drawSmallShape(d: GanttItem,
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
-function drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
-  drawSmallShape(d, 'rect', 'gt-item timestamp box', {x: cx - iconRadius, y: cy - iconRadius}, cx, cy, svgContainer)
+function drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
+  drawSmallShape(d, 'rect', 'gt-item timestamp box', {
+    x: cx - iconRadius,
+    y: cy - iconRadius
+  }, cx, cy, svgContainer, availableWidth)
 }
 
 /**
@@ -221,10 +227,11 @@ function drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement)
  * @param cx horizontal center of svg to draw, keep as is for 'polygon'
  * @param cy vertical center of svg to draw, keep as is for 'polygon'
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
-function drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+function drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
   const points = `${cx},${cy - iconRadius} ${cx + iconRadius},${cy} ${cx},${cy + iconRadius} ${cx - iconRadius},${cy}`
-  drawSmallShape(d, 'polygon', 'gt-item timestamp diamond', {points}, cx, cy, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp diamond', {points}, cx, cy, svgContainer, availableWidth)
 }
 
 /**
@@ -233,9 +240,10 @@ function drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElem
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
-function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
-  drawSmallShape(d, 'circle', 'gt-item timestamp circle', {cx, cy}, cx, cy, svgContainer)
+function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
+  drawSmallShape(d, 'circle', 'gt-item timestamp circle', {cx, cy}, cx, cy, svgContainer, availableWidth)
 }
 
 /**
@@ -244,10 +252,11 @@ function drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElemen
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
-function drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+function drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 3)
-  drawSmallShape(d, 'polygon', 'gt-item timestamp triangle', {points}, cx, cy, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp triangle', {points}, cx, cy, svgContainer, availableWidth)
 }
 
 /**
@@ -256,15 +265,16 @@ function drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGEle
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
-function drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+function drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 5)
-  drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer, availableWidth)
 }
 
-function drawStar(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+function drawStar(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 10, 0.382)
-  drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer, availableWidth)
 }
 
 /**
@@ -273,15 +283,16 @@ function drawStar(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement
  * @param cx horizontal center of svg to draw
  * @param cy vertical center of svg to draw
  * @param svgContainer
+ * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
-function drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+function drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 6)
-  drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer, availableWidth)
 }
 
-function drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement): void {
+function drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
   const points = calculatePolygonPoints(iconRadius, cx, cy, 8, 1, 1 / 8)
-  drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer)
+  drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer, availableWidth)
 }
 
 /**
@@ -295,7 +306,9 @@ function drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElem
  * @param svgContainer
  */
 function drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number, svgContainer: SVGElement): void {
-  const line = createSvg('line', Css.item.line, {x1, x2: x1, y1, y2, 'stroke-width': width, 'data-id': d.id})
+  const line = createSvg('line', Css.item.line, {
+    x1, x2: x1, y1, y2, 'stroke-width': width, 'data-id': d.id
+  })
   if (d.color) line.setAttribute('stroke', d.color)
   svgContainer.appendChild(line)
 

@@ -231,18 +231,12 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Color',
             desc: `Default color for events. Used when not given in property: '${this.settings.frontMatterProperty_event_color}'`,
-            control: {
-              type: 'color', key: 'fallbackColor',
-              defaultValue: DEFAULT_SETTINGS.fallbackColor
-            }
+            control: {type: 'color', key: 'fallbackColor', defaultValue: DEFAULT_SETTINGS.fallbackColor}
           },
           {
             name: 'Icon color',
             desc: `Default color for event icons. Used when not given in property: '${this.settings.frontMatterProperty_event_icon_color}'`,
-            control: {
-              type: 'color', key: 'fallbackColorForIcons',
-              defaultValue: DEFAULT_SETTINGS.fallbackColorForIcons
-            }
+            control: {type: 'color', key: 'fallbackColorForIcons', defaultValue: DEFAULT_SETTINGS.fallbackColorForIcons}
           },
           {
             name: 'Vertical line width',
@@ -254,7 +248,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Filename as start date',
-            desc: 'Use filename as start date when not given. (experimental setting)',
+            desc: 'Use filename as fallback start date. May be of use for daily notes. Experimental - use with care!',
             control: {
               type: 'toggle', key: 'useFilenameAsFallbackStartDate',
               defaultValue: DEFAULT_SETTINGS.useFilenameAsFallbackStartDate
@@ -270,8 +264,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             name: 'Highlight event',
             desc: 'Highlight hovered events with a bounding box.',
             control: {
-              type: 'toggle', key: 'mouseOverEventShowBox',
-              defaultValue: DEFAULT_SETTINGS.mouseOverEventShowBox
+              type: 'toggle', key: 'mouseOverEventShowBox', defaultValue: DEFAULT_SETTINGS.mouseOverEventShowBox
             }
           },
           {
@@ -280,15 +273,15 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
              and '${this.settings.frontMatterProperty_event_successors}' will get checked against the names of other Gantt event notes.
               Hovering one event will then highlight related events.`,
             control: {
-              type: 'toggle', key: 'uxHighlightRelatedEvents',
-              defaultValue: DEFAULT_SETTINGS.uxHighlightRelatedEvents
+              type: 'toggle', key: 'uxHighlightRelatedEvents', defaultValue: DEFAULT_SETTINGS.uxHighlightRelatedEvents
             }
           },
           {
             name: 'Connect related events',
             desc: `Activating this connects related events with directional arrows. See previous setting 'Highlight related events' for relation logic.`,
             control: {
-              type: 'toggle', key: 'uxConnectRelatedEvents',
+              type: 'toggle',
+              key: 'uxConnectRelatedEvents',
               defaultValue: DEFAULT_SETTINGS.uxConnectRelatedEvents,
               disabled: () => !this.settings.uxHighlightRelatedEvents
             }
@@ -302,16 +295,13 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Color',
-            desc: 'Color for overlay.',
+            name: 'Color', desc: 'Color for overlay.',
             control: {
-              type: 'color', key: 'uxVerticalOverlayColor',
-              defaultValue: DEFAULT_SETTINGS.uxVerticalOverlayColor,
+              type: 'color', key: 'uxVerticalOverlayColor', defaultValue: DEFAULT_SETTINGS.uxVerticalOverlayColor,
             },
           },
           {
-            name: 'Tooltip',
-            desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
+            name: 'Tooltip', desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
             control: {
               type: 'toggle', key: 'uxAddDaySuffixToTooltipTitle',
               defaultValue: DEFAULT_SETTINGS.uxAddDaySuffixToTooltipTitle
@@ -327,8 +317,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             name: 'Restrict minimum and maximum zoom',
             desc: 'Maximum zoom shows adjacent days, minimum zoom fits your complete dataset.',
             control: {
-              type: 'toggle', key: 'autoRestrictZoom',
-              defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
+              type: 'toggle', key: 'autoRestrictZoom', defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
             }
           },
           {
@@ -422,29 +411,20 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         items: [
           {
             name: 'Add ribbon icon (desktop only)',
-            // TODO more options to come
             desc: 'Adds a ribbon icon to quickly open a live chart preview.',
-            control: {
-              type: 'toggle', key: 'uxAddRibbonIcon',
-              defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon
-            }
+            control: {type: 'toggle', key: 'uxAddRibbonIcon', defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon}
           },
           {
             name: 'Add menu option (mobile ony)',
             desc: 'Adds a menu option to quickly open a live chart preview.',
             control: {
-              type: 'toggle', key: 'uxAddRibbonIconMobile',
-              defaultValue: DEFAULT_SETTINGS.uxAddRibbonIconMobile
+              type: 'toggle', key: 'uxAddRibbonIconMobile', defaultValue: DEFAULT_SETTINGS.uxAddRibbonIconMobile
             }
           },
           {
             name: 'Add plugin commands',
             desc: 'Adds commands to insert event properties, calendar definitions, and code blocks.',
-            control: {
-              type: 'toggle', key: 'uxAddCommands',
-              disabled: true,
-              defaultValue: DEFAULT_SETTINGS.uxAddCommands
-            }
+            control: {type: 'toggle', key: 'uxAddCommands', defaultValue: DEFAULT_SETTINGS.uxAddCommands}
           }
         ]
       }

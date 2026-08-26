@@ -2,6 +2,10 @@ import FantasyGanttPlugin from '../main'
 
 import {Notice, TFile} from 'obsidian'
 
+/**
+ * The plugin's first command adds ALL missing frontmatter properties used by the plugin to the currently open `.md` file.
+ * @param plugin
+ */
 function addCommandEventFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) {
   plugin.addCommand({
     id: 'add-gantt-frontmatter',
@@ -29,8 +33,6 @@ function addCommandEventFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) 
         fallbackColorForIcons
       } = plugin.settings
 
-
-      // Set properties if they don't already exist
       await plugin.app.fileManager.processFrontMatter(file, (frontMatter: Record<string, unknown>) => {
         frontMatter[file_marker] = frontMatter[file_marker] ?? true
         frontMatter[lower_date] = frontMatter[lower_date] ?? ''

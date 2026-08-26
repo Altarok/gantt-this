@@ -277,7 +277,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   uxDefaultTimestampEventSymbol: DEFAULT_TIMESTAMP,
   uxAddRibbonIcon: false,
   uxAddRibbonIconMobile: false,
-  uxAddCommands: false,
+  uxAddCommands: true,
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,
@@ -303,7 +303,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
    * Front-matter property names
    */
   frontMatterProperty_calendar_name: 'gantt-calendar-definition', // string, activates file as calendar source
-
   frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
   frontMatterProperty_gantt_this_optional: true,
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )

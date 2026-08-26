@@ -6,6 +6,7 @@ import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './view/svg-drawer-prestep'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
+import {Commands} from "./commands/commands";
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -26,13 +27,9 @@ export default class FantasyGanttPlugin extends Plugin {
       this.addPluginRibbonIcon()
     else if (Platform.isMobile && this.settings.uxAddRibbonIconMobile)
       this.addPluginRibbonIcon()
-
-
+    
     if (this.settings.uxAddCommands) {
-      /*
-       * TODO create commands
-       */
-      // Commands.addAll(this)
+      Commands.addAll(this)
     }
 
     this.registerBasesView(GanttBaseViewExampleName, {

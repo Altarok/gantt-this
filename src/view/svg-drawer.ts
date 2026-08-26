@@ -241,6 +241,20 @@ export class GanttRenderEngine {
     }
   }
 
+  private mapLaneItems(group: GanttGroup, width: number): Map<number, GanttItem[]> {
+    const laneItemsMap = new Map<number, GanttItem[]>()
+    group.items.forEach(item => {
+      const lane = item.lane ?? 0
+      if (!laneItemsMap.has(lane)) laneItemsMap.set(lane, [])
+      laneItemsMap.get(lane)?.push(item)
+    })
+    laneItemsMap.forEach(items => {
+      items.sort((a, b) => this.getXPosition(a.startDays, width) - this.getXPosition(b.startDays, width))
+    })
+    return laneItemsMap
+  }
+
+
   renderData(width: number) {
     this.dataG.empty()
 
@@ -259,13 +273,27 @@ export class GanttRenderEngine {
       const totalGroupHeight = headerHeight + groupContentHeight
       const groupYStart = group.yOffset + headerHeight
 
+      const laneItemsMap: Map<number, GanttItem[]> = this.mapLaneItems(group, width)
+
+
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
         const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
+        // const x1 = this.getXPosition(d.startDays, width)
+
         const x1 = this.getXPosition(d.startDays, width)
         const x2 = (!d.endDays || d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)
+        const renderWidth = width - this.config.margin.left - this.config.margin.right
+
+        // Calculate available width for timestamp text (Method 1)
+        const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
+        const nextItem = currentLaneItems.find(item => this.getXPosition(item.startDays, width) > x1)
+
+        const nextX = nextItem ? this.getXPosition(nextItem.startDays, width) : renderWidth
+        const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
+
 
         if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
           case 'bar':
@@ -279,9 +307,9 @@ export class GanttRenderEngine {
 
         } else if (GanttItemDisplayTypes.isTimestamp(displayType)) switch (displayType) {
           case 'point':
-            return Util.drawPoint(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawPoint(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'box':
-            return Util.drawBox(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawBox(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'vertical-line': {
             const isInGeneralGroup = d.group === 'general'
             const y: number = isInGeneralGroup ? firstYValue : group.yOffset
@@ -289,17 +317,17 @@ export class GanttRenderEngine {
             return Util.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
           }
           case 'diamond':
-            return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'triangle':
-            return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'pentagon':
-            return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'star':
-            return Util.drawStar(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawStar(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'hexagon':
-            return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'octagon':
-            return Util.drawOctagon(d, x1, laneY + halfRowHeight, this.dataG)
+            return Util.drawOctagon(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
         }
 
       }) // end loop group.items.forEach(GanttItem)
