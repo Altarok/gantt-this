@@ -1,6 +1,8 @@
 import {sanitizeHTMLToDom} from 'obsidian'
 //  <span class="m_8d3afb97 mantine-ActionIcon-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-zoom-reset "><path d="M21 21l-6 -6"></path><path d="M3.268 12.043a7.017 7.017 0 0 0 6.634 4.957a7.012 7.012 0 0 0 7.043 -6.131a7 7 0 0 0 -5.314 -7.672a7.021 7.021 0 0 0 -8.241 4.403"></path><path d="M3 4v4h4"></path></svg></span>
 
+const svgNS = 'http://www.w3.org/2000/svg'
+
 const resetZoom = `
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M3 11a8 8 0 1 0 8-8 8.75 8.75 0 0 0-5.74 1.74L3 7v-5v5h5"/>
@@ -12,11 +14,30 @@ const moonPhase1 = `<svg xmlns="http://www.w3.org/2000/svg"><path d="M 12 3 A 9 
 const moonPhase2 = `<svg xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" class="moon-fill"/></svg>`
 const moonPhase3 = `<svg xmlns="http://www.w3.org/2000/svg"><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/></svg>`
 
+function addArrowTipAsSvgDef(svgEl: SVGElement): void {
+  let defs = svgEl.querySelector('defs')
+  if (!defs) {
+    defs = window.document.createElementNS(svgNS, 'defs')
+    svgEl.insertBefore(defs, svgEl.firstChild)
+  }
 
-function saveAllToApi() {
-  // addIcon('gt-arrow-head', `<marker id="gt-arrow-head" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-  //   <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent)" />
-  // </marker>`);
+  if (!defs.querySelector('#gt-arrow-head')) {
+    const marker = window.document.createElementNS(svgNS, 'marker')
+    marker.setAttribute('id', 'gt-arrow-head')
+    marker.setAttribute('viewBox', '0 0 10 10')
+    marker.setAttribute('refX', '5')
+    marker.setAttribute('refY', '5')
+    marker.setAttribute('markerWidth', '6')
+    marker.setAttribute('markerHeight', '6')
+    marker.setAttribute('orient', 'auto-start-reverse')
+
+    const path = window.document.createElementNS(svgNS, 'path')
+    path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z')
+    path.setAttribute('fill', 'var(--interactive-accent)')
+
+    marker.appendChild(path)
+    defs.appendChild(marker)
+  }
 }
 
 export const ManualSvg = {
@@ -25,8 +46,7 @@ export const ManualSvg = {
   crescentHalfMoon: sanitizeHTMLToDom(moonPhase1), // 1/4 - First Quarter / Waxing (Right half filled)
   fullMoon: sanitizeHTMLToDom(moonPhase2), // 2/4 - Full Moon (Solid filled circle)
   waningHalfMoon: sanitizeHTMLToDom(moonPhase3), // 3/4 - Third Quarter / Waning (Left half filled)
-
-  saveAllToApi
+  addArrowTipAsSvgDef
 }
 
 //~~~meta-bind-js-view

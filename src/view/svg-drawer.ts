@@ -15,6 +15,7 @@ import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
+import {addArrowTipAsSvgDef, ManualSvg} from "./manual-svg-icons";
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -155,15 +156,7 @@ export class GanttRenderEngine {
 
     this.svg = Util.createSvg('svg', Css.svg.canvas)
 
-
-    const defsHTML = `
-  <defs>
-    <marker id="gt-arrow-head" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="${this.arrowColor}"/>
-    </marker>
-  </defs>
-`
-    this.svg.insertAdjacentHTML('afterbegin', defsHTML)
+    ManualSvg.addArrowTipAsSvgDef(this.svg)
 
     this.svg.setAttribute('height', this.totalHeight.toString())
     this.container.appendChild(this.svg)
