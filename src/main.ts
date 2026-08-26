@@ -6,7 +6,6 @@ import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import {GanttRender} from './view/svg-drawer-prestep'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
-import {ManualSvg} from "./view/manual-svg-icons";
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -18,8 +17,6 @@ export default class FantasyGanttPlugin extends Plugin {
 
   async onload() {
     await this.loadSettings()
-
-    ManualSvg.saveAllToApi()
 
     this.addSettingTab(new FantasyGanttSettingTab(this))
 

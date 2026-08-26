@@ -15,7 +15,7 @@ import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
-import {addArrowTipAsSvgDef, ManualSvg} from "./manual-svg-icons";
+import {ManualSvg} from './manual-svg-icons'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
