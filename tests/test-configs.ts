@@ -1,32 +1,7 @@
 import {CalendarConfig} from '../src/const/types'
+import {GregorianCalendar} from '../src/const/fallback-calendar'
 
-export const gregorianConfig: CalendarConfig = {
-  id: 'gregorian',
-  name: 'Gregorian Calendar',
-  sharedOffset: 0,
-  offsetToDayZero: 0,
-  type: 'rule-based',
-  delimiter: '-',
-  ruleBasedDetails: {
-    daysInStandardYear: 365,
-    leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 1},
-    format: ['year', 'month', 'day'],
-    months: [
-      {shortname: 'Jan', name: 'January', days: 31},
-      {shortname: 'Feb', name: 'February', days: 28},
-      {shortname: 'Mar', name: 'March', days: 31},
-      {shortname: 'Apr', name: 'April', days: 30},
-      {shortname: 'May', name: 'May', days: 31},
-      {shortname: 'Jun', name: 'June', days: 30},
-      {shortname: 'Jul', name: 'July', days: 31},
-      {shortname: 'Aug', name: 'August', days: 31},
-      {shortname: 'Sep', name: 'September', days: 30},
-      {shortname: 'Oct', name: 'October', days: 31},
-      {shortname: 'Nov', name: 'November', days: 30},
-      {shortname: 'Dec', name: 'December', days: 31}
-    ]
-  }
-}
+export const gregorianConfig: CalendarConfig = GregorianCalendar
 
 export const gregorianWithoutMonthsConfig: CalendarConfig = {
   id: 'gregorian-no-months',

@@ -1,9 +1,10 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {CalendarConfig, CodeBlockContent, PluginSettings} from '../const/types'
+import {CalendarConfig, CodeBlockContent, DEFAULT_SETTINGS, PluginSettings} from '../const/types'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {Consts} from '../const/constants'
+import {GregorianCalendar} from "../const/fallback-calendar";
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -26,7 +27,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
   let targetFile = getMatchingMarkdownFile(plugin, calendarId, pluginSettings, codeBlockContent)
 
-  if (!targetFile) return null
+  if (!targetFile) return fallbackIfGregorian(calendarId, plugin)
 
   const content = await plugin.app.vault.read(targetFile)
   const match = yamlRegex.exec(content)
@@ -50,6 +51,14 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
   }
 }
 
+function fallbackIfGregorian(calendarId: string,
+                             plugin: FantasyGanttPlugin): CalendarConfig | null {
+  if (calendarId === DEFAULT_SETTINGS.defaultCalendar) {
+    // new Notice(`Failed to load gregorian calendar. Will use pre-set fallback.`)
+    plugin.calendarConfigsCache.set(calendarId, GregorianCalendar)
+    return GregorianCalendar
+  } else return null
+}
 
 /**
  * Search for Markdown file defining the missing calendar config.

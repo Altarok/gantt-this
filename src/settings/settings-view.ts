@@ -1,4 +1,4 @@
-import {ColorComponent, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
+import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {ControlKeyMapped, DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
 import {AddEntryModal} from './settings-util'
@@ -107,6 +107,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         }
       },
       onDelete: (idx: number) => {
+        const calendar: GroupOrCalendarSettings | undefined = this.settings.calendars[idx]
+        if (!calendar) return
+        if (calendar.id === this.settings.defaultCalendar) {
+          new Notice(`Can't delete default calendar!`)
+          return
+        }
+        if (calendar.id === 'gregorian') {
+          new Notice(`Can't delete fallback calendar!`)
+          return
+        }
         this.settings.calendars.splice(idx, 1)
         void (async () => {
           await this.plugin.saveSettings()
@@ -165,6 +175,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         }
       },
       onDelete: (idx: number) => {
+        const group: GroupOrCalendarSettings | undefined = this.settings.groups[idx]
+        if (!group) return
+        if (group.id === this.settings.defaultGroup) {
+          new Notice(`Can't delete default group!`)
+          return
+        }
+        if (group.id === 'general') {
+          new Notice(`Can't delete fallback group!`)
+          return
+        }
         this.settings.groups.splice(idx, 1)
         void (async () => {
           await this.plugin.saveSettings()
@@ -212,7 +232,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         items: [
           {
             name: 'Symbol',
-            desc: `Default symbol used for timestamp events. Used when not given in property: '${this.settings.frontMatterProperty_event_symbol}'`,
+            desc: `Default symbol for timestamp events. Override with property: '${this.settings.frontMatterProperty_event_symbol}'`,
             control: {
               type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
               options: toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
@@ -221,11 +241,20 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Calendar',
-            desc: `Default calendar used for events. Used when not given in property: '${this.settings.frontMatterProperty_event_calendar}'`,
+            desc: `Default calendar for events. Override with property: '${this.settings.frontMatterProperty_event_calendar}'`,
             control: {
-              type: 'text', key: 'defaultCalendar',
-              placeholder: DEFAULT_SETTINGS.defaultCalendar, defaultValue: DEFAULT_SETTINGS.defaultCalendar,
-              validate: (value: string) => isKnownCalendar(value, this.settings.calendars) ? undefined : 'Not a known calendar!'
+              type: 'dropdown', key: 'defaultCalendar',
+              options: toRecord(this.settings.calendars.map(c => c.id)),
+              defaultValue: DEFAULT_SETTINGS.defaultCalendar
+            }
+          },
+          {
+            name: 'Group',
+            desc: `Default group for events. Override with property: '${this.settings.frontMatterProperty_event_group}'`,
+            control: {
+              type: 'dropdown', key: 'defaultGroup',
+              options: toRecord(this.settings.groups.map(g => g.id)),
+              defaultValue: DEFAULT_SETTINGS.defaultGroup
             }
           },
           {
@@ -248,7 +277,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Filename as start date',
-            desc: 'Use filename as fallback start date. May be of use for daily notes. Experimental - use with care!',
+            desc: '⚠️Use filename as fallback start date. May be of use for daily notes. Experimental - use with care!',
             control: {
               type: 'toggle', key: 'useFilenameAsFallbackStartDate',
               defaultValue: DEFAULT_SETTINGS.useFilenameAsFallbackStartDate

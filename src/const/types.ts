@@ -224,6 +224,7 @@ export type HideableSettingPages = {
 
 export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
+  defaultGroup: string
   fallbackColor: string
   fallbackColorForIcons: string
   calendars: GroupOrCalendarSettings[]
@@ -265,10 +266,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   calendarPath: '/',
   calendarPathSearchRecursive: false,
   defaultCalendar: 'gregorian',
+  defaultGroup: 'general',
   fallbackColor: '#1565C0',
   fallbackColorForIcons: '#FF8800',
   calendars: [{id: 'gregorian', visible: true, priority: 0}],
-  groups: [],
+  groups: [{id: 'general', visible: true, priority: 0}],
 
   /*
    * Advanced UX settings
