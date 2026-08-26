@@ -27,7 +27,7 @@ export default class FantasyGanttPlugin extends Plugin {
       this.addPluginRibbonIcon()
     else if (Platform.isMobile && this.settings.uxAddRibbonIconMobile)
       this.addPluginRibbonIcon()
-    
+
     if (this.settings.uxAddCommands) {
       Commands.addAll(this)
     }
@@ -74,6 +74,7 @@ export default class FantasyGanttPlugin extends Plugin {
       groups: Array.isArray(loadedData?.groups) ? loadedData?.groups : (Array.isArray(DEFAULT_SETTINGS.groups) ? DEFAULT_SETTINGS.groups : []),
     }
 
+    this.settings.useFilenameAsFallbackStartDate = false
   }
 
   async saveSettings() {

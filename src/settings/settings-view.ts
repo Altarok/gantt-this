@@ -277,10 +277,11 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Filename as start date',
-            desc: '⚠️Use filename as fallback start date. May be of use for daily notes. Experimental - use with care!',
+            desc: 'Use filename as fallback start date. May be of use for daily notes. Experimental - use with care!',
             control: {
               type: 'toggle', key: 'useFilenameAsFallbackStartDate',
-              defaultValue: DEFAULT_SETTINGS.useFilenameAsFallbackStartDate
+              defaultValue: DEFAULT_SETTINGS.useFilenameAsFallbackStartDate,
+              disabled: true
             }
           },
         ]
