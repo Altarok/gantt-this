@@ -118,6 +118,14 @@ function readUnknownProperties(d: GanttItem, selectedProperties: string[]): { ke
   return values
 }
 
+function getPredecessors(frontMatter: FrontMatterCache, settings: PluginSettings): string[] {
+  return frontMatter[settings.frontMatterProperty_event_predecessors] as string[] ?? []
+}
+
+function getSuccessors(frontMatter: FrontMatterCache, settings: PluginSettings): string[] {
+  return frontMatter[settings.frontMatterProperty_event_successors] as string[] ?? []
+}
+
 
 export const FrontMatterUtil = {
   isMatchingCalendarDefinition,
@@ -132,5 +140,7 @@ export const FrontMatterUtil = {
   hasStartDate,
   getEventTimestamps,
   getHeaderToLinkTo,
-  readUnknownProperties
+  readUnknownProperties,
+  getPredecessors,
+  getSuccessors
 }

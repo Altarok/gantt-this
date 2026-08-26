@@ -1,4 +1,4 @@
-import {addIcon, sanitizeHTMLToDom} from 'obsidian'
+import {sanitizeHTMLToDom} from 'obsidian'
 //  <span class="m_8d3afb97 mantine-ActionIcon-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-zoom-reset "><path d="M21 21l-6 -6"></path><path d="M3.268 12.043a7.017 7.017 0 0 0 6.634 4.957a7.012 7.012 0 0 0 7.043 -6.131a7 7 0 0 0 -5.314 -7.672a7.021 7.021 0 0 0 -8.241 4.403"></path><path d="M3 4v4h4"></path></svg></span>
 
 const resetZoom = `
@@ -14,9 +14,9 @@ const moonPhase3 = `<svg xmlns="http://www.w3.org/2000/svg"><path d="M 12 3 A 9 
 
 
 function saveAllToApi() {
-  addIcon('gt-arrow-head', `<marker id="gt-arrow-head" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-    <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent)" />
-  </marker>`);
+  // addIcon('gt-arrow-head', `<marker id="gt-arrow-head" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+  //   <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent)" />
+  // </marker>`);
 }
 
 export const ManualSvg = {

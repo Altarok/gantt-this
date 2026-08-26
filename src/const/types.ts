@@ -133,8 +133,8 @@ export type GanttItem = {
   lane?: number
   frontMatter: FrontMatterCache
   file: TFile
-  _predecessors?: number[] // experimental
-  _successors?: number[] // experimental
+  predecessors: number[] // IDs of predecessor GanttItems
+  successors: number[] // IDs of successors GanttItems
 }
 
 export type GanttGroup = {
@@ -212,6 +212,8 @@ export type ConfigurableFrontmatterPropertyNames = {
   frontMatterProperty_event_icon_name: string
   frontMatterProperty_event_icon_color: string
   frontMatterProperty_note_header: string
+  frontMatterProperty_event_predecessors: string
+  frontMatterProperty_event_successors: string
 }
 
 export type HideableSettingPages = {
@@ -308,6 +310,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // icon name from https://lucide.dev
   frontMatterProperty_event_icon_color: 'gantt-displayIconColor',  // color for said icon
   frontMatterProperty_note_header: 'gantt-linkToHeader', // note-internal header to link to
+  frontMatterProperty_event_predecessors: 'gantt-predecessors',
+  frontMatterProperty_event_successors: 'gantt-successors',
 
   hideSettingsPageUx: true,
   hideSettingsPageFrontmatterProperties: true

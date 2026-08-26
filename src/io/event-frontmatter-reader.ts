@@ -15,7 +15,7 @@ import {FrontMatterUtil} from './frontmatter-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../util/dates'
 import {getFilteredFiles} from './file-collector'
-import {Experimental} from "./experimental-algorithms";
+import {findPredecessorsAndSuccessors} from './event-hierarchy-analysis'
 
 /**
  * Search and filter files, then parse to {@link GanttItem}s.
@@ -73,7 +73,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
   parseCodeBlockContent(plugin, codeBlockContent)
 
-  Experimental.findPredecessorsAndSuccessors(items)
+  findPredecessorsAndSuccessors(items, plugin.settings)
 
   return items
 }
@@ -90,8 +90,6 @@ function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: Co
 }
 
 function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
-
-  debugger
 
   if (typeof date === 'string')
     return parseEventDate(date, calendarConfig) ?? undefined
@@ -150,7 +148,8 @@ function createItem(plugin: FantasyGanttPlugin,
     link: file.path + FrontMatterUtil.getHeaderToLinkTo(frontMatter, plugin.settings),
     frontMatter,
     file,
-    _predecessors: [], _successors: []
+    predecessors: [],
+    successors: []
   } // as GanttItem
 }
 

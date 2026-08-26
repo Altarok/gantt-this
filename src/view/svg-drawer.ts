@@ -31,6 +31,7 @@ export class GanttRenderEngine {
   private activeAxesList: string[] = []
   private totalHeight = 400
   private resizeObserver: ResizeObserver
+  private arrowColor: string
 
   config: GanttChartConfig = {
     showEras: true,
@@ -55,15 +56,12 @@ export class GanttRenderEngine {
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
-              // public readonly tooltip: HTMLElement,
-              // public readonly hoverTitle: HTMLElement,
-              // public readonly hoverDates: HTMLElement,
               public readonly plugin: FantasyGanttPlugin,
               public readonly codeBlockContent: CodeBlockContent,
               public readonly selectedFrontmatterProperties: string[] | null) {
+    this.arrowColor = plugin.app.isDarkMode() ? 'white' : 'black'
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
-    // this.transitionToPredefinedBounds()
     this.initLayout()
     this.initChartStructure()
 
@@ -75,7 +73,6 @@ export class GanttRenderEngine {
     this.svgDrawerData = this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
-    // this.transitionToPredefinedBounds()
     this.initLayout()
     this.initChartStructure()
     this.handleResize()
@@ -158,10 +155,11 @@ export class GanttRenderEngine {
 
     this.svg = Util.createSvg('svg', Css.svg.canvas)
 
+
     const defsHTML = `
   <defs>
     <marker id="gt-arrow-head" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--interactive-accent)" />
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="${this.arrowColor}"/>
     </marker>
   </defs>
 `

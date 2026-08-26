@@ -241,8 +241,8 @@ export class TooltipManager implements HoverParent {
     // type HighLightTarget = { item: GanttItem, svg: SVGElement }
     // type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
-    const predecessorsRaw = gtItem._predecessors?.map(p => this.getEventById(p)).filter(x => !!x) ?? []
-    const successorsRaw = gtItem._successors?.map(s => this.getEventById(s)).filter(x => !!x) ?? []
+    const predecessorsRaw = gtItem.predecessors.map(p => this.getEventById(p)).filter(x => !!x) ?? []
+    const successorsRaw = gtItem.successors.map(s => this.getEventById(s)).filter(x => !!x) ?? []
 
     const predecessors: HighLightTarget[] = []
     const successors: HighLightTarget[] = []

@@ -349,15 +349,19 @@
 }
 
 .gt-dependency-arrow {
-  stroke: var(--interactive-accent);
   stroke-width: 1px;
-
-  /* stroke-dasharray: 4; !* Optional: dotted/dashed connector */
   pointer-events: none;
-  
-  /* filter: drop-shadow(0 0 3px var(--interactive-accent)); */
 }
 
+.theme-dark .gt-dependency-arrow {
+  stroke: #fff;
+  filter: drop-shadow(0 0 3px #fff);
+}
+
+.theme-light .gt-dependency-arrow {
+  stroke: #000;
+  filter: drop-shadow(0 0 3px #000);
+}
 
 /* Base styles hover reset for rectangles */
 .gt-item.timestamp.box,
@@ -377,7 +381,14 @@
   dominant-baseline: middle;
   pointer-events: none;
   user-select: none;
+}
+
+.theme-dark .gt-item.text-timespan {
   fill: black;
+}
+
+.theme-light .gt-item.text-timespan {
+  fill: white;
 }
 
 .gt-item.text-timestamp {

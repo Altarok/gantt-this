@@ -572,6 +572,27 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           validate: (value: string) => testFrontMatterInput(value)
         }
       },
+      {
+        name: 'Event predecessors',
+        desc: 'Optional property. Predecessors will be highlighted on chart.',
+        control: {
+          type: 'text', key: 'frontMatterProperty_event_predecessors',
+          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
+          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
+          validate: (value: string) => testFrontMatterInput(value)
+        }
+      },
+      {
+        name: 'Event successors',
+        desc: 'Optional property. Successors will be highlighted on chart.',
+        control: {
+          type: 'text', key: 'frontMatterProperty_event_successors',
+          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
+          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
+          validate: (value: string) => testFrontMatterInput(value)
+        }
+      },
+
       /*
        * TODO activate once users are satisfied
        */

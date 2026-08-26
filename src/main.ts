@@ -1,4 +1,4 @@
-import {MarkdownPostProcessorContext, Plugin} from 'obsidian'
+import {MarkdownPostProcessorContext, Platform, Plugin} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings/settings-view'
 import {BaseKeys, CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './const/types'
 import {readCodeBlock} from './io/code-block-reader'
@@ -12,6 +12,10 @@ export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
   calendarConfigsCache = new Map<string, CalendarConfig>()
 
+  private addPluginRibbonIcon() {
+    this.addRibbonIcon('lucide-chart-bar-stacked', 'Gantt this: Open code block creator', () => new CodeBlockCreatorModal(this.app, this).open())
+  }
+
   async onload() {
     await this.loadSettings()
 
@@ -21,9 +25,11 @@ export default class FantasyGanttPlugin extends Plugin {
 
     this.registerMarkdownCodeBlockProcessor(Consts.CODEBLOCK_ID, this.registerCalendar.bind(this))
 
-    if (this.settings.uxAddRibbonIcon) this.addRibbonIcon('lucide-chart-bar-stacked', 'Gantt this: Open code block creator', () =>
-      new CodeBlockCreatorModal(this.app, this).open()
-    )
+    if (Platform.isDesktop && this.settings.uxAddRibbonIcon)
+      this.addPluginRibbonIcon()
+    else if (Platform.isMobile && this.settings.uxAddRibbonIconMobile)
+      this.addPluginRibbonIcon()
+
 
     if (this.settings.uxAddCommands) {
       /*
