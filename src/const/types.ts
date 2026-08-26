@@ -195,6 +195,7 @@ export const ControlKeyMapped = {
 // export const OptionalControlKeyMapped = {
 //   'none': 'none', ...ControlKeyMapped
 // }
+
 /**
  * Front-matter property names configurable by user
  */
@@ -205,10 +206,10 @@ export type ConfigurableFrontmatterPropertyNames = {
   frontMatterProperty_event_time_start: string
   frontMatterProperty_event_time_end: string
   frontMatterProperty_event_name: string
-  frontMatterProperty_event_color: string
+  frontMatterProperty_event_calendar: string
   frontMatterProperty_event_group: string
   frontMatterProperty_event_symbol: string
-  frontMatterProperty_event_calendar: string
+  frontMatterProperty_event_color: string
   frontMatterProperty_event_icon_name: string
   frontMatterProperty_event_icon_color: string
   frontMatterProperty_note_header: string
@@ -305,13 +306,13 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 
   frontMatterProperty_gantt_this: 'gantt-item', // boolean, activates file as event source
   frontMatterProperty_gantt_this_optional: true,
-  frontMatterProperty_event_calendar: 'gantt-calendar', // name of matching calendar or 'gregorian'
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
   frontMatterProperty_event_name: 'gantt-name', // ... or filename
-  frontMatterProperty_event_color: 'gantt-color', // hex value | human-readable color  ... or global fallback color
+  frontMatterProperty_event_calendar: 'gantt-calendar', // name of matching calendar or 'gregorian'
   frontMatterProperty_event_group: 'gantt-group', // ... or 'general'
   frontMatterProperty_event_symbol: 'gantt-symbol', // diamond ... or auto-(bar | point)
+  frontMatterProperty_event_color: 'gantt-color', // hex value | human-readable color  ... or global fallback color
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // icon name from https://lucide.dev
   frontMatterProperty_event_icon_color: 'gantt-displayIconColor',  // color for said icon
   frontMatterProperty_note_header: 'gantt-linkToHeader', // note-internal header to link to

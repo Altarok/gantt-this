@@ -30,9 +30,9 @@ export default class FantasyGanttPlugin extends Plugin {
 
     if (this.settings.uxAddCommands) {
       /*
-       * TODO re-add after all other eslint chores are done
+       * TODO create commands
        */
-//      Commands.addAll(this)
+      // Commands.addAll(this)
     }
 
     this.registerBasesView(GanttBaseViewExampleName, {
