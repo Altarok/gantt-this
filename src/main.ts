@@ -50,7 +50,13 @@ export default class FantasyGanttPlugin extends Plugin {
             default: this.settings.calendarPathSearchRecursive
           },
           {type: 'text', displayName: 'Lower bound date', key: BaseKeys.lbd},
-          {type: 'text', displayName: 'Upper bound date', key: BaseKeys.ubd}
+          {type: 'text', displayName: 'Upper bound date', key: BaseKeys.ubd},
+          {
+            type: 'text',
+            displayName: 'Calendar used for bounds',
+            key: BaseKeys.cal,
+            default: this.settings.defaultCalendar, placeholder: this.settings.defaultCalendar
+          }
         ]
       ) /* end options */
 

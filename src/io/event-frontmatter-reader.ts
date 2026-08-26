@@ -38,7 +38,8 @@ export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
  */
 export async function parseFiles(plugin: FantasyGanttPlugin,
                                  partialPluginSettings: PluginSettings,
-                                 codeBlockContent: CodeBlockContent, files: TFile[]): Promise<GanttItem[]> {
+                                 codeBlockContent: CodeBlockContent,
+                                 files: TFile[]): Promise<GanttItem[]> {
   const items: GanttItem[] = []
   let incrementalId = 0
 
@@ -55,7 +56,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
     let {startDate, endDate} = FrontMatterUtil.getEventTimestamps(frontMatter, plugin.settings)
 
     if (startDate === undefined || startDate === null || startDate === '') {
-      if ( plugin.settings.useFilenameAsFallbackStartDate) startDate = file.basename
+      if (plugin.settings.useFilenameAsFallbackStartDate) startDate = file.basename
       else continue
     }
 
@@ -89,6 +90,8 @@ function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: Co
 }
 
 function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
+
+  debugger
 
   if (typeof date === 'string')
     return parseEventDate(date, calendarConfig) ?? undefined

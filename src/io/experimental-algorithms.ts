@@ -38,8 +38,11 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
 
       if (cleanFilename && filenameToItem[cleanFilename]) {
         filenameToItem[cleanFilename].forEach(ii => {
-            ii._successors?.push(item.id)
-            item._predecessors?.push(ii.id)
+            ii._successors ??= []
+            item._predecessors ??= []
+
+            if (!ii._successors.includes(item.id)) ii._successors.push(item.id)
+            if (!item._predecessors.includes(ii.id)) item._predecessors.push(ii.id)
           }
         )
       }
@@ -51,8 +54,11 @@ function findPredecessorsAndSuccessors(items: GanttItem[]) {
 
       if (cleanFilename && filenameToItem[cleanFilename]) {
         filenameToItem[cleanFilename].forEach(ii => {
-            ii._predecessors?.push(item.id)
-            item._successors?.push(ii.id)
+            ii._predecessors ??= []
+            item._successors ??= []
+
+            if (!ii._predecessors.includes(item.id)) ii._predecessors.push(item.id)
+            if (!item._successors.includes(ii.id)) item._successors?.push(ii.id)
           }
         )
       }

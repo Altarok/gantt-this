@@ -351,9 +351,11 @@
 .gt-dependency-arrow {
   stroke: var(--interactive-accent);
   stroke-width: 1px;
-  /*stroke-dasharray: 4; !* Optional: dotted/dashed connector *!*/
+
+  /* stroke-dasharray: 4; !* Optional: dotted/dashed connector */
   pointer-events: none;
-  /*filter: drop-shadow(0 0 3px var(--interactive-accent));*/
+  
+  /* filter: drop-shadow(0 0 3px var(--interactive-accent)); */
 }
 
 

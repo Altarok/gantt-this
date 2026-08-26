@@ -32,7 +32,9 @@ export class GanttThisBasesView extends BasesView {
       calendarPath: this.calendarPath,
       calendarPathSearchRecursive: this.calendarPathSearchRecursive,
       lowerBoundDate: this.lowerBoundDate,
-      upperBoundDate: this.upperBoundDate
+      upperBoundDate: this.upperBoundDate,
+      calendar: this.calendarForBounds
+
     }
 
     const selectedProperties: string[] = this.config.getOrder()
@@ -93,6 +95,10 @@ export class GanttThisBasesView extends BasesView {
 
   private get upperBoundDate(): string | undefined {
     return this.getStringValue(BaseKeys.ubd)
+  }
+
+  private get calendarForBounds(): string | undefined {
+    return this.getStringValue(BaseKeys.cal)
   }
 
   /*

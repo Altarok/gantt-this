@@ -234,33 +234,25 @@ export class TooltipManager implements HoverParent {
   /**
    * TODO experimental!!
    *
-   * @param ganttItem
+   * @param gtItem
    */
-  private experimental_showHighlightAroundRelatedElements(ganttItem: GanttItem): RelatedTargets {
+  private experimental_showHighlightAroundRelatedElements(gtItem: GanttItem): RelatedTargets {
 
     // type HighLightTarget = { item: GanttItem, svg: SVGElement }
     // type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
-    const predecessorsRaw = ganttItem._predecessors?.map(p =>
-      this.getEventById(p)
-    ).filter(x => x !== undefined) ?? []
-
-    const successorsRaw = ganttItem._successors?.map(s =>
-      this.getEventById(s)
-    ).filter(x => x !== undefined) ?? []
-
-    const predecessorItems = Array.from(new Map(predecessorsRaw.map(p => [p.id, p])).values()) // => distinct
-    const successorItems = Array.from(new Map(successorsRaw.map(p => [p.id, p])).values()) // => distinct
+    const predecessorsRaw = gtItem._predecessors?.map(p => this.getEventById(p)).filter(x => !!x) ?? []
+    const successorsRaw = gtItem._successors?.map(s => this.getEventById(s)).filter(x => !!x) ?? []
 
     const predecessors: HighLightTarget[] = []
     const successors: HighLightTarget[] = []
 
-    predecessorItems.forEach(item => {
+    predecessorsRaw.forEach(item => {
       const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
       if (svg) predecessors.push({item, svg})
     })
 
-    successorItems.forEach(item => {
+    successorsRaw.forEach(item => {
       const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
       if (svg) successors.push({item, svg})
     })

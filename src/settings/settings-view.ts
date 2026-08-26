@@ -221,7 +221,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Calendar',
-            desc: `Default calendar used for events. Used when not given in property: ${this.settings.frontMatterProperty_event_calendar}'`,
+            desc: `Default calendar used for events. Used when not given in property: '${this.settings.frontMatterProperty_event_calendar}'`,
             control: {
               type: 'text', key: 'defaultCalendar',
               placeholder: DEFAULT_SETTINGS.defaultCalendar, defaultValue: DEFAULT_SETTINGS.defaultCalendar,

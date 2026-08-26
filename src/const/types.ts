@@ -330,6 +330,7 @@ export const BaseKeys = {
   calPath: 'bk-calendar-path',
   calPathRec: 'bk-calendar-path-recursive',
   lbd: 'bk-lower-bound-date',
-  ubd: 'bk-upper-bound-date'
+  ubd: 'bk-upper-bound-date',
+  cal: 'bk-calendar-for-bounds'
 } as const
 export type BaseKey = (typeof BaseKeys)[keyof typeof BaseKeys]
