@@ -369,17 +369,19 @@ function calculatePolygonPoints(radius: number,
                                 additionalRotation = 0): string {
   const points: string[] = []
 
-  // Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
-  // value chosen to make triangle and pentagon point up
+  /*
+   * Start angle: 90 degrees (π/2 radians) to make first point at top (x, y+r)
+   * value chosen to make triangle and pentagon point up
+   */
   const startAngle = -Math.PI / 2 + Math.PI * additionalRotation
 
   for (let i = 0; i < numCorners; i++) {
-    // Calculate angle for this vertex (going clockwise)
+    /* Calculate angle for this vertex (going clockwise) */
     const angle = startAngle - (2 * Math.PI * i / numCorners)
 
     const iterRad = (i % 2 === 0) ? 1 : altRadiusFactor
 
-    // Calculate x and y coordinates
+    /* Calculate x and y coordinates */
     const x = cx + radius * Math.cos(angle) * iterRad
     const y = cy + radius * Math.sin(angle) * iterRad
 

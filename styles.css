@@ -326,7 +326,8 @@
   stroke: var(--text-muted);
   stroke-width: 1px;
   vector-effect: non-scaling-stroke; /* prevent border width scaling when zooming/panning */
-  shape-rendering: crispedges; /* prevent blurriness on non-integer display pixels */
+  
+  /*shape-rendering: crispedges; !* prevent blurriness on non-integer display pixels *!*/
 }
 
 .gt-item.symbol-hover {
