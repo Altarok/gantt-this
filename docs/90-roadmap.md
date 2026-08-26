@@ -27,7 +27,9 @@ Last change: 2026-08-26
   - Set a safe default zoom and restore it when re-opening files.
 - Calendars:
   - Add a manually configurable leap year rule. - CePeU
-  - Add YyWwDd format. - CePeU
+  - Add `YyWwDd format`. - CePeU
+  - Remove duplicate calendar ID definition in calendar notes.
+  - Rename `rule-based`.
 - Highlight weekends.
 - Manage rerender cooldown depending on the content of the changed file. - CePeU
 - Add a setting for the time difference between calendar axis ticks. - Charatzu
@@ -53,4 +55,4 @@ Last change: 2026-08-26
   - What to add to it?
 - Allow events to open a canvas or base when clicked. - CePeU
 - Allow events to open other Gantt charts when clicked. - CePeU
-
+- Allow differing day lengths across calendars.

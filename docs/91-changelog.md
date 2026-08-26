@@ -8,6 +8,9 @@ order: 91
 See [Roadmap](90-roadmap) for upcoming features.
 Last change: 2026-08-26
 
+> Disclaimer: The mentioned frontmatter properties represent their default keys;
+> you may have renamed them in your vault.
+
 ## [v1.2.1](https://github.com/Altarok/gantt-this/releases/tag/1.2.1), 2026-08-26
 
 - _Timestamp events now have text descriptions._
