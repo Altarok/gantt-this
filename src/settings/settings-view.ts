@@ -351,7 +351,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
           {
             name: 'Zoom and pan buttons',
-            desc: 'Adds 4 buttons to chart toolbar: pan left, zoom out, zoom in, and pan right',
+            desc: 'Display pan and zoom navigation buttons in the chart toolbar.',
             control: {
               type: 'toggle', key: 'showPanAndZoomButtonsInToolbar',
               defaultValue: DEFAULT_SETTINGS.showPanAndZoomButtonsInToolbar
@@ -398,7 +398,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
         ]
       },
-      
+
       // { // TODO wip
       //   name: 'Enable visual canvas zoom',
       //   desc: 'Scale the entire chart visually instead of adjusting the timeline date range.',
