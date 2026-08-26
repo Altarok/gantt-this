@@ -267,11 +267,30 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         type: 'group',
         items: [
           {
-            name: 'Show overlay',
+            name: 'Highlight event',
             desc: 'Highlight hovered events with a bounding box.',
             control: {
               type: 'toggle', key: 'mouseOverEventShowBox',
               defaultValue: DEFAULT_SETTINGS.mouseOverEventShowBox
+            }
+          },
+          {
+            name: 'Highlight related events',
+            desc: `If activated, the frontmatter properties '${this.settings.frontMatterProperty_event_predecessors}'
+             and '${this.settings.frontMatterProperty_event_successors}' will get checked against the names of other Gantt event notes.
+              Hovering one event will then highlight related events.`,
+            control: {
+              type: 'toggle', key: 'uxHighlightRelatedEvents',
+              defaultValue: DEFAULT_SETTINGS.uxHighlightRelatedEvents
+            }
+          },
+          {
+            name: 'Connect related events',
+            desc: `Activating this connects related events with directional arrows. See previous setting 'Highlight related events' for relation logic.`,
+            control: {
+              type: 'toggle', key: 'uxConnectRelatedEvents',
+              defaultValue: DEFAULT_SETTINGS.uxConnectRelatedEvents,
+              disabled: () => !this.settings.uxHighlightRelatedEvents
             }
           },
           {
@@ -353,8 +372,8 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Group visibility toggles',
-            desc: 'Add buttons to the toolbar for hiding or showing individual groups.',
+            name: 'Show group visibility toggles',
+            desc: 'Display eye icons in the toolbar to toggle group visibility.',
             control: {
               type: 'toggle', key: 'showButtonsToHideGroups',
               defaultValue: DEFAULT_SETTINGS.showButtonsToHideGroups
@@ -369,7 +388,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
-            name: 'Re-render cooldown',
+            name: 'Rerender cooldown (seconds)',
             desc: 'For those nerds changing files every second.',
             control: {
               type: 'slider', key: 'uxRerenderCooldownSeconds',
@@ -379,8 +398,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           },
         ]
       },
-
-
+      
       // { // TODO wip
       //   name: 'Enable visual canvas zoom',
       //   desc: 'Scale the entire chart visually instead of adjusting the timeline date range.',
@@ -623,6 +641,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       items: items
     }
   }
+
 
 }
 

@@ -254,6 +254,8 @@ export type PluginSettings = GanttChartSources & {
   uxAddDaySuffixToTooltipTitle: boolean
   useFilenameAsFallbackStartDate: boolean
   uxRerenderCooldownSeconds: number
+  uxHighlightRelatedEvents: boolean // highlight predecessors and successors
+  uxConnectRelatedEvents: boolean // connect predecessors and successors
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -293,6 +295,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   uxAddDaySuffixToTooltipTitle: false,
   useFilenameAsFallbackStartDate: false,
   uxRerenderCooldownSeconds: 5,
+  uxHighlightRelatedEvents: true,
+  uxConnectRelatedEvents: false,
 
   /*
    * Front-matter property names

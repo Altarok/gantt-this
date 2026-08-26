@@ -73,7 +73,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
   parseCodeBlockContent(plugin, codeBlockContent)
 
-  findPredecessorsAndSuccessors(items, plugin.settings)
+  if (plugin.settings.uxHighlightRelatedEvents) findPredecessorsAndSuccessors(items, plugin.settings)
 
   return items
 }

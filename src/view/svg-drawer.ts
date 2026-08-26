@@ -31,7 +31,7 @@ export class GanttRenderEngine {
   private activeAxesList: string[] = []
   private totalHeight = 400
   private resizeObserver: ResizeObserver
-  private arrowColor: string
+  private readonly arrowColor: string
 
   config: GanttChartConfig = {
     showEras: true,

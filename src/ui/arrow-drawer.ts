@@ -3,7 +3,6 @@ import {Util} from '../view/svg-drawer-util'
 const diff = 2
 type Point = { x: number, y: number }
 
-
 export class GanttConnectorDrawer {
   private activeArrows: SVGElement[] = []
 
@@ -60,7 +59,6 @@ export class GanttConnectorDrawer {
   }
 }
 
-
 function centerOfLowerBound(containerRect: DOMRect, rect: DOMRect): Point {
   return {
     x: rect.left + (rect.width / 2) - containerRect.left,
@@ -81,7 +79,6 @@ function centerOfLeftBound(containerRect: DOMRect, rect: DOMRect): Point {
     y: rect.top + (rect.height / 2) - containerRect.top
   }
 }
-
 
 function centerOfRightBound(containerRect: DOMRect, rect: DOMRect): Point {
   return {

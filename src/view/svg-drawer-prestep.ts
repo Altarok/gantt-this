@@ -186,7 +186,9 @@ function createIconButton(parentEl: HTMLElement, icon: string, title: string,): 
 class GanttLifecycleComponent extends MarkdownRenderChild {
   private events: EventRef[] = []
 
-  constructor(containerEl: HTMLElement, private plugin: FantasyGanttPlugin, readonly refreshChartCallback: () => void) {
+  constructor(containerEl: HTMLElement,
+              private readonly plugin: FantasyGanttPlugin,
+              private readonly refreshChartCallback: () => void) {
     super(containerEl)
   }
 

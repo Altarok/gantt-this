@@ -12,6 +12,9 @@ type HighLightTarget = { item: GanttItem, svg: SVGElement }
 type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
 export class TooltipManager implements HoverParent {
+  private readonly searchForRelatedEventsOnHover: boolean
+  private readonly isDrawArrows: boolean
+
   hoverPopover: HoverPopover | null = null;
   private verticalGuides: VerticalOverlay[] = []
   private lastHoveredTarget: HTMLElement | null = null
@@ -21,6 +24,9 @@ export class TooltipManager implements HoverParent {
 
   constructor(readonly engine: GanttRenderEngine,
               readonly pluginSettings: PluginSettings) {
+    this.searchForRelatedEventsOnHover = pluginSettings.uxHighlightRelatedEvents
+    this.isDrawArrows = this.searchForRelatedEventsOnHover && pluginSettings.uxConnectRelatedEvents
+
     this.setupDelegatedHover()
   }
 
@@ -231,31 +237,25 @@ export class TooltipManager implements HoverParent {
     this.verticalGuides = []
   }
 
-  /**
-   * TODO experimental!!
-   *
-   * @param gtItem
-   */
-  private experimental_showHighlightAroundRelatedElements(gtItem: GanttItem): RelatedTargets {
-
-    // type HighLightTarget = { item: GanttItem, svg: SVGElement }
-    // type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
-
-    const predecessorsRaw = gtItem.predecessors.map(p => this.getEventById(p)).filter(x => !!x) ?? []
-    const successorsRaw = gtItem.successors.map(s => this.getEventById(s)).filter(x => !!x) ?? []
+  private findRelatedElementsToHighlight(gtItem: GanttItem): RelatedTargets {
 
     const predecessors: HighLightTarget[] = []
     const successors: HighLightTarget[] = []
 
-    predecessorsRaw.forEach(item => {
-      const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
-      if (svg) predecessors.push({item, svg})
-    })
+    if (this.searchForRelatedEventsOnHover) {
+      const predecessorsRaw = gtItem.predecessors.map(p => this.getEventById(p)).filter(x => !!x) ?? []
+      const successorsRaw = gtItem.successors.map(s => this.getEventById(s)).filter(x => !!x) ?? []
 
-    successorsRaw.forEach(item => {
-      const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
-      if (svg) successors.push({item, svg})
-    })
+      predecessorsRaw.forEach(item => {
+        const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
+        if (svg) predecessors.push({item, svg})
+      })
+
+      successorsRaw.forEach(item => {
+        const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
+        if (svg) successors.push({item, svg})
+      })
+    }
 
     return {predecessors, successors}
   }
@@ -280,21 +280,22 @@ export class TooltipManager implements HoverParent {
 
   private addHighLightAroundSvg(ganttItem: GanttItem, svgBackground: SVGElement, target: SVGElement | HTMLElement) {
 
-    const relatedTargets: RelatedTargets = this.experimental_showHighlightAroundRelatedElements(ganttItem)
+    const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
+
 
     this.createShape(ganttItem, target, svgBackground, 'gt-item symbol-hover')
 
     relatedTargets.predecessors.forEach(r => {
       this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
 
-      this.connectorDrawer.drawCurvedArrow(r.svg, target, svgBackground)
+      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(r.svg, target, svgBackground)
     })
 
     relatedTargets.successors.forEach(r => {
       this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
 
       /* switch start and end in this loop */
-      this.connectorDrawer.drawCurvedArrow(target, r.svg, svgBackground)
+      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(target, r.svg, svgBackground)
     })
 
   }
