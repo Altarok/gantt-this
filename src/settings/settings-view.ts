@@ -574,7 +574,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       {
         name: 'Event predecessors',
-        desc: 'Optional property. Predecessors will be highlighted on chart.',
+        desc: 'Optional property (list). Predecessors will be highlighted on chart.',
         control: {
           type: 'text', key: 'frontMatterProperty_event_predecessors',
           placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
@@ -584,7 +584,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       {
         name: 'Event successors',
-        desc: 'Optional property. Successors will be highlighted on chart.',
+        desc: 'Optional property (list). Successors will be highlighted on chart.',
         control: {
           type: 'text', key: 'frontMatterProperty_event_successors',
           placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
