@@ -54,7 +54,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 function fallbackIfGregorian(calendarId: string,
                              plugin: FantasyGanttPlugin): CalendarConfig | null {
   if (calendarId === DEFAULT_SETTINGS.defaultCalendar) {
-    // new Notice(`Failed to load gregorian calendar. Will use pre-set fallback.`)
+    new Notice('Failed to load gregorian calendar. Will use pre-set fallback.')
     plugin.calendarConfigsCache.set(calendarId, GregorianCalendar)
     return GregorianCalendar
   } else return null
