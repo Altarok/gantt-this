@@ -163,7 +163,7 @@ Congratulations! You got your first calendar and event running and displayed!
 
 You might like to take a look at:
 
-- [Calendar Definitions](03-calendars)
-- [Event Definitions](04-events)
-- [Plugin Settings](05-plugin-settings)
-- [FAQ](99-FAQ)
+- [[03-calendars|Calendar Definitions]]
+- [[04-events|Event Definitions]]
+- [[05-plugin-settings|Plugin Settings]]
+- [[99-FAQ|FAQ]]

@@ -5,8 +5,7 @@ order: 90
 
 # Roadmap
 
-See [Changelog](91-changelog) for implemented features.
-Last change: 2026-08-26
+See [[91-changelog|Changelog]] for implemented features.
 
 > The following list is not exhaustive. It contains only features confirmed for implementation.
 > See below for a shorthand list of unsorted ideas.

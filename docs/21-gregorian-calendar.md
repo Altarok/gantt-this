@@ -3,8 +3,6 @@ title: Gregorian Calendar
 order: 21
 ---
 
-Back to [calendar examples](20-example-calendars).
-
 # Gregorian Calendar
 
 The global standard Earth time-tracking profile using true dynamic leap-year calculations.
@@ -50,4 +48,4 @@ adSuffix: 'AD'                                         # optional date suffix fo
 ```
 ````
 
-Last change: 2026-08-26
+Back to [[20-example-calendars|calendar examples]].

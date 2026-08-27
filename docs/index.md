@@ -8,16 +8,16 @@ order: 0
 Welcome to the documentation for **Gantt This**. Select a topic from the sidebar or click a section below to get
 started:
 
-- [Introduction](01-introduction)
-- [Getting Started](02-getting-started)
-- [Calendar Definitions](03-calendars)
-- [Event Definitions](04-events)
-- [Plugin Settings](05-plugin-settings)
-- [Example Calendars](20-example-calendars)
-  - [Gregorian Calendar](21-gregorian-calendar)
-  - [Mayan Calendar](22-mayan-calendar)
-- [Roadmap](90-roadmap)
-- [Changelog](91-changelog)
+- [[01-introduction|Introduction]]
+- [[02-getting-started|Getting Started]]
+- [[03-calendars|Calendar Definitions]]
+- [[04-events|Event Definitions]]
+- [[05-plugin-settings|Plugin Settings]]
+- [[20-example-calendars|Example Calendars]]
+  - [[21-gregorian-calendar|Gregorian Calendar]]
+  - [[22-mayan-calendar|Mayan Calendar]]
+- [[90-roadmap|Roadmap]]
+- [[91-changelog|Changelog]]
 - [[99-FAQ|FAQ]]
 
 Click to find plugin in [Obsidian Community](https://community.obsidian.md/plugins/gantt-this).

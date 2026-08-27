@@ -52,4 +52,4 @@ We are continuously adding ideas and suggestions from the community. The main fe
 
 ## Next: Setup and First Steps
 
-- [Setup](02-getting-started)
+- [[02-getting-started|Setup]]

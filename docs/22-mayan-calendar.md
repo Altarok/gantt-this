@@ -3,8 +3,6 @@ title: Mayan Calendar
 order: 22
 ---
 
-Back to [calendar examples](20-example-calendars).
-
 # Mayan Calendar
 
 While the world didn't end in 2012, this calendar did. The Maya did not count years, but phases of different length.
@@ -43,4 +41,4 @@ moons:                     # optional moon, totally irrelevant for the calendar
 ```
 ````
 
-Last change: 2026-08-26
+Back to [[20-example-calendars|calendar examples]].

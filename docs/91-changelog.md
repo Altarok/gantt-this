@@ -5,8 +5,7 @@ order: 91
 
 # Changelog
 
-See [Roadmap](90-roadmap) for upcoming features.
-Last change: 2026-08-26
+See [[90-roadmap|Roadmap]] for upcoming features.
 
 > Disclaimer: The mentioned frontmatter properties represent their default keys;
 > you may have renamed them in your vault.
