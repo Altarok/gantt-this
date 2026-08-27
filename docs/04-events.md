@@ -118,10 +118,10 @@ gantt-color: yellow | '#FFFF00' | (omit for default color - configurable in sett
 > [!info] Color priority
 >
 > There are multiple sources for event color. Starting with the highest priority, the plugin uses the first it finds.
-> 1. event property `gantt-color`
-> 2. default color for group in property `gantt-group`
-> 3. default color for calendar in property `gantt-calendar`
-> 4. global fallback color (always exists)
+> - event property `gantt-color`
+> - default color for group in property `gantt-group`
+> - default color for calendar in property `gantt-calendar`
+> - global fallback color (always exists)
 
 ### Icons
 
