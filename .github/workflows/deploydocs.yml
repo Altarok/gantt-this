@@ -45,6 +45,20 @@ jobs:
             --output ./public \
             --url "https://Altarok.github.io/gantt-this"
 
+      # Temporary fix for Kiln issue #55 (Graph view duplicate subpath)
+      - name: Patch Graph Links (Kiln Issue #55 Workaround)
+        run: |
+          find ./public -name "*.html" -exec sed -i '/<\/head>/i \
+          <script>\
+            document.addEventListener("click", function(e) {\
+              const a = e.target.closest("a");\
+              if (a && a.href && a.href.includes("/gantt-this/gantt-this/")) {\
+                e.preventDefault();\
+                window.location.href = a.href.replace("/gantt-this/gantt-this/", "/gantt-this/");\
+              }\
+            }, true);\
+          </script>' {} +
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
