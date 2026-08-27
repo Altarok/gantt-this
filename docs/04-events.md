@@ -28,26 +28,21 @@ In the chart, each element above the calendar axis represents an event defined i
 
 See below for more in-depth [[#Examples]].
 
-To display one or more notes as events in your timeline, add the corresponding properties to the YAML frontmatter of
-your Markdown file:
+To display one or more notes as events in your timeline, add the corresponding properties to the YAML frontmatter of your Markdown file:
 
 ```yaml
----
 gantt-item: true           # Marks the note as an event
 gantt-start: 2026-01-01    # Start date / point in time
 gantt-end: 2026-01-05      # Optional: end date (fallback: gantt-start) - marks event as timespan if given
 gantt-name: "My Project"   # Optional: name (fallback: filename)
 gantt-group: "Development" # Optional: group (fallback: 'general')
----
 ```
 
 ## Examples
 
 ### Calendar
 
-Each event can be related to one calendar only.
-Assigning an event to more than one makes no sense since they would appear at different timestamps.
-Dates defined in the event note will be interpreted according to this calendar.
+Each event can be related to one calendar only. Assigning an event to more than one makes no sense since they could appear at different timestamps. Dates defined in the event note will be interpreted according to this calendar.
 
 To add a calendar to an event use the following property:
 
@@ -61,13 +56,9 @@ gantt-calendar: gregorian | (omit or leave empty for default calendar - configur
 Any event with start- and end-date property is defined as a timespan.
 There are two types of timespan events:
 
-1. `'bar'`: Bars are shown as horizontal rectangles. See markers (4) and (5) in the screenshot: (4) is named 'Bar' and
-   set into group 'symbols', while (5) is placed into group 'icons.'
+1. `'bar'`: Bars are shown as horizontal rectangles. See markers (4) and (5) in the screenshot: (4) is named 'Bar' and set into group 'symbols', while (5) is placed into group 'icons.'
 
-2. `'era'`: Eras are shown as semi-transparent rectangle behind all other events. They can be placed in a group or span
-   the entire
-   height of the chart (if no group is defined). See markers (1), (2) and (3) in the screenshot. (1) is placed in
-   group 'symbols', (2) inside 'icons', while (3) has no group.
+2. `'era'`: Eras are shown as semi-transparent rectangle behind all other events. They can be placed in a group or span the entire height of the chart (if no group is defined). See markers (1), (2) and (3) in the screenshot. (1) is placed in group 'symbols', (2) inside 'icons', while (3) has no group.
 
 ```yaml
 gantt-start: 2026-08-27
@@ -80,14 +71,11 @@ gantt-symbol: bar | era | (omit or leave empty to default to 'bar')
 ![Timespans](images/showcase-highlighted-timestamps.png)
 Timestamp events are defined by adding a start-date to any event. Omit the end-date or leave it empty.
 
-There are 8 different symbols usable for a normal timestamp event. All of these function the same way, the only thing
-that changes is the SVG graphic. See central box of the screenshot.
+There are 8 different symbols usable for a normal timestamp event. All of these function the same way, the only thing that changes is the SVG graphic. See central box of the screenshot.
 
 - `point` | `triangle` | `box` | `diamond` | `pentagon` | `hexagon` | `octagon` | `star`
 
-But they were all betrayed - for a ninth symbol was made to betray them all. See right box of the screenshot.
-This symbol was added to create separators and/or markers for special days like "today".
-Similar to `era` above, it spans the entire height when not placed into a specific group.
+But they were all betrayed - for a ninth symbol was made to betray them all. See right box of the screenshot. This symbol was added to create separators and/or markers for special days like "today". Similar to `era` above, it spans the entire height when not placed into a specific group.
 
 - `vertical-line`
 
@@ -99,9 +87,7 @@ gantt-symbol: point | triangle | box | diamond | pentagon
 
 ### Group
 
-All events can be placed into a group. Whether the group is defined in settings does not matter at this point.
-The events in the showcase screenshot are sorted into the groups symbols, icons, and general (see left side of
-screenshot)."
+All events can be placed into a group. Whether the group is defined in settings does not matter at this point. The events in the showcase screenshot are sorted into the groups symbols, icons, and general (see left side of screenshot)."
 
 To group an event use the following property:
 
@@ -118,9 +104,7 @@ gantt-group: any group | (omit or leave empty for default group 'general' - conf
 
 ### Color
 
-Each event can be colored. `era` events will add transparency to the chosen color.
-The color value can be a human-readable CSS color like for example `red`, `forestgreen`, `teal` - or a 6-digit hex value
-starting with `'#'`.
+Each event can be colored. `era` events will add transparency to the chosen color. The color value can be a human-readable CSS color like for example `red`, `forestgreen`, `teal` - or a 6-digit hex value starting with `'#'`.
 
 To color an event use the following property:
 
@@ -138,8 +122,7 @@ gantt-color: yellow | '#FFFF00' | (omit for default color - configurable in sett
 
 ### Icons
 
-Each event except `vertical-line` can be decorated with an SVG icon. The icons are pulled from Obsidian's cache.
-To add and color an icon use the following properties. Remember to rename the properties to your liking.
+Each event except `vertical-line` can be decorated with an SVG icon. The icons are pulled from Obsidian's cache. To add and color an icon use the following properties. Remember to rename the properties to your liking.
 
 ```yaml
 gantt-displayIcon: heart
@@ -148,8 +131,7 @@ gantt-displayIconColor: red | (omit or leave empty for default color - configura
 
 ### Special dates
 
-Right now, there is one special keyword: `today`. This will be interpreted as your local current day.
-Adding this to an event will obviously show it at different timestamps each day.
+Right now, there is one special keyword: `today`. This will be interpreted as your local current day. Adding this to an event will obviously show it at different timestamps each day.
 
 You can add a fixed amount of days to it. To achieve this you can use the following properties:
 
