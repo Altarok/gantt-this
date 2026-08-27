@@ -36,7 +36,7 @@ positionalUnits:           # Mandatory when type equals "positional"
   - name: "kin"            # Kin, literally 1 day, 
     days: 1                # Range: 0-19 (20 kins = 1 uinal)
 moons:                     # optional moon, totally irrelevant for the calendar
-  - {offset: 18.2, cycle: 29.53059, color: "#0000CC"}
+  - {offset: 18.2, cycle: 29.53059, color: "teal"}
 
 ```
 ````

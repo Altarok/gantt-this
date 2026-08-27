@@ -16,10 +16,6 @@ You may remove the comments starting from `'#'` completely.
 For this plugin all calendars are day-based, there is no time of day.
 This may change later, see [[90-roadmap|Roadmap]] for planned features.
 
-## [[21-gregorian-calendar|Gregorian Calendar]]
-
-The global standard calendar everybody knows.
-
-## [[22-mayan-calendar|Mayan Calendar]]
-
-The calendar that ended in 2012.
+1. [[21-gregorian-calendar|Gregorian Calendar]] - the global standard calendar everybody knows
+2. [[22-mayan-calendar|Mayan Calendar]] - the one that ended in 2012
+3. 
