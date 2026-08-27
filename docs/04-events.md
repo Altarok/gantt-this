@@ -50,15 +50,18 @@ To add a calendar to an event use the following property:
 gantt-calendar: gregorian | (omit or leave empty for default calendar - configurable in settings)
 ```
 
+> [!info] Default value
+> This frontmatter property is *optional*. Omit or leave empty to use default calendar, which is configurable in settings
+
 ### Timespan Events
 
 ![Timespans](images/showcase-highlighted-timespans.png)
 Any event with start- and end-date property is defined as a timespan.
 There are two types of timespan events:
 
-1. `'bar'`: Bars are shown as horizontal rectangles. See markers (4) and (5) in the screenshot: (4) is named 'Bar' and set into group 'symbols', while (5) is placed into group 'icons.'
+- `'bar'`: Bars are shown as horizontal rectangles. See markers (4) and (5) in the screenshot: (4) is named 'Bar' and set into group 'symbols', while (5) is placed into group 'icons.'
 
-2. `'era'`: Eras are shown as semi-transparent rectangle behind all other events. They can be placed in a group or span the entire height of the chart (if no group is defined). See markers (1), (2) and (3) in the screenshot. (1) is placed in group 'symbols', (2) inside 'icons', while (3) has no group.
+- `'era'`: Eras are shown as semi-transparent rectangle behind all other events. They can be placed in a group or span the entire height of the chart (if no group is defined). See markers (1), (2) and (3) in the screenshot. (1) is placed in group 'symbols', (2) inside 'icons', while (3) has no group.
 
 ```yaml
 gantt-start: 2026-08-27
@@ -85,14 +88,14 @@ gantt-symbol: point | triangle | box | diamond | pentagon
   | hexagon | octagon | star | (omit for default symbol - configurable in settings)
 ```
 
-### Group
+### Groups
 
-All events can be placed into a group. Whether the group is defined in settings does not matter at this point. The events in the showcase screenshot are sorted into the groups symbols, icons, and general (see left side of screenshot)."
+All events can be grouped. Whether the group is defined in settings does not matter at this point. The events in the showcase screenshot are sorted into the groups `symbols`, `icons`, and `general` (see left side of screenshot).
 
-To group an event use the following property:
+To group an event use the following property. Omit or leave empty for default group 'general' - configurable in settings)
 
 ```yaml
-gantt-group: any group | (omit or leave empty for default group 'general' - configurable in settings)
+gantt-group: any group
 ```
 
 > [!info] Additional options
