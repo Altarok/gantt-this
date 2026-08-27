@@ -18,7 +18,7 @@ started:
   - [Mayan Calendar](22-mayan-calendar)
 - [Roadmap](90-roadmap)
 - [Changelog](91-changelog)
-- [FAQ](99-FAQ)
+- [[99-FAQ|FAQ]]
 
 Click to find plugin in [Obsidian Community](https://community.obsidian.md/plugins/gantt-this).
 
