@@ -45,8 +45,9 @@ gantt-group: "Development" # Optional: group (fallback: 'general')
 
 ### Calendar
 
-Each event can be related to one calendar only. Changing this to more than one make no sense since they would appear at
-different timestamps. Dates defined in the event note will be interpreted as of this calendar.
+Each event can be related to one calendar only.
+Assigning an event to more than one makes no sense since they would appear at different timestamps.
+Dates defined in the event note will be interpreted according to this calendar.
 
 To add a calendar to an event use the following property:
 
@@ -57,13 +58,14 @@ gantt-calendar: gregorian | (omit or leave empty for default calendar - configur
 ### Timespan Events
 
 ![Timespans](images/showcase-highlighted-timespans.png)
-Any events with start- and end-date property is defined as timespan.
+Any event with start- and end-date property is defined as a timespan.
 There are two types of timespan events:
 
-1. `bar`: Bars are shown as vertical rectangles. See markers (4) and (5) in the screenshot: (4) is named 'Bar' and set
-   into group 'symbols', while (5) is placed into group 'icons.'
+1. `'bar'`: Bars are shown as horizontal rectangles. See markers (4) and (5) in the screenshot: (4) is named 'Bar' and
+   set into group 'symbols', while (5) is placed into group 'icons.'
 
-2. `era`: Eras are shown as opaque rectangle behind all other events. They can be placed in a group or span the entire
+2. `'era'`: Eras are shown as semi-transparent rectangle behind all other events. They can be placed in a group or span
+   the entire
    height of the chart (if no group is defined). See markers (1), (2) and (3) in the screenshot. (1) is placed in
    group 'symbols', (2) inside 'icons', while (3) has no group.
 
@@ -78,13 +80,13 @@ gantt-symbol: bar | era | (omit or leave empty to default to 'bar')
 ![Timespans](images/showcase-highlighted-timestamps.png)
 Timestamp events are defined by adding a start-date to any event. Omit the end-date or leave it empty.
 
-There are 8 different symbols usable for a normal timestamp event. All of these react the same way, the only thing that
-changes is the SVG graphic. See central box of the screenshot.
+There are 8 different symbols usable for a normal timestamp event. All of these function the same way, the only thing
+that changes is the SVG graphic. See central box of the screenshot.
 
 - `point` | `triangle` | `box` | `diamond` | `pentagon` | `hexagon` | `octagon` | `star`
 
 But they were all betrayed - for a ninth symbol was made to betray them all. See right box of the screenshot.
-This symbol was added to create separators and or markers for special days like "today".
+This symbol was added to create separators and/or markers for special days like "today".
 Similar to `era` above, it spans the entire height when not placed into a specific group.
 
 - `vertical-line`
@@ -98,7 +100,8 @@ gantt-symbol: point | triangle | box | diamond | pentagon
 ### Group
 
 All events can be placed into a group. Whether the group is defined in settings does not matter at this point.
-The events in the showcase screenshot are sorted to groups `symbols`, `icons` and `general. See left side of screenshot.
+The events in the showcase screenshot are sorted into the groups symbols, icons, and general (see left side of
+screenshot)."
 
 To group an event use the following property:
 
@@ -115,7 +118,7 @@ gantt-group: any group | (omit or leave empty for default group 'general' - conf
 
 ### Color
 
-Each event can be colored. `era` events will add a lot of opacity to the chosen color.
+Each event can be colored. `era` events will add transparency to the chosen color.
 The color value can be a human-readable CSS color like for example `red`, `forestgreen`, `teal` - or a 6-digit hex value
 starting with `'#'`.
 
@@ -145,7 +148,7 @@ gantt-displayIconColor: red | (omit or leave empty for default color - configura
 
 ### Special dates
 
-Right now, there is one special date: `today`. This will be interpreted as your locale current day.
+Right now, there is one special keyword: `today`. This will be interpreted as your local current day.
 Adding this to an event will obviously show it at different timestamps each day.
 
 You can add a fixed amount of days to it. To achieve this you can use the following properties:
@@ -165,7 +168,7 @@ The following table lists all available properties you can use in your notes:
 | `gantt-start`            | String                                     | No        | *None* (Note will be ignored without a start value) | Start date or start value of the event.                                   |
 | `gantt-end`              | String                                     | Yes       | Value of `gantt-start`                              | End date of the event. If identical to start value, a point is displayed. |
 | `gantt-name`             | String                                     | Yes       | File name without extension (`file.basename`)       | Name of the event in the timeline and tooltip.                            |
-| `gantt-type`             | String                                     | Yes       | Default calendar                                    | Determines the assigned calendar type.                                    |
+| `gantt-calendar`         | String                                     | Yes       | Default calendar                                    | Determines the assigned calendar type.                                    |
 | `gantt-group`            | String                                     | Yes       | `'general'`                                         | Group used for row layout and structuring.                                |
 | `gantt-color`            | Color (e.g. `#ff0000`, `red`)              | Yes       | Group color → Calendar color → Default              | Overrides the background color of the event individually.                 |
 | `gantt-displayIcon`      | String ([Lucide Icon](https://lucide.dev)) | Yes       | *None*                                              | Displays an icon on the event.                                            |
