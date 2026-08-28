@@ -15,7 +15,7 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 - Minor CSS fixes like:
   - Increase readability of era text
   - Fix color of arrowhead
-- Added documentation to https://altarok.github.io/gantt-this/
+- Added documentation in https://altarok.github.io/gantt-this/
 
 ## [v1.2.1](https://github.com/Altarok/gantt-this/releases/tag/1.2.1), 2026-08-26
 
