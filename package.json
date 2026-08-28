@@ -1,6 +1,6 @@
 {
   "name": "gantt-this",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "description": "A Gantt chart showing multiple TTRPG calendars at once.",
   "keywords": [
