@@ -16,6 +16,8 @@ started:
 - [[20-example-calendars|Example Calendars]]
   - [[21-gregorian-calendar|Gregorian Calendar]]
   - [[22-mayan-calendar|Mayan Calendar]]
+  - [[23-dsa-ttrpg-calendar|The Dark Eye (DSA) Calendar]]
+- [[40-bases|Bases]]
 - [[90-roadmap|Roadmap]]
 - [[91-changelog|Changelog]]
 - [[99-FAQ|FAQ]]
