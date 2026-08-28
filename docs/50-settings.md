@@ -1,6 +1,7 @@
 ---
 title: Plugin Settings
 order: 50
+draft: true
 ---
 
 # Plugin Settings
