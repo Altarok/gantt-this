@@ -5,23 +5,33 @@ order: 2
 
 # Setup
 
+This guide walks you through setting up your first Gantt chart in Obsidian.
+
 ## Fundamentals and first steps
 
-To help you understand what you need to do to set up a Gantt-This chart in your Obsidian note, here is an explanation of the fundamental workings of the Gantt-This plugin.
-
-The plugin renders a Gantt chart from a codeblock as is usually done with other Obsidian plugins. To create that codeblock nothing more is needed than:
+The plugin renders timeline views directly inside Markdown notes using custom code blocks and Bases. At its simplest, a chart requires only a basic code block:
 
 ````markdown
 ```gantt-this
 ```
 ````
 
-Of course without a calendar or events you will see exactly nothing.
-So as a first step you will need a calendar. Each calendar definition is stored in a YAML codeblock in a note. This calendar definition is stored in a separate note which you create in Obsidian and put into a folder of your choice. For future reference we will store this in the folder "calendardefinitions".
+Alternatively, create a Base of type `'Gantt this'`.
 
-This is an example for a TTRPG calendar of one of my favorite RPGs:
+Without calendar and events, the chart will render nothing. Follow the steps below to populate your timeline.
+
+### Define a calendar
+
+First, create a new folder in your vault for calendars, for example `calendardefinitions`. In the settings you can tell the plugin to only look for calendars in this folder.
+Then, create a new note inside *this* folder.
+
+Calendar definitions are stored in YAML code blocks inside dedicated Markdown notes. Feel free to copy any example of our [[20-example-calendars|Example Calendars]] or this example of one of our favorite TTRPGs:
 
 ````markdown
+---
+gantt-calendar-definition: my-first-calendar
+---
+
 ```yaml
 id: my-first-calendar # unique id for each calendar
 name: Example Calendar # a calendar name as shown in the Gantt chart
@@ -73,56 +83,42 @@ moons: # optional. define multiple moons
 
 There are more options to a calendar definition and many are optional but this should give you a quick calendar you can start from and adjust to your needs.
 
-The next step is to define a front matter field for THIS note of the type: `gantt-calendar-definition: my-first-calendar` or whatever else you named your calendar.
+> [!warning] Property Matching
+> The frontmatter value (`gantt-calendar-definition`) and the `id` field inside the YAML code block must match **exactly** (case-sensitive).
 
-Be aware that the frontmatter value (`my-first-calendar`) and the calendar id in the YAML code block must match exactly.
+Next, configure the plugin settings to locate your calendar and event files:
 
-It will look like this:
-
-```markdown
----
-gantt-calendar-definition: my-first-calendar
----
-```
-
-The next step is to tell the plugin where it can find the calendar definitions and what calendars it is supposed to use.
-This is done in the plugin settings.
+(1) Set Calendar Folder: Open settings and specify your calendar definitions folder (e.g. `calendardefinitions`). If left blank, the plugin searches your entire vault root.
 ![foldersettings](images/foldersettings.webp)
 
-As you see no folder is selected. This means the plugin will revert to assuming that you want to search all folders from
-the root. Ideally you will input a specific folder like "Calendars" or similar. In our case it is "calendardefinitions"
-
+(2) Enable Sub-folder Search: Enabling "Search sub-folders" for events is recommended, as event notes are typically spread across different vault folders.
 ![calendarfolders](images/calendarfolders.webp)
 
-For our case "Search sub-folders" would not be strictly necessary but I included it anyway. Also note that "Search
-sub-folders" for event definitions makes much sense because your events probably will be spread across your vault.
-
-The next step is to tell the plugin to use a specific calendar. This is also done in the settings.
-
+(3) Add the Calendar ID: Under the Calendars section in settings, click the + button and enter your calendar ID (`my-first-calendar`). Here you can also toggle visibility and set a default color (e.g., green).
 ![settingsCalendarAdd](images/settingsCalendarAdd.webp)
 
-As you see already 4 calendars have been added. Each calendar can be set as visible or non-visible and each calendar can get a default color. The Hal calendar has a default of green.
+### Define an Event
 
-You add the calendar by choosing the "+" sign beside the Calendars heading and inputting the id of the calendar you want to add (this would be `"my-first-calendar"` in our case).
+Now, create an event note. Add YAML frontmatter to any Markdown file in your vault:
 
-Now after we have set up the calendar the next step is to create an event definition. This is done by creating a Markdown file and adding frontmatter properties.
-
-The plugin will look for files with the following frontmatter properties: `gantt-start` and `gantt-calendar`
-
-For our example we need this:
-
-```markdown
+````markdown
 ---
 gantt-calendar: my-first-calendar
 gantt-start: 1000-01-20
 ---
-```
+````
 
-This will create an event for the `my-first-calendar` calendar in the year 1000 on the 20th day of the first month.
+This creates an event on the 20th day of the first month in the year 1000 for `my-first-calendar`.
+
+### Create a chart
 
 Finally, we need to add a Gantt chart to one of our notes. As mentioned above create a new note and add a code block of the gantt-this type like this:
 
-### Option 1: Via Command / Ribbon Icon (Recommended)
+#### Option 1: Via Bases
+
+Create a new base view and set its view type to `Gantt this`.
+
+#### Option 2: Via Command / Ribbon Icon
 
 1. Click the ribbon icon or open the command palette and select: `Gantt this: Open code block creator`.
 2. The modal guides you step-by-step through the configuration:
@@ -135,7 +131,7 @@ Finally, we need to add a Gantt chart to one of our notes. As mentioned above cr
 3. At the bottom of the modal, you can copy the generated code block or insert it directly at your current cursor
    position.
 
-### Option 2: Manually in the Editor
+#### Option 3: Manually in the Editor
 
 Simply paste the following code block into any Markdown file:
 

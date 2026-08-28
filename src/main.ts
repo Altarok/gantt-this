@@ -33,7 +33,7 @@ export default class FantasyGanttPlugin extends Plugin {
     }
 
     this.registerBasesView(GanttBaseViewExampleName, {
-      name: 'Gantt chart',
+      name: 'Gantt this',
       icon: 'lucide-chart-bar-stacked',
       factory: (controller, containerEl) => {
         return new GanttThisBasesView(this, controller, containerEl)

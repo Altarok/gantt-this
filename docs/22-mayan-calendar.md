@@ -14,7 +14,7 @@ gantt-calendar-definition: mayan
 ---
 
 ```yaml
-id: mayan
+id: mayan                  # mandatory. unique ID for each calendar, referenced by events
 name: Mayan Long Count
 displayName: Mayan
 sharedOffset:

@@ -14,7 +14,7 @@ gantt-calendar-definition: gregorian
 ---
 
 ```yaml
-id: gregorian               # mandatory. unique ID of this calendar, referenced by events
+id: gregorian               # mandatory. unique ID for each calendar, referenced by events
 name: Gregorian Calendar    # optional name, used as axis description if `displayName` is not given  
 displayName: Gregorian      # optional display name for axis description
 sharedOffset: 0             # used to define offset between calendars
@@ -26,12 +26,12 @@ ruleBasedDetails:
     ruleType: "gregorian"                              # Triggers the divisible by 4, but not 100 unless 400 math - alteratives are 'interval' | 'none'
     applyToMonthIndex: 1                               # February. first month has index 0 in this case
     extraDays: 1                                       # optional. defaults to 1 anyway
-  format: ["year", "month", "day"]                     # mandatory. order of elements in date input (and possibly output)
-  outputFormat: ["day", "month", "year"]               # optional. defines order of elements in display date
+  format: ["year", "month", "day"]                     # optional. order of elements in date input (and possibly output)
+  outputFormat: ["day", "month", "year"]               # optional. defines order of elements in dates displayed on Gantt chart
   months:                                              # list of months
     - {shortname: "Jan", name: "January", days: 31}    # shortname is optional ...
     - {shortname: "Feb", name: "February", days: 28}   # name is optional ...
-    - {shortname: "Mar", name: "March", days: 31}      # days is mandatory
+    - {shortname: "Mar", name: "March", days: 31}      # days are mandatory
     - {shortname: "Apr", name: "April", days: 30}      
     - {shortname: "May", name: "May", days: 31}
     - {shortname: "Jun", name: "June", days: 30}
@@ -42,7 +42,7 @@ ruleBasedDetails:
     - {shortname: "Nov", name: "November", days: 30}
     - {shortname: "Dec", name: "December", days: 31}
 moons:                                                 # optional list of moons
-  - {offset: 18.2, cycle: 29.53059, color: "orange"}         # offset is the index of a day with a new moon, offset+-cycle are other new moons
+  - {offset: 18.2, cycle: 29.53059, color: "orange"}   # offset is the index of a day with a new moon, offset+-cycle are other new moons
 bcSuffix: 'BC'                                         # optional date suffix for dates before day 1 
 adSuffix: 'AD'                                         # optional date suffix for dates after (and including) day 1 
 ```
