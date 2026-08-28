@@ -29,7 +29,8 @@ export const Css = {
     bar: 'gt-item timespan bar',
     era: 'gt-item timespan era',
 
-    textTimespan: 'gt-item text-timespan',
+    textBar: 'gt-item text-bar',
+    textEra: 'gt-item text-era',
     textTimestamp: 'gt-item text-timestamp',
 
     // icon: 'gt-item point-icon-container',

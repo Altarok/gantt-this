@@ -3,7 +3,7 @@ title: Event Definitions
 order: 4
 ---
 
-# Event frontmatter properties
+# Event properties
 
 ![Showcase](images/showcase.png)
 
@@ -26,7 +26,7 @@ In the chart, each element above the calendar axis represents an event defined i
 
 ## Populating Your Gantt Chart / Timeline
 
-See below for more in-depth [[#Examples]].
+See below for more in-depth [[04-events#Understanding-Event-Properties|examples]].
 
 To display one or more notes as events in your timeline, add the corresponding properties to the YAML frontmatter of your Markdown file:
 
@@ -38,9 +38,9 @@ gantt-name: "My Project"   # Optional: name (fallback: filename)
 gantt-group: "Development" # Optional: group (fallback: 'general')
 ```
 
-## Examples
+# Understanding Event Properties
 
-### Calendar
+## Calendar
 
 Each event can be related to one calendar only. Assigning an event to more than one makes no sense since they could appear at different timestamps. Dates defined in the event note will be interpreted according to this calendar.
 
@@ -53,7 +53,7 @@ gantt-calendar: gregorian | (omit or leave empty for default calendar - configur
 > [!info] Default value
 > This frontmatter property is *optional*. Omit or leave empty to use default calendar, which is configurable in settings
 
-### Timespan Events
+## Timespan Events
 
 ![Timespans](images/showcase-highlighted-timespans.png)
 Any event with start- and end-date property is defined as a timespan.
@@ -69,7 +69,7 @@ gantt-end: 2026-08-30
 gantt-symbol: bar | era | (omit or leave empty to default to 'bar')
 ```
 
-### Timestamp Events
+## Timestamp Events
 
 ![Timespans](images/showcase-highlighted-timestamps.png)
 Timestamp events are defined by adding a start-date to any event. Omit the end-date or leave it empty.
@@ -88,7 +88,7 @@ gantt-symbol: point | triangle | box | diamond | pentagon
   | hexagon | octagon | star | (omit for default symbol - configurable in settings)
 ```
 
-### Groups
+## Groups
 
 All events can be grouped. Whether the group is defined in settings does not matter at this point. The events in the showcase screenshot are sorted into the groups `symbols`, `icons`, and `general` (see left side of screenshot).
 
@@ -105,7 +105,7 @@ gantt-group: any group
 > - group visibility can be toggled
 > - groups can be sorted to influence order of appearance on charts
 
-### Color
+## Color
 
 Each event can be colored. `era` events will add transparency to the chosen color. The color value can be a human-readable CSS color like for example `red`, `forestgreen`, `teal` - or a 6-digit hex value starting with `'#'`.
 
@@ -123,7 +123,7 @@ gantt-color: yellow | '#FFFF00' | (omit for default color - configurable in sett
 > - default color for calendar in property `gantt-calendar`
 > - global fallback color (always exists)
 
-### Icons
+## Icons
 
 Each event except `vertical-line` can be decorated with an SVG icon. The icons are pulled from Obsidian's cache. To add and color an icon use the following properties. Remember to rename the properties to your liking.
 
@@ -132,18 +132,18 @@ gantt-displayIcon: heart
 gantt-displayIconColor: red | (omit or leave empty for default color - configurable in settings)
 ```
 
-### Special dates
+## Special dates
 
 Right now, there is one special keyword: `today`. This will be interpreted as your local current day. Adding this to an event will obviously show it at different timestamps each day.
 
 You can add a fixed amount of days to it. To achieve this you can use the following properties:
 
 ```yaml
-gantt-start: today -20
-gantt-end: today-5
+gantt-start: 2026-08-20
+gantt-end: today+5
 ```
 
-## Frontmatter Property Overview
+# Overview
 
 The following table lists all available properties you can use in your notes:
 

@@ -122,16 +122,15 @@ function truncateText(text: string, maxWidth: number, charWidthEstimate = 7): st
  * @param width of surrounding svg
  * @param hasIcon moves text to the right if true
  * @param svgContainer
- * @param isTimeSpan true for 'era' or 'bar' events, necessary to decide which CSS magic to apply
+ * @param textCssClass necessary to decide which CSS magic to apply
  */
-function addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement, isTimeSpan: boolean): void {
+function addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement, isTimeSpan: boolean,
+                          textCssClass: string): void {
   const textSpacing = textLeftPadding + (hasIcon ? iconSize : 0)
   const availableTextWidth = width - textSpacing
 
-  const cssClass = isTimeSpan ? Css.item.textTimespan : Css.item.textTimestamp
-
   if (availableTextWidth > 0) {
-    const textSvg = createSvg('text', cssClass, {x: x + textSpacing, y})
+    const textSvg = createSvg('text', textCssClass, {x: x + textSpacing, y})
     textSvg.textContent = truncateText(text, availableTextWidth)
     svgContainer.appendChild(textSvg)
   }
@@ -154,7 +153,7 @@ function drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: 
 
   if (width > iconSize) {
     const hasIcon = addIconIfPresent(d, x1, y - iconRadius, svgContainer)
-    if (width > 2 * iconSize) addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer, true)
+    if (width > 2 * iconSize) addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer, true, Css.item.textBar)
   }
 }
 
@@ -177,7 +176,7 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
   if (width > iconSize) {
     const hasIcon = addIconIfPresent(d, x1, y, svgContainer)
     const text = `${d.name}` // `Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`
-    if (width > 2 * iconSize) addTextIfFitting(text, x1, y + iconRadius, width, hasIcon, svgContainer, true)
+    if (width > 2 * iconSize) addTextIfFitting(text, x1, y + iconRadius, width, hasIcon, svgContainer, true, Css.item.textEra)
   }
 }
 
@@ -193,7 +192,8 @@ function drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number
  * @param availableWidth calculated width from this event to the next one to the right, used for event description
  */
 function drawSmallShape(d: GanttItem,
-                        shape: 'circle' | 'polygon' | 'rect', cssClass: string,
+                        shape: 'circle' | 'polygon' | 'rect',
+                        cssClass: string,
                         attrs: Record<string, string | number>, x: number, y: number,
                         svgContainer: SVGElement,
                         availableWidth: number): void {
@@ -203,7 +203,7 @@ function drawSmallShape(d: GanttItem,
   addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer);
 
   const textX = x + iconRadius
-  addTextIfFitting(d.name, textX, y, availableWidth, false, svgContainer, false)
+  addTextIfFitting(d.name, textX, y, availableWidth, false, svgContainer, false, Css.item.textTimestamp)
 }
 
 /**

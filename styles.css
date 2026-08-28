@@ -326,7 +326,7 @@
   stroke: var(--text-muted);
   stroke-width: 1px;
   vector-effect: non-scaling-stroke; /* prevent border width scaling when zooming/panning */
-  
+
   /* shape-rendering: crispedges; !* prevent blurriness on non-integer display pixels *! */
 }
 
@@ -383,18 +383,21 @@
   user-select: none;
 }
 
-.gt-item.text-timespan {
+.gt-item.text-bar,
+.gt-item.text-era {
   font-size: 14px;
   dominant-baseline: middle;
   pointer-events: none;
   user-select: none;
 }
 
-.theme-dark .gt-item.text-timespan {
+.theme-dark .gt-item.text-bar,
+.theme-light .gt-item.text-era {
   fill: black;
 }
 
-.theme-light .gt-item.text-timespan {
+.theme-light .gt-item.text-bar,
+.theme-dark .gt-item.text-era {
   fill: white;
 }
 

@@ -33,7 +33,13 @@ function addArrowTipAsSvgDef(svgEl: SVGElement): void {
 
     const path = window.document.createElementNS(svgNS, 'path')
     path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z')
-    path.setAttribute('fill', 'var(--interactive-accent)')
+
+
+    const isDarkTheme = window.document.body.classList.contains("theme-dark")
+    if (isDarkTheme)
+      path.setAttribute('fill', 'white')
+    else
+      path.setAttribute('fill', 'black')
 
     marker.appendChild(path)
     defs.appendChild(marker)

@@ -5,6 +5,7 @@
 .idea/
 .vscode/
 coverage/
+examples/
 # Plugin files
 main.js
 data.json
