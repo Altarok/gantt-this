@@ -10,7 +10,7 @@ Obsidian plugin able to show a Gantt chart for multiple fantasy calendars.
 Welcome to the documentation for the Gantt Timeline Plugin for Obsidian.
 This plugin allows you to clearly display your notes and events in interactive timelines.
 
-![Timeline Example View](examples/img.png)
+![Timeline Example View](docs/images/showcase.png)
 
 ### Features & Structure
 
@@ -77,19 +77,19 @@ gantt-group: "Development" # Optional: Group (Fallback is 'general')
 
 The following table lists all available properties you can use in your notes:
 
-| Property                 | Type / Values                              | Optional? | Default / Fallback                                  | Description                                                               |
-|:-------------------------|:-------------------------------------------|:----------|:----------------------------------------------------|:--------------------------------------------------------------------------|
-| `gantt-item`             | Boolean                                    | No        | `true`                                              | Marks the note as an event target for the plugin.                         |
-| `gantt-start`            | String                                     | No        | *None* (Note will be ignored without a start value) | Start date or start value of the event.                                   |
-| `gantt-end`              | String                                     | Yes       | Value of `gantt-start`                              | End date of the event. If identical to start value, a point is displayed. |
-| `gantt-name`             | String                                     | Yes       | File name without extension (`file.basename`)       | Name of the event in the timeline and tooltip.                            |
-| `gantt-type`             | String                                     | Yes       | Plugin standard calendar                            | Determines the assigned calendar type.                                    |
-| `gantt-group`            | String                                     | Yes       | `'general'`                                         | Group used for row layout and structuring.                                |
-| `gantt-color`            | Color (e.g. `#ff0000`, `red`)              | Yes       | Group color → Calendar color → Default              | Overrides the background color of the event individually.                 |
-| `gantt-displayIcon`      | String ([Lucide Icon](https://lucide.dev)) | Yes       | *None*                                              | Displays an icon on the event.                                            |
-| `gantt-displayIconColor` | Color (e.g. `#ff0000`, `red`)              | Yes       | Default icon color                                  | Sets the color of the icon.                                               |
-| `gantt-symbol`           | `bar`, `point`, `icon`, `diamond`          | Yes       | `bar` (time span) or `point` (point in time)        | Sets the visual representation format of the event.                       |
-| `gantt-linkToHeader`     | String                                     | Yes       | *None* (Jumps to top of file)                       | Links directly to a specific heading when clicked.                        |
+| Property                 | Type / Values                 | Optional? | Default / Fallback                                  | Description                                                               |
+|:-------------------------|:------------------------------|:----------|:----------------------------------------------------|:--------------------------------------------------------------------------|
+| `gantt-item`             | Boolean                       | No        | `true`                                              | Marks the note as an event target for the plugin.                         |
+| `gantt-start`            | String                        | No        | *None* (Note will be ignored without a start value) | Start date or start value of the event.                                   |
+| `gantt-end`              | String                        | Yes       | Value of `gantt-start`                              | End date of the event. If identical to start value, a point is displayed. |
+| `gantt-name`             | String                        | Yes       | File name without extension (`file.basename`)       | Name of the event in the timeline and tooltip.                            |
+| `gantt-type`             | String                        | Yes       | Plugin standard calendar                            | Determines the assigned calendar type.                                    |
+| `gantt-group`            | String                        | Yes       | `'general'`                                         | Group used for row layout and structuring.                                |
+| `gantt-color`            | Color (e.g. `#ff0000`, `red`) | Yes       | Group color → Calendar color → Default              | Overrides the background color of the event individually.                 |
+| `gantt-displayIcon`      | String                        | Yes       | *None*                                              | Displays an icon on the event.                                            |
+| `gantt-displayIconColor` | Color (e.g. `#ff0000`, `red`) | Yes       | Default icon color                                  | Sets the color of the icon.                                               |
+| `gantt-symbol`           | `bar`, `point`, `icon`, ...   | Yes       | `bar` (time span) or `point` (point in time)        | Sets the visual representation format of the event.                       |
+| `gantt-linkToHeader`     | String                        | Yes       | *None* (Jumps to top of file)                       | Links directly to a specific heading when clicked.                        |
 
 ## *Custom Calendar Definitions*
 
