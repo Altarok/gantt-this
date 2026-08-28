@@ -10,6 +10,13 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 > Disclaimer: The mentioned frontmatter properties represent their default keys;
 > you may have renamed them in your vault.
 
+## [v1.2.2](https://github.com/Altarok/gantt-this/releases/tag/1.2.2), 2026-08-28
+
+- Minor CSS fixes like:
+  - Increase readability of era text
+  - Fix color of arrowhead
+- Added documentation to https://altarok.github.io/gantt-this/
+
 ## [v1.2.1](https://github.com/Altarok/gantt-this/releases/tag/1.2.1), 2026-08-26
 
 - _Timestamp events now have text descriptions._
