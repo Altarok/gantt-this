@@ -7,8 +7,7 @@ order: 90
 
 See [[91-changelog|Changelog]] for implemented features.
 
-> The following list is not exhaustive. It contains only features confirmed for implementation.
-> See below for a shorthand list of unsorted ideas.
+> The following list is not exhaustive. It contains only features confirmed for implementation. See below for a shorthand list of unsorted ideas.
 
 ## Features to come, by priority
 
@@ -19,7 +18,8 @@ See [[91-changelog|Changelog]] for implemented features.
 - Keep calendar axis visible while scrolling over the chart.
 - Keep toolbar visible while scrolling over the chart.
 - Apply the calendar's optional `outputFormat` property to tooltip dates. - CePeU
-- Change the frontmatter properties `gantt-calendar` and `gantt-group` from `text` to `list`.
+- Place events into multiple groups. - CePeU and others
+  - Change the frontmatter properties `gantt-group` from `text` to `list`.
 - Zoom:
   - Hide smallest date format elements consecutively while zooming out.
   - Focus shown dates on more natural periods.

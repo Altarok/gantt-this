@@ -28,7 +28,7 @@ Two lists display the calendars and groups currently known to the plugin. Both l
 #### Entry Properties
 
 - **ID**: A unique identifier
-  - Used by frontmatter `gantt-type`/`gantt-type-definition` for calendars.
+  - Used by frontmatter `gantt-calendar`/`gantt-calendar-definition` for calendars.
   - Used by frontmatter `gantt-group` for groups.
   - *Note: These are __NOT CASE-SENSITIVE__!*
 - **Visibility**: Toggles whether related events are shown on the chart.
@@ -70,9 +70,9 @@ These settings let you adapt the plugin to use different frontmatter keys in you
 - **Marker may be optional**: If enabled, the primary marker becomes optional (saves one property per
   file but reduces explicit control).
 - **Calendar definition**: Frontmatter key used to identify a calendar definition file. Default:
-  `gantt-type-definition`.
+  `gantt-calendar-definition`.
 - **Event calendar**: Frontmatter key that defines which calendar an event belongs to. Default:
-  `gantt-type`.
+  `gantt-calendar`.
 - **Event name**: Frontmatter key for the event name. Default: `gantt-name`.
 - **Event start date**: Frontmatter key for the event start date (mandatory). Default:
   `gantt-start`.

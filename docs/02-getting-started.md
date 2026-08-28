@@ -7,11 +7,9 @@ order: 2
 
 ## Fundamentals and first steps
 
-To help you understand what you need to do to set up a Gantt-This chart in your Obsidian note, here is an explanation of
-the fundamental workings of the Gantt-This plugin.
+To help you understand what you need to do to set up a Gantt-This chart in your Obsidian note, here is an explanation of the fundamental workings of the Gantt-This plugin.
 
-The plugin renders a Gantt chart from a codeblock as is usually done with other Obsidian plugins. To create that
-codeblock nothing more is needed than:
+The plugin renders a Gantt chart from a codeblock as is usually done with other Obsidian plugins. To create that codeblock nothing more is needed than:
 
 ````markdown
 ```gantt-this
@@ -19,15 +17,13 @@ codeblock nothing more is needed than:
 ````
 
 Of course without a calendar or events you will see exactly nothing.
-So as a first step you will need a calendar. Each calendar definition is stored in a YAML codeblock
-in a note. This calendar definition is stored in a separate note which you create in Obsidian and put into a folder of
-your choice. For future reference we will store this in the folder "calendardefinitions".
+So as a first step you will need a calendar. Each calendar definition is stored in a YAML codeblock in a note. This calendar definition is stored in a separate note which you create in Obsidian and put into a folder of your choice. For future reference we will store this in the folder "calendardefinitions".
 
 This is an example for a TTRPG calendar of one of my favorite RPGs:
 
 ````markdown
 ```yaml
-id: example # unique id for each calendar
+id: my-first-calendar # unique id for each calendar
 name: Example Calendar # a calendar name as shown in the Gantt chart
 sharedOffset: 0
 startDay: 1
@@ -75,20 +71,17 @@ moons: # optional. define multiple moons
 ```
 ````
 
-There are more options to a calendar definition and many are optional but this should give you a quick calendar you can
-start from and adjust to your needs.
+There are more options to a calendar definition and many are optional but this should give you a quick calendar you can start from and adjust to your needs.
 
-The next step is to define a front matter field for THIS note of the type:
-gantt-type-definition: example
-or whatever else you named your calendar.
+The next step is to define a front matter field for THIS note of the type: `gantt-calendar-definition: my-first-calendar` or whatever else you named your calendar.
 
-Be aware that the frontmatter value (here: example) and the calendar id in the YAML code block must match exactly.
+Be aware that the frontmatter value (`my-first-calendar`) and the calendar id in the YAML code block must match exactly.
 
 It will look like this:
 
 ```markdown
 ---
-gantt-calendar-definition: example
+gantt-calendar-definition: my-first-calendar
 ---
 ```
 
@@ -108,30 +101,26 @@ The next step is to tell the plugin to use a specific calendar. This is also don
 
 ![settingsCalendarAdd](images/settingsCalendarAdd.webp)
 
-As you see already 4 calendars have been added. Each calendar can be set as visible or non-visible and each calendar
-can get a default color. The Hal calendar has a default of green.
+As you see already 4 calendars have been added. Each calendar can be set as visible or non-visible and each calendar can get a default color. The Hal calendar has a default of green.
 
-You add the calendar by choosing the "+" sign beside the Calendars heading and inputting the id of the calendar you want
-to add (this would be "example" in our case).
+You add the calendar by choosing the "+" sign beside the Calendars heading and inputting the id of the calendar you want to add (this would be `"my-first-calendar"` in our case).
 
-Now after we have set up the calendar the next step is to create an event definition. This is done by creating a
-Markdown file and adding frontmatter properties.
+Now after we have set up the calendar the next step is to create an event definition. This is done by creating a Markdown file and adding frontmatter properties.
 
-The plugin will look for files with the following frontmatter properties: gantt-start and gantt-type
+The plugin will look for files with the following frontmatter properties: `gantt-start` and `gantt-calendar`
 
 For our example we need this:
 
 ```markdown
 ---
-gantt-calendar: example
+gantt-calendar: my-first-calendar
 gantt-start: 1000-01-20
 ---
 ```
 
-This will create an event for the `example` calendar in the year 1000 on the 20th day of the first month.
+This will create an event for the `my-first-calendar` calendar in the year 1000 on the 20th day of the first month.
 
-Finally, we need to add a Gantt chart to one of our notes. As mentioned above create a new note and add a code block of
-the gantt-this type like this:
+Finally, we need to add a Gantt chart to one of our notes. As mentioned above create a new note and add a code block of the gantt-this type like this:
 
 ### Option 1: Via Command / Ribbon Icon (Recommended)
 

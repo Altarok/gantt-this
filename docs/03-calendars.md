@@ -9,13 +9,13 @@ order: 3
 
 If you use custom time systems or fictional calendars in your vault, you can define them using a separate note:
 
-| Property                | Type / Values | Optional? | Default / Fallback | Description                                                                     |
-|:------------------------|:--------------|:----------|:-------------------|:--------------------------------------------------------------------------------|
-| `gantt-type-definition` | String        | **No**    | *None*             | Unique identifier of the calendar for referencing via `gantt-type` in an event. |
+| Property                    | Type / Values | Optional? | Default / Fallback | Description                                                                         |
+|:----------------------------|:--------------|:----------|:-------------------|:------------------------------------------------------------------------------------|
+| `gantt-calendar-definition` | String        | **No**    | *None*             | Unique identifier of the calendar for referencing via `gantt-calendar` in an event. |
 
 ## Calendar YAML Block Properties
 
-- **`id`**: (string, required) Unique identifier for the calendar. Used by events `gantt-type` to reference this
+- **`id`**: (string, required) Unique identifier for the calendar. Used by events `gantt-calendar` to reference this
   calendar.
 - **`name`**: (string, optional) Human-friendly internal name for the calendar.
 - **`displayName`**: (string, optional) Display name shown in the UI (if different from `name`).

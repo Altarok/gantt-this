@@ -126,9 +126,9 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 ## [v1.0.1](https://github.com/Altarok/gantt-this/releases/tag/1.0.1), 2026-08-14
 
 - Improved grammar in settings, removed typos.
-- "today" is now a valid date for events -> This enables you to:
-  - Mark the current day with something (e.g. `vertical-line` event)
-  - Define an event with an open end (start: x, end: `today`)
+- "today" is now a valid date for events. This enables you to:
+  - Mark the current day. (e.g. with a `vertical-line` event)
+  - Define an event with an open end. (start: x, end: `today`)
     - Gregorian only for now
 
 **Bugfix**
