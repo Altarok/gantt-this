@@ -108,11 +108,18 @@ export const GanttItemDisplayTypes = {
   isTimestamp: isGanttItemDisplayTypeTimestamp
 }
 
+export type RepeatRule = {
+  delta: number
+  startDate?: number
+  endDate?: number
+}
+
 export type ParsedDate = {
   /** Absolute offset to day 0 of the event's relative calendar. */
   days: number
   /** Human-readable display of date. May include (short) month names if given. */
   display: string
+  repeatRule?: RepeatRule
 }
 
 /** Calendar event */
@@ -135,6 +142,11 @@ export type GanttItem = {
   file: TFile
   predecessors: number[] // IDs of predecessor GanttItems
   successors: number[] // IDs of successors GanttItems
+  // stuff for repetition
+  repeatEveryDays?: number // X interval in days from your regex
+  repeatUntilDays?: number // Optional upper end bound for recurrence
+  isRecurringInstance?: boolean
+  parentEventId?: number
 }
 
 export type GanttGroup = {

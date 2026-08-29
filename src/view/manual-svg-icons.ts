@@ -1,4 +1,4 @@
-import {sanitizeHTMLToDom} from 'obsidian'
+import {addIcon, sanitizeHTMLToDom} from 'obsidian'
 //  <span class="m_8d3afb97 mantine-ActionIcon-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-zoom-reset "><path d="M21 21l-6 -6"></path><path d="M3.268 12.043a7.017 7.017 0 0 0 6.634 4.957a7.012 7.012 0 0 0 7.043 -6.131a7 7 0 0 0 -5.314 -7.672a7.021 7.021 0 0 0 -8.241 4.403"></path><path d="M3 4v4h4"></path></svg></span>
 
 const svgNS = 'http://www.w3.org/2000/svg'
@@ -46,13 +46,18 @@ function addArrowTipAsSvgDef(svgEl: SVGElement): void {
   }
 }
 
+// function addMoonIconsToObsidianCache() {
+//   addIcon('gt-new-moon', `<circle cx="12" cy="12" r="9" class="moon-unlit"/>`)
+// }
+
 export const ManualSvg = {
   resetZoom,
   newMoon: sanitizeHTMLToDom(moonPhase0), // 0/4 - New Moon (Outline circle)
   crescentHalfMoon: sanitizeHTMLToDom(moonPhase1), // 1/4 - First Quarter / Waxing (Right half filled)
   fullMoon: sanitizeHTMLToDom(moonPhase2), // 2/4 - Full Moon (Solid filled circle)
   waningHalfMoon: sanitizeHTMLToDom(moonPhase3), // 3/4 - Third Quarter / Waning (Left half filled)
-  addArrowTipAsSvgDef
+  addArrowTipAsSvgDef,
+  // addMoonIconsToObsidianCache
 }
 
 //~~~meta-bind-js-view

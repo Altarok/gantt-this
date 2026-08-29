@@ -64,9 +64,9 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
     if (!calendarId || !mappedCalendarConfigs[calendarId]?.visible) continue
 
-    const config = await getCalendarDefinition(plugin, calendarId, partialPluginSettings, codeBlockContent)
+    const calendarConfig = await getCalendarDefinition(plugin, calendarId, partialPluginSettings, codeBlockContent)
 
-    const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate ?? startDate, calendarId, config, file, frontMatter, ++incrementalId)
+    const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate, calendarId, calendarConfig, file, frontMatter, ++incrementalId)
     if (!ganttItem) continue
     items.push(ganttItem)
   }
@@ -99,10 +99,10 @@ function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfi
 
 function createItem(plugin: FantasyGanttPlugin,
                     startDate: string,
-                    endDate: string,
+                    endDate: string | undefined,
                     /** Calendar to use for event */
                     calendarId: string,
-                    config: CalendarConfig | null,
+                    calendarConfig: CalendarConfig | null,
                     file: TFile,
                     frontMatter: FrontMatterCache,
                     id: number): GanttItem | null {
@@ -111,18 +111,20 @@ function createItem(plugin: FantasyGanttPlugin,
   let endRes: ParsedDate | null = null
 
   try {
-    startRes = parseEventDate(startDate, config)
+    startRes = parseEventDate(startDate, calendarConfig)
   } catch {
     new Notice(`Failed to parse event date: ${startDate} in file ${file.name}`)
   }
 
+  if (!startRes) return null
+
   try {
-    endRes = endDate ? parseEventDate(endDate, config) : startRes
+    endRes = endDate ? parseEventDate(endDate, calendarConfig) :
+      {days: startRes.days, display: startRes.display} as ParsedDate
   } catch {
     new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
   }
 
-  if (!startRes) return null
   if (!endRes) return null
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
@@ -132,7 +134,7 @@ function createItem(plugin: FantasyGanttPlugin,
   const group = FrontMatterUtil.getEventGroup(frontMatter, plugin.settings)
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
 
-  return {
+  const item: GanttItem = {
     id,
     name: FrontMatterUtil.getEventName(frontMatter, plugin.settings) ?? file.basename,
     startDateDisplay: startRes.display,
@@ -149,8 +151,18 @@ function createItem(plugin: FantasyGanttPlugin,
     frontMatter,
     file,
     predecessors: [],
-    successors: []
-  } // as GanttItem
+    successors: [],
+  }
+
+  // stuff for repetition:
+  if (startRes.repeatRule) {
+    item.repeatEveryDays = startRes.repeatRule.delta
+    // repeatUntilDays: undefined, // Optional upper end bound for recurrence
+    // isRecurringInstance: undefined,
+    // parentEventId: undefined,
+  }
+
+  return item
 }
 
 

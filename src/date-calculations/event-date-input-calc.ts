@@ -1,6 +1,7 @@
-import {CalendarConfig, ParsedDate, RuleBasedDetails} from '../const/types'
+import {CalendarConfig, ParsedDate, RepeatRule, RuleBasedDetails} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
 import {Dates} from '../util/dates'
+import {createRepeatRule} from '../util/repetition-interpreter'
 
 
 /**
@@ -9,6 +10,15 @@ import {Dates} from '../util/dates'
 export function parseEventDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {
 
   if (!input || !config) return null
+
+  let repeatRule: RepeatRule | undefined = undefined
+
+  if (input.contains(' repeat ')){
+    const parts = input.split(' repeat ')
+    input = parts[0] ?? ''
+    const suffix = parts[1] ?? ''
+    repeatRule = createRepeatRule(suffix.trim())
+  }
 
   let cleanInput: string // e.g. 2026-08-13
   if (input.startsWith(Dates.TODAY)) {
@@ -19,13 +29,13 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
 
   let result: ParsedDate | null = null
 
-
   if (config.type === 'positional') {
     result = parseEventDateWithPositionalConfig(cleanInput, config)
   } else if (config.type === 'rule-based') {
     result = parseEventDateWithRuleBasedConfig(cleanInput, config)
   }
 
+  if (result) result.repeatRule = repeatRule
 
   return result
 }

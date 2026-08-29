@@ -91,6 +91,9 @@ export class GanttRenderEngine {
   initLayout() {
     let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
 
+    // TODO experimental recurrng event test
+    activeData = this.expandRecurringEvents(activeData)
+
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
@@ -275,7 +278,6 @@ export class GanttRenderEngine {
 
       const laneItemsMap: Map<number, GanttItem[]> = this.mapLaneItems(group, width)
 
-
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
         const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
@@ -294,6 +296,12 @@ export class GanttRenderEngine {
         const nextX = nextItem ? this.getXPosition(nextItem.startDays, width) : renderWidth
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
 
+        // TODO add CSS for events duplicates
+        // // Inside renderData() loop:
+        // if (d.isRecurringInstance) {
+        //   // Option A: Target via CSS selector in your stylesheet using class gt-recurring-instance
+        //   // Option B: Render opacity dynamically if needed
+        // }
 
         if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
           case 'bar':
@@ -759,6 +767,46 @@ export class GanttRenderEngine {
   findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
     const selector = `[data-id="${id}"]`
     return this.dataG.querySelector<T>(selector)
+  }
+
+  // TODO experimental recurrng event test
+  private expandRecurringEvents(items: GanttItem[]): GanttItem[] {
+    const expanded: GanttItem[] = []
+
+    for (const item of items) {
+      expanded.push(item) // Always include the base event
+
+      if (!item.repeatEveryDays || item.repeatEveryDays <= 0) {
+        continue
+      }
+
+      const interval = item.repeatEveryDays
+      const duration = item.endDays ? (item.endDays - item.startDays) : 0
+
+      // Determine bounds for repetition
+      const maxLimit = item.repeatUntilDays
+        ? Math.min(this.maxDays, item.repeatUntilDays)
+        : this.maxDays
+
+      let currentStart = item.startDays + interval
+
+      while (currentStart <= maxLimit) {
+        // Only create instances within render range (or slightly padded)
+        if (currentStart >= this.minDays - interval) {
+          expanded.push({
+            ...item,
+            id: item.id, // Keep base ID if elements highlight together, or generate synthetic unique IDs
+            startDays: currentStart,
+            endDays: item.endDays ? currentStart + duration : currentStart,
+            isRecurringInstance: true,
+            parentEventId: item.id
+          })
+        }
+        currentStart += interval
+      }
+    }
+
+    return expanded
   }
 
 }

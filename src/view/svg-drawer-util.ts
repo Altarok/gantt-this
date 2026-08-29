@@ -200,7 +200,7 @@ function drawSmallShape(d: GanttItem,
   const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
   if (d.color) el.setAttribute('fill', d.color)
   svgContainer.appendChild(el)
-  addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer);
+  addIconIfPresent(d, x - iconRadius, y - iconRadius, svgContainer)
 
   const textX = x + iconRadius
   addTextIfFitting(d.name, textX, y, availableWidth, false, svgContainer, false, Css.item.textTimestamp)
@@ -322,7 +322,12 @@ const moonSvgs: Record<number, DocumentFragment> = {
   2: ManualSvg.fullMoon,
   3: ManualSvg.waningHalfMoon
 }
-
+// const moonIcons: Record<number, string> = {
+//   0: 'gt-new-moon',
+//   // 1: ManualSvg.crescentHalfMoon,
+//   // 2: ManualSvg.fullMoon,
+//   // 3: ManualSvg.waningHalfMoon
+// }
 /**
  * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
  *
@@ -349,7 +354,6 @@ export function drawMoonPhase(cx: number,
   const x = cx - halfSize
   const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
   const y = cy - halfSize + yOffset
-
 
   const g = createSvg('svg', 'moon-phase-icon', {
     width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y

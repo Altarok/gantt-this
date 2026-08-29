@@ -15,7 +15,7 @@ export class TooltipManager implements HoverParent {
   private readonly searchForRelatedEventsOnHover: boolean
   private readonly isDrawArrows: boolean
 
-  hoverPopover: HoverPopover | null = null;
+  hoverPopover: HoverPopover | null = null
   private verticalGuides: VerticalOverlay[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private highlightElements: SVGElement[] = []
@@ -135,7 +135,7 @@ export class TooltipManager implements HoverParent {
   }
 
   private createFallbackTooltipContent(d: GanttItem): string {
-    return d.displayType === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay;
+    return d.displayType === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {

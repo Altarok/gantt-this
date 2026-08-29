@@ -4,7 +4,7 @@ import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {Consts} from '../const/constants'
-import {GregorianCalendar} from "../const/fallback-calendar";
+import {GregorianCalendar} from '../const/fallback-calendar'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
