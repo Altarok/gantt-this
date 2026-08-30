@@ -1,5 +1,5 @@
 import {GanttItem, RepeatRule} from '../const/types'
-import {GanttRenderEngine} from "../view/svg-drawer";
+import {GanttRenderEngine} from '../view/svg-drawer'
 
 // export type RepeatRule = {
 //   delta: number

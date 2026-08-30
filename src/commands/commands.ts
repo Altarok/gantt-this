@@ -30,6 +30,7 @@ function addCommandEventFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) 
         frontMatterProperty_event_successors: successors,
         fallbackColor,
         defaultCalendar,
+        defaultGroup,
         fallbackColorForIcons
       } = plugin.settings
 
@@ -38,7 +39,7 @@ function addCommandEventFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) 
         frontMatter[lower_date] = frontMatter[lower_date] ?? ''
         frontMatter[upper_date] = frontMatter[upper_date] ?? ''
         frontMatter[event_name] = frontMatter[event_name] ?? file.basename
-        frontMatter[event_group] = frontMatter[event_group] ?? 'general'
+        frontMatter[event_group] = frontMatter[event_group] ?? defaultGroup
         frontMatter[event_color] = frontMatter[event_color] ?? fallbackColor
         frontMatter[event_symbol] = frontMatter[event_symbol] ?? 'point|triangle|box|diamond|pentagon|star|hexagon|octagon -or- era|bar for timespans'
         frontMatter[calendar] = frontMatter[calendar] ?? defaultCalendar

@@ -16,7 +16,7 @@ import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
 import {ManualSvg} from './manual-svg-icons'
 import {drawMoons} from './moon-drawer'
-import {Recurring} from "../util/recurring-events";
+import {Recurring} from '../util/recurring-events'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -80,19 +80,40 @@ export class GanttRenderEngine {
     this.handleResize()
   }
 
-  updateSvgDrawerData() {
+  private updateSvgDrawerData() {
     return {
       mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, g])),
       mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map(c => [c.id, c])),
-      drawnGroups: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, {y1: 0, y2: 0}])),
+      // drawnGroups: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, {y1: 0, y2: 0}])),
       drawnCals: Object.fromEntries(this.plugin.settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
     }
+  }
+
+  private calculateGlobalBounds() {
+    if (this.rawData.length === 0) {
+      const todayDays = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+      this.minDays = todayDays - 15
+      this.maxDays = todayDays + 15
+      return
+    }
+
+    const startValues = this.rawData.map(d => d.startDays)
+    const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
+
+    const lowerBound = Math.min(...startValues)
+    const upperBound = Math.max(...endValues)
+    const diff = upperBound - lowerBound
+
+    const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
+
+    this.minDays = lowerBound - paddingDays
+    this.maxDays = upperBound + paddingDays
   }
 
   initLayout() {
     let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
 
-    activeData =Recurring  .expandRecurringEvents(this, activeData)
+    activeData = Recurring.expandRecurringEvents(this, activeData)
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
@@ -109,7 +130,7 @@ export class GanttRenderEngine {
         groupedMap.set(name, [])
       }
       activeData.forEach(item => {
-        const gName = item.group || 'general'
+        const gName = item.group || this.plugin.settings.defaultGroup
         if (!groupedMap.has(gName)) groupedMap.set(gName, [])
         groupedMap.get(gName)?.push(item)
       })
@@ -256,7 +277,6 @@ export class GanttRenderEngine {
     })
     return laneItemsMap
   }
-
 
   renderData(width: number) {
     this.dataG.empty()
@@ -584,27 +604,6 @@ export class GanttRenderEngine {
     this.eventManager?.destroy()
   }
 
-  private calculateGlobalBounds() {
-    if (this.rawData.length === 0) {
-      const todayDays = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
-      this.minDays = todayDays - 15
-      this.maxDays = todayDays + 15
-      return
-    }
-
-    const startValues = this.rawData.map(d => d.startDays)
-    const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
-
-    const lowerBound = Math.min(...startValues)
-    const upperBound = Math.max(...endValues)
-    const diff = upperBound - lowerBound
-
-    const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
-
-    this.minDays = lowerBound - paddingDays
-    this.maxDays = upperBound + paddingDays
-  }
-
   private transitionToPredefinedBounds(width: number): void {
 
     const lower = this.codeBlockContent.lowerBoundDateParsed?.days
@@ -661,7 +660,6 @@ export class GanttRenderEngine {
       .sort((a, b) => a.startDays - b.startDays)
 
     // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
-
 
     const lanes: GanttItem[][] = []
     nonEras.forEach(item => {

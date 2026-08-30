@@ -157,10 +157,17 @@ export type GanttGroup = {
   lanes: number
 }
 
+/**
+ * Global setting for calendars and groups.
+ */
 export type GroupOrCalendarSettings = {
+  /** Unique identifier, case-sensitive */
   id: string
+  /** Visibility toggle */
   visible: boolean
+  /** Default color */
   color?: string
+  /** Index in array, used for priority */
   priority?: number
 }
 
@@ -345,7 +352,7 @@ export type GroupOrCalendarDrawerData = {
 export type SvgDrawerData = {
   mappedGrpConfigs: Record<string, GroupOrCalendarSettings>
   mappedCalConfigs: Record<string, GroupOrCalendarSettings>
-  drawnGroups: Record<string, GroupOrCalendarDrawerData>
+  // drawnGroups: Record<string, GroupOrCalendarDrawerData>
   drawnCals: Record<string, GroupOrCalendarDrawerData>
 }
 

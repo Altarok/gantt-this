@@ -1,6 +1,6 @@
-import {Platform} from "obsidian"
+import {Platform} from 'obsidian'
 import {GanttRenderEngine} from '../view/svg-drawer'
-import {GanttMobileEventManager} from "./event-manager-mobile"
+import {GanttMobileEventManager} from './event-manager-mobile'
 import {GanttDesktopEventManager} from './event-manager-desktop'
 import {PluginSettings} from '../const/types'
 
