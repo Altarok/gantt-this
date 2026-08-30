@@ -1,7 +1,7 @@
 import {CalendarConfig, ParsedDate, RepeatRule, RuleBasedDetails} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
 import {Dates} from '../util/dates'
-import {createRepeatRule} from '../util/repetition-interpreter'
+import {Recurring} from '../util/recurring-events'
 
 
 /**
@@ -17,7 +17,7 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
     const parts = input.split(' repeat ')
     input = parts[0] ?? ''
     const suffix = parts[1] ?? ''
-    repeatRule = createRepeatRule(suffix.trim())
+    repeatRule = Recurring.createRepeatRule(suffix.trim())
   }
 
   let cleanInput: string // e.g. 2026-08-13

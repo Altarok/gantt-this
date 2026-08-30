@@ -16,6 +16,7 @@ import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
 import {ManualSvg} from './manual-svg-icons'
 import {drawMoons} from './moon-drawer'
+import {Recurring} from "../util/recurring-events";
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -46,8 +47,8 @@ export class GanttRenderEngine {
   }
 
   /* Bounds tracked in raw day counts */
-  private minDays = 0
-  private maxDays = 0
+  minDays = 0
+  maxDays = 0
   zoomScale = 1
   zoomTranslateX = 0
   /** Day diff between 2 axis ticks. Must be positive. */
@@ -91,8 +92,7 @@ export class GanttRenderEngine {
   initLayout() {
     let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
 
-    // TODO experimental recurrng event test
-    activeData = this.expandRecurringEvents(activeData)
+    activeData =Recurring  .expandRecurringEvents(this, activeData)
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
@@ -703,46 +703,6 @@ export class GanttRenderEngine {
   findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
     const selector = `[data-id="${id}"]`
     return this.dataG.querySelector<T>(selector)
-  }
-
-  // TODO experimental recurrng event test
-  private expandRecurringEvents(items: GanttItem[]): GanttItem[] {
-    const expanded: GanttItem[] = []
-
-    for (const item of items) {
-      expanded.push(item) // Always include the base event
-
-      if (!item.repeatEveryDays || item.repeatEveryDays <= 0) {
-        continue
-      }
-
-      const interval = item.repeatEveryDays
-      const duration = item.endDays ? (item.endDays - item.startDays) : 0
-
-      // Determine bounds for repetition
-      const maxLimit = item.repeatUntilDays
-        ? Math.min(this.maxDays, item.repeatUntilDays)
-        : this.maxDays
-
-      let currentStart = item.startDays + interval
-
-      while (currentStart <= maxLimit) {
-        // Only create instances within render range (or slightly padded)
-        if (currentStart >= this.minDays - interval) {
-          expanded.push({
-            ...item,
-            id: item.id, // Keep base ID if elements highlight together, or generate synthetic unique IDs
-            startDays: currentStart,
-            endDays: item.endDays ? currentStart + duration : currentStart,
-            isRecurringInstance: true,
-            parentEventId: item.id
-          })
-        }
-        currentStart += interval
-      }
-    }
-
-    return expanded
   }
 
 }
