@@ -418,7 +418,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         ]
       },
 
-      // { // TODO wip
+      // { // TODO #zoom-entire-svg-canvas
       //   name: 'Enable visual canvas zoom',
       //   desc: 'Scale the entire chart visually instead of adjusting the timeline date range.',
       //   control: {
@@ -429,7 +429,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       // },
 
       /*
-       * TODO activate once users are satisfied
+       * TODO #hide-setting-groups
        */
       // {
       // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,
@@ -631,7 +631,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
 
       /*
-       * TODO activate once users are satisfied
+       * TODO #hide-setting-groups
        */
       // {
       // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,

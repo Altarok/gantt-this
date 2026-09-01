@@ -92,7 +92,7 @@ function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: Co
 function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
 
   if (typeof date === 'string')
-    return parseEventDate(date, calendarConfig) ?? undefined
+    return parseEventDate(false,false /* not important in this case */, date, calendarConfig) ?? undefined
   else
     return {days: date, display: createAxisDateDescription(date, calendarConfig)}
 }
@@ -111,7 +111,7 @@ function createItem(plugin: FantasyGanttPlugin,
   let endRes: ParsedDate | null = null
 
   try {
-    startRes = parseEventDate(startDate, calendarConfig)
+    startRes = parseEventDate(true, true, startDate, calendarConfig)
   } catch {
     new Notice(`Failed to parse event date: ${startDate} in file ${file.name}`)
   }
@@ -119,7 +119,7 @@ function createItem(plugin: FantasyGanttPlugin,
   if (!startRes) return null
 
   try {
-    endRes = endDate ? parseEventDate(endDate, calendarConfig) :
+    endRes = endDate ? parseEventDate(true, false, endDate, calendarConfig) :
       {days: startRes.days, display: startRes.display} as ParsedDate
   } catch {
     new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
@@ -155,11 +155,10 @@ function createItem(plugin: FantasyGanttPlugin,
   }
 
   // stuff for repetition:
-  if (startRes.repeatRule) {
-    item.repeatEveryDays = startRes.repeatRule.delta
-    // repeatUntilDays: undefined, // Optional upper end bound for recurrence
-    // isRecurringInstance: undefined,
-    // parentEventId: undefined,
+  if (endDate && endRes.repeatRule) {
+    item.repeatRule = endRes.repeatRule
+  } else if (startRes.repeatRule) {
+    item.repeatRule = startRes.repeatRule
   }
 
   return item

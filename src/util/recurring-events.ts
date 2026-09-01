@@ -1,5 +1,6 @@
-import {GanttItem, RepeatRule} from '../const/types'
+import {CalendarConfig, GanttItem, RepeatRule} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
+import {createParsedDate} from "../date-calculations/event-date-input-calc";
 
 // export type RepeatRule = {
 //   delta: number
@@ -15,21 +16,63 @@ export const Recurring = {
 /**
  * Interpret input-date suffix to make its event repeat itself.
  *
- * @param input suffix of a date, what came after `' repeat '`
+ * @param isStartDate - decide which suffixes to check
+ * @param input - suffix of a date, what came after `' repeat '`
+ * @param calendarConfig
  */
-function createRepeatRule(input: string): RepeatRule | undefined {
+function createRepeatRule(isStartDate: boolean,
+                          input: string,
+                          calendarConfig?: CalendarConfig): RepeatRule | undefined {
 
-  let repeatRule: RepeatRule | undefined = undefined
+  const isEndDate = !isStartDate
 
-  if (/^every \d+ days$/.test(input)) {
-    const value = input.replace(/every|days| /g, '')
-    repeatRule = {delta: Number(value)}
+  let delta: number | undefined = undefined
+  let startDate = -Infinity
+  let endDate = +Infinity
+
+  if (isStartDate && /^(after|every) [1-9]\d* days/.test(input)) {
+    delta = Number(input.replace(/^(after|every) (\d+) days.*/g, '$2'))
+  } else if (isEndDate && /^after \d+ days/.test(input)) {
+    delta = Number(input.replace(/^after (\d+) days.*/g, '$1'))
   }
 
-  if (repeatRule)
-    console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
-  else
+  if (!delta) {
     console.info(`input(${input}) --> repeatRule: undefined`)
+    return undefined
+  }
+
+  if (calendarConfig) {
+
+    if (/starting from \[[^\]]+]( |$)/.test(input)) {
+      const startMatch = input.match(/starting from \[([^\]]+)]/)
+      if (startMatch) {
+        const parsedDate = createParsedDate(startMatch[1]!.trim(), calendarConfig)
+        if (parsedDate) startDate = parsedDate.days
+      }
+
+      // const startDateRaw = input.replace(/.*starting from \[([^\]]+)].*?/g, '$1').trim()
+      // const parsedDate = createParsedDate(startDateRaw, calendarConfig)
+      // if (parsedDate) startDate = parsedDate.days
+    }
+
+    if (/ending on \[[^\]]+]( |$)/.test(input)) {
+      const endMatch = input.match(/ending on \[([^\]]+)]/)
+      if (endMatch) {
+        const parsedDate = createParsedDate(endMatch[1]!.trim(), calendarConfig)
+        if (parsedDate) endDate = parsedDate.days
+      }
+
+
+      // const endDateRaw = input.replace(/.*ending on \[([^\]]+)].*/g, '$1').trim()
+      // const parsedDate = createParsedDate(endDateRaw, calendarConfig)
+      // if (parsedDate) endDate = parsedDate.days
+    }
+
+  }
+
+  const repeatRule: RepeatRule = {delta, startDate, endDate}
+
+  console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
 
   return repeatRule
 }
@@ -47,14 +90,15 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
   for (const item of items) {
     expanded.push(item) // Always include the base event
 
-    if (!item.repeatEveryDays || item.repeatEveryDays <= 0) continue
+    debugger
 
+    if (!item.repeatRule) continue
 
-    const interval = item.repeatEveryDays
+    const interval = item.repeatRule.delta
     const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
     // Determine bounds for repetition
-    const maxLimit = item.repeatUntilDays ? Math.min(engine.maxDays, item.repeatUntilDays) : engine.maxDays
+    const maxLimit = interval ? Math.min(engine.maxDays, interval) : engine.maxDays
 
     let currentStart = item.startDays + interval
 

@@ -3,21 +3,23 @@ import {isCustomLeapYear} from './leap-year-calc'
 import {Dates} from '../util/dates'
 import {Recurring} from '../util/recurring-events'
 
-
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
  */
-export function parseEventDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {
+export function parseEventDate(doCheckForRepetitions: boolean,
+                               isStartDate: boolean,
+                               input?: string,
+                               config?: CalendarConfig | null): ParsedDate | null {
 
   if (!input || !config) return null
 
   let repeatRule: RepeatRule | undefined = undefined
 
-  if (input.contains(' repeat ')){
+  if (doCheckForRepetitions && input.contains(' repeat ')) {
     const parts = input.split(' repeat ')
     input = parts[0] ?? ''
     const suffix = parts[1] ?? ''
-    repeatRule = Recurring.createRepeatRule(suffix.trim())
+    repeatRule = Recurring.createRepeatRule(isStartDate, suffix.trim(), config)
   }
 
   let cleanInput: string // e.g. 2026-08-13
@@ -27,18 +29,19 @@ export function parseEventDate(input?: string, config?: CalendarConfig | null): 
     cleanInput = input.toString().trim()
   }
 
-  let result: ParsedDate | null = null
+  const parsedDate = createParsedDate(cleanInput, config)
 
-  if (config.type === 'positional') {
-    result = parseEventDateWithPositionalConfig(cleanInput, config)
-  } else if (config.type === 'rule-based') {
-    result = parseEventDateWithRuleBasedConfig(cleanInput, config)
-  }
+  if (parsedDate) parsedDate.repeatRule = repeatRule
 
-  if (result) result.repeatRule = repeatRule
-
-  return result
+  return parsedDate
 }
+
+export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
+  if (config.type === 'positional') return parseEventDateWithPositionalConfig(cleanInput, config)
+  else if (config.type === 'rule-based') return parseEventDateWithRuleBasedConfig(cleanInput, config)
+  else return null
+}
+
 
 /** Parse _positional_ event date. */
 function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: CalendarConfig): ParsedDate | null {

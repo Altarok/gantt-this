@@ -111,8 +111,8 @@ export const GanttItemDisplayTypes = {
 
 export type RepeatRule = {
   delta: number
-  startDate?: number
-  endDate?: number
+  startDate: number
+  endDate: number
 }
 
 export type ParsedDate = {
@@ -143,9 +143,11 @@ export type GanttItem = {
   file: TFile
   predecessors: number[] // IDs of predecessor GanttItems
   successors: number[] // IDs of successors GanttItems
-  // stuff for repetition
-  repeatEveryDays?: number // X interval in days from your regex
-  repeatUntilDays?: number // Optional upper end bound for recurrence
+
+  // stuff for repetition:
+  repeatRule?: RepeatRule
+  // repeatEveryDays?: number // X interval in days from your regex
+  // repeatUntilDays?: number // Optional upper end bound for recurrence
   isRecurringInstance?: boolean
   parentEventId?: number
 }

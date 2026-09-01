@@ -100,7 +100,7 @@ export class TooltipManager implements HoverParent {
 
     const g = tooltip.createDiv({cls: 'gt-tooltip'})
 
-    g.createDiv({text: d.name + this.getTooltipTitleSuffix(d), cls: 'gt-tooltip-title'})
+    g.createDiv({text: (d.name || d.file.basename) + this.getTooltipTitleSuffix(d), cls: 'gt-tooltip-title'})
     const table = g.createEl('table', {cls: 'gt-tooltip-table'})
     g.createDiv({text: 'Click to open in new tab', cls: 'gt-tooltip-link'})
 

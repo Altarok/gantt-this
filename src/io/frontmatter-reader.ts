@@ -33,9 +33,6 @@ function getEventColor(frontMatter: FrontMatterCache, settings: PluginSettings):
  * Default key: 'gantt-group'
  */
 function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  /*
-   * TODO remove default group -> check handling of missing group everywhere!!
-   */
   return (frontMatter[settings.frontMatterProperty_event_group] as string ?? NO_GROUP).trim()
 }
 
@@ -43,8 +40,7 @@ function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings):
  * Default key: 'gantt-name'
  */
 function getEventName(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  const key = settings.frontMatterProperty_event_name
-  return frontMatter[key] as string ?? undefined
+  return frontMatter[settings.frontMatterProperty_event_name] as string ?? undefined
 }
 
 /*
@@ -76,9 +72,6 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
   }
 }
 
-/*
- * TODO add fallback file.basename for daily notes
- */
 function getStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
   return frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
 }
