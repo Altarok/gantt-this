@@ -135,7 +135,7 @@ function createItem(plugin: FantasyGanttPlugin,
   const color = getItemColor(frontMatter, plugin.settings, group, calendarId)
 
   const item: GanttItem = {
-    id,
+    id: id,
     name: FrontMatterUtil.getEventName(frontMatter, plugin.settings) ?? file.basename,
     startDateDisplay: startRes.display,
     endDateDisplay: endRes.display,

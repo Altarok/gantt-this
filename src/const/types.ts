@@ -1,5 +1,6 @@
 import {FrontMatterCache, TFile} from 'obsidian'
 
+export const NO_GROUP = ''
 export const CALENDAR_CONFIG_TYPES = [
   'positional',
   'rule-based',

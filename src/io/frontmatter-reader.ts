@@ -1,5 +1,5 @@
 import {FrontMatterCache} from 'obsidian'
-import {GanttItem, GanttItemDisplayType, GanttItemDisplayTypes, PluginSettings} from '../const/types'
+import {GanttItem, GanttItemDisplayType, GanttItemDisplayTypes, NO_GROUP, PluginSettings} from '../const/types'
 
 /*
  * Default key: 'gantt-type-definition'
@@ -19,7 +19,7 @@ function isFileMarkedAsEvent(frontMatter: FrontMatterCache, settings: PluginSett
  * Default key: 'gantt-type'
  */
 function getEventCalendarName(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  return (frontMatter[settings.frontMatterProperty_event_calendar] as string ?? settings.defaultCalendar).trim() // .toLowerCase()
+  return (frontMatter[settings.frontMatterProperty_event_calendar] as string ?? settings.defaultCalendar).trim()
 }
 
 /*
@@ -34,9 +34,9 @@ function getEventColor(frontMatter: FrontMatterCache, settings: PluginSettings):
  */
 function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings): string {
   /*
-  TODO remove default group -> check handling of missing group everywhere!!
+   * TODO remove default group -> check handling of missing group everywhere!!
    */
-  return (frontMatter[settings.frontMatterProperty_event_group] as string ?? '').trim() // .toLowerCase()
+  return (frontMatter[settings.frontMatterProperty_event_group] as string ?? NO_GROUP).trim()
 }
 
 /*

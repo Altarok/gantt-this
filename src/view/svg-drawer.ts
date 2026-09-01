@@ -6,7 +6,7 @@ import {
   GanttGroup,
   GanttItem,
   GanttItemDisplayType,
-  GanttItemDisplayTypes,
+  GanttItemDisplayTypes, NO_GROUP,
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
@@ -118,7 +118,7 @@ export class GanttRenderEngine {
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
-    const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group)))
+    const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group || 'general')))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
     this.groups = []
@@ -327,9 +327,9 @@ export class GanttRenderEngine {
           case 'bar':
             return Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
           case 'era': {
-            const isInGeneralGroup = d.group === 'general'
-            const y: number = isInGeneralGroup ? firstYValue : group.yOffset
-            const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+            const isNotInAGroup = d.group === NO_GROUP
+            const y: number = isNotInAGroup ? firstYValue : group.yOffset
+            const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
             return Util.drawEra(d, x1, x2, y, height, eraLayer)
           }
 
@@ -339,9 +339,9 @@ export class GanttRenderEngine {
           case 'box':
             return Util.drawBox(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
           case 'vertical-line': {
-            const isInGeneralGroup = d.group === 'general'
-            const y: number = isInGeneralGroup ? firstYValue : group.yOffset
-            const height: number = isInGeneralGroup ? totalChartHeight : totalGroupHeight
+            const isNotInAGroup = d.group === NO_GROUP
+            const y: number = isNotInAGroup ? firstYValue : group.yOffset
+            const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
             return Util.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
           }
           case 'diamond':
