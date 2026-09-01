@@ -154,6 +154,8 @@ function createItem(plugin: FantasyGanttPlugin,
     successors: [],
   }
 
+  debugger
+
   // stuff for repetition:
   if (endDate && endRes.repeatRule) {
     item.repeatRule = endRes.repeatRule

@@ -98,7 +98,7 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
     const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
     // Determine bounds for repetition
-    const maxLimit = interval ? Math.min(engine.maxDays, interval) : engine.maxDays
+    const maxLimit = item.repeatRule.endDate ? Math.min(engine.maxDays, item.repeatRule.endDate) : engine.maxDays
 
     let currentStart = item.startDays + interval
 
