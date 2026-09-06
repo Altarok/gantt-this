@@ -44,7 +44,7 @@ function createRepeatRule(isStartDate: boolean,
   if (calendarConfig) {
 
     if (/starting from \[[^\]]+]( |$)/.test(input)) {
-      const startMatch = input.match(/starting from \[([^\]]+)]/)
+      const startMatch = /starting from \[([^\]]+)]/.exec(input)
       if (startMatch) {
         const parsedDate = createParsedDate(startMatch[1]!.trim(), calendarConfig)
         if (parsedDate) startDate = parsedDate.days
