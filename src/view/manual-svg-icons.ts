@@ -48,8 +48,8 @@ const scatterChartCrossed =`
   <circle cx="18.5" cy="13" r="0.5" fill="currentColor" />
   <circle cx="6" cy="11" r="0.5" fill="currentColor" />
   <circle cx="9" cy="4" r="0.5" fill="currentColor" />
-  <path d="m.5 23.5 23-23" stroke="#ff0008"/>
-  <path d="m.5.5 23 23" stroke="#ff0008"/>
+  <path d="m.5 23.5 23-23" />
+  <path d="m.5.5 23 23" />
 </svg>
 `
 const barChartCrossed =`
@@ -68,8 +68,8 @@ const barChartCrossed =`
   <path d="M3 3v16a2 2 0 002 2h16" />
   <rect x="7" y="13" width="9" height="4" rx="1" />
   <rect x="7" y="5" width="12" height="4" rx="1" />
-  <path d="m.5 23.5 23-23" stroke="#ff0008"/>
-  <path d="m.5.5 23 23" stroke="#ff0008"/>
+  <path d="m.5 23.5 23-23" />
+  <path d="m.5.5 23 23" />
 </svg>
 `
 const groupCrossed = `
@@ -81,8 +81,8 @@ const groupCrossed = `
     <path d="M7 21H5c-1.1 0-2-.9-2-2v-2" />
     <rect width="7" height="5" x="7" y="7" rx="1" />
     <rect width="7" height="5" x="10" y="12" rx="1" />
-    <path d="m.5 23.5 23-23" stroke="#ff0008"/>
-    <path d="m.5.5 23 23" stroke="#ff0008"/>
+    <path d="m.5 23.5 23-23" />
+    <path d="m.5.5 23 23" />
 </svg>
 `
 
