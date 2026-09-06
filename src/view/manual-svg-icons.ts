@@ -9,6 +9,83 @@ const resetZoom = `
 <line x1="21" x2="16.65" y1="21" y2="16.65"/>
 </svg>
 `
+const scatterChart =`
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="100"
+  height="100"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+  <circle cx="11.5" cy="17.5" r="0.5" fill="currentColor" />
+  <circle cx="13" cy="6.5" r="0.5" fill="currentColor" />
+  <circle cx="18.5" cy="13" r="0.5" fill="currentColor" />
+  <circle cx="6" cy="11" r="0.5" fill="currentColor" />
+  <circle cx="9" cy="4" r="0.5" fill="currentColor" />
+</svg>
+`
+const scatterChartCrossed =`
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="100"
+  height="100"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  
+  <path d="M3 3v16a2 2 0 002 2h16" />
+  <circle cx="11.5" cy="17.5" r="0.5" fill="currentColor" />
+  <circle cx="13" cy="6.5" r="0.5" fill="currentColor" />
+  <circle cx="18.5" cy="13" r="0.5" fill="currentColor" />
+  <circle cx="6" cy="11" r="0.5" fill="currentColor" />
+  <circle cx="9" cy="4" r="0.5" fill="currentColor" />
+  <path d="m.5 23.5 23-23" stroke="#ff0008"/>
+  <path d="m.5.5 23 23" stroke="#ff0008"/>
+</svg>
+`
+const barChartCrossed =`
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="100"
+  height="100"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+
+  <path d="M3 3v16a2 2 0 002 2h16" />
+  <rect x="7" y="13" width="9" height="4" rx="1" />
+  <rect x="7" y="5" width="12" height="4" rx="1" />
+  <path d="m.5 23.5 23-23" stroke="#ff0008"/>
+  <path d="m.5.5 23 23" stroke="#ff0008"/>
+</svg>
+`
+const groupCrossed = `
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-group">
+    <path d="M3 7V5c0-1.1.9-2 2-2h2" />
+    <path d="M17 3h2c1.1 0 2 .9 2 2v2" />
+    <path d="M21 17v2c0 1.1-.9 2-2 2h-2" />
+    <path d="M7 21H5c-1.1 0-2-.9-2-2v-2" />
+    <rect width="7" height="5" x="7" y="7" rx="1" />
+    <rect width="7" height="5" x="10" y="12" rx="1" />
+    <path d="m.5 23.5 23-23" stroke="#ff0008"/>
+    <path d="m.5.5 23 23" stroke="#ff0008"/>
+</svg>
+`
+
 const moonPhase0 = `<svg xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" class="moon-unlit"/></svg>`
 const moonPhase1 = `<svg xmlns="http://www.w3.org/2000/svg"><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/></svg>`
 const moonPhase2 = `<svg xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" class="moon-fill"/></svg>`
@@ -51,6 +128,10 @@ function addArrowTipAsSvgDef(svgEl: SVGElement): void {
 // }
 
 export const ManualSvg = {
+  groupCrossed,
+  barChartCrossed,
+  scatterChart,
+  scatterChartCrossed,
   resetZoom,
   newMoon: sanitizeHTMLToDom(moonPhase0), // 0/4 - New Moon (Outline circle)
   crescentHalfMoon: sanitizeHTMLToDom(moonPhase1), // 1/4 - First Quarter / Waxing (Right half filled)
