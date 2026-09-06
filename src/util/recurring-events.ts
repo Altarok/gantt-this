@@ -72,7 +72,7 @@ function createRepeatRule(isStartDate: boolean,
 
   const repeatRule: RepeatRule = {delta, startDate, endDate}
 
-  console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
+  // console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
 
   return repeatRule
 }
