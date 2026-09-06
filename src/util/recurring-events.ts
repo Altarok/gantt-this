@@ -37,7 +37,7 @@ function createRepeatRule(isStartDate: boolean,
   }
 
   if (!delta) {
-    console.info(`input(${input}) --> repeatRule: undefined`)
+    // console.info(`input(${input}) --> repeatRule: undefined`)
     return undefined
   }
 
