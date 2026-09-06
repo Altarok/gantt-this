@@ -120,7 +120,7 @@ function createItem(plugin: FantasyGanttPlugin,
 
   try {
     endRes = endDate ? parseEventDate(true, false, endDate, calendarConfig) :
-      {days: startRes.days, display: startRes.display} as ParsedDate
+      {days: startRes.days, display: startRes.display} // ParsedDate
   } catch {
     new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
   }
