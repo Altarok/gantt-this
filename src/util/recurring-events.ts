@@ -90,8 +90,6 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
   for (const item of items) {
     expanded.push(item) // Always include the base event
 
-    debugger
-
     if (!item.repeatRule) continue
 
     const interval = item.repeatRule.delta
