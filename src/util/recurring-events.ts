@@ -56,7 +56,7 @@ function createRepeatRule(isStartDate: boolean,
     }
 
     if (/ending on \[[^\]]+]( |$)/.test(input)) {
-      const endMatch = input.match(/ending on \[([^\]]+)]/)
+      const endMatch = /ending on \[([^\]]+)]/.exec(input)
       if (endMatch) {
         const parsedDate = createParsedDate(endMatch[1]!.trim(), calendarConfig)
         if (parsedDate) endDate = parsedDate.days
