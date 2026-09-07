@@ -1,4 +1,5 @@
 import {
+  addIcon,
   EventRef,
   MarkdownPostProcessorContext,
   MarkdownRenderChild,
@@ -78,9 +79,16 @@ export class GanttRender {
     }
 
     const reloadBtn = createIconButton(toolbar, 'refresh-cw', 'Reload data')
-    const toggleBars = createCheckbox('Show Bars', 'toggle-bars')
-    const togglePoints = createCheckbox('Show Points', 'toggle-points')
-    const toggleGrouping = createCheckbox('Enable Grouping', 'toggle-grouping')
+
+    let renderOptionsToggleState ={
+      toggleBars: true,
+      togglePoints: true,
+      toggleGrouping: true
+    }
+
+    const toggleBars = createIconButton(toolbar, renderOptionsToggleState.toggleBars ? 'chart-bar-big' : 'customBarChartCrossed', 'Toggle bars')
+    const togglePoints = createIconButton(toolbar, renderOptionsToggleState.togglePoints ? 'customScatterChart' : 'customScatterChartCrossed', 'Toggle points')
+    const toggleGrouping = createIconButton(toolbar, renderOptionsToggleState.togglePoints ? 'group' : 'customGroupCrossed', 'Toggle grouping')
 
     /* Create 6 pan, zoom, settings buttons */
     const zoomGroupEl = toolbar.createDiv({cls: 'gt-toolbar-zoom-group'})
@@ -149,9 +157,21 @@ export class GanttRender {
 
     reloadBtn.addEventListener('click', () => refreshChartCallback())
 
-    toggleBars.addEventListener('change', () => renderEngine.toggleShowBars(toggleBars.checked))
-    togglePoints.addEventListener('change', () => renderEngine.toggleShowPoints(togglePoints.checked))
-    toggleGrouping.addEventListener('change', () => renderEngine.toggleGrouping(toggleGrouping.checked))
+    toggleBars.addEventListener('click', () => {
+      renderOptionsToggleState.toggleBars = !renderOptionsToggleState.toggleBars
+      setIcon(toggleBars, renderOptionsToggleState.toggleBars ? 'chart-bar-big'  : 'customBarChartCrossed')
+      renderEngine.toggleShowBars(renderOptionsToggleState.toggleBars)
+                    })
+    togglePoints.addEventListener('click', () => {
+      renderOptionsToggleState.togglePoints = !renderOptionsToggleState.togglePoints
+      setIcon(togglePoints, renderOptionsToggleState.togglePoints ? 'customScatterChart'  : 'customScatterChartCrossed')
+      renderEngine.toggleShowPoints(renderOptionsToggleState.togglePoints)
+                    })
+    toggleGrouping.addEventListener('click', () => {
+      renderOptionsToggleState.toggleGrouping = !renderOptionsToggleState.toggleGrouping
+      setIcon(toggleGrouping, renderOptionsToggleState.toggleGrouping ? 'group'  : 'customGroupCrossed')
+      renderEngine.toggleGrouping(renderOptionsToggleState.toggleGrouping)
+    })
 
     panLeftBtn?.addEventListener('click', () => renderEngine.panLeft(step))
     zoomOutBtn?.addEventListener('click', () => renderEngine.zoomOut())
@@ -196,6 +216,10 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
     /* Register listeners with reference tracking */
     this.events.push(this.plugin.app.metadataCache.on('changed', this.refreshChartCallback))
     this.events.push(this.plugin.app.metadataCache.on('resolved', this.refreshChartCallback))
+    addIcon("customBarChartCrossed", ManualSvg.barChartCrossed);
+    addIcon("customScatterChart", ManualSvg.scatterChart);
+    addIcon("customScatterChartCrossed", ManualSvg.scatterChartCrossed);
+    addIcon("customGroupCrossed", ManualSvg.groupCrossed);
   }
 
   onunload() {
