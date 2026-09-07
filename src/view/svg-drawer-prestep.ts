@@ -44,6 +44,8 @@ export class GanttRender {
     const mainWrapper = el.createDiv({cls: Css.wrapper})
     const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
 
+/* 
+ * TODO no longer used after PR #6
     const createCheckbox = (label: string, id: string, checked = true) => {
       const lbl = toolbar.createEl('label', {cls: Css.inputLabel})
       const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
@@ -51,6 +53,7 @@ export class GanttRender {
       lbl.createSpan({text: ` ${label}`})
       return input
     }
+*/
 
     /* Define the callback synchronously */
     const refreshChartCallback = () => {
