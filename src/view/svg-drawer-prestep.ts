@@ -1,5 +1,4 @@
 import {
-  addIcon,
   EventRef,
   MarkdownPostProcessorContext,
   MarkdownRenderChild,
@@ -44,16 +43,16 @@ export class GanttRender {
     const mainWrapper = el.createDiv({cls: Css.wrapper})
     const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
 
-/* 
- * TODO no longer used after PR #6
-    const createCheckbox = (label: string, id: string, checked = true) => {
-      const lbl = toolbar.createEl('label', {cls: Css.inputLabel})
-      const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
-      input.checked = checked
-      lbl.createSpan({text: ` ${label}`})
-      return input
-    }
-*/
+    /*
+     * TODO no longer used after PR #6
+        const createCheckbox = (label: string, id: string, checked = true) => {
+          const lbl = toolbar.createEl('label', {cls: Css.inputLabel})
+          const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
+          input.checked = checked
+          lbl.createSpan({text: ` ${label}`})
+          return input
+        }
+    */
 
     /* Define the callback synchronously */
     const refreshChartCallback = () => {
@@ -74,16 +73,16 @@ export class GanttRender {
         new Notice('Re-rendering Gantt...')
 
         this.getGanttItems(pluginSettings, codeBlockContent)
-        .then(updatedData => {
-          if (renderEngine) renderEngine.updateData(updatedData)
-        })
-        .catch(() => new Notice('Failed to reload Gantt.'))
+          .then(updatedData => {
+            if (renderEngine) renderEngine.updateData(updatedData)
+          })
+          .catch(() => new Notice('Failed to reload Gantt.'))
       }, remainingCooldown)
     }
 
     const reloadBtn = createIconButton(toolbar, 'refresh-cw', 'Reload data')
 
-    let renderOptionsToggleState ={
+    let renderOptionsToggleState = {
       toggleBars: true,
       togglePoints: true,
       toggleGrouping: true
@@ -162,17 +161,17 @@ export class GanttRender {
 
     toggleBars.addEventListener('click', () => {
       renderOptionsToggleState.toggleBars = !renderOptionsToggleState.toggleBars
-      setIcon(toggleBars, renderOptionsToggleState.toggleBars ? 'chart-bar-big'  : 'customBarChartCrossed')
+      setIcon(toggleBars, renderOptionsToggleState.toggleBars ? 'chart-bar-big' : 'customBarChartCrossed')
       renderEngine.toggleShowBars(renderOptionsToggleState.toggleBars)
-                    })
+    })
     togglePoints.addEventListener('click', () => {
       renderOptionsToggleState.togglePoints = !renderOptionsToggleState.togglePoints
-      setIcon(togglePoints, renderOptionsToggleState.togglePoints ? 'customScatterChart'  : 'customScatterChartCrossed')
+      setIcon(togglePoints, renderOptionsToggleState.togglePoints ? 'customScatterChart' : 'customScatterChartCrossed')
       renderEngine.toggleShowPoints(renderOptionsToggleState.togglePoints)
-                    })
+    })
     toggleGrouping.addEventListener('click', () => {
       renderOptionsToggleState.toggleGrouping = !renderOptionsToggleState.toggleGrouping
-      setIcon(toggleGrouping, renderOptionsToggleState.toggleGrouping ? 'group'  : 'customGroupCrossed')
+      setIcon(toggleGrouping, renderOptionsToggleState.toggleGrouping ? 'group' : 'customGroupCrossed')
       renderEngine.toggleGrouping(renderOptionsToggleState.toggleGrouping)
     })
 
@@ -219,10 +218,6 @@ class GanttLifecycleComponent extends MarkdownRenderChild {
     /* Register listeners with reference tracking */
     this.events.push(this.plugin.app.metadataCache.on('changed', this.refreshChartCallback))
     this.events.push(this.plugin.app.metadataCache.on('resolved', this.refreshChartCallback))
-    addIcon("customBarChartCrossed", ManualSvg.barChartCrossed);
-    addIcon("customScatterChart", ManualSvg.scatterChart);
-    addIcon("customScatterChartCrossed", ManualSvg.scatterChartCrossed);
-    addIcon("customGroupCrossed", ManualSvg.groupCrossed);
   }
 
   onunload() {

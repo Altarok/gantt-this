@@ -7,6 +7,7 @@ import {Consts} from './const/constants'
 import {GanttRender} from './view/svg-drawer-prestep'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
+import {ManualSvg} from './view/manual-svg-icons'
 
 
 export default class FantasyGanttPlugin extends Plugin {
@@ -20,7 +21,7 @@ export default class FantasyGanttPlugin extends Plugin {
   async onload() {
     await this.loadSettings()
 
-    // ManualSvg.addMoonIconsToObsidianCache()
+    ManualSvg.addManualSvgsToObsidianCache()
 
     this.addSettingTab(new FantasyGanttSettingTab(this))
 
