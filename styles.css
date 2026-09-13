@@ -1,3 +1,54 @@
+/* Main container*/
+.gt-wrapper {
+  position: relative;
+  background-color: var(--background-primary);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  width: 100%; /* span 100% of the active note area */
+  box-sizing: border-box;
+}
+
+/* base toolbar layout */
+.gt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Reduces horizontal space between buttons */
+.gt-toolbar-buttongroup {
+  display: flex;
+  gap: 6px;
+}
+
+.gt-toolbar-separator {
+  width: 1px;
+  height: 18px;             /* Match the height of your icons */
+  background-color: currentColor; /* Inherits text/icon color */
+  opacity: 0.25;            /* Makes it subtle */
+  margin: 0;            /* Spacing on the left and right */
+  align-self: center;       /* Centers it vertically */
+}
+
+.gt-toolbar-hide-groups {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.gt-toolbar-hide-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-ui-small);
+}
+
+
 /* --------- icon-only buttons --------- */
 
 .gt-btn-icon {
@@ -74,38 +125,16 @@
   opacity: 0.7;
 }
 
-.gt-wrapper {
-  position: relative;
-  background-color: var(--background-primary);
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  width: 100%; /* span 100% of the active note area */
-  box-sizing: border-box;
-}
 
-/* Base Toolbar Layout */
-.gt-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
 
-.gt-toolbar-zoom-group {
-  display: flex;
-  gap: 6px;
-}
 
 /* Force the zoom buttons to take full row width on mobile */
-.is-mobile .gt-toolbar-zoom-group {
+.is-mobile .gt-toolbar-buttongroup {
   /* empty for now, open task */
 }
 
 @media (width <= 768px) {
-  .gt-toolbar-zoom-group {
+  .gt-toolbar-buttongroup {
     flex-basis: 100%;
     width: 100%;
     display: flex;
@@ -113,20 +142,6 @@
     gap: 6px;
     margin-top: 6px;
   }
-}
-
-.gt-toolbar-hide-groups {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.gt-toolbar-hide-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--font-ui-small);
 }
 
 .gt-input-label {

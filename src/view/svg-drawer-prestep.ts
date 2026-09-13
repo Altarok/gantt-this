@@ -1,24 +1,13 @@
-import {
-  EventRef,
-  MarkdownPostProcessorContext,
-  MarkdownRenderChild,
-  Notice,
-  Platform,
-  sanitizeHTMLToDom,
-  setIcon,
-  TFile
-} from 'obsidian'
+import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, Platform, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
-import {ManualSvg} from './manual-svg-icons'
-import {createIconButton} from './toolbar-view'
+import {ToolbarView} from './toolbar-view'
+import {setToolbarReactions} from '../ctrl/toolbar-controller'
 
-const step = Platform.isMobile ? 0.4 : 0.25
-
-export class GanttRender {
+export default class GanttRender {
   private readonly rerenderCooldownMs: number
   private lastRenderTimestamp = 0
 
@@ -41,9 +30,6 @@ export class GanttRender {
                     pluginSettings: PluginSettings,
                     codeBlockContent: CodeBlockContent,
                     ctx?: MarkdownPostProcessorContext) {
-    const mainWrapper = el.createDiv({cls: Css.wrapper})
-    const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
-
     /*
      * TODO no longer used after PR #6
         const createCheckbox = (label: string, id: string, checked = true) => {
@@ -55,7 +41,7 @@ export class GanttRender {
         }
     */
 
-    /* Define the callback synchronously */
+    /* Define the callback synchronously TODO move to toolbar view*/
     const refreshChartCallback = () => {
       if (!renderEngine) return
 
@@ -74,69 +60,18 @@ export class GanttRender {
         new Notice('Re-rendering Gantt...')
 
         this.getGanttItems(pluginSettings, codeBlockContent)
-        .then(updatedData => {
-          if (renderEngine) renderEngine.updateData(updatedData)
-        })
-        .catch(() => new Notice('Failed to reload Gantt.'))
+          .then(updatedData => {
+            if (renderEngine) renderEngine.updateData(updatedData)
+          })
+          .catch(() => new Notice('Failed to reload Gantt.'))
       }, remainingCooldown)
     }
 
-    const reloadBtn = createIconButton(toolbar, 'refresh-cw', 'Reload data')
-
-    let renderOptionsToggleState = {
-      toggleBars: true,
-      togglePoints: true,
-      toggleGrouping: true
-    }
-
-    const toggleBars = createIconButton(toolbar, renderOptionsToggleState.toggleBars ? 'chart-bar-big' : 'customBarChartCrossed', 'Toggle bars')
-    const togglePoints = createIconButton(toolbar, renderOptionsToggleState.togglePoints ? 'customScatterChart' : 'customScatterChartCrossed', 'Toggle points')
-    const toggleGrouping = createIconButton(toolbar, renderOptionsToggleState.toggleGrouping ? 'group' : 'customGroupCrossed', 'Toggle grouping')
-
-    /* Create 6 pan, zoom, settings buttons */
-    const zoomGroupEl = toolbar.createDiv({cls: 'gt-toolbar-zoom-group'})
-
-    const {showPanAndZoomButtonsInToolbar} = pluginSettings
-
-    let panLeftBtn: HTMLButtonElement | null = null
-    let zoomOutBtn: HTMLButtonElement | null = null
-    let zoomInBtn: HTMLButtonElement | null = null
-    let panRightBtn: HTMLButtonElement | null = null
-
-    if (showPanAndZoomButtonsInToolbar) {
-      panLeftBtn = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
-      zoomOutBtn = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
-    }
-    const zoomResetBtn = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset view'})
-    zoomResetBtn.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
-    if (showPanAndZoomButtonsInToolbar) {
-      zoomInBtn = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
-      panRightBtn = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
-    }
-    const settingsBtn = createIconButton(zoomGroupEl, 'settings', 'Plugin settings')
-
-    if (this.plugin.settings.showButtonsToHideGroups) {
-      /* Create buttons to hide groups */
-      const hideGroupEl = toolbar.createDiv({cls: 'gt-toolbar-hide-groups'})
-      const groups = this.plugin.settings.groups
-      for (const group of groups) {
-        const subGroup = hideGroupEl.createDiv({cls: 'gt-toolbar-hide-group'})
-        let isVisible: boolean = group?.visible ?? false
-        const button = createIconButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
-        subGroup.createDiv({text: group.id})
-        button.addEventListener('click', () => {
-          if (group) {
-            isVisible = !isVisible
-            group.visible = isVisible
-            setIcon(button, isVisible ? 'eye' : 'eye-off')
-            void this.plugin.saveSettings()
-            refreshChartCallback()
-          }
-        })
-      }
-    }
-
+    const mainWrapper = el.createDiv({cls: Css.wrapper})
+    const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
     const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
+
+    const tv = new ToolbarView(toolbar, this.plugin, refreshChartCallback)
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */
     let renderEngine: GanttRenderEngine | null = null
@@ -158,44 +93,8 @@ export class GanttRender {
       this.selectedFrontmatterProperties
     )
 
-    reloadBtn.addEventListener('click', () => refreshChartCallback())
+    setToolbarReactions(tv,renderEngine,refreshChartCallback )
 
-    toggleBars.addEventListener('click', () => {
-      renderOptionsToggleState.toggleBars = !renderOptionsToggleState.toggleBars
-      setIcon(toggleBars, renderOptionsToggleState.toggleBars ? 'chart-bar-big' : 'customBarChartCrossed')
-      renderEngine.toggleShowBars(renderOptionsToggleState.toggleBars)
-    })
-    togglePoints.addEventListener('click', () => {
-      renderOptionsToggleState.togglePoints = !renderOptionsToggleState.togglePoints
-      setIcon(togglePoints, renderOptionsToggleState.togglePoints ? 'customScatterChart' : 'customScatterChartCrossed')
-      renderEngine.toggleShowPoints(renderOptionsToggleState.togglePoints)
-    })
-    toggleGrouping.addEventListener('click', () => {
-      renderOptionsToggleState.toggleGrouping = !renderOptionsToggleState.toggleGrouping
-      setIcon(toggleGrouping, renderOptionsToggleState.toggleGrouping ? 'group' : 'customGroupCrossed')
-      renderEngine.toggleGrouping(renderOptionsToggleState.toggleGrouping)
-    })
-
-    panLeftBtn?.addEventListener('click', () => renderEngine.panLeft(step))
-    zoomOutBtn?.addEventListener('click', () => renderEngine.zoomOut())
-    zoomResetBtn.addEventListener('click', () => renderEngine.resetZoom())
-    zoomInBtn?.addEventListener('click', () => renderEngine.zoomIn())
-    panRightBtn?.addEventListener('click', () => renderEngine.panRight(step))
-
-    settingsBtn.addEventListener('click', () => {
-        const settingApi = (this.plugin.app as unknown as {
-          setting: {
-            open(): void
-            openTabById(id: string): void
-          }
-        }).setting
-
-        if (settingApi) {
-          settingApi.open()
-          settingApi.openTabById(this.plugin.manifest.id)
-        }
-      }
-    )
   }
 }
 

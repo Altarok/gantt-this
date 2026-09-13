@@ -1,10 +1,10 @@
 import {sanitizeHTMLToDom, setIcon} from 'obsidian'
+import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
-import {PluginSettings} from '../const/types'
 import {ManualSvg} from './manual-svg-icons'
 
 /* See https://lucide.dev for icons */
-export function createIconButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
+export function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
   const btn = parentEl.createEl('button', {cls: Css.button.icon, title})
   setIcon(btn, icon)
   return btn
@@ -16,7 +16,15 @@ type ToggleStates = {
   grouping: boolean
 }
 
-export class Toolbar {
+function addSeparator(container: HTMLDivElement){
+  container.createDiv({cls: Css.toolbarSeparator})
+}
+
+function createGroup(container: HTMLDivElement){
+  return container.createDiv({cls: Css.toolbarButtonGroup})
+}
+
+export class ToolbarView {
   private toggleStates: ToggleStates
 
   /*
@@ -36,59 +44,103 @@ export class Toolbar {
 
   /**
    * @param container HTML div destined to contains the Gantt chart's toolbar
-   * @param pluginSettings
+   * @param plugin
+   * @param refreshChartCallback
    */
-  constructor(container: HTMLDivElement, pluginSettings: PluginSettings) {
-    const {showPanAndZoomButtonsInToolbar} = pluginSettings
-
+  constructor(container: HTMLDivElement,
+              readonly plugin: FantasyGanttPlugin,
+              refreshChartCallback: () => void) {
+    const {showPanAndZoomButtonsInToolbar} = plugin.settings
     this.toggleStates = {bars: true, timestamps: true, grouping: true}
 
+    this.reloadButton = createButton(container, 'refresh-cw', 'Reload data')
 
-    this.reloadButton = createIconButton(container, 'refresh-cw', 'Reload data')
+    addSeparator(container)
+    const g1 = createGroup(container)
 
-    this.toggleBarsButton = createIconButton(container, 'chart-bar-big', 'Toggle bar visibility')
-    this.toggleTimestampButton = createIconButton(container, 'customScatterChart', 'Toggle timestamp event visibility')
-    this.toggleEventGroupingButton = createIconButton(container, 'group', 'Toggle event grouping')
+    this.toggleBarsButton = createButton(g1, 'chart-bar-big', 'Toggle bar visibility')
+    this.toggleTimestampButton = createButton(g1, 'customScatterChart', 'Toggle timestamp event visibility')
+    this.toggleEventGroupingButton = createButton(g1, 'group', 'Toggle event grouping')
 
-    const zoomGroupEl = container.createDiv({cls: 'gt-toolbar-zoom-group'})
+    addSeparator(container)
+    const g2 = createGroup(container)
 
     if (showPanAndZoomButtonsInToolbar) {
-      this.panLeftButton = createIconButton(zoomGroupEl, 'chevron-left', 'Pan left')
-      this.zoomOutButton = createIconButton(zoomGroupEl, 'zoom-out', 'Zoom out')
+      this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
+      this.zoomOutButton = createButton(g2, 'zoom-out', 'Zoom out')
     }
-
-    this.resetZoomAndPanButton = zoomGroupEl.createEl('button', {cls: Css.button.icon, title: 'Reset view'})
+    this.resetZoomAndPanButton = g2.createEl('button', {cls: Css.button.icon, title: 'Reset view'})
     this.resetZoomAndPanButton.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
-
     if (showPanAndZoomButtonsInToolbar) {
-      this.zoomInButton = createIconButton(zoomGroupEl, 'zoom-in', 'Zoom in')
-      this.panRightButton = createIconButton(zoomGroupEl, 'chevron-right', 'Pan right')
+      this.zoomInButton = createButton(g2, 'zoom-in', 'Zoom in')
+      this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')
     }
 
-    this.settingsButton = createIconButton(zoomGroupEl, 'settings', 'Plugin settings')
+    addSeparator(container)
+    const g3 = createGroup(container)
 
-    // if (pluginSettings.showButtonsToHideGroups) {
-    //   /* Create buttons to hide groups */
-    //   const hideGroupEl = container.createDiv({cls: 'gt-toolbar-hide-groups'})
-    //   const groups = pluginSettings.groups
-    //   for (const group of groups) {
-    //     const subGroup = hideGroupEl.createDiv({cls: 'gt-toolbar-hide-group'})
-    //     let isVisible: boolean = group?.visible ?? false
-    //     const button = createIconButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
-    //     subGroup.createDiv({text: group.id})
-    //     button.addEventListener('click', () => {
-    //       if (group) {
-    //         isVisible = !isVisible
-    //         group.visible = isVisible
-    //         setIcon(button, isVisible ? 'eye' : 'eye-off')
-    //         void this.plugin.saveSettings()
-    //         refreshChartCallback()
-    //       }
-    //     })
-    //   }
-    // }
+    this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
+    this.debugInfoButton = createButton(g3, 'info', 'Debug info')
 
+
+    if (plugin.settings.showButtonsToHideGroups) {
+    addSeparator(container)
+      const g4 = createGroup(container)
+
+      /* Create buttons to hide groups */
+      const hideGroupEl = container.createDiv({cls: 'gt-toolbar-hide-groups'})
+      const groups = plugin.settings.groups
+      for (const group of groups) {
+        const subGroup = hideGroupEl.createDiv({cls: 'gt-toolbar-hide-group'})
+        let isVisible: boolean = group?.visible ?? false
+        const button = createButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
+        subGroup.createDiv({text: group.id})
+        button.addEventListener('click', () => {
+          if (group) {
+            isVisible = !isVisible
+            group.visible = isVisible
+            setIcon(button, isVisible ? 'eye' : 'eye-off')
+            void plugin.saveSettings()
+            refreshChartCallback()
+          }
+        })
+      }
+    }
   }
 
 
+  handleToggleBarsButtonClick(): boolean {
+    this.toggleStates.bars = !this.toggleStates.bars
+    setIcon(this.toggleBarsButton, this.toggleStates.bars ? 'chart-bar-big' : 'customBarChartCrossed')
+    return this.toggleStates.bars
+  }
+
+  handleToggleTimestampsButtonClick(): boolean {
+    this.toggleStates.timestamps = !this.toggleStates.timestamps
+    setIcon(this.toggleTimestampButton, this.toggleStates.timestamps ?  'customScatterChart' : 'customScatterChartCrossed')
+    return this.toggleStates.timestamps
+  }
+
+  handleToggleGroupingButtonClick(): boolean {
+    this.toggleStates.grouping = !this.toggleStates.grouping
+    setIcon(this.toggleEventGroupingButton, this.toggleStates.grouping ? 'group' : 'customGroupCrossed')
+    return this.toggleStates.grouping
+  }
+
+  /**
+   * Open plugin's settings in native Obsidian modal.
+   */
+  handleSettingsButtonClick() {
+    const settingApi = (this.plugin.app as unknown as {
+      setting: {
+        open(): void
+        openTabById(id: string): void
+      }
+    }).setting
+
+    if (settingApi) {
+      settingApi.open()
+      settingApi.openTabById(this.plugin.manifest.id)
+    }
+  }
 }

@@ -1,6 +1,10 @@
 export const Css = {
   wrapper: 'gt-wrapper',
   toolbar: 'gt-toolbar',
+  /* Reduces horizontal space between buttons */
+  toolbarButtonGroup: 'gt-toolbar-buttongroup',
+  toolbarSeparator: 'gt-toolbar-separator',
+
   inputLabel: 'gt-input-label',
   btn: 'gt-btn',
   chartContainer: 'gt-chart-container',
