@@ -5,7 +5,7 @@ import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ToolbarView} from './toolbar-view'
-import {setToolbarReactions} from '../ctrl/toolbar-controller'
+import {setToolbarReactions} from './toolbar-controller'
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number

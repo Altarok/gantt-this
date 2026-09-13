@@ -1,6 +1,6 @@
 import {Platform} from 'obsidian'
-import {ToolbarView} from '../view/toolbar-view'
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {ToolbarView} from './toolbar-view'
+import {GanttRenderEngine} from './svg-drawer'
 
 const panStep = Platform.isMobile ? 0.4 : 0.25
 
