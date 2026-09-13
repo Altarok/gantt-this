@@ -1,7 +1,7 @@
 import {setIcon} from 'obsidian'
 import {Css} from '../const/constants'
 import {GanttChartConfig, GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
-import {ManualSvg} from './manual-svg-icons'
+import {ManualSvg} from "./manual-svg-icons";
 
 const iconSize = 16
 const iconRadius = iconSize / 2
@@ -323,11 +323,12 @@ const moonSvgs: Record<number, DocumentFragment> = {
   3: ManualSvg.waningHalfMoon
 }
 // const moonIcons: Record<number, string> = {
-//   0: 'gt-new-moon',
-//   // 1: ManualSvg.crescentHalfMoon,
-//   // 2: ManualSvg.fullMoon,
-//   // 3: ManualSvg.waningHalfMoon
+//   0: 'gt-custom-newMoon',
+//   1: 'gt-custom-crescentHalfMoon',
+//   2: 'gt-custom-fullMoon',
+//   3: 'gt-custom-waningHalfMoon'
 // }
+
 /**
  * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
  *
@@ -361,6 +362,7 @@ export function drawMoonPhase(cx: number,
 
   if (color) g.style.color = color
 
+  // setIcon(g, innerContent)
   g.appendChild(innerContent.cloneNode(true)) // do not use g.innerHTML = innerContent
   svgContainer.appendChild(g)
 }

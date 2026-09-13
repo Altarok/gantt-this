@@ -1,14 +1,6 @@
-import {sanitizeHTMLToDom, setIcon} from 'obsidian'
+import {setIcon, setTooltip} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
-import {ManualSvg} from './manual-svg-icons'
-
-/* See https://lucide.dev for icons */
-export function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
-  const btn = parentEl.createEl('button', {cls: Css.button.icon, title})
-  setIcon(btn, icon)
-  return btn
-}
 
 type ToggleStates = {
   bars: boolean
@@ -16,11 +8,19 @@ type ToggleStates = {
   grouping: boolean
 }
 
-function addSeparator(container: HTMLDivElement){
+/* See https://lucide.dev for icons */
+export function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
+  const btn = parentEl.createEl('button', {cls: Css.button.icon})
+  setIcon(btn, icon)
+  setTooltip(btn, title, { placement: 'bottom', delay: -1 })
+  return btn
+}
+
+function addSeparator(container: HTMLDivElement) {
   container.createDiv({cls: Css.toolbarSeparator})
 }
 
-function createGroup(container: HTMLDivElement){
+function createGroup(container: HTMLDivElement) {
   return container.createDiv({cls: Css.toolbarButtonGroup})
 }
 
@@ -69,8 +69,7 @@ export class ToolbarView {
       this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
       this.zoomOutButton = createButton(g2, 'zoom-out', 'Zoom out')
     }
-    this.resetZoomAndPanButton = g2.createEl('button', {cls: Css.button.icon, title: 'Reset view'})
-    this.resetZoomAndPanButton.appendChild(sanitizeHTMLToDom(ManualSvg.resetZoom))
+    this.resetZoomAndPanButton = createButton(g2, 'gt-custom-resetPanAndZoom', 'Reset view')
     if (showPanAndZoomButtonsInToolbar) {
       this.zoomInButton = createButton(g2, 'zoom-in', 'Zoom in')
       this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')
@@ -82,9 +81,8 @@ export class ToolbarView {
     this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
     this.debugInfoButton = createButton(g3, 'info', 'Debug info')
 
-
     if (plugin.settings.showButtonsToHideGroups) {
-    addSeparator(container)
+      // addSeparator(container)
       const g4 = createGroup(container)
 
       /* Create buttons to hide groups */
@@ -117,7 +115,7 @@ export class ToolbarView {
 
   handleToggleTimestampsButtonClick(): boolean {
     this.toggleStates.timestamps = !this.toggleStates.timestamps
-    setIcon(this.toggleTimestampButton, this.toggleStates.timestamps ?  'customScatterChart' : 'customScatterChartCrossed')
+    setIcon(this.toggleTimestampButton, this.toggleStates.timestamps ? 'customScatterChart' : 'customScatterChartCrossed')
     return this.toggleStates.timestamps
   }
 

@@ -41,7 +41,7 @@ export default class GanttRender {
         }
     */
 
-    /* Define the callback synchronously TODO move to toolbar view*/
+    /* Define the callback synchronously TODO move to toolbar view */
     const refreshChartCallback = () => {
       if (!renderEngine) return
 
@@ -68,10 +68,19 @@ export default class GanttRender {
     }
 
     const mainWrapper = el.createDiv({cls: Css.wrapper})
-    const toolbar = mainWrapper.createDiv({cls: Css.toolbar})
-    const chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
 
-    const tv = new ToolbarView(toolbar, this.plugin, refreshChartCallback)
+    let chartContainer: HTMLDivElement
+    let toolbarContainer: HTMLDivElement
+
+    if (pluginSettings.uxMoveToolbarBelowChart) {
+      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
+      toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar})
+    } else {
+      toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar})
+      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
+    }
+
+    const tv = new ToolbarView(toolbarContainer, this.plugin, refreshChartCallback)
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */
     let renderEngine: GanttRenderEngine | null = null

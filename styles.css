@@ -25,13 +25,24 @@
   gap: 6px;
 }
 
+/* Force the zoom buttons to take full row width on mobile */
+.is-mobile .gt-toolbar-buttongroup {
+  flex-basis: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+
 .gt-toolbar-separator {
   width: 1px;
-  height: 18px;             /* Match the height of your icons */
+  height: 18px; /* Match the height of your icons */
   background-color: currentColor; /* Inherits text/icon color */
-  opacity: 0.25;            /* Makes it subtle */
-  margin: 0;            /* Spacing on the left and right */
-  align-self: center;       /* Centers it vertically */
+  opacity: 0.25; /* Makes it subtle */
+  margin: 0; /* Spacing on the left and right */
+  align-self: center; /* Centers it vertically */
 }
 
 .gt-toolbar-hide-groups {
@@ -73,8 +84,23 @@
 }
 
 .gt-btn-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke-width: 1.5px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.is-mobile .gt-btn-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.is-mobile .gt-btn-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Gridlines and Axis Lines */
@@ -123,25 +149,6 @@
   stroke: var(--text-muted);
   stroke-width: 1;
   opacity: 0.7;
-}
-
-
-
-
-/* Force the zoom buttons to take full row width on mobile */
-.is-mobile .gt-toolbar-buttongroup {
-  /* empty for now, open task */
-}
-
-@media (width <= 768px) {
-  .gt-toolbar-buttongroup {
-    flex-basis: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    gap: 6px;
-    margin-top: 6px;
-  }
 }
 
 .gt-input-label {
@@ -515,28 +522,6 @@
 .gt-settings-visibility-list {
   padding-left: 6px;
   margin-bottom: 18px;
-}
-
-.is-mobile .gt-btn-icon {
-  width: 36px;
-  height: 36px;
-}
-
-.is-mobile .gt-btn-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-@media (width <= 768px) {
-  .gt-btn-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .gt-btn-icon svg {
-    width: 20px;
-    height: 20px;
-  }
 }
 
 /* ----------- moons ----------- */

@@ -280,6 +280,7 @@ export type PluginSettings = GanttChartSources & {
   uxRerenderCooldownSeconds: number
   uxHighlightRelatedEvents: boolean // highlight predecessors and successors
   uxConnectRelatedEvents: boolean // connect predecessors and successors
+  uxMoveToolbarBelowChart: boolean
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -322,6 +323,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   uxRerenderCooldownSeconds: 5,
   uxHighlightRelatedEvents: true,
   uxConnectRelatedEvents: false,
+  uxMoveToolbarBelowChart: false,
 
   /*
    * Front-matter property names

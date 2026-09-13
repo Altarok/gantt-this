@@ -407,6 +407,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             }
           },
           {
+            name: 'Move toolbar down',
+            desc: 'Displays toolbar below the Gantt chart.',
+            control: {
+              type: 'toggle', key: 'uxMoveToolbarBelowChart',
+              defaultValue: DEFAULT_SETTINGS.uxMoveToolbarBelowChart
+            }
+          },
+          {
             name: 'Rerender cooldown (seconds)',
             desc: 'For those nerds changing files every second.',
             control: {
