@@ -14,6 +14,7 @@ import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ManualSvg} from './manual-svg-icons'
+import {createIconButton} from './toolbar-view'
 
 const step = Platform.isMobile ? 0.4 : 0.25
 
@@ -73,10 +74,10 @@ export class GanttRender {
         new Notice('Re-rendering Gantt...')
 
         this.getGanttItems(pluginSettings, codeBlockContent)
-          .then(updatedData => {
-            if (renderEngine) renderEngine.updateData(updatedData)
-          })
-          .catch(() => new Notice('Failed to reload Gantt.'))
+        .then(updatedData => {
+          if (renderEngine) renderEngine.updateData(updatedData)
+        })
+        .catch(() => new Notice('Failed to reload Gantt.'))
       }, remainingCooldown)
     }
 
@@ -90,7 +91,7 @@ export class GanttRender {
 
     const toggleBars = createIconButton(toolbar, renderOptionsToggleState.toggleBars ? 'chart-bar-big' : 'customBarChartCrossed', 'Toggle bars')
     const togglePoints = createIconButton(toolbar, renderOptionsToggleState.togglePoints ? 'customScatterChart' : 'customScatterChartCrossed', 'Toggle points')
-    const toggleGrouping = createIconButton(toolbar, renderOptionsToggleState.togglePoints ? 'group' : 'customGroupCrossed', 'Toggle grouping')
+    const toggleGrouping = createIconButton(toolbar, renderOptionsToggleState.toggleGrouping ? 'group' : 'customGroupCrossed', 'Toggle grouping')
 
     /* Create 6 pan, zoom, settings buttons */
     const zoomGroupEl = toolbar.createDiv({cls: 'gt-toolbar-zoom-group'})
@@ -196,13 +197,6 @@ export class GanttRender {
       }
     )
   }
-}
-
-/* See https://lucide.dev for icons, */
-function createIconButton(parentEl: HTMLElement, icon: string, title: string,): HTMLButtonElement {
-  const btn = parentEl.createEl('button', {cls: Css.button.icon, title})
-  setIcon(btn, icon)
-  return btn
 }
 
 class GanttLifecycleComponent extends MarkdownRenderChild {
