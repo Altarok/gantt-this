@@ -10,6 +10,9 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 > Disclaimer: The mentioned frontmatter properties represent their default keys;
 > you may have renamed them in your vault.
 
+## [v1.2.4](https://github.com/Altarok/gantt-this/releases/tag/1.2.4), 2026-09-15
+- Prevent default swipe reaction on mobile for a smoother manual pan experience.
+
 ## [v1.2.3](https://github.com/Altarok/gantt-this/releases/tag/1.2.3), 2026-09-14
 
 **Features**
