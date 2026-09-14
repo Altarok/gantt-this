@@ -22,7 +22,6 @@ export class GanttMobileEventManager implements GanttEventManager {
   private readonly boundSvgTouchStart: (e: TouchEvent) => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-
   constructor(private engine: GanttRenderEngine) {
     this.autoRestrictZoom = this.engine.plugin.settings.autoRestrictZoom
 
@@ -45,7 +44,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     this.activeWindow.addEventListener('touchend', this.boundWindowTouchEnd)
     this.activeWindow.addEventListener('touchcancel', this.boundWindowTouchEnd)
 
-    this.svg.addEventListener('touchstart', this.boundSvgTouchStart, {passive: true})
+    this.svg.addEventListener('touchstart', this.boundSvgTouchStart, {passive: false})
     this.svg.addEventListener('click', this.boundSvgClick)
   }
 
@@ -66,7 +65,10 @@ export class GanttMobileEventManager implements GanttEventManager {
 
   private handleTouchMove(e: TouchEvent) {
     if (e.touches.length === 1 && this.isDragging) {
-      if (e.cancelable) e.preventDefault()
+      // Prevent default scroll / panel drag behavior
+      e.preventDefault()
+      e.stopPropagation()
+
       this.engine.zoomTranslateX = this.startTranslateX + (e.touches[0]!.clientX - this.startX)
       this.scheduleRender()
     } else if (e.touches.length === 2 && this.pinchDistance) {
@@ -76,6 +78,9 @@ export class GanttMobileEventManager implements GanttEventManager {
   }
 
   private handleTouchStart(e: TouchEvent) {
+    // Prevent Obsidian from interpreting this swipe as a sidebar trigger
+    e.stopPropagation()
+
     if (e.touches.length === 1) {
       const touch = e.touches[0]!
       this.isDragging = true
