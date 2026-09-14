@@ -10,6 +10,25 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 > Disclaimer: The mentioned frontmatter properties represent their default keys;
 > you may have renamed them in your vault.
 
+## [v1.2.3](https://github.com/Altarok/gantt-this/releases/tag/1.2.3), 2026-09-14
+
+**Features**
+
+- Toolbar improvements:
+  - Bar, Point and Group are now icon buttons by @CePeU in #6
+  - Added faster tooltips
+  - Toolbar can now be moved to below Gantt chart with new setting
+- Use filename as fallback tooltip title if event's name-property is empty
+- CSS improvements
+
+**Bugfixes**
+
+- Removed default group 'general' from event creation
+  - -> Group can now contain vertical-line events and eras
+- Zoom and Pan buttons no longer broken when upper and lower bound given
+- Edge case behaviour on maximum zoom no longer broken 
+  - Maximum zoom now shows 4 dates
+
 ## [v1.2.2](https://github.com/Altarok/gantt-this/releases/tag/1.2.2), 2026-08-28
 
 - Minor CSS fixes like:
