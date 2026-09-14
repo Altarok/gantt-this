@@ -201,7 +201,7 @@ Adapt to new Obsidian settings (version 1.13+).
 ## [v0.4.1](https://github.com/Altarok/gantt-this/releases/tag/0.4.1), 2026-07-28
 
 - Changed width of code block creator modal to 90%.
-- Added setting: Show row of buttons at the end of toolbar to toggle group visibility.
+- Added setting: Show row of buttons at the end of toolbarContainer to toggle group visibility.
 - Overhaul German version of README.
 
 ## [v0.4.0](https://github.com/Altarok/gantt-this/releases/tag/0.4.0), 2026-07-28

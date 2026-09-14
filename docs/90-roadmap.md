@@ -16,7 +16,7 @@ See [[91-changelog|Changelog]] for implemented features.
 
 - Recurring events. - CePeU and others
 - Keep calendar axis visible while scrolling over the chart.
-- Keep toolbar visible while scrolling over the chart.
+- Keep toolbarContainer visible while scrolling over the chart.
 - Apply the calendar's optional `outputFormat` property to tooltip dates. - CePeU
 - Place events into multiple groups. - CePeU and others
   - Change the frontmatter properties `gantt-group` from `text` to `list`.

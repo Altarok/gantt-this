@@ -1,12 +1,18 @@
 export const Css = {
-  wrapper: 'gt-wrapper',
-  toolbar: 'gt-toolbar',
-  /* Reduces horizontal space between buttons */
-  toolbarButtonGroup: 'gt-toolbar-buttongroup',
-  toolbarSeparator: 'gt-toolbar-separator',
+  wrapper: 'gt-main-container',
+
+  toolbar: {
+    container: 'gt-toolbar-container',
+    /* Reduces horizontal space between buttons */
+    buttonGroup: 'gt-toolbar-buttongroup',
+    button: 'gt-toolbar-button',
+    /* Separates button groups */
+    separator: 'gt-toolbar-separator',
+  },
+
 
   inputLabel: 'gt-input-label',
-  btn: 'gt-btn',
+  // btn: 'gt-btn',
   chartContainer: 'gt-chart-container',
   axis: {
     baseline: 'gt-axis-baseline',
@@ -17,12 +23,9 @@ export const Css = {
     tick: 'gt-axis-tick',
     tickMinor: 'gt-axis-tick-minor',
   },
-  button: {
-    icon: 'gt-btn-icon',
-  },
+
   item: {
     item: 'gt-item',
-
     circle: 'gt-item timestamp circle',
     diamond: 'gt-item timestamp diamond',
     triangle: 'gt-item timestamp triangle',

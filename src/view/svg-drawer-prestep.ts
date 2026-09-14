@@ -1,4 +1,4 @@
-import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, Platform, TFile} from 'obsidian'
+import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
@@ -60,10 +60,10 @@ export default class GanttRender {
         new Notice('Re-rendering Gantt...')
 
         this.getGanttItems(pluginSettings, codeBlockContent)
-          .then(updatedData => {
-            if (renderEngine) renderEngine.updateData(updatedData)
-          })
-          .catch(() => new Notice('Failed to reload Gantt.'))
+        .then(updatedData => {
+          if (renderEngine) renderEngine.updateData(updatedData)
+        })
+        .catch(() => new Notice('Failed to reload Gantt.'))
       }, remainingCooldown)
     }
 
@@ -73,11 +73,11 @@ export default class GanttRender {
     let toolbarContainer: HTMLDivElement
 
     if (pluginSettings.uxMoveToolbarBelowChart) {
-      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
-      toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar})
+      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
     } else {
-      toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar})
-      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer, attr: {height: '100%'}})
+      toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
+      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
     const tv = new ToolbarView(toolbarContainer, this.plugin, refreshChartCallback)
@@ -102,7 +102,7 @@ export default class GanttRender {
       this.selectedFrontmatterProperties
     )
 
-    setToolbarReactions(tv,renderEngine,refreshChartCallback )
+    setToolbarReactions(tv, renderEngine, refreshChartCallback)
 
   }
 }

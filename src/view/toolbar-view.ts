@@ -9,19 +9,19 @@ type ToggleStates = {
 }
 
 /* See https://lucide.dev for icons */
-export function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
-  const btn = parentEl.createEl('button', {cls: Css.button.icon})
+function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
+  const btn = parentEl.createEl('button', {cls: Css.toolbar.button})
   setIcon(btn, icon)
-  setTooltip(btn, title, { placement: 'bottom', delay: -1 })
+  setTooltip(btn, title, {placement: 'bottom', delay: -1})
   return btn
 }
 
 function addSeparator(container: HTMLDivElement) {
-  container.createDiv({cls: Css.toolbarSeparator})
+  container.createDiv({cls: Css.toolbar.separator})
 }
 
 function createGroup(container: HTMLDivElement) {
-  return container.createDiv({cls: Css.toolbarButtonGroup})
+  return container.createDiv({cls: Css.toolbar.buttonGroup})
 }
 
 export class ToolbarView {
@@ -86,13 +86,13 @@ export class ToolbarView {
       const g4 = createGroup(container)
 
       /* Create buttons to hide groups */
-      const hideGroupEl = container.createDiv({cls: 'gt-toolbar-hide-groups'})
+      // const hideGroupEl = container.createDiv({cls: 'gt-toolbar-hide-groups'})
       const groups = plugin.settings.groups
       for (const group of groups) {
-        const subGroup = hideGroupEl.createDiv({cls: 'gt-toolbar-hide-group'})
+        // const subGroup = g4.createDiv({cls: })
         let isVisible: boolean = group?.visible ?? false
-        const button = createButton(subGroup, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
-        subGroup.createDiv({text: group.id})
+        const button = createButton(g4, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
+        g4.createDiv({text: group.id})
         button.addEventListener('click', () => {
           if (group) {
             isVisible = !isVisible

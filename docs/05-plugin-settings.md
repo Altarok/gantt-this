@@ -51,7 +51,7 @@ Two lists display the calendars and groups currently known to the plugin. Both l
 - **Add plugin commands**: Add plugin commands (currently work-in-progress / disabled in UI).
 - **Show overlay box**: Show an overlay box around an event when hovered.
 - **Show overlay vertical line**: Show a vertical line on hover to compare dates.
-- **Group visibility toggles**: Add toolbar buttons that allow hiding/showing groups individually.
+- **Group visibility toggles**: Add toolbarContainer buttons that allow hiding/showing groups individually.
 - **Restrict minimum and maximum zoom**: Automatically constrain min/max zoom to reasonable bounds for the current data.
   - Minimum zoom would fit your complete dataset on the screen.
   - Maximum zoom would show adjacent days.
