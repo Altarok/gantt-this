@@ -6,7 +6,8 @@ import {
   GanttGroup,
   GanttItem,
   GanttItemDisplayType,
-  GanttItemDisplayTypes, NO_GROUP,
+  GanttItemDisplayTypes,
+  NO_GROUP,
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
@@ -16,7 +17,6 @@ import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
 import {ManualSvg} from './manual-svg-icons'
 import {drawMoons} from './moon-drawer'
-import {Recurring} from '../util/recurring-events'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -33,7 +33,7 @@ export class GanttRenderEngine {
   private activeAxesList: string[] = []
   private totalHeight = 400
   private resizeObserver: ResizeObserver
-  private readonly arrowColor: string
+  // private readonly arrowColor: string
 
   config: GanttChartConfig = {
     showEras: true,
@@ -61,11 +61,12 @@ export class GanttRenderEngine {
               public readonly plugin: FantasyGanttPlugin,
               public readonly codeBlockContent: CodeBlockContent,
               public readonly selectedFrontmatterProperties: string[] | null) {
-    this.arrowColor = plugin.app.isDarkMode() ? 'white' : 'black'
+    // this.arrowColor = plugin.app.isDarkMode() ? 'white' : 'black'
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
+    this.handleResize(true)
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize())
     this.resizeObserver.observe(this.container)
@@ -77,7 +78,7 @@ export class GanttRenderEngine {
     this.calculateGlobalBounds()
     this.initLayout()
     this.initChartStructure()
-    this.handleResize()
+    this.handleResize(true)
   }
 
   private updateSvgDrawerData() {
@@ -112,8 +113,8 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
-
-    activeData = Recurring.expandRecurringEvents(this, activeData)
+ 
+    // activeData = Recurring.expandRecurringEvents(this, activeData)
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
@@ -218,17 +219,26 @@ export class GanttRenderEngine {
     this.eventManager = createGanttEventManager(this, this.plugin.settings)
   }
 
-  handleResize() {
-    const width = this.container.clientWidth || 800
+  handlePanOrZoom() {
+    this.handleResize(false)
+  }
 
-    // Re-evaluate predefined bounds now that we have the true container width
-    if (this.codeBlockContent.lowerBoundDateParsed ||
+  handleViewReset() {
+    this.handleResize(true)
+  }
+
+  handleResize(includeViewReset = false) {
+    const width = this.container.clientWidth
+    if (!width || width <= 0) return
+
+    if (includeViewReset && (this.codeBlockContent.lowerBoundDateParsed ||
+      /* Re-evaluate predefined bounds now that we have the true container width */
       this.codeBlockContent.upperBoundDateParsed ||
-      this.codeBlockContent.centerHereDateParsed) {
+      this.codeBlockContent.centerHereDateParsed)) {
       this.transitionToPredefinedBounds(width)
     }
 
-    this.clipRect.setAttribute('width', (width - this.config.margin.left - this.config.margin.right).toString())
+    this.clipRect.setAttribute('width', this.getRenderWidth(width).toString())
 
     this.drawGroupBackgrounds(width)
     this.renderData(width)
@@ -307,11 +317,13 @@ export class GanttRenderEngine {
 
         const x1 = this.getXPosition(d.startDays, width)
         const x2 = (!d.endDays || d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)
-        const renderWidth = width - this.config.margin.left - this.config.margin.right
+        const renderWidth = this.getRenderWidth(width)
 
         // Calculate available width for timestamp text (Method 1)
         const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
-        const nextItem = currentLaneItems.find(item => this.getXPosition(item.startDays, width) > x1)
+        const currentIndex = currentLaneItems.indexOf(d)
+        const nextItem = currentIndex !== -1 ? currentLaneItems[currentIndex + 1] : undefined
+        // currentLaneItems.find(item => this.getXPosition(item.startDays, width) > x1)
 
         const nextX = nextItem ? this.getXPosition(nextItem.startDays, width) : renderWidth
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
@@ -373,12 +385,12 @@ export class GanttRenderEngine {
   drawAxes(width: number) {
     this.axisG.innerHTML = ''
     this.gridG.innerHTML = ''
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    const renderWidth = this.getRenderWidth(width)
 
     const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
     const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
 
-    this.stepDays = Math.floor(totalDaysSpan / (renderWidth / 120))
+    this.stepDays = Math.max(1, Math.floor(totalDaysSpan / (renderWidth / 120)))
 
     const startDaysValue = Math.floor(this.minDays / this.stepDays) * this.stepDays - this.stepDays
     const endDaysValue = Math.ceil(this.maxDays / this.stepDays) * this.stepDays + this.stepDays
@@ -520,15 +532,16 @@ export class GanttRenderEngine {
     if (this.eventManager?.isDragging) return
     this.zoomScale = 1
     this.zoomTranslateX = 0
-    this.handleResize()
+    this.handleViewReset()
   }
 
   zoomOut(factor = 1.25) {
     if (this.eventManager?.isDragging) return
     if (this.plugin.settings.autoRestrictZoom && this.zoomScale < 0.5) return
 
-    const width = this.container.clientWidth || 800
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    const width = this.container.clientWidth
+    if (!width || width <= 0) return
+    const renderWidth = this.getRenderWidth(width)
     const centerX = renderWidth / 2
 
     const oldScale = this.zoomScale
@@ -538,65 +551,73 @@ export class GanttRenderEngine {
     /* Focal point zoom: adjust translateX so center point stays pinned */
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
     this.zoomScale = newScale
-    this.handleResize()
+    this.handlePanOrZoom()
   }
 
   zoomIn(factor = 1.25) {
     if (this.eventManager?.isDragging) return
-    if (this.plugin.settings.autoRestrictZoom && this.stepDays < 2) return
 
-    const width = this.container.clientWidth || 800
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    const width = this.container.clientWidth
+    if (!width || width <= 0) return
+    const renderWidth = this.getRenderWidth(width)
+
+    /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
+    const daysSpan = (this.maxDays - this.minDays) / this.zoomScale
+    if (this.plugin.settings.autoRestrictZoom && daysSpan <= 4) return
+
     const centerX = renderWidth / 2
-
     const oldScale = this.zoomScale
     const newScale = oldScale * factor
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
     this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
     this.zoomScale = newScale
-    this.handleResize()
+    this.handlePanOrZoom()
   }
 
   /** Shift view left by moving translateX positive */
   panLeft(percentage = 0.25) {
     if (this.eventManager?.isDragging) return
-    const width = this.container.clientWidth || 800
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
+
+    const width = this.container.clientWidth
+    const renderWidth = this.getRenderWidth(width)
+    // width - this.config.margin.left - this.config.margin.right
 
     this.zoomTranslateX += renderWidth * percentage
-    this.handleResize()
+    this.handlePanOrZoom()
   }
 
   /** Shift view right by moving translateX negative */
   panRight(percentage = 0.25) {
     if (this.eventManager?.isDragging) return
-    const width = this.container.clientWidth || 800
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
+
+    const width = this.container.clientWidth
+    const renderWidth = this.getRenderWidth(width)
+    // width - this.config.margin.left - this.config.margin.right
 
     this.zoomTranslateX -= renderWidth * percentage
-    this.handleResize()
+    this.handlePanOrZoom()
   }
 
   toggleShowBars(val: boolean) {
     this.config.showBars = val
-    this.updateSettings()
+    this.updateViewAfterToggle()
   }
 
   toggleShowPoints(val: boolean) {
     this.config.showPoints = val
-    this.updateSettings()
+    this.updateViewAfterToggle()
   }
 
   toggleGrouping(val: boolean) {
     this.config.enableGrouping = val
-    this.updateSettings()
+    this.updateViewAfterToggle()
   }
 
-  updateSettings() {
+  private updateViewAfterToggle() {
     this.initLayout()
     this.initChartStructure()
-    this.handleResize()
+    this.handleResize(false)
   }
 
   public destroy() {
@@ -617,7 +638,7 @@ export class GanttRenderEngine {
       return
     }
 
-    const renderWidth = Math.max(1, width - this.config.margin.left - this.config.margin.right)
+    const renderWidth = this.getRenderWidth(width)
 
     // Case A: Predefined min and/or max bounds supplied
     if (lower !== undefined || upper !== undefined) {
@@ -657,7 +678,7 @@ export class GanttRenderEngine {
 
     const eras = items.filter(i => i.displayType === 'era')
     const nonEras = items.filter(i => i.displayType !== 'era')
-      .sort((a, b) => a.startDays - b.startDays)
+    .sort((a, b) => a.startDays - b.startDays)
 
     // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
 
@@ -688,7 +709,9 @@ export class GanttRenderEngine {
   }
 
   getXPosition(days: number, width: number): number {
-    const renderWidth = width - this.config.margin.left - this.config.margin.right
+    if (this.maxDays <= this.minDays) return this.zoomTranslateX // fail-safe
+
+    const renderWidth = this.getRenderWidth(width)
     const percentage = (days - this.minDays) / (this.maxDays - this.minDays)
     return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
   }
@@ -703,4 +726,8 @@ export class GanttRenderEngine {
     return this.dataG.querySelector<T>(selector)
   }
 
+  getRenderWidth(width?: number) {
+    const containerWidth = width ?? this.container.clientWidth
+    return Math.max(1, containerWidth - this.config.margin.left - this.config.margin.right)
+  }
 }

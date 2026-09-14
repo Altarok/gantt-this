@@ -133,7 +133,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
     this.rafId ??= window.requestAnimationFrame(() => {
-      const width = this.engine.container.clientWidth || 800
+      const width = this.engine.container.clientWidth
+      if (!width || width <= 0) return
       this.engine.renderData(width)
       this.engine.drawAxes(width)
       this.rafId = null
@@ -142,12 +143,19 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   private zoom(e: WheelEvent) {
     if (!this.currentSvg) return
-    const width = this.engine.container.clientWidth || 800
+    const width = this.engine.container.clientWidth
+    if (!width || width <= 0) return
     const rect = this.currentSvg.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.engine.config.margin.left
 
     let zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-    if (this.settings.autoRestrictZoom && this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
+
+    const daysSpan = (this.engine.maxDays - this.engine.minDays) / this.engine.zoomScale
+
+    /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
+    if (this.settings.autoRestrictZoom && daysSpan <= 4 && zoomFactor > 1) return
+
+    // if ( /* this.settings.autoRestrictZoom && */ this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
     let nextScale = this.engine.zoomScale * zoomFactor
     if (this.settings.autoRestrictZoom && nextScale < 0.5) nextScale = 0.5
 
@@ -195,7 +203,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     /* needs to exist for drag events */
   }
 
-  private get settings(){
+  private get settings() {
     return this.pluginSettings
   }
 }

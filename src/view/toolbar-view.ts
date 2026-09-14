@@ -1,6 +1,8 @@
-import {setIcon, setTooltip} from 'obsidian'
+import {Platform, setIcon, setTooltip} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
+
+const isMobile = Platform.isMobile
 
 type ToggleStates = {
   bars: boolean
@@ -17,7 +19,7 @@ function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLB
 }
 
 function addSeparator(container: HTMLDivElement) {
-  container.createDiv({cls: Css.toolbar.separator})
+  if (!isMobile) container.createDiv({cls: Css.toolbar.separator})
 }
 
 function createGroup(container: HTMLDivElement) {

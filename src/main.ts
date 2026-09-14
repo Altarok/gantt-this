@@ -9,7 +9,6 @@ import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'
 
-
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
   calendarConfigsCache = new Map<string, CalendarConfig>()
