@@ -82,14 +82,11 @@ export class ToolbarView {
     this.debugInfoButton = createButton(g3, 'info', 'Debug info')
 
     if (plugin.settings.showButtonsToHideGroups) {
-      // addSeparator(container)
       const g4 = createGroup(container)
 
       /* Create buttons to hide groups */
-      // const hideGroupEl = container.createDiv({cls: 'gt-toolbar-hide-groups'})
       const groups = plugin.settings.groups
       for (const group of groups) {
-        // const subGroup = g4.createDiv({cls: })
         let isVisible: boolean = group?.visible ?? false
         const button = createButton(g4, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
         g4.createDiv({text: group.id})

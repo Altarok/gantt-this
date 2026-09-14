@@ -55,21 +55,6 @@
   font-size: var(--font-ui-small);
 }
 
-/* Force the zoom buttons to take full row width on mobile */
-.is-mobile .gt-toolbar-buttongroup {
-  /*width: 100%;*/
-  display: flex;
-  gap: 6px;
-}
-
-@media (width <= 768px) {
-  .gt-toolbar-buttongroup {
-    /*width: 100%;*/
-    display: flex;
-    gap: 6px;
-  }
-}
-
 .gt-toolbar-separator {
   width: 2px;
   height: 18px; /* Match the height of your icons */

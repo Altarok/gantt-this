@@ -3,16 +3,12 @@ export const Css = {
 
   toolbar: {
     container: 'gt-toolbar-container',
-    /* Reduces horizontal space between buttons */
-    buttonGroup: 'gt-toolbar-buttongroup',
-    button: 'gt-toolbar-button',
-    /* Separates button groups */
-    separator: 'gt-toolbar-separator',
+    buttonGroup: 'gt-toolbar-buttongroup', /* Reduces horizontal space between buttons */
+    button: 'gt-toolbar-button', /* Button and SVG sizes */
+    separator: 'gt-toolbar-separator', /* Separates button groups */
   },
 
-
   inputLabel: 'gt-input-label',
-  // btn: 'gt-btn',
   chartContainer: 'gt-chart-container',
   axis: {
     baseline: 'gt-axis-baseline',
