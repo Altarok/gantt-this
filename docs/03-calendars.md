@@ -29,15 +29,15 @@ If you use custom time systems or fictional calendars in your vault, you can def
   for range checks.
 - **`offsetToDayZero`**: (number, calculated) Not usually set by users — the plugin writes/calculates this value when
   reading the calendar from YAML. It represents days offset to the plugin's internal day-zero.
-- **`type`**: (string, required) Calendar type. Supported values: `positional`, `rule-based`, `gregorian`. Determines
+- **`type`**: (string, required) Calendar type. Supported values: `positional`, `leapYearRule-based`, `gregorian`. Determines
   which additional keys are required:
   - `positional`: Calendar defined by ordered positional units (e.g., seasons, boles). Use `positionalUnits`.
-  - `rule-based` / `gregorian`: Use `ruleBasedDetails` to describe months, leap rules, and formats.
+  - `leapYearRule-based` / `gregorian`: Use `ruleBasedDetails` to describe months, leap rules, and formats.
 - **`delimiter`**: (string, optional) Separator used in textual date representations (for example `-` in
   `1420-Afterlithe-21`).
 - **`positionalUnits`**: (array of objects, positional type only) Each unit is `{ name: string, days: number }`. Use for
   calendars that specify named positions with fixed day lengths rather than month/day rules.
-- **`ruleBasedDetails`**: (object, rule-based/gregorian only) Contains details for month names, leap-year handling, and
+- **`ruleBasedDetails`**: (object, leapYearRule-based/gregorian only) Contains details for month names, leap-year handling, and
   formatting:
   - **`months`**: array of month objects `{ name: string, shortname?: string, days: number, isIntercalary?: boolean }`
     describing month order and lengths. `isIntercalary` marks days that do not belong to any month (e.g., Yule days).

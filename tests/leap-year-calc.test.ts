@@ -1,7 +1,11 @@
 import {describe, expect, it} from 'vitest'
-import {isCustomLeapYear, isLeapYear} from '../src/date-calculations/leap-year-calc'
+import {isCustomLeapYear, isGregorianLeapYear} from '../src/date-calculations/leap-year-calc'
 import {gregorianConfig, shireConfig} from './test-configs'
-import {LeapYearRule} from '../src/const/types'
+import {CalendarConfig, LeapYearRule} from '../src/const/types'
+
+function isLeapYear(y: number): boolean {
+  return isGregorianLeapYear(y)
+}
 
 describe('Leap year calculations should work for', () => {
 

@@ -1,6 +1,6 @@
 import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent} from '../const/types'
-import {isCustomLeapYear, isLeapYear} from '../date-calculations/leap-year-calc'
+import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
 
 const TODAY = 'today'
@@ -63,7 +63,7 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig, as
   /* Calculate 1-based day of the year (e.g., Jan 1st is Day 1) */
   remainingDays -= totalDaysToYearStart
 
-  const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  const monthDays = [31, isGregorianLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
   let month = 1
   for (const daysInMonth of monthDays) {
@@ -123,7 +123,7 @@ function parseDaysToNonGregorianDateString(days: number, config: CalendarConfig,
       // Convert custom year back to target Gregorian year based on epoch
       const epochYear = config.sharedOffset.year
       const targetGregorianYear = epochYear + (customYear - 1)
-      return isLeapYear(targetGregorianYear)
+      return isGregorianLeapYear(targetGregorianYear)
     }
     return isCustomLeapYear(customYear, details.leapYearRule)
   }

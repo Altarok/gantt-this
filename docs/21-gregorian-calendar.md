@@ -18,11 +18,11 @@ id: gregorian               # mandatory. unique ID for each calendar, referenced
 name: Gregorian Calendar    # optional name, used as axis description if `displayName` is not given  
 displayName: Gregorian      # optional display name for axis description
 sharedOffset: 0             # used to define offset between calendars
-type: "rule-based"          # mandatory. just keep this like that, see Mayan calendar for alternative
+type: "leapYearRule-based"          # mandatory. just keep this like that, see Mayan calendar for alternative
 delimiter: "-"              # mandatory. symbol used to separate your days/months/years 
 ruleBasedDetails:
   daysInStandardYear: 365   
-  leapYearRule:                                        # optional leap year rule
+  leapYearRule:                                        # optional leap year leapYearRule
     ruleType: "gregorian"                              # Triggers the divisible by 4, but not 100 unless 400 math - alteratives are 'interval' | 'none'
     applyToMonthIndex: 1                               # February. first month has index 0 in this case
     extraDays: 1                                       # optional. defaults to 1 anyway

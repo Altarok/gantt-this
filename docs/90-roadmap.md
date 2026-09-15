@@ -25,10 +25,10 @@ See [[91-changelog|Changelog]] for implemented features.
   - Focus shown dates on more natural periods.
   - Set a safe default zoom and restore it when re-opening files.
 - Calendars:
-  - Add a manually configurable leap year rule. - CePeU
+  - Add a manually configurable leap year leapYearRule. - CePeU
   - Add `YyWwDd format`. - CePeU
   - Remove duplicate calendar ID definition in calendar notes.
-  - Rename `rule-based`.
+  - Rename `leapYearRule-based`.
 - Highlight weekends.
 - Manage rerender cooldown depending on the content of the changed file. - CePeU
 - Add a setting for the time difference between calendar axis ticks. - Charatzu

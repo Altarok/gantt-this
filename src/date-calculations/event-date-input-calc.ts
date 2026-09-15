@@ -39,7 +39,7 @@ export function parseEventDate(_doCheckForRepetitions: boolean,
 
 export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
   if (config.type === 'positional') return parseEventDateWithPositionalConfig(cleanInput, config)
-  else if (config.type === 'rule-based') return parseEventDateWithRuleBasedConfig(cleanInput, config)
+  else if (config.type === 'leapYearRule-based') return parseEventDateWithRuleBasedConfig(cleanInput, config)
   else return null
 }
 

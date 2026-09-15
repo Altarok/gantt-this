@@ -37,7 +37,7 @@ id: my-first-calendar # unique id for each calendar
 name: Example Calendar # a calendar name as shown in the Gantt chart
 sharedOffset: 0
 startDay: 1
-type: rule-based
+type: leapYearRule-based
 delimiter: "-"
 ruleBasedDetails:
   daysInStandardYear: 365

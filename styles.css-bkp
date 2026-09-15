@@ -530,7 +530,7 @@
   margin-bottom: 5px;
 }
 
-/* Style row text via nesting inside existing rule */
+/* Style row text via nesting inside existing leapYearRule */
 .gt-settings-row span {
   flex-grow: 1;
   font-weight: bold;
