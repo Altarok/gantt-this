@@ -39,9 +39,10 @@ export type Moon = {
 }
 
 export type RuleBasedDetails = {
-  months: MonthDefinition[]
-  leapYearRule?: LeapYearRule
   daysInStandardYear: number
+  noYearZero?: boolean;
+  leapYearRule?: LeapYearRule
+  months: MonthDefinition[]
   /**
    * Defines the order of elements in the date string.
    * For '1420-Afterlithe-21', format is ['year', 'month', 'day']
