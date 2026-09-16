@@ -10,6 +10,7 @@ export const GregorianCalendar: CalendarConfig = {
   type: 'rule-based',
   delimiter: '-',
   ruleBasedDetails: {
+    noYearZero: false, // == default value
     daysInStandardYear: 365,
     leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 1},
     format: ['year', 'month', 'day'],

@@ -34,12 +34,14 @@ export function parseEventDate(_doCheckForRepetitions: boolean,
 
   if (parsedDate) parsedDate.repeatRule = repeatRule
 
+  // debugger
+
   return parsedDate
 }
 
 export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
   if (config.type === 'positional') return parseEventDateWithPositionalConfig(cleanInput, config)
-  else if (config.type === 'leapYearRule-based') return parseEventDateWithRuleBasedConfig(cleanInput, config)
+  else if (config.type === 'rule-based') return parseEventDateWithRuleBasedConfig(cleanInput, config)
   else return null
 }
 
@@ -112,13 +114,19 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
     }
   }
 
+  const noYearZero = calendarConfig.ruleBasedDetails?.noYearZero
+  if (noYearZero === true) {
+    if (year === 0) return null // TODO #error caching
+    if (year < 0) year = year + 1
+  }
+
   /* Reject invalid input! */
   const isInvalid: boolean = isNaN(year) || isNaN(day) || day < 1 || (typeof monthName === 'number' && monthName < 1)
   if (isInvalid) return null
 
   /* Calculate days from previous years */
   const daysFromYears = calculateDaysForYears(year - 1, details)
-  const isLeap = isCustomLeapYear(year, details.leapYearRule)
+  const isLeap = isCustomLeapYear(year, calendarConfig, true)
 
   /* Handle Ordinal Dates (No month block in the format) */
   if (!monthName) {
@@ -173,5 +181,8 @@ function calculateDaysForYears(upToYear: number, details: RuleBasedDetails): num
       totalDays += Math.floor(upToYear / 4) - Math.floor(upToYear / 100) + Math.floor(upToYear / 400)
     }
   }
+
+  // debugger
+
   return totalDays
 }

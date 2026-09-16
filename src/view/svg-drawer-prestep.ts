@@ -80,6 +80,13 @@ export default class GanttRender {
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
+    // if (Platform.isMobile) {
+    //   mainWrapper.createDiv({
+    //     cls: 'gt-mobile-chart-bottom-spacer',
+    //     attr: {style: 'height: 60px; width: 100%; flex-shrink: 0;'}
+    //   })
+    // }
+
     const tv = new ToolbarView(toolbarContainer, this.plugin, refreshChartCallback)
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */

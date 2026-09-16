@@ -92,7 +92,7 @@ function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: Co
 function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
 
   if (typeof date === 'string')
-    return parseEventDate(false,false /* not important in this case */, date, calendarConfig) ?? undefined
+    return parseEventDate(false, false /* not important in this case */, date, calendarConfig) ?? undefined
   else
     return {days: date, display: createAxisDateDescription(date, calendarConfig)}
 }

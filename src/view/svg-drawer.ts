@@ -113,7 +113,7 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
- 
+
     // activeData = Recurring.expandRecurringEvents(this, activeData)
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
@@ -313,10 +313,8 @@ export class GanttRenderEngine {
         const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
-        // const x1 = this.getXPosition(d.startDays, width)
-
         const x1 = this.getXPosition(d.startDays, width)
-        const x2 = (!d.endDays || d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)
+        const x2 = (d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)
         const renderWidth = this.getRenderWidth(width)
 
         // Calculate available width for timestamp text (Method 1)

@@ -40,7 +40,7 @@ export type Moon = {
 
 export type RuleBasedDetails = {
   daysInStandardYear: number
-  noYearZero?: boolean;
+  noYearZero?: boolean // default false
   leapYearRule?: LeapYearRule
   months: MonthDefinition[]
   /**

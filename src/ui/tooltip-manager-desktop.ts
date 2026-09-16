@@ -123,6 +123,9 @@ export class TooltipManager implements HoverParent {
       cellKey.textContent = p.key
       const cellVal = row.insertCell()
       cellVal.textContent = p.value
+      /*
+       * TODO @CePeU replace startd and end dates with outputformat
+       */
     }
   }
 
