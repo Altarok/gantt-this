@@ -28,7 +28,7 @@ See [[91-changelog|Changelog]] for implemented features.
   - Add a manually configurable leap year leapYearRule. - CePeU
   - Add `YyWwDd format`. - CePeU
   - Remove duplicate calendar ID definition in calendar notes.
-  - Rename `leapYearRule-based`.
+  - Rename `rule-based`.
 - Highlight weekends.
 - Manage rerender cooldown depending on the content of the changed file. - CePeU
 - Add a setting for the time difference between calendar axis ticks. - Charatzu

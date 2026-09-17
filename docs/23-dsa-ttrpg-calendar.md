@@ -16,7 +16,7 @@ name: The Dark Eye Calendar    # optional name, used as axis description if `dis
 displayName: TDE               # optional display name for axis description
 sharedOffset: 0                # used to define offset between calendars
 startDay: 1
-type: leapYearRule-based               # mandatory.
+type: rule-based               # mandatory.
 delimiter: "-"                 # mandatory. symbol used to separate your days/months/years 
 ruleBasedDetails:
   daysInStandardYear: 365      # self-explanatory

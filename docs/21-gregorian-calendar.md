@@ -18,7 +18,7 @@ id: gregorian               # mandatory. unique ID for each calendar, referenced
 name: Gregorian Calendar    # optional name, used as axis description if `displayName` is not given  
 displayName: Gregorian      # optional display name for axis description
 sharedOffset: 0             # used to define offset between calendars
-type: "leapYearRule-based"          # mandatory. just keep this like that, see Mayan calendar for alternative
+type: "rule-based"          # mandatory. just keep this like that, see Mayan calendar for alternative
 delimiter: "-"              # mandatory. symbol used to separate your days/months/years 
 ruleBasedDetails:
   daysInStandardYear: 365   

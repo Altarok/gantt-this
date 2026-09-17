@@ -30,7 +30,7 @@
 //
 // export interface CalendarConfig {
 //   id: string
-//   type: 'leapYearRule-based' | 'positional'
+//   type: 'rule-based' | 'positional'
 //   offsetToDayZero: number
 //   bcSuffix?: string
 //   adSuffix?: string
@@ -46,7 +46,7 @@
 //
 //   YAML
 // gantt-calendar-definition: fantasy
-// type: leapYearRule-based
+// type: rule-based
 // offsetToDayZero: 0
 // delimiter: '-'
 // bcSuffix: 'BC'
