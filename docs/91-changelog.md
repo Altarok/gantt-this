@@ -10,7 +10,16 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 > Disclaimer: The mentioned frontmatter properties represent their default keys;
 > you may have renamed them in your vault.
 
+## [v1.3.0.](https://github.com/Altarok/gantt-this/releases/tag/1.3.0), 2026-09-17
+
+Added optional calendar property `without year zero`.
+This enables you to use the more natural Gregorian calendar used outside of astronomy and computers.
+
+- Add `noYearZero: true|false` to the `ruleBasedDetails` part of a calendar.
+  - Omitting the property will default to `false`.
+
 ## [v1.2.4](https://github.com/Altarok/gantt-this/releases/tag/1.2.4), 2026-09-14
+
 - Prevent default swipe reaction on mobile for a smoother manual pan experience.
 
 ## [v1.2.3](https://github.com/Altarok/gantt-this/releases/tag/1.2.3), 2026-09-14
@@ -29,7 +38,7 @@ See [[90-roadmap|Roadmap]] for upcoming features.
 - Removed default group 'general' from event creation
   - -> Group can now contain vertical-line events and eras
 - Zoom and Pan buttons no longer broken when upper and lower bound given
-- Edge case behaviour on maximum zoom no longer broken 
+- Edge case behaviour on maximum zoom no longer broken
   - Maximum zoom now shows 4 dates
 
 ## [v1.2.2](https://github.com/Altarok/gantt-this/releases/tag/1.2.2), 2026-08-28
