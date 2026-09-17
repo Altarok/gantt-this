@@ -1,7 +1,7 @@
 import {setIcon} from 'obsidian'
 import {Css} from '../const/constants'
 import {GanttChartConfig, GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
-import {ManualSvg} from "./manual-svg-icons";
+import {ManualSvg} from './manual-svg-icons'
 
 const iconSize = 16
 const iconRadius = iconSize / 2

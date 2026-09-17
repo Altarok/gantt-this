@@ -38,11 +38,11 @@ describe('Parsing positional event dates works for', () => {
   const {positionalUnits} = mayanConfig
 
   it('Mayan input', () => {
-    const mayanDayOne = parseDate('0.0.0.0.1', config);
+    const mayanDayOne = parseDate('0.0.0.0.1', config)
     expect(mayanDayOne.days).toBe(mayanConfig.offsetToDayZero + 1)
     expect(mayanDayOne.display).toBe('0.0.0.0.1')
 
-    const anotherMayanDate = parseDate('0.0.11.2.3', mayanConfig);
+    const anotherMayanDate = parseDate('0.0.11.2.3', mayanConfig)
     expect(anotherMayanDate.days).toBe(mayanConfig.offsetToDayZero
       + 11 * positionalUnits[2]!.days
       + 2 * positionalUnits[3]!.days
@@ -136,7 +136,7 @@ describe('Parsing rule-base event dates works for', () => {
   })
 
   it('shire dates', () => {
-    const aHobbitDate = parseDate('0001-Afteryule-9', shireConfig);
+    const aHobbitDate = parseDate('0001-Afteryule-9', shireConfig)
     expect(aHobbitDate.days).toBe(2)
     expect(aHobbitDate.display).toBe('1-Afteryule-9')
   })

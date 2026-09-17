@@ -1,6 +1,6 @@
 // import {CalendarConfig, GanttItem, RepeatRule} from '../const/types'
 // import {GanttRenderEngine} from '../view/svg-drawer'
-// import {createParsedDate} from "../date-calculations/event-date-input-calc";
+// import {createParsedDate} from '../date-calculations/event-date-input-calc'
 //
 // // export type RepeatRule = {
 // //   delta: number

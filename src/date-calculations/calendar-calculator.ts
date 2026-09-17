@@ -15,29 +15,28 @@
  */
 
 // export interface CalendarRuleDetails {
-//   daysInStandardYear: number;
-//   noYearZero?: boolean; // New YAML property TODO
+//   daysInStandardYear: number
+//   noYearZero?: boolean // New YAML property TODO
 //   leapYearRule?: {
-//     ruleType: 'none' | 'gregorian' | 'interval';
-//     intervalYears?: number;
-//     extraDays?: number;
-//     applyToMonthIndex?: number;
-//   };
-//   months?: Array<{ name?: string; shortname?: string; days: number }>;
-//   format?: string[];
-//   outputFormat?: string[];
+//     ruleType: 'none' | 'gregorian' | 'interval'
+//     intervalYears?: number
+//     extraDays?: number
+//     applyToMonthIndex?: number
+//   }
+//   months?: Array<{ name?: string; shortname?: string; days: number }>
+//   format?: string[]
+//   outputFormat?: string[]
 // }
 //
 // export interface CalendarConfig {
-//   id: string;
-//   type: 'leapYearRule-based' | 'positional';
-//   offsetToDayZero: number;
-//   delimiter: string;
-//   bcSuffix?: string;
-//   adSuffix?: string;
-//   sharedOffset?: number | { year: number };
-//   ruleBasedDetails?: CalendarRuleDetails;
-//   positionalUnits?: Array<{ name: string; days: number }>;
+//   id: string
+//   type: 'leapYearRule-based' | 'positional'
+//   offsetToDayZero: number
+//   bcSuffix?: string
+//   adSuffix?: string
+//   sharedOffset?: number | { year: number }
+//   ruleBasedDetails?: CalendarRuleDetails
+//   positionalUnits?: Array<{ name: string; days: number }>
 // }
 
 

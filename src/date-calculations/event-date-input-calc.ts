@@ -180,7 +180,5 @@ function calculateDaysForYears(upToYear: number, details: RuleBasedDetails): num
     }
   }
 
-  // debugger
-
   return totalDays
 }

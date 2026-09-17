@@ -1,4 +1,4 @@
-// import {Notice} from 'obsidian'
+import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
@@ -24,7 +24,7 @@ function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig)
   if (input.length > TODAY.length) {
     const suffix = input.slice(TODAY.length).trim()
     if (TODAY_SUFFIX_PATTERN.test(suffix)) absoluteDay += Number(suffix)
-    // else new Notice(`Failed to parse descriptive date '${input}'.'`)
+    else new Notice(`Failed to parse descriptive date '${input}'.'`)
   }
 
   // pass calculated day count into description generator
