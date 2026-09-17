@@ -1,4 +1,4 @@
-import {Notice} from 'obsidian'
+// import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
@@ -24,7 +24,7 @@ function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig)
   if (input.length > TODAY.length) {
     const suffix = input.slice(TODAY.length).trim()
     if (TODAY_SUFFIX_PATTERN.test(suffix)) absoluteDay += Number(suffix)
-    else new Notice(`Failed to parse descriptive date '${input}'.'`)
+    // else new Notice(`Failed to parse descriptive date '${input}'.'`)
   }
 
   // pass calculated day count into description generator
@@ -174,7 +174,7 @@ function parseDaysToNonGregorianDateString(days: number,
   /* Determine the Month and Day */
   let monthName = ''
   let dayOfPeriod = 1
-  const isLeap = isCustomLeapYear(displayedYear, config, true)
+  const isLeap = isCustomLeapYear(year, config, true)
 
   if (details.months?.length > 0) {
     for (let m = 0; m < details.months.length; m++) {
@@ -227,8 +227,6 @@ export function createAxisDateDescription(days: number, config: CalendarConfig |
 
   let description: string
 
-  debugger
-
   if (!config) {
 
     /* Workaround: fall back to default Gregorian, but since 1970 */
@@ -255,8 +253,6 @@ export function createAxisDateDescription(days: number, config: CalendarConfig |
   } else {
     description = 'n/a'
   }
-
-  debugger
 
   return description
 }

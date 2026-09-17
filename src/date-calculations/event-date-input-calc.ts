@@ -34,8 +34,6 @@ export function parseEventDate(_doCheckForRepetitions: boolean,
 
   if (parsedDate) parsedDate.repeatRule = repeatRule
 
-  // debugger
-
   return parsedDate
 }
 

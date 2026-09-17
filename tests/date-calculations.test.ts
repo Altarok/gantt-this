@@ -3,6 +3,7 @@ import {createAxisDateDescription} from '../src/util/dates'
 import {
   frenchRevolutionConfig,
   gregorianConfig,
+  gregorianConfigWithoutYearZero,
   gregorianWithoutMonthsConfig,
   mayanConfig,
   shireConfig
@@ -13,7 +14,7 @@ import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
 
 describe('Verify test data is configured correctly', () => {
 
-  it('test gregorian epoch gregorian', () => {
+  it('test Gregorian epoch Gregorian', () => {
     const {sharedOffset} = gregorianConfig
 
     let offsetTo1_1_1970 = 0
@@ -32,14 +33,14 @@ describe('Verify test data is configured correctly', () => {
     expect(locallyCalculatedOffsetToDayZero).toBe(gregorianConfig.offsetToDayZero)
   })
 
-  it('test gregorian offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = parseEventDate('0000-12-31', gregorianConfig)
+  it('test Gregorian offsetToDayZero (manually configured for tests)', () => {
+    const parseToAbsoluteDays = parseEventDate(false, false, '0000-12-31', gregorianConfig)
     expect(parseToAbsoluteDays.days).toBe(gregorianConfig.offsetToDayZero)
     expect(parseToAbsoluteDays.display).toBe('0-Dec-31')
   })
 
 
-  it('test shire epoch gregorian', () => {
+  it('test shire epoch Gregorian', () => {
     const {sharedOffset} = shireConfig
 
     const date = new Date('0001-01-01')
@@ -53,7 +54,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test shire offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = parseEventDate('1-2. Yule-1', shireConfig)
+    const parseToAbsoluteDays = parseEventDate(false, false, '1-2. Yule-1', shireConfig)
     expect(parseToAbsoluteDays.days).toBe(shireConfig.offsetToDayZero + 1)
     expect(parseToAbsoluteDays.display).toBe('1-2. Yule-1')
   })
@@ -72,7 +73,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test mayan offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = parseEventDate('0.0.0.0.0', mayanConfig)
+    const parseToAbsoluteDays = parseEventDate(false, false, '0.0.0.0.0', mayanConfig)
     expect(parseToAbsoluteDays.days).toBe(mayanConfig.offsetToDayZero)
     expect(parseToAbsoluteDays.display).toBe('0.0.0.0.0')
   })
@@ -91,9 +92,9 @@ describe('Verify test data is configured correctly', () => {
   })
 
   it('test french revolution offsetToDayZero (manually configured for tests)', () => {
-    const parseToAbsoluteDays = parseEventDate('0-leap_days-6', frenchRevolutionConfig)
-    expect(parseToAbsoluteDays.days).toBe(frenchRevolutionConfig.offsetToDayZero)
-    expect(parseToAbsoluteDays.display).toBe('0-leap_days-6')
+    const frenchDayOne = parseEventDate(false, false, '1-1-1', frenchRevolutionConfig)
+    expect(frenchDayOne.days).toBe(frenchRevolutionConfig.offsetToDayZero + 1)
+    expect(frenchDayOne.display).toBe('1-Vendémiaire-1')
   })
 
 
@@ -102,10 +103,13 @@ describe('Verify test data is configured correctly', () => {
 describe('Creation of axis date description works for', () => {
 
   const gregorian = (days: number) => createAxisDateDescription(days, gregorianConfig)
+  const gregorianWithoutZero = (days: number) => createAxisDateDescription(days, gregorianConfigWithoutYearZero)
   const french = (days: number) => createAxisDateDescription(frenchRevolutionConfig.offsetToDayZero + days, frenchRevolutionConfig)
 
-  it('default gregorian dates', () => {
+  it('positive Gregorian dates (iso-8601)', () => {
     expect(gregorian(1)).toBe('0001-Jan-01')
+    expect(gregorian(59)).toBe('0001-Feb-28')
+    expect(gregorian(60)).toBe('0001-Mar-01') // not a leap year
     expect(gregorian(334)).toBe('0001-Nov-30')
     expect(gregorian(365)).toBe('0001-Dec-31')
     expect(gregorian(366)).toBe('0002-Jan-01')
@@ -114,13 +118,42 @@ describe('Creation of axis date description works for', () => {
     expect(gregorian(3650)).toBe('0010-Dec-29')
   })
 
-  it('non-positive gregorian dates', () => {
+  it('non-positive Gregorian dates (iso-8601)', () => {
     expect(gregorian(0)).toBe('0000-Dec-31')
     expect(gregorian(-1)).toBe('0000-Dec-30')
+    expect(gregorian(-2)).toBe('0000-Dec-29')
+    expect(gregorian(-3)).toBe('0000-Dec-28')
     expect(gregorian(-31)).toBe('0000-Nov-30')
-    expect(gregorian(-365)).toBe('0000-Jan-01') // year zero is a leap year
+    expect(gregorian(-305)).toBe('0000-Mar-01')
+    expect(gregorian(-306)).toBe('0000-Feb-29') // year zero is a leap year
+    expect(gregorian(-365)).toBe('0000-Jan-01')
     expect(gregorian(-366)).toBe('-0001-Dec-31')
     expect(gregorian(-3650)).toBe('-0009-Jan-03') // 3 leap years > shift 3 days
+  })
+
+  it('positive Gregorian dates (natural)', () => {
+    expect(gregorianWithoutZero(1)).toBe('0001-Jan-1')
+    expect(gregorianWithoutZero(59)).toBe('0001-Feb-28')
+    expect(gregorianWithoutZero(60)).toBe('0001-Mar-1') // not a leap year
+    expect(gregorianWithoutZero(334)).toBe('0001-Nov-30')
+    expect(gregorianWithoutZero(365)).toBe('0001-Dec-31')
+    expect(gregorianWithoutZero(366)).toBe('0002-Jan-1')
+    expect(gregorianWithoutZero(367)).toBe('0002-Jan-2')
+    expect(gregorianWithoutZero(397)).toBe('0002-Feb-1')
+    expect(gregorianWithoutZero(3650)).toBe('0010-Dec-29')
+  })
+
+  it('non-positive Gregorian dates (natural)', () => {
+    expect(gregorianWithoutZero(0)).toBe('-0001-Dec-31')
+    expect(gregorianWithoutZero(-1)).toBe('-0001-Dec-30')
+    expect(gregorianWithoutZero(-2)).toBe('-0001-Dec-29')
+    expect(gregorianWithoutZero(-3)).toBe('-0001-Dec-28')
+    expect(gregorianWithoutZero(-31)).toBe('-0001-Nov-30')
+    expect(gregorianWithoutZero(-305)).toBe('-0001-Mar-1')
+    expect(gregorianWithoutZero(-306)).toBe('-0001-Feb-29') // year zero is a leap year
+    expect(gregorianWithoutZero(-365)).toBe('-0001-Jan-1')
+    expect(gregorianWithoutZero(-366)).toBe('-0002-Dec-31')
+    expect(gregorianWithoutZero(-3650)).toBe('-0010-Jan-3') // 3 leap years > shift 3 days
   })
 
   it('default french-revolution dates', () => {
@@ -132,7 +165,6 @@ describe('Creation of axis date description works for', () => {
     expect(french(61)).toBe('0001-Frimaire-1')
     expect(french(365)).toBe('0001-leap_days-5')
     expect(french(366)).toBe('0001-leap_days-6') // 1792 is leap
-
     // 2-5 years
     expect(french(365 * 2)).toBe('0002-leap_days-4')
     expect(french(365 * 3)).toBe('0003-leap_days-4')
@@ -167,11 +199,11 @@ describe('Creation of axis date description works for', () => {
 
 describe('Parse days to date format', () => {
 
-  it('gregorian', () => {
+  it('Gregorian', () => {
     expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-Jan-01')
   })
 
-  it('gregorian without months', () => {
+  it('Gregorian without months', () => {
     expect(createAxisDateDescription(1, gregorianWithoutMonthsConfig)).toBe('0001.1')
     expect(createAxisDateDescription(2, gregorianWithoutMonthsConfig)).toBe('0001.2')
     expect(createAxisDateDescription(3, gregorianWithoutMonthsConfig)).toBe('0001.3')
@@ -191,7 +223,7 @@ describe('Parse days to date format', () => {
   })
 
   it('have reversible in- and output', () => {
-    const expected = parseEventDate('1970-01-01', gregorianConfig)
+    const expected = parseEventDate(false, false, '1970-01-01', gregorianConfig)
 
     const s = createAxisDateDescription(expected.days, gregorianConfig)
 
