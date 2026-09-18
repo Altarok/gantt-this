@@ -2,7 +2,8 @@
 
 Obsidian plugin able to show a Gantt chart for multiple fantasy calendars.
 
-> See this for more extensive documentation: https://altarok.github.io/gantt-this/
+> See this for more extensive documentation:
+https://altarok.github.io/quartz/
 
 > Hint: This is an automated translation of the German README (`LIESMICH.md`).
 
