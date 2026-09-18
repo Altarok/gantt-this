@@ -278,6 +278,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           {
             name: 'Filename as start date',
             desc: 'Use filename as fallback start date. May be of use for daily notes. Experimental - use with care!',
+            visible: false,
             control: {
               type: 'toggle', key: 'useFilenameAsFallbackStartDate',
               defaultValue: DEFAULT_SETTINGS.useFilenameAsFallbackStartDate,
@@ -345,7 +346,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
         items: [
           {
             name: 'Restrict minimum and maximum zoom',
-            desc: 'Maximum zoom shows adjacent days, minimum zoom fits your complete dataset.',
+            desc: 'Maximum zoom shows 4 adjacent days, minimum zoom fits your complete dataset.',
             control: {
               type: 'toggle', key: 'autoRestrictZoom', defaultValue: DEFAULT_SETTINGS.autoRestrictZoom
             }
