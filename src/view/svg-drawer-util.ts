@@ -7,14 +7,6 @@ const iconSize = 16
 const iconRadius = iconSize / 2
 const textLeftPadding = 3
 
-/*
-Element,Default Anchor Point,Positioned By
-<g> (Group),"Top-Left (0, 0)","transform=""translate(x, y)"""
-<bar>,Top-Left corner,"x, y"
-<circle>,Center,"cx, cy"
-<text>,Bottom-Left baseline (by default),"x, y"
- */
-
 export const Util = {
   createSvg,
   filterActiveEventData,
@@ -322,12 +314,6 @@ const moonSvgs: Record<number, DocumentFragment> = {
   2: ManualSvg.fullMoon,
   3: ManualSvg.waningHalfMoon
 }
-// const moonIcons: Record<number, string> = {
-//   0: 'gt-custom-newMoon',
-//   1: 'gt-custom-crescentHalfMoon',
-//   2: 'gt-custom-fullMoon',
-//   3: 'gt-custom-waningHalfMoon'
-// }
 
 /**
  * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
@@ -362,7 +348,6 @@ export function drawMoonPhase(cx: number,
 
   if (color) g.style.color = color
 
-  // setIcon(g, innerContent)
   g.appendChild(innerContent.cloneNode(true)) // do not use g.innerHTML = innerContent
   svgContainer.appendChild(g)
 }

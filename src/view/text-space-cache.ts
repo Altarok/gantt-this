@@ -1,31 +1,53 @@
-// export type LabelBounds = { x1: number, x2: number }
-//
-// /**
-//  * Tracks rendered label positions per horizontal timeline row to prevent overlap.
-//  */
-// export class LabelOccupancyTracker {
-//   private occupiedRanges: LabelBounds[] = []
-//
-//   /** Reset bounds before each full chart redrawing */
-//   public clear(): void {
-//     this.occupiedRanges = []
-//   }
-//
-//   /**
-//    * Checks if a label fits without overlapping existing labels.
-//    * If it fits, registers its bounds and returns true.
-//    */
-//   public tryRegisterLabel(x: number, width: number, padding = 10): boolean {
-//     const x1 = x - padding
-//     const x2 = x + width + padding
-//
-//     for (const range of this.occupiedRanges) {
-//       if (x1 < range.x2 && x2 > range.x1) {
-//         return false // Overlap detected!
-//       }
-//     }
-//
-//     this.occupiedRanges.push({x1, x2})
-//     return true
-//   }
-// }
+import {GanttGroup} from "../const/types";
+
+export type LabelBounds = { x1: number, x2: number }
+
+/**
+ * Tracks rendered label positions per horizontal timeline row to prevent overlap.
+ */
+export default class TextWidthCache {
+  private cache: Record<string, number>
+  private svgCache: Record<string, number>
+
+  constructor(readonly badgePadding: number = 12) {
+    this.cache = {}
+    this.svgCache = {}
+  }
+
+  getSvgWidth(svg: SVGTextElement, groupName: string): number {
+    const text = groupName.toUpperCase()
+    // svg.textContent = text
+    if (this.svgCache[text] !== undefined) return this.svgCache[text]
+
+    const w = (svg.getComputedTextLength() || text.length * 6.5) + 20
+
+    this.svgCache[text] = w
+    return w
+  }
+
+  getWidth(text: string): number {
+    if (this.cache[text] !== undefined) return this.cache[text]
+
+    const w = this.measureTextWidth(text)
+    this.cache[text] = w
+    return w
+  }
+
+  private measureTextWidth(text: string): number {
+    const canvas = window.createEl('canvas')
+    const context = canvas.getContext('2d')
+    if (!context) return text.length * 8
+
+    /* Match: font-size: 0.75em (~12px in default Obsidian), font-weight: bold */
+    context.font = 'bold 12px sans-serif'
+
+    /* Explicitly measure uppercase because CSS applies text-transform: uppercase */
+    return context.measureText(text.toUpperCase()).width + this.badgePadding
+  }
+
+  public reset(): void {
+    this.cache = {}
+    this.svgCache = {}
+  }
+
+}

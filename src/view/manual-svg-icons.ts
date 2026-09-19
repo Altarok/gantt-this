@@ -80,11 +80,6 @@ function addManualSvgsToObsidianCache() {
   addIcon('customGroupCrossed', groupCrossedButtonIcon)
 
   addIcon('gt-custom-resetPanAndZoom', resetZoomAndPanButtonIcon)
-
-  // addIcon('gt-custom-newMoon', moonPhase0)
-  // addIcon('gt-custom-crescentHalfMoon', moonPhase1)
-  // addIcon('gt-custom-fullMoon', moonPhase2)
-  // addIcon('gt-custom-waningHalfMoon', moonPhase3)
 }
 
 export const ManualSvg = {

@@ -17,6 +17,7 @@ import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
 import {ManualSvg} from './manual-svg-icons'
 import {drawMoons} from './moon-drawer'
+import TextWidthCache from "./text-space-cache";
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -33,7 +34,6 @@ export class GanttRenderEngine {
   private activeAxesList: string[] = []
   private totalHeight = 400
   private resizeObserver: ResizeObserver
-  // private readonly arrowColor: string
 
   config: GanttChartConfig = {
     showEras: true,
@@ -60,8 +60,8 @@ export class GanttRenderEngine {
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
               public readonly codeBlockContent: CodeBlockContent,
-              public readonly selectedFrontmatterProperties: string[] | null) {
-    // this.arrowColor = plugin.app.isDarkMode() ? 'white' : 'black'
+              public readonly selectedFrontmatterProperties: string[] | null,
+              readonly textCache: TextWidthCache) {
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
@@ -249,28 +249,25 @@ export class GanttRenderEngine {
     this.backgroundG.innerHTML = ''
 
     if (this.config.enableGrouping) {
-      this.groups.forEach((d, i) => {
+      this.groups.forEach((group, i) => {
 
         const groupG = Util.createSvg('g')
-        groupG.setAttribute('transform', `translate(0, ${d.yOffset})`)
+        groupG.setAttribute('transform', `translate(0, ${group.yOffset})`)
 
         const cssClass = i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd
-        const rect = Util.createSvg('rect', cssClass, {width, height: d.height})
+        const rect = Util.createSvg('rect', cssClass, {width, height: group.height})
         groupG.appendChild(rect)
 
         this.backgroundG.appendChild(groupG)
 
         const badge = Util.createSvg('rect', Css.group.badge, {x: 10})
+        const label = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
         groupG.appendChild(badge)
-        const text = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
-        groupG.appendChild(text)
-        text.textContent = d.name.toUpperCase()
+        groupG.appendChild(label)
 
-        const computedLength = text.getComputedTextLength()
-        const textWidthEstimate = computedLength || d.name.length * 6.5
-        const badgeWidth = (textWidthEstimate + 20).toString()
-
-        badge.setAttribute('width', badgeWidth)
+        label.textContent = group.name.toUpperCase()
+        const badgeWidth = this.textCache.getSvgWidth(label, group.name)
+        badge.setAttribute('width', String(badgeWidth))
       })
     }
   }
@@ -495,36 +492,22 @@ export class GanttRenderEngine {
         individualAxisG.appendChild(headerG)
 
         const badge = Util.createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
+        const label = Util.createSvg('text', Css.axis.label, {x: 14, y: 19})
+        headerG.appendChild(badge)
+        headerG.appendChild(label)
 
         /* Calculate width accurately off-screen with explicit uppercase padding */
-        const textWidth = this.measureTextWidth(calBadgeTextContent)
-        const badgePadding = 12
-        const exactWidth = textWidth + badgePadding
-
-        badge.setAttribute('width', exactWidth.toFixed(1))
-        headerG.appendChild(badge)
-
-        const label = Util.createSvg('text', Css.axis.label, {x: 14, y: 19})
-        label.textContent = calBadgeTextContent
-
-        headerG.appendChild(label)
+        label.textContent = calBadgeTextContent.toUpperCase()
+        const badgeWidth = this.textCache.getWidth(calBadgeTextContent)
+        // TODO choose algorithm
+        // const badgeWidth = this.textCache.getSvgWidth(label, calBadgeTextContent)
+        badge.setAttribute('width', badgeWidth.toFixed(1))
       }
 
       this.axisG.appendChild(individualAxisG)
     })
   }
 
-  private measureTextWidth(text: string): number {
-    const canvas = window.createEl('canvas')
-    const context = canvas.getContext('2d')
-    if (!context) return text.length * 8
-
-    /* Match: font-size: 0.75em (~12px in default Obsidian), font-weight: bold */
-    context.font = 'bold 12px sans-serif'
-
-    /* Explicitly measure uppercase because CSS applies text-transform: uppercase */
-    return context.measureText(text.toUpperCase()).width
-  }
 
   resetZoom() {
     if (this.eventManager?.isDragging) return
@@ -676,7 +659,7 @@ export class GanttRenderEngine {
 
     const eras = items.filter(i => i.displayType === 'era')
     const nonEras = items.filter(i => i.displayType !== 'era')
-    .sort((a, b) => a.startDays - b.startDays)
+      .sort((a, b) => a.startDays - b.startDays)
 
     // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
 

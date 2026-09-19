@@ -6,6 +6,7 @@ import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ToolbarView} from './toolbar-view'
 import {setToolbarReactions} from './toolbar-controller'
+import TextWidthCache from "./text-space-cache";
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
@@ -80,13 +81,6 @@ export default class GanttRender {
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
-    // if (Platform.isMobile) {
-    //   mainWrapper.createDiv({
-    //     cls: 'gt-mobile-chart-bottom-spacer',
-    //     attr: {style: 'height: 60px; width: 100%; flex-shrink: 0;'}
-    //   })
-    // }
-
     const tv = new ToolbarView(toolbarContainer, this.plugin, refreshChartCallback)
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */
@@ -106,11 +100,11 @@ export default class GanttRender {
       data,
       this.plugin,
       codeBlockContent,
-      this.selectedFrontmatterProperties
+      this.selectedFrontmatterProperties,
+      new TextWidthCache()
     )
 
     setToolbarReactions(tv, renderEngine, refreshChartCallback)
-
   }
 }
 
