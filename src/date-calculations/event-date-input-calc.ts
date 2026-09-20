@@ -1,14 +1,13 @@
 import {CalendarConfig, ParsedDate, RepeatRule, RuleBasedDetails} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
 import {Dates} from '../util/dates'
-
-// import {Recurring} from '../util/recurring-events'
+import {Recurring} from '../util/recurring-events'
 
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
  */
-export function parseEventDate(_doCheckForRepetitions: boolean,
-                               _isStartDate: boolean,
+export function parseEventDate(doCheckForRepetitions: boolean,
+                               isStartDate: boolean,
                                input?: string,
                                config?: CalendarConfig | null): ParsedDate | null {
 
@@ -16,12 +15,12 @@ export function parseEventDate(_doCheckForRepetitions: boolean,
 
   let repeatRule: RepeatRule | undefined = undefined
 
-  // if (doCheckForRepetitions && input.contains(' repeat ')) {
-  //   const parts = input.split(' repeat ')
-  //   input = parts[0] ?? ''
-  //   const suffix = parts[1] ?? ''
-  // repeatRule = Recurring.createRepeatRule(isStartDate, suffix.trim(), config)
-  // }
+  if (doCheckForRepetitions && input.contains(' repeat ')) {
+    const parts = input.split(' repeat ')
+    input = parts[0] ?? ''
+    const suffix = parts[1] ?? ''
+    if (suffix) repeatRule = Recurring.createRepeatRule(isStartDate, suffix.trim(), config)
+  }
 
   let cleanInput: string // e.g. 2026-08-13
   if (input.startsWith(Dates.TODAY)) {

@@ -121,10 +121,11 @@
   pointer-events: none;
 }
 
+/* Text of calendar axis badge */
 .gt-axis-label {
+  fill: var(--background-modifier-border);
   font-size: 0.75em;
   font-weight: bold;
-  fill: var(--background-modifier-border);
   text-transform: uppercase;
   pointer-events: none;
   user-select: none;
@@ -268,6 +269,7 @@
   pointer-events: none;
 }
 
+/* Text of group axis badge */
 .gt-group-text {
   fill: var(--text-accent);
   font-size: 10px;

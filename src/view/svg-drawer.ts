@@ -17,7 +17,8 @@ import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
 import {ManualSvg} from './manual-svg-icons'
 import {drawMoons} from './moon-drawer'
-import TextWidthCache from "./text-space-cache";
+import TextWidthCache from './text-space-cache'
+import {Recurring} from '../util/recurring-events'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
@@ -114,7 +115,11 @@ export class GanttRenderEngine {
   initLayout() {
     let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
 
-    // activeData = Recurring.expandRecurringEvents(this, activeData)
+    debugger
+
+    activeData = Recurring.expandRecurringEvents(this, activeData)
+
+    debugger
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
@@ -689,7 +694,7 @@ export class GanttRenderEngine {
     return {processedData, totalLanes: lanes.length}
   }
 
-  getXPosition(days: number, width: number): number {
+  getXPosition(days: number, width?: number): number {
     if (this.maxDays <= this.minDays) return this.zoomTranslateX // fail-safe
 
     const renderWidth = this.getRenderWidth(width)

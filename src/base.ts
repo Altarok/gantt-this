@@ -23,6 +23,9 @@ export class GanttThisBasesView extends BasesView {
   }
 
   public onDataUpdated(): void {
+
+    debugger
+
     this.containerEl.empty()
     const files = this.preFilterFiles()
 
