@@ -38,7 +38,7 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
   }
 
   if (!delta) {
-    console.info(`input(${input}) --> repeatRule: undefined`)
+    // console.info(`input(${input}) --> repeatRule: undefined`)
     return undefined
   }
 
@@ -73,7 +73,7 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
 
   const repeatRule: RepeatRule = {delta, startDate, endDate}
 
-  console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
+  // console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
 
   return repeatRule
 }
@@ -88,21 +88,22 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
 function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): GanttItem[] {
   const expanded: GanttItem[] = []
 
-  debugger
+  // debugger
 
   for (const item of items) {
     expanded.push(item) // Always include the base event
 
     if (!item.repeatRule) continue
 
-    debugger
+    // debugger
 
     const interval = item.repeatRule.delta
     const duration = item.endDays ? (item.endDays - item.startDays) : 0
     // const isTimestamp = duration === 0
 
     // Determine bounds for repetition
-    const maxLimit = item.repeatRule.endDate ? Math.min(engine.maxDays, item.repeatRule.endDate) : engine.maxDays
+    const {maxDays} = engine.viewConfig
+    const maxLimit = item.repeatRule.endDate ? Math.min(maxDays, item.repeatRule.endDate) : maxDays
 
     let currentStart = item.startDays + interval
 
@@ -121,7 +122,7 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
 
     while (currentStart <= maxLimit) {
       // Only create instances within render range (or slightly padded)
-      if (currentStart >= engine.minDays - interval) {
+      if (currentStart >= engine.viewConfig.minDays - interval) {
         expanded.push({
           ...item,
           id: item.id, // Keep base ID if elements highlight together, or generate synthetic unique IDs

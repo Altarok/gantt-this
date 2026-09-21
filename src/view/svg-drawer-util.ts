@@ -1,7 +1,8 @@
 import {setIcon} from 'obsidian'
 import {Css} from '../const/constants'
-import {GanttChartConfig, GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
+import {GanttItem, GanttItemDisplayTypes, SvgDrawerData} from '../const/types'
 import {ManualSvg} from './manual-svg-icons'
+import {GanttChartViewModel} from "../model/gantt-chart-model";
 
 const iconSize = 16
 const iconRadius = iconSize / 2
@@ -77,7 +78,7 @@ function addIconIfPresent(d: GanttItem,
 
 function filterActiveEventData(rawData: GanttItem[],
                                svgDrawerData: SvgDrawerData,
-                               ganttChartConfig: GanttChartConfig): GanttItem[] {
+                               ganttChartConfig: GanttChartViewModel): GanttItem[] {
   const {mappedGrpConfigs, mappedCalConfigs} = svgDrawerData
 
   return rawData.filter(d => {

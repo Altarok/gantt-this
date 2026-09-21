@@ -1,5 +1,6 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
+import {GanttChartViewModel} from "../model/gantt-chart-model";
 
 export class GanttMobileEventManager implements GanttEventManager {
   public isDragging = false
@@ -22,7 +23,11 @@ export class GanttMobileEventManager implements GanttEventManager {
   private readonly boundSvgTouchStart: (e: TouchEvent) => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
+  viewConfig: GanttChartViewModel
+
   constructor(private engine: GanttRenderEngine) {
+    this.viewConfig = engine.viewConfig
+
     this.autoRestrictZoom = this.engine.plugin.settings.autoRestrictZoom
 
     this.boundWindowTouchMove = this.handleTouchMove.bind(this)
@@ -69,7 +74,7 @@ export class GanttMobileEventManager implements GanttEventManager {
       e.preventDefault()
       e.stopPropagation()
 
-      this.engine.zoomTranslateX = this.startTranslateX + (e.touches[0]!.clientX - this.startX)
+      this.viewConfig.panTranslateX = this.startTranslateX + (e.touches[0]!.clientX - this.startX)
       this.scheduleRender()
     } else if (e.touches.length === 2 && this.pinchDistance) {
       if (e.cancelable) e.preventDefault()
@@ -86,13 +91,13 @@ export class GanttMobileEventManager implements GanttEventManager {
       this.isDragging = true
       this.isPinching = false
       this.startX = touch.clientX
-      this.startTranslateX = this.engine.zoomTranslateX
+      this.startTranslateX = this.viewConfig.panTranslateX
       this.touchStartPos = {x: touch.clientX, y: touch.clientY}
     } else if (e.touches.length === 2) {
       this.isDragging = false
       this.isPinching = true
       this.pinchDistance = this.getTouchDistance(e.touches[0]!, e.touches[1]!)
-      this.initialZoomScale = this.engine.zoomScale
+      this.initialZoomScale = this.viewConfig.zoomFactor
     }
   }
 
@@ -125,20 +130,20 @@ export class GanttMobileEventManager implements GanttEventManager {
     if (currentDistance === 0) return
 
     const rect = this.svg.getBoundingClientRect()
-    const touchMidX = (t1.clientX + t2.clientX) / 2 - rect.left - this.engine.config.margin.left
+    const touchMidX = (t1.clientX + t2.clientX) / 2 - rect.left - this.engine.viewConfig.margin.left
 
     const pinchFactor = currentDistance / this.pinchDistance
     let nextScale = this.initialZoomScale * pinchFactor
 
-    if (this.autoRestrictZoom && this.engine.stepDays < 2 && nextScale > this.engine.zoomScale) {
-      nextScale = this.engine.zoomScale
+    if (this.autoRestrictZoom && this.viewConfig.stepDays < 2 && nextScale > this.viewConfig.zoomFactor) {
+      nextScale = this.viewConfig.zoomFactor
     }
     if (this.autoRestrictZoom && nextScale < 0.5) {
       nextScale = 0.5
     }
 
-    this.engine.zoomTranslateX = touchMidX - (touchMidX - this.engine.zoomTranslateX) * (nextScale / this.engine.zoomScale)
-    this.engine.zoomScale = nextScale
+    this.viewConfig.panTranslateX = touchMidX - (touchMidX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
+    this.viewConfig.zoomFactor = nextScale
 
     this.scheduleRender()
   }

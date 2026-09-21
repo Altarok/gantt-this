@@ -2,6 +2,7 @@ import {ControlKey, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {TooltipManager} from './tooltip-manager-desktop'
+import {GanttChartViewModel} from "../model/gantt-chart-model";
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -20,8 +21,12 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private readonly boundSvgMouseMove: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
+  viewConfig: GanttChartViewModel
+
   constructor(readonly engine: GanttRenderEngine,
               readonly pluginSettings: PluginSettings) {
+    this.viewConfig = engine.viewConfig
+
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -87,7 +92,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     if (this.isDragging) {
       const deltaX = e.clientX - this.startX
-      this.engine.zoomTranslateX = this.startTranslateX + deltaX
+      this.viewConfig.panTranslateX = this.startTranslateX + deltaX
 
       this.rafId ??= window.requestAnimationFrame(() => {
         const width = this.engine.container.clientWidth || 800
@@ -102,7 +107,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
     this.isDragging = true
     this.startX = e.clientX
-    this.startTranslateX = this.engine.zoomTranslateX
+    this.startTranslateX = this.viewConfig.panTranslateX
   }
 
   private isModifierActive(e: MouseEvent, key: ControlKey): boolean {
@@ -129,7 +134,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private pan(e: WheelEvent) {
-    this.engine.zoomTranslateX = this.engine.zoomTranslateX - Math.floor(e.deltaY / 2)
+    this.viewConfig.panTranslateX = this.viewConfig.panTranslateX - Math.floor(e.deltaY / 2)
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
     this.rafId ??= window.requestAnimationFrame(() => {
@@ -146,21 +151,21 @@ export class GanttDesktopEventManager implements GanttEventManager {
     const width = this.engine.container.clientWidth
     if (!width || width <= 0) return
     const rect = this.currentSvg.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left - this.engine.config.margin.left
+    const mouseX = e.clientX - rect.left - this.engine.viewConfig.margin.left
 
-    let zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
+    let newZoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
 
-    const daysSpan = (this.engine.maxDays - this.engine.minDays) / this.engine.zoomScale
+    const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
 
     /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
-    if (this.settings.autoRestrictZoom && daysSpan <= 4 && zoomFactor > 1) return
+    if (this.settings.autoRestrictZoom && daysSpan <= 4 && newZoomFactor > 1) return
 
     // if ( /* this.settings.autoRestrictZoom && */ this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
-    let nextScale = this.engine.zoomScale * zoomFactor
+    let nextScale = this.viewConfig.zoomFactor * newZoomFactor
     if (this.settings.autoRestrictZoom && nextScale < 0.5) nextScale = 0.5
 
-    this.engine.zoomTranslateX = mouseX - (mouseX - this.engine.zoomTranslateX) * (nextScale / this.engine.zoomScale)
-    this.engine.zoomScale = nextScale
+    this.viewConfig.panTranslateX = mouseX - (mouseX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
+    this.viewConfig.zoomFactor = nextScale
 
     this.engine.renderData(width)
     this.engine.drawAxes(width)

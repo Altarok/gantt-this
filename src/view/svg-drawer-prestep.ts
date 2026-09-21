@@ -4,9 +4,10 @@ import {Css} from '../const/constants'
 import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
-import {ToolbarView} from './toolbar-view'
-import {setToolbarReactions} from './toolbar-controller'
+import {ToolbarView} from '../views/toolbar-view'
+import {setToolbarReactions} from '../view-ctrl/toolbar-controller'
 import TextWidthCache from "./text-space-cache";
+import {GanttChartModelImpl} from "../model/gantt-chart-model";
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
@@ -81,7 +82,9 @@ export default class GanttRender {
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
-    const tv = new ToolbarView(toolbarContainer, this.plugin, refreshChartCallback)
+    const ganttChartModel = new GanttChartModelImpl()
+
+    const tv = new ToolbarView(toolbarContainer, this.plugin, ganttChartModel, refreshChartCallback)
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */
     let renderEngine: GanttRenderEngine | null = null
@@ -95,13 +98,13 @@ export default class GanttRender {
     const data = await this.getGanttItems(pluginSettings, codeBlockContent)
 
     /* Instantiate the engine */
-    renderEngine = new GanttRenderEngine(
-      chartContainer,
+    renderEngine = new GanttRenderEngine(chartContainer,
       data,
       this.plugin,
       codeBlockContent,
       this.selectedFrontmatterProperties,
-      new TextWidthCache()
+      new TextWidthCache(),
+      ganttChartModel
     )
 
     setToolbarReactions(tv, renderEngine, refreshChartCallback)

@@ -43,9 +43,8 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
   const items: GanttItem[] = []
   let incrementalId = 0
 
-  const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings> = Object.fromEntries(
-    plugin.settings.calendars.map((c) => [c.id, c])
-  )
+  const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings>
+    = Object.fromEntries(plugin.settings.calendars.map((c) => [c.id, c]))
 
   for (const file of files) {
     const cache = plugin.app.metadataCache.getFileCache(file)

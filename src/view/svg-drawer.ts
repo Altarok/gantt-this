@@ -2,7 +2,6 @@ import FantasyGanttPlugin from '../main'
 import {
   CalendarConfig,
   CodeBlockContent,
-  GanttChartConfig,
   GanttGroup,
   GanttItem,
   GanttItemDisplayType,
@@ -15,58 +14,32 @@ import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
 import {Util} from './svg-drawer-util'
-import {ManualSvg} from './manual-svg-icons'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
 import {Recurring} from '../util/recurring-events'
+import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {GanttChartView} from '../views/gantt-chart-view'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
-  svg!: SVGElement
-  private backgroundG!: SVGElement
-  private chartArea!: SVGElement
-  private gridG!: SVGElement
-  private dataG!: SVGElement
-  private axisG!: SVGElement
-  private clipRect!: SVGElement
-
   private groups: GanttGroup[] = []
-  /** Collection of calendars to be shown as axis. */
-  private activeAxesList: string[] = []
-  private totalHeight = 400
   private resizeObserver: ResizeObserver
 
-  config: GanttChartConfig = {
-    showEras: true,
-    showBars: true,
-    showPoints: true,
-    enableGrouping: true,
-    rowHeight: 24,
-    groupHeaderHeight: 25,
-    singleAxisHeight: 35,
-    margin: {top: 20, right: 0, bottom: 10, left: 0}
-  }
-
-  /* Bounds tracked in raw day counts */
-  minDays = 0
-  maxDays = 0
-  zoomScale = 1
-  zoomTranslateX = 0
-  /** Day diff between 2 axis ticks. Must be positive. */
-  stepDays = 1
-
   svgDrawerData: SvgDrawerData
+  private view: GanttChartView
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
               public readonly codeBlockContent: CodeBlockContent,
               public readonly selectedFrontmatterProperties: string[] | null,
-              readonly textCache: TextWidthCache) {
+              readonly textCache: TextWidthCache,
+              readonly viewConfig: GanttChartViewModel) {
+
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
-    this.initChartStructure()
+    this.view = this.initChartStructure()
     this.handleResize(true)
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize())
@@ -78,7 +51,7 @@ export class GanttRenderEngine {
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    this.initChartStructure()
+    this.view = this.initChartStructure()
     this.handleResize(true)
   }
 
@@ -94,8 +67,7 @@ export class GanttRenderEngine {
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
       const todayDays = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
-      this.minDays = todayDays - 15
-      this.maxDays = todayDays + 15
+      this.viewConfig.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
 
@@ -108,30 +80,29 @@ export class GanttRenderEngine {
 
     const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
 
-    this.minDays = lowerBound - paddingDays
-    this.maxDays = upperBound + paddingDays
+    this.viewConfig.setDayRange(lowerBound - paddingDays, upperBound + paddingDays)
   }
 
   initLayout() {
-    let activeItems: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
+    let activeItems: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.viewConfig)
 
-    debugger
+    // debugger
 
     let activeData: GanttItem[] = Recurring.expandRecurringEvents(this, activeItems)
 
-    debugger
+    // debugger
 
-    this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
-    Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
+    this.viewConfig.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
+    Priorities.sortCalendarAxisByPriority(this.viewConfig.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
     // TODO replace 'general' with configurable global fallback group
     const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group || 'general')))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
     this.groups = []
-    let currentYOffset = this.config.margin.top
+    let currentYOffset = this.viewConfig.margin.top
 
-    if (this.config.enableGrouping) {
+    if (this.viewConfig.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
       for (const name of groupNames) { /* groupNames is sorted! */
         groupedMap.set(name, [])
@@ -146,8 +117,8 @@ export class GanttRenderEngine {
         const {processedData, totalLanes} = this.calculateStacking(items)
         const groupContentLanes = totalLanes > 0 ? totalLanes : 0
         const groupHeight = /* Math.max(1, totalLanes) */
-          groupContentLanes * this.config.rowHeight + /* this.config.groupHeaderHeight */
-          (this.config.enableGrouping ? this.config.groupHeaderHeight : 0)
+          groupContentLanes * this.viewConfig.eventRowHeight + /* this.config.groupHeaderHeight */
+          (this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0)
         this.groups.push({
           name: groupName,
           items: processedData,
@@ -161,7 +132,7 @@ export class GanttRenderEngine {
       const {processedData, totalLanes} = this.calculateStacking(activeData)
       const groupContentLanes = totalLanes > 0 ? totalLanes : 0
       const groupHeight = /* Math.max(1, totalLanes) */
-        groupContentLanes * this.config.rowHeight
+        groupContentLanes * this.viewConfig.eventRowHeight
       this.groups.push({
         name: 'All',
         items: processedData,
@@ -175,54 +146,15 @@ export class GanttRenderEngine {
     /* Before going on, we have to sort groups by their respective priority */
     Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.svgDrawerData.mappedGrpConfigs)
 
-    const combinedAxesHeight = this.activeAxesList.length * this.config.singleAxisHeight
-    this.totalHeight = currentYOffset + combinedAxesHeight + this.config.margin.bottom
-    // this.container.style.height = '100%' /* `${this.totalHeight}px` */
+    const combinedAxesHeight = this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight
+    this.viewConfig.totalHeight = currentYOffset + combinedAxesHeight + this.viewConfig.margin.bottom
   }
 
-  initChartStructure() {
+  initChartStructure(): GanttChartView {
     if (this.eventManager) this.eventManager.destroy()
-
-    this.container.empty() // .innerHTML = ''
-
-    this.svg = Util.createSvg('svg', Css.svg.canvas)
-
-    ManualSvg.addArrowTipAsSvgDef(this.svg)
-
-    this.svg.setAttribute('height', this.totalHeight.toString())
-    this.container.appendChild(this.svg)
-
-    this.backgroundG = Util.createSvg('g')
-    this.svg.appendChild(this.backgroundG)
-
-    this.chartArea = Util.createSvg('g')
-    this.chartArea.setAttribute('transform', `translate(${this.config.margin.left}, 0)`)
-    this.svg.appendChild(this.chartArea)
-
-    /* Dedicated grid container behind bars and points */
-    this.gridG = Util.createSvg('g')
-    this.chartArea.appendChild(this.gridG)
-
-    const defs = Util.createSvg('defs')
-    const clipPath = Util.createSvg('clipPath')
-    clipPath.setAttribute('id', 'gantt-clip')
-    this.clipRect = Util.createSvg('rect')
-
-    const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
-    this.clipRect.setAttribute('height', itemsAreaHeight.toString())
-
-    clipPath.appendChild(this.clipRect)
-    defs.appendChild(clipPath)
-    this.svg.appendChild(defs)
-
-    this.dataG = Util.createSvg('g')
-    this.dataG.setAttribute('clip-path', 'url(#gantt-clip)')
-    this.chartArea.appendChild(this.dataG)
-
-    this.axisG = Util.createSvg('g')
-    this.chartArea.appendChild(this.axisG)
-
     this.eventManager = createGanttEventManager(this, this.plugin.settings)
+
+    return new GanttChartView(this.plugin, this.container, this.viewConfig)
   }
 
   handlePanOrZoom() {
@@ -244,7 +176,7 @@ export class GanttRenderEngine {
       this.transitionToPredefinedBounds(width)
     }
 
-    this.clipRect.setAttribute('width', this.getRenderWidth(width).toString())
+    this.view.clipRect.setAttribute('width', this.getRenderWidth(width).toString())
 
     this.drawGroupBackgrounds(width)
     this.renderData(width)
@@ -252,30 +184,31 @@ export class GanttRenderEngine {
   }
 
   private drawGroupBackgrounds(width: number) {
-    this.backgroundG.innerHTML = ''
+    this.view.backgroundG.empty()
 
-    if (this.config.enableGrouping) {
-      this.groups.forEach((group, i) => {
+    if (!this.viewConfig.enableGrouping) return
 
-        const groupG = Util.createSvg('g')
-        groupG.setAttribute('transform', `translate(0, ${group.yOffset})`)
+    this.groups.forEach((group, i) => {
 
-        const cssClass = i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd
-        const rect = Util.createSvg('rect', cssClass, {width, height: group.height})
-        groupG.appendChild(rect)
+      const groupG = Util.createSvg('g')
+      groupG.setAttribute('transform', `translate(0, ${group.yOffset})`)
 
-        this.backgroundG.appendChild(groupG)
+      const cssClass = i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd
+      const rect = Util.createSvg('rect', cssClass, {width, height: group.height})
+      groupG.appendChild(rect)
 
-        const badge = Util.createSvg('rect', Css.group.badge, {x: 10})
-        const label = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
-        groupG.appendChild(badge)
-        groupG.appendChild(label)
+      this.view.backgroundG.appendChild(groupG)
 
-        label.textContent = group.name.toUpperCase()
-        const badgeWidth = this.textCache.getSvgWidth(label, group.name)
-        badge.setAttribute('width', String(badgeWidth))
-      })
-    }
+      const badge = Util.createSvg('rect', Css.group.badge, {x: 10})
+      const label = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
+      groupG.appendChild(badge)
+      groupG.appendChild(label)
+
+      label.textContent = group.name.toUpperCase()
+      const badgeWidth = this.textCache.getSvgWidth(label, group.name)
+      badge.setAttribute('width', String(badgeWidth))
+    })
+
   }
 
   private mapLaneItems(group: GanttGroup, width: number): Map<number, GanttItem[]> {
@@ -292,20 +225,20 @@ export class GanttRenderEngine {
   }
 
   renderData(width: number) {
-    this.dataG.empty()
+    this.view.dataG.empty()
 
     const eraLayer = Util.createSvg('g', 'gt-layer-eras')
 
-    this.dataG.appendChild(eraLayer)
+    this.view.dataG.appendChild(eraLayer)
 
-    const halfRowHeight = this.config.rowHeight / 2
-    const firstYValue = this.config.margin.top
+    const halfRowHeight = this.viewConfig.eventRowHeight / 2
+    const firstYValue = this.viewConfig.margin.top
     const totalChartHeight = this.calculateTotalChartHeight()
 
-    const headerHeight = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
+    const headerHeight = this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0
 
     this.groups.forEach(group => {
-      const groupContentHeight = (group.lanes ?? 1) * this.config.rowHeight
+      const groupContentHeight = (group.lanes ?? 1) * this.viewConfig.eventRowHeight
       const totalGroupHeight = headerHeight + groupContentHeight
       const groupYStart = group.yOffset + headerHeight
 
@@ -313,7 +246,7 @@ export class GanttRenderEngine {
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
-        const laneY = groupYStart + (lane ?? 0) * this.config.rowHeight
+        const laneY = groupYStart + (lane ?? 0) * this.viewConfig.eventRowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
         const x1 = this.getXPosition(d.startDays, width)
@@ -338,7 +271,7 @@ export class GanttRenderEngine {
 
         if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
           case 'bar':
-            return Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.dataG)
+            return Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.view.dataG)
           case 'era': {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
@@ -348,9 +281,9 @@ export class GanttRenderEngine {
 
         } else if (GanttItemDisplayTypes.isTimestamp(displayType)) switch (displayType) {
           case 'point':
-            return Util.drawPoint(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawPoint(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'box':
-            return Util.drawBox(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawBox(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'vertical-line': {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
@@ -358,17 +291,17 @@ export class GanttRenderEngine {
             return Util.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
           }
           case 'diamond':
-            return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'triangle':
-            return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'pentagon':
-            return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'star':
-            return Util.drawStar(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawStar(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'hexagon':
-            return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
           case 'octagon':
-            return Util.drawOctagon(d, x1, laneY + halfRowHeight, this.dataG, availableWidth)
+            return Util.drawOctagon(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
         }
 
       }) // end loop group.items.forEach(GanttItem)
@@ -377,33 +310,33 @@ export class GanttRenderEngine {
 
   calculateTotalChartHeight() {
     return this.groups.reduce((acc, g) => {
-      const header = this.config.enableGrouping ? this.config.groupHeaderHeight : 0
-      const content = (g.lanes ?? 1) * this.config.rowHeight
+      const header = this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0
+      const content = (g.lanes ?? 1) * this.viewConfig.eventRowHeight
       return acc + header + content
     }, 0)
   }
 
   drawAxes(width: number) {
-    this.axisG.innerHTML = ''
-    this.gridG.innerHTML = ''
+    this.view.axisG.innerHTML = ''
+    this.view.gridG.innerHTML = ''
     const renderWidth = this.getRenderWidth(width)
 
-    const itemsAreaHeight = this.totalHeight - (this.activeAxesList.length * this.config.singleAxisHeight) - this.config.margin.bottom
-    const totalDaysSpan = (this.maxDays - this.minDays) / this.zoomScale
+    const itemsAreaHeight = this.viewConfig.totalHeight - (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight) - this.viewConfig.margin.bottom
+    const totalDaysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
 
-    this.stepDays = Math.max(1, Math.floor(totalDaysSpan / (renderWidth / 120)))
+    this.viewConfig.stepDays = Math.max(1, Math.floor(totalDaysSpan / (renderWidth / 120)))
 
-    const startDaysValue = Math.floor(this.minDays / this.stepDays) * this.stepDays - this.stepDays
-    const endDaysValue = Math.ceil(this.maxDays / this.stepDays) * this.stepDays + this.stepDays
+    const startDaysValue = Math.floor(this.viewConfig.minDays / this.viewConfig.stepDays) * this.viewConfig.stepDays - this.viewConfig.stepDays
+    const endDaysValue = Math.ceil(this.viewConfig.maxDays / this.viewConfig.stepDays) * this.viewConfig.stepDays + this.viewConfig.stepDays
 
-    this.activeAxesList.forEach((calType, index) => {
-      const currentAxisYStart = itemsAreaHeight + (index * this.config.singleAxisHeight)
-      const tickPixelSpacing = (this.stepDays / (this.maxDays - this.minDays)) * renderWidth * this.zoomScale
+    this.viewConfig.activeAxesList.forEach((calType, index) => {
+      const currentAxisYStart = itemsAreaHeight + (index * this.viewConfig.calendarAxisRowHeight)
+      const tickPixelSpacing = (this.viewConfig.stepDays / (this.viewConfig.maxDays - this.viewConfig.minDays)) * renderWidth * this.viewConfig.zoomFactor
       const showMoonPhases: boolean = this.plugin.settings.uxShowMoons && tickPixelSpacing >= 24
 
       this.svgDrawerData.drawnCals[calType] = {
         y1: currentAxisYStart,
-        y2: currentAxisYStart + this.config.singleAxisHeight - 1
+        y2: currentAxisYStart + this.viewConfig.calendarAxisRowHeight - 1
       }
 
       const individualAxisG = Util.createSvg('g')
@@ -462,7 +395,7 @@ export class GanttRenderEngine {
       //   ticksG.appendChild(title)
       // }
 
-      for (let currDays = effectiveStartDay; currDays <= effectiveEndDay; currDays += this.stepDays) {
+      for (let currDays = effectiveStartDay; currDays <= effectiveEndDay; currDays += this.viewConfig.stepDays) {
         const xPos = this.getXPosition(currDays, width)
         if (xPos < 0 || xPos > renderWidth) continue
 
@@ -471,7 +404,7 @@ export class GanttRenderEngine {
           const gridLine = Util.createSvg('line', Css.axis.gridline, {
             x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight
           })
-          this.gridG.appendChild(gridLine)
+          this.view.gridG.appendChild(gridLine)
         }
 
         const tick = Util.createSvg('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
@@ -510,34 +443,31 @@ export class GanttRenderEngine {
         badge.setAttribute('width', badgeWidth.toFixed(1))
       }
 
-      this.axisG.appendChild(individualAxisG)
+      this.view.axisG.appendChild(individualAxisG)
     })
   }
 
-
   resetZoom() {
     if (this.eventManager?.isDragging) return
-    this.zoomScale = 1
-    this.zoomTranslateX = 0
+    this.viewConfig.resetPanAndZoom()
     this.handleViewReset()
   }
 
   zoomOut(factor = 1.25) {
     if (this.eventManager?.isDragging) return
-    if (this.plugin.settings.autoRestrictZoom && this.zoomScale < 0.5) return
+    if (this.plugin.settings.autoRestrictZoom && this.viewConfig.zoomFactor < 0.5) return
 
     const width = this.container.clientWidth
     if (!width || width <= 0) return
     const renderWidth = this.getRenderWidth(width)
     const centerX = renderWidth / 2
 
-    const oldScale = this.zoomScale
+    const oldScale = this.viewConfig.zoomFactor
     let newScale = oldScale / factor
     if (this.plugin.settings.autoRestrictZoom && newScale < 0.5) newScale = 0.5
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
-    this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
-    this.zoomScale = newScale
+    this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
     this.handlePanOrZoom()
   }
 
@@ -549,16 +479,15 @@ export class GanttRenderEngine {
     const renderWidth = this.getRenderWidth(width)
 
     /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
-    const daysSpan = (this.maxDays - this.minDays) / this.zoomScale
+    const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
     if (this.plugin.settings.autoRestrictZoom && daysSpan <= 4) return
 
     const centerX = renderWidth / 2
-    const oldScale = this.zoomScale
+    const oldScale = this.viewConfig.zoomFactor
     const newScale = oldScale * factor
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
-    this.zoomTranslateX = centerX - (centerX - this.zoomTranslateX) * (newScale / oldScale)
-    this.zoomScale = newScale
+    this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
     this.handlePanOrZoom()
   }
 
@@ -566,11 +495,9 @@ export class GanttRenderEngine {
   panLeft(percentage = 0.25) {
     if (this.eventManager?.isDragging) return
 
-    const width = this.container.clientWidth
-    const renderWidth = this.getRenderWidth(width)
-    // width - this.config.margin.left - this.config.margin.right
+    const renderWidth = this.getRenderWidth()
 
-    this.zoomTranslateX += renderWidth * percentage
+    this.viewConfig.panTranslateX += renderWidth * percentage
     this.handlePanOrZoom()
   }
 
@@ -578,30 +505,13 @@ export class GanttRenderEngine {
   panRight(percentage = 0.25) {
     if (this.eventManager?.isDragging) return
 
-    const width = this.container.clientWidth
-    const renderWidth = this.getRenderWidth(width)
-    // width - this.config.margin.left - this.config.margin.right
+    const renderWidth = this.getRenderWidth()
 
-    this.zoomTranslateX -= renderWidth * percentage
+    this.viewConfig.panTranslateX -= renderWidth * percentage
     this.handlePanOrZoom()
   }
 
-  toggleShowBars(val: boolean) {
-    this.config.showBars = val
-    this.updateViewAfterToggle()
-  }
-
-  toggleShowPoints(val: boolean) {
-    this.config.showPoints = val
-    this.updateViewAfterToggle()
-  }
-
-  toggleGrouping(val: boolean) {
-    this.config.enableGrouping = val
-    this.updateViewAfterToggle()
-  }
-
-  private updateViewAfterToggle() {
+  updateViewAfterToggle() {
     this.initLayout()
     this.initChartStructure()
     this.handleResize(false)
@@ -618,10 +528,9 @@ export class GanttRenderEngine {
     const upper = this.codeBlockContent.upperBoundDateParsed?.days
     const center = this.codeBlockContent.centerHereDateParsed?.days
 
-    const totalRange = this.maxDays - this.minDays
+    const totalRange = this.viewConfig.maxDays - this.viewConfig.minDays
     if (totalRange <= 0) {
-      this.zoomScale = 1
-      this.zoomTranslateX = 0
+      this.viewConfig.resetPanAndZoom()
       return
     }
 
@@ -629,36 +538,35 @@ export class GanttRenderEngine {
 
     // Case A: Predefined min and/or max bounds supplied
     if (lower !== undefined || upper !== undefined) {
-      const targetMin = lower ?? this.minDays
-      const targetMax = upper ?? this.maxDays
+      const targetMin = lower ?? this.viewConfig.minDays
+      const targetMax = upper ?? this.viewConfig.maxDays
       const targetRange = targetMax - targetMin
 
       if (targetRange > 0) {
-        this.zoomScale = totalRange / targetRange
+        this.viewConfig.zoomFactor = totalRange / targetRange
         // Pixel position of targetMin at scale 1:
-        const minXAtScale1 = ((targetMin - this.minDays) / totalRange) * renderWidth
+        const minXAtScale1 = ((targetMin - this.viewConfig.minDays) / totalRange) * renderWidth
         // Shift targetMin to pixel X = 0 under the new zoomScale:
-        this.zoomTranslateX = -(minXAtScale1 * this.zoomScale)
+        this.viewConfig.panTranslateX = -(minXAtScale1 * this.viewConfig.zoomFactor)
         return
       }
     }
 
     // Case B: Single center point specified
     if (center !== undefined) {
-      const currentScale = this.zoomScale > 0 ? this.zoomScale : 1
-      this.zoomScale = currentScale
+      const currentScale = this.viewConfig.zoomFactor > 0 ? this.viewConfig.zoomFactor : 1
+      this.viewConfig.zoomFactor = currentScale
 
-      const centerXAtScale1 = ((center - this.minDays) / totalRange) * renderWidth
+      const centerXAtScale1 = ((center - this.viewConfig.minDays) / totalRange) * renderWidth
       const centerXZoomed = centerXAtScale1 * currentScale
 
       // Center the target day in the middle of renderWidth:
-      this.zoomTranslateX = (renderWidth / 2) - centerXZoomed
+      this.viewConfig.panTranslateX = (renderWidth / 2) - centerXZoomed
       return
     }
 
     // Default: Full view reset
-    this.zoomScale = 1
-    this.zoomTranslateX = 0
+    this.viewConfig.resetPanAndZoom()
   }
 
   private calculateStacking(items: GanttItem[]) {
@@ -695,11 +603,11 @@ export class GanttRenderEngine {
   }
 
   getXPosition(days: number, width?: number): number {
-    if (this.maxDays <= this.minDays) return this.zoomTranslateX // fail-safe
+    if (this.viewConfig.maxDays <= this.viewConfig.minDays) return this.viewConfig.panTranslateX // fail-safe
 
     const renderWidth = this.getRenderWidth(width)
-    const percentage = (days - this.minDays) / (this.maxDays - this.minDays)
-    return (percentage * renderWidth * this.zoomScale) + this.zoomTranslateX
+    const percentage = (days - this.viewConfig.minDays) / (this.viewConfig.maxDays - this.viewConfig.minDays)
+    return (percentage * renderWidth * this.viewConfig.zoomFactor) + this.viewConfig.panTranslateX
   }
 
   // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
@@ -709,11 +617,11 @@ export class GanttRenderEngine {
 
   findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
     const selector = `[data-id="${id}"]`
-    return this.dataG.querySelector<T>(selector)
+    return this.view.dataG.querySelector<T>(selector)
   }
 
   getRenderWidth(width?: number) {
     const containerWidth = width ?? this.container.clientWidth
-    return Math.max(1, containerWidth - this.config.margin.left - this.config.margin.right)
+    return Math.max(1, containerWidth - this.viewConfig.margin.left - this.viewConfig.margin.right)
   }
 }

@@ -1,7 +1,3 @@
-import {GanttGroup} from "../const/types";
-
-export type LabelBounds = { x1: number, x2: number }
-
 /**
  * Tracks rendered label positions per horizontal timeline row to prevent overlap.
  */
@@ -9,7 +5,7 @@ export default class TextWidthCache {
   private cache: Record<string, number>
   private svgCache: Record<string, number>
 
-  constructor(readonly badgePadding: number = 12) {
+  constructor(readonly badgePadding = 12) {
     this.cache = {}
     this.svgCache = {}
   }

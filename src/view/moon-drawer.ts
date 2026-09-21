@@ -2,16 +2,15 @@ import {GanttRenderEngine} from './svg-drawer'
 import {CalendarConfig, Moon} from '../const/types'
 import {Util} from './svg-drawer-util'
 
-export function drawMoons(
-  engine: GanttRenderEngine,
-  ticksG: SVGGElement,
-  width: number,
-  calendarConfig: CalendarConfig | undefined,
-  startDaysValue: number,
-  endDaysValue: number,
-  effectiveStartDay: number,
-  effectiveEndDay: number,
-  renderWidth: number) {
+export function drawMoons(engine: GanttRenderEngine,
+                          ticksG: SVGGElement,
+                          width: number,
+                          calendarConfig: CalendarConfig | undefined,
+                          startDaysValue: number,
+                          endDaysValue: number,
+                          effectiveStartDay: number,
+                          effectiveEndDay: number,
+                          renderWidth: number) {
 
   const moons = calendarConfig?.moons ?? []
   const moonCount = moons?.length ?? 0
@@ -52,8 +51,7 @@ export function drawMoons(
       if (exactDay < startDaysValue || exactDay > endDaysValue)
         return
 
-      if (x >= 0 && x <= renderWidth)
-        Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
+      if (x >= 0 && x <= renderWidth) Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
     }
 
     for (let k = minK; k <= maxK; k++) {

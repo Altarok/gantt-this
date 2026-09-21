@@ -1,14 +1,15 @@
 import {Platform, setIcon, setTooltip} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
+import {GanttChartViewModel} from '../model/gantt-chart-model'
 
 const isMobile = Platform.isMobile
 
-type ToggleStates = {
-  bars: boolean
-  timestamps: boolean
-  grouping: boolean
-}
+// type ToggleStates = {
+//   bars: boolean
+//   timestamps: boolean
+//   grouping: boolean
+// }
 
 /* See https://lucide.dev for icons */
 function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
@@ -27,7 +28,7 @@ function createGroup(container: HTMLDivElement) {
 }
 
 export class ToolbarView {
-  private toggleStates: ToggleStates
+  // private toggleStates: ToggleStates
 
   /*
    * Toolbar buttons in order (LTR)
@@ -47,13 +48,15 @@ export class ToolbarView {
   /**
    * @param container HTML div destined to contains the Gantt chart's toolbar
    * @param plugin
+   * @param viewConfig
    * @param refreshChartCallback
    */
   constructor(container: HTMLDivElement,
               readonly plugin: FantasyGanttPlugin,
+              readonly viewConfig: GanttChartViewModel,
               refreshChartCallback: () => void) {
     const {showPanAndZoomButtonsInToolbar} = plugin.settings
-    this.toggleStates = {bars: true, timestamps: true, grouping: true}
+    // this.toggleStates = {bars: true, timestamps: true, grouping: true}
 
     this.reloadButton = createButton(container, 'refresh-cw', 'Reload data')
 
@@ -107,21 +110,21 @@ export class ToolbarView {
 
 
   handleToggleBarsButtonClick(): boolean {
-    this.toggleStates.bars = !this.toggleStates.bars
-    setIcon(this.toggleBarsButton, this.toggleStates.bars ? 'chart-bar-big' : 'customBarChartCrossed')
-    return this.toggleStates.bars
+    this.viewConfig.showBars = !this.viewConfig.showBars
+    setIcon(this.toggleBarsButton, this.viewConfig.showBars ? 'chart-bar-big' : 'customBarChartCrossed')
+    return this.viewConfig.showBars
   }
 
   handleToggleTimestampsButtonClick(): boolean {
-    this.toggleStates.timestamps = !this.toggleStates.timestamps
-    setIcon(this.toggleTimestampButton, this.toggleStates.timestamps ? 'customScatterChart' : 'customScatterChartCrossed')
-    return this.toggleStates.timestamps
+    this.viewConfig.showPoints = !this.viewConfig.showPoints
+    setIcon(this.toggleTimestampButton, this.viewConfig.showPoints ? 'customScatterChart' : 'customScatterChartCrossed')
+    return this.viewConfig.showPoints
   }
 
   handleToggleGroupingButtonClick(): boolean {
-    this.toggleStates.grouping = !this.toggleStates.grouping
-    setIcon(this.toggleEventGroupingButton, this.toggleStates.grouping ? 'group' : 'customGroupCrossed')
-    return this.toggleStates.grouping
+    this.viewConfig.enableGrouping = !this.viewConfig.enableGrouping
+    setIcon(this.toggleEventGroupingButton, this.viewConfig.enableGrouping ? 'group' : 'customGroupCrossed')
+    return this.viewConfig.enableGrouping
   }
 
   /**

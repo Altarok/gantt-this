@@ -201,12 +201,12 @@ export type GanttChartButtonSelection = {
   enableGrouping: boolean
 }
 
-export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
-  rowHeight: number,
-  groupHeaderHeight: number,
-  singleAxisHeight: number,
-  margin: { top: number, right: number, bottom: number, left: number }
-}
+// export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
+//   // rowHeight: number,
+//   groupHeaderHeight: number,
+//   singleAxisHeight: number,
+//   margin: { top: number, right: number, bottom: number, left: number }
+// }
 
 export type ControlKey = 'ctrl' | 'alt' | 'shift'
 export const ControlKeyMapped = {
@@ -282,6 +282,10 @@ export type PluginSettings = GanttChartSources & {
   uxHighlightRelatedEvents: boolean // highlight predecessors and successors
   uxConnectRelatedEvents: boolean // connect predecessors and successors
   uxMoveToolbarBelowChart: boolean
+
+  viewEventRowHeight: number
+  viewEventShapeHeight: number
+  viewEventIconHeight: number
 } & ConfigurableFrontmatterPropertyNames & HideableSettingPages
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -346,7 +350,10 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_successors: 'gantt-successors',
 
   hideSettingsPageUx: true,
-  hideSettingsPageFrontmatterProperties: true
+  hideSettingsPageFrontmatterProperties: true,
+  viewEventRowHeight: 24,
+  viewEventShapeHeight: 16,
+  viewEventIconHeight: 16
 } as const
 
 /**  Data updated on a redraw, not while panning or zooming */

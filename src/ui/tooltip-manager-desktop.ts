@@ -213,12 +213,12 @@ export class TooltipManager implements HoverParent {
    */
   private updateLine(ganttItem: GanttItem, line: VerticalOverlay, x: number) {
 
-    const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.config.margin.top
+    const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.viewConfig.margin.top
 
     const xS = String(x)
 
     line.upper.setAttribute('x1', xS)
-    line.upper.setAttribute('y1', String(this.engine.config.margin.top))
+    line.upper.setAttribute('y1', String(this.engine.viewConfig.margin.top))
     line.upper.setAttribute('x2', xS)
     line.upper.setAttribute('y2', String(totalChartHeight))
 
