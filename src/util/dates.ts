@@ -8,7 +8,8 @@ const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
 
 export const Dates = {
   TODAY,
-  parseDescriptiveDateToValidInput
+  parseDescriptiveDateToValidInput,
+  getTodayInDays
 }
 
 /**
@@ -255,4 +256,8 @@ export function createAxisDateDescription(days: number, config: CalendarConfig |
   }
 
   return description
+}
+
+function getTodayInDays(){
+ return Math.floor(Date.now() / (24 * 60 * 60 * 1000))
 }

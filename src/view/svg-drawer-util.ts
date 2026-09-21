@@ -10,7 +10,7 @@ const textLeftPadding = 3
 
 export const Util = {
   createSvg,
-  filterActiveEventData,
+  // filterActiveEventData,
 
   drawBar,
   drawEra,
@@ -74,31 +74,6 @@ function addIconIfPresent(d: GanttItem,
   foreignObj.appendChild(createIconInDiv(d))
   container.appendChild(foreignObj)
   return true
-}
-
-function filterActiveEventData(rawData: GanttItem[],
-                               svgDrawerData: SvgDrawerData,
-                               ganttChartConfig: GanttChartViewModel): GanttItem[] {
-  const {mappedGrpConfigs, mappedCalConfigs} = svgDrawerData
-
-  return rawData.filter(d => {
-    const grp = mappedGrpConfigs[d.group]
-    const cal = mappedCalConfigs[d.calendarType]
-
-    /* Undefined groups or calendars are accepted! */
-    if (grp?.visible === false || cal?.visible === false) return false
-
-    if (GanttItemDisplayTypes.isTimespan(d.displayType)) switch (d.displayType) {
-      case "bar":
-        return ganttChartConfig.showBars
-      case "era":
-        return ganttChartConfig.showEras
-    } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) {
-      return ganttChartConfig.showPoints
-    } else {
-      return false
-    }
-  })
 }
 
 function truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {

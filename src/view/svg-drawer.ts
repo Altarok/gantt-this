@@ -12,7 +12,7 @@ import {
 import {Css} from '../const/constants'
 import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
 import {Priorities} from '../util/priority-util'
-import {createAxisDateDescription} from '../util/dates'
+import {createAxisDateDescription, Dates} from '../util/dates'
 import {Util} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
@@ -66,7 +66,7 @@ export class GanttRenderEngine {
 
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
-      const todayDays = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+      const todayDays = Dates.getTodayInDays()
       this.viewConfig.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
@@ -84,7 +84,7 @@ export class GanttRenderEngine {
   }
 
   initLayout() {
-    let activeItems: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.viewConfig)
+    let activeItems: GanttItem[] = this.filterActiveEventData()
 
     // debugger
 
@@ -154,7 +154,7 @@ export class GanttRenderEngine {
     if (this.eventManager) this.eventManager.destroy()
     this.eventManager = createGanttEventManager(this, this.plugin.settings)
 
-    return new GanttChartView(this.plugin, this.container, this.viewConfig)
+    return new GanttChartView(this.plugin, this.container, this.viewConfig, this.textCache)
   }
 
   handlePanOrZoom() {
@@ -184,20 +184,24 @@ export class GanttRenderEngine {
   }
 
   private drawGroupBackgrounds(width: number) {
-    this.view.backgroundG.empty()
+    this.view.clearGroupBackground()
 
     if (!this.viewConfig.enableGrouping) return
 
     this.groups.forEach((group, i) => {
+      const isEvenGroup = i % 2 === 0
+
+      this.view.addGroupBackground(group.name, group.yOffset, group.height, isEvenGroup)
+
 
       const groupG = Util.createSvg('g')
       groupG.setAttribute('transform', `translate(0, ${group.yOffset})`)
 
-      const cssClass = i % 2 === 0 ? Css.group.rowEven : Css.group.rowOdd
+      const cssClass = isEvenGroup ? Css.group.rowEven : Css.group.rowOdd
       const rect = Util.createSvg('rect', cssClass, {width, height: group.height})
       groupG.appendChild(rect)
 
-      this.view.backgroundG.appendChild(groupG)
+      this.view.backgroundGroup.appendChild(groupG)
 
       const badge = Util.createSvg('rect', Css.group.badge, {x: 10})
       const label = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
@@ -624,4 +628,28 @@ export class GanttRenderEngine {
     const containerWidth = width ?? this.container.clientWidth
     return Math.max(1, containerWidth - this.viewConfig.margin.left - this.viewConfig.margin.right)
   }
+
+  filterActiveEventData(): GanttItem[] {
+    const {mappedGrpConfigs, mappedCalConfigs} = this.svgDrawerData
+
+    return this.rawData.filter(d => {
+      const grp = mappedGrpConfigs[d.group]
+      const cal = mappedCalConfigs[d.calendarType]
+
+      /* Undefined groups or calendars are accepted! */
+      if (grp?.visible === false || cal?.visible === false) return false
+
+      if (GanttItemDisplayTypes.isTimespan(d.displayType)) switch (d.displayType) {
+        case "bar":
+          return this.viewConfig.showBars
+        case "era":
+          return this.viewConfig.showEras
+      } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) {
+        return this.viewConfig.showPoints
+      } else {
+        return false
+      }
+    })
+  }
+
 }
