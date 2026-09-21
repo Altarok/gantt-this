@@ -23,9 +23,7 @@ export const Recurring = {
  * @param input - suffix of a date, what came after `' repeat '`
  * @param calendarConfig
  */
-function createRepeatRule(isStartDate: boolean,
-                          input: string,
-                          calendarConfig?: CalendarConfig): RepeatRule | undefined {
+function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: CalendarConfig): RepeatRule | undefined {
 
   const isEndDate = !isStartDate
 
@@ -101,7 +99,7 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
 
     const interval = item.repeatRule.delta
     const duration = item.endDays ? (item.endDays - item.startDays) : 0
-    const isTimestamp = duration === 0
+    // const isTimestamp = duration === 0
 
     // Determine bounds for repetition
     const maxLimit = item.repeatRule.endDate ? Math.min(engine.maxDays, item.repeatRule.endDate) : engine.maxDays
@@ -112,7 +110,7 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
 
     const xPosition0 = engine.getXPosition(0)
 
-    for (; true; minIntervalMultiplier++) {
+    for (; ; minIntervalMultiplier++) {
       /*
        * TODO do this after each zoom !! #recurring
        */

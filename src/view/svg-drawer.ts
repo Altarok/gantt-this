@@ -113,17 +113,18 @@ export class GanttRenderEngine {
   }
 
   initLayout() {
-    let activeData: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
+    let activeItems: GanttItem[] = Util.filterActiveEventData(this.rawData, this.svgDrawerData, this.config)
 
     debugger
 
-    activeData = Recurring.expandRecurringEvents(this, activeData)
+    let activeData: GanttItem[] = Recurring.expandRecurringEvents(this, activeItems)
 
     debugger
 
     this.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
+    // TODO replace 'general' with configurable global fallback group
     const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group || 'general')))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
@@ -663,8 +664,7 @@ export class GanttRenderEngine {
   private calculateStacking(items: GanttItem[]) {
 
     const eras = items.filter(i => i.displayType === 'era')
-    const nonEras = items.filter(i => i.displayType !== 'era')
-      .sort((a, b) => a.startDays - b.startDays)
+    const nonEras = items.filter(i => i.displayType !== 'era').sort((a, b) => a.startDays - b.startDays)
 
     // const sorted = [...items].sort((a, b) => a.startDays - b.startDays)
 
