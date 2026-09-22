@@ -276,6 +276,7 @@ export type PluginSettings = GanttChartSources & {
   // customTooltipButton: OptionalControlKey
   // nativeTooltipButton: OptionalControlKey
   uxUseCalColorForCalAxis: boolean
+  uxTooltipOpacity: number
   uxAddDaySuffixToTooltipTitle: boolean
   useFilenameAsFallbackStartDate: boolean
   uxRerenderCooldownSeconds: number
@@ -323,6 +324,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   // customTooltipButton: 'none',
   // nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
+  uxTooltipOpacity: 1,
   uxAddDaySuffixToTooltipTitle: false,
   useFilenameAsFallbackStartDate: false,
   uxRerenderCooldownSeconds: 5,

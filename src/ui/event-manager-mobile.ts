@@ -41,7 +41,7 @@ export class GanttMobileEventManager implements GanttEventManager {
   public attachSvgListeners() {
     this.detachListeners()
 
-    this.svg = this.engine.svg
+    this.svg = this.engine.view.svg
     if (!this.svg) return
 
     this.activeWindow = this.svg.ownerDocument.defaultView ?? window

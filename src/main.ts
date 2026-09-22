@@ -4,7 +4,7 @@ import {BaseKeys, CalendarConfig, DEFAULT_SETTINGS, PluginSettings} from './cons
 import {readCodeBlock} from './io/code-block-reader'
 import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
 import {Consts} from './const/constants'
-import GanttRender from './view/svg-drawer-prestep'
+import GanttRender from './view/gantt-chart-manager'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'

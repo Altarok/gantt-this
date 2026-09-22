@@ -3,6 +3,7 @@ import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttMobileEventManager} from './event-manager-mobile'
 import {GanttDesktopEventManager} from './event-manager-desktop'
 import {PluginSettings} from '../const/types'
+import {SvgDrawerUtil} from '../view/svg-drawer-util'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -14,10 +15,11 @@ export type GanttEventManager = {
 }
 
 export function createGanttEventManager(renderEngine: GanttRenderEngine,
-                                        pluginSettings: PluginSettings): GanttEventManager {
+                                        pluginSettings: PluginSettings,
+                                        svgDrawerUtil: SvgDrawerUtil): GanttEventManager {
 
   if (Platform.isMobile)
     return new GanttMobileEventManager(renderEngine)
   else
-    return new GanttDesktopEventManager(renderEngine, pluginSettings)
+    return new GanttDesktopEventManager(renderEngine, pluginSettings, svgDrawerUtil)
 }

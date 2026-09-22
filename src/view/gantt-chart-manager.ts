@@ -6,19 +6,22 @@ import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ToolbarView} from '../views/toolbar-view'
 import {setToolbarReactions} from '../view-ctrl/toolbar-controller'
-import TextWidthCache from "./text-space-cache";
-import {GanttChartModelImpl} from "../model/gantt-chart-model";
+import TextWidthCache from './text-space-cache'
+import {GanttChartModelImpl} from '../model/gantt-chart-model'
+import {SvgDrawerUtil} from './svg-drawer-util'
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
   private lastRenderTimestamp = 0
+  private svgDrawerUtil: SvgDrawerUtil
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly filesFilteredByBase: TFile[] | null,
               readonly selectedFrontmatterProperties: string[] | null) {
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
+    this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings)
   }
-
+  
   private async getGanttItems(pluginSettings: PluginSettings,
                               codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
     if (this.filesFilteredByBase !== null) {
@@ -82,7 +85,7 @@ export default class GanttRender {
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
-    const ganttChartModel = new GanttChartModelImpl()
+    const ganttChartModel = new GanttChartModelImpl(this.plugin)
 
     const tv = new ToolbarView(toolbarContainer, this.plugin, ganttChartModel, refreshChartCallback)
 
@@ -104,7 +107,8 @@ export default class GanttRender {
       codeBlockContent,
       this.selectedFrontmatterProperties,
       new TextWidthCache(),
-      ganttChartModel
+      ganttChartModel,
+      this.svgDrawerUtil
     )
 
     setToolbarReactions(tv, renderEngine, refreshChartCallback)

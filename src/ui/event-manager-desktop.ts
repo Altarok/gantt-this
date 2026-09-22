@@ -3,6 +3,7 @@ import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {TooltipManager} from './tooltip-manager-desktop'
 import {GanttChartViewModel} from "../model/gantt-chart-model";
+import {SvgDrawerUtil} from "../view/svg-drawer-util";
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -24,7 +25,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
   viewConfig: GanttChartViewModel
 
   constructor(readonly engine: GanttRenderEngine,
-              readonly pluginSettings: PluginSettings) {
+              readonly pluginSettings: PluginSettings,
+              private readonly svgDrawerUtil: SvgDrawerUtil) {
     this.viewConfig = engine.viewConfig
 
     /* Bind all handlers _once_ */
@@ -46,11 +48,11 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   public attachSvgListeners() {
 
-    const tooltipManager = new TooltipManager(this.engine, this.pluginSettings)
+    const tooltipManager = new TooltipManager(this.engine, this.pluginSettings, this.svgDrawerUtil)
 
     this.detachListeners()
 
-    this.currentSvg = this.engine.svg
+    this.currentSvg = this.engine.view.svg
     if (!this.currentSvg) return
 
     this.activeWindow = this.currentSvg.ownerDocument.defaultView ?? window

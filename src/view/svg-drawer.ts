@@ -13,7 +13,7 @@ import {Css} from '../const/constants'
 import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription, Dates} from '../util/dates'
-import {Util} from './svg-drawer-util'
+import {createSvg, SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
 import {Recurring} from '../util/recurring-events'
@@ -26,7 +26,7 @@ export class GanttRenderEngine {
   private resizeObserver: ResizeObserver
 
   svgDrawerData: SvgDrawerData
-  private view: GanttChartView
+  view!: GanttChartView
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
@@ -34,12 +34,14 @@ export class GanttRenderEngine {
               public readonly codeBlockContent: CodeBlockContent,
               public readonly selectedFrontmatterProperties: string[] | null,
               readonly textCache: TextWidthCache,
-              readonly viewConfig: GanttChartViewModel) {
+              readonly viewConfig: GanttChartViewModel,
+              readonly svgDrawerUtil: SvgDrawerUtil) {
 
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
-    this.view = this.initChartStructure()
+    this.view = this.redraw()
+    this.initEventListener()
     this.handleResize(true)
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize())
@@ -51,8 +53,13 @@ export class GanttRenderEngine {
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    this.view = this.initChartStructure()
+    this.view = this.redraw()
+    this.initEventListener()
     this.handleResize(true)
+  }
+
+  redraw() {
+    return new GanttChartView(this.plugin, this.container, this.viewConfig, this.textCache)
   }
 
   private updateSvgDrawerData() {
@@ -150,11 +157,9 @@ export class GanttRenderEngine {
     this.viewConfig.totalHeight = currentYOffset + combinedAxesHeight + this.viewConfig.margin.bottom
   }
 
-  initChartStructure(): GanttChartView {
+  initEventListener(): void {
     if (this.eventManager) this.eventManager.destroy()
-    this.eventManager = createGanttEventManager(this, this.plugin.settings)
-
-    return new GanttChartView(this.plugin, this.container, this.viewConfig, this.textCache)
+    this.eventManager = createGanttEventManager(this, this.plugin.settings, this.svgDrawerUtil)
   }
 
   handlePanOrZoom() {
@@ -169,48 +174,27 @@ export class GanttRenderEngine {
     const width = this.container.clientWidth
     if (!width || width <= 0) return
 
-    if (includeViewReset && (this.codeBlockContent.lowerBoundDateParsed ||
+    if (includeViewReset &&
       /* Re-evaluate predefined bounds now that we have the true container width */
-      this.codeBlockContent.upperBoundDateParsed ||
-      this.codeBlockContent.centerHereDateParsed)) {
+      (this.codeBlockContent.lowerBoundDateParsed || this.codeBlockContent.upperBoundDateParsed || this.codeBlockContent.centerHereDateParsed)) {
       this.transitionToPredefinedBounds(width)
     }
 
-    this.view.clipRect.setAttribute('width', this.getRenderWidth(width).toString())
+    this.view.setWidth(this.getRenderWidth(width))
 
-    this.drawGroupBackgrounds(width)
+    this.drawGroupBackgrounds()
     this.renderData(width)
     this.drawAxes(width)
   }
 
-  private drawGroupBackgrounds(width: number) {
+  private drawGroupBackgrounds() {
     this.view.clearGroupBackground()
 
     if (!this.viewConfig.enableGrouping) return
 
-    this.groups.forEach((group, i) => {
+    this.groups.forEach((grp, i) => {
       const isEvenGroup = i % 2 === 0
-
-      this.view.addGroupBackground(group.name, group.yOffset, group.height, isEvenGroup)
-
-
-      const groupG = Util.createSvg('g')
-      groupG.setAttribute('transform', `translate(0, ${group.yOffset})`)
-
-      const cssClass = isEvenGroup ? Css.group.rowEven : Css.group.rowOdd
-      const rect = Util.createSvg('rect', cssClass, {width, height: group.height})
-      groupG.appendChild(rect)
-
-      this.view.backgroundGroup.appendChild(groupG)
-
-      const badge = Util.createSvg('rect', Css.group.badge, {x: 10})
-      const label = Util.createSvg('text', Css.group.text, {x: 20, y: 17})
-      groupG.appendChild(badge)
-      groupG.appendChild(label)
-
-      label.textContent = group.name.toUpperCase()
-      const badgeWidth = this.textCache.getSvgWidth(label, group.name)
-      badge.setAttribute('width', String(badgeWidth))
+      this.view.addGroupBackground(grp.name, grp.yOffset, grp.height, isEvenGroup)
     })
 
   }
@@ -229,11 +213,11 @@ export class GanttRenderEngine {
   }
 
   renderData(width: number) {
-    this.view.dataG.empty()
+    this.view.clearEventLayer()
 
-    const eraLayer = Util.createSvg('g', 'gt-layer-eras')
-
-    this.view.dataG.appendChild(eraLayer)
+    // const eraLayer = Util.createSvg('g', 'gt-layer-eras')
+    //
+    // this.view.eventLayer.appendChild(eraLayer)
 
     const halfRowHeight = this.viewConfig.eventRowHeight / 2
     const firstYValue = this.viewConfig.margin.top
@@ -275,37 +259,37 @@ export class GanttRenderEngine {
 
         if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
           case 'bar':
-            return Util.drawBar(d, x1, x2, laneY + halfRowHeight, this.view.dataG)
+            return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight, this.view.eventLayer)
           case 'era': {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
             const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return Util.drawEra(d, x1, x2, y, height, eraLayer)
+            return this.svgDrawerUtil.drawEra(d, x1, x2, y, height, this.view.eraLayer)
           }
 
         } else if (GanttItemDisplayTypes.isTimestamp(displayType)) switch (displayType) {
           case 'point':
-            return Util.drawPoint(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'box':
-            return Util.drawBox(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawBox(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'vertical-line': {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
             const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return Util.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, eraLayer)
+            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, this.view.eraLayer)
           }
           case 'diamond':
-            return Util.drawDiamond(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'triangle':
-            return Util.drawTriangle(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawTriangle(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'pentagon':
-            return Util.drawPentagon(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawPentagon(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'star':
-            return Util.drawStar(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawStar(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'hexagon':
-            return Util.drawHexagon(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawHexagon(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
           case 'octagon':
-            return Util.drawOctagon(d, x1, laneY + halfRowHeight, this.view.dataG, availableWidth)
+            return this.svgDrawerUtil.drawOctagon(d, x1, laneY + halfRowHeight, this.view.eventLayer, availableWidth)
         }
 
       }) // end loop group.items.forEach(GanttItem)
@@ -321,8 +305,7 @@ export class GanttRenderEngine {
   }
 
   drawAxes(width: number) {
-    this.view.axisG.innerHTML = ''
-    this.view.gridG.innerHTML = ''
+    this.view.clearCalendarLayer()
     const renderWidth = this.getRenderWidth(width)
 
     const itemsAreaHeight = this.viewConfig.totalHeight - (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight) - this.viewConfig.margin.bottom
@@ -343,12 +326,11 @@ export class GanttRenderEngine {
         y2: currentAxisYStart + this.viewConfig.calendarAxisRowHeight - 1
       }
 
-      const individualAxisG = Util.createSvg('g')
+      const individualAxisG = createSvg('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
 
       /* Layer 1: Ticks, baseline, and dates (rendered underneath) */
-      const ticksG = Util.createSvg('g')
-      individualAxisG.appendChild(ticksG)
+      const ticksG = individualAxisG.createSvg('g')
 
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
@@ -369,14 +351,14 @@ export class GanttRenderEngine {
       const startX = this.getXPosition(effectiveStartDay, width)
       const endX = this.getXPosition(effectiveEndDay, width)
 
-      const baseline = Util.createSvg('line', Css.axis.baseline, {
+      const baseline = createSvg('line', Css.axis.baseline, {
         x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': 2.5, stroke: axisColor
       })
       ticksG.appendChild(baseline)
 
       // Draw start cap marker (if in visible range)
       if (calendarConfig?.startDay && calendarConfig.startDay as number >= startDaysValue) {
-        const startCap = Util.createSvg('line', 'calendar-cap-marker', {
+        const startCap = createSvg('line', 'calendar-cap-marker', {
           x1: startX, y1: -6, x2: startX, y2: 6, 'stroke-width': 2, stroke: axisColor
         })
         ticksG.appendChild(startCap)
@@ -384,7 +366,7 @@ export class GanttRenderEngine {
 
       // Draw end cap marker (if in visible range)
       if (calendarConfig?.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
-        const endCap = Util.createSvg('line', 'calendar-cap-marker', {
+        const endCap = createSvg('line', 'calendar-cap-marker', {
           x1: endX, y1: -6, x2: endX, y2: 6, 'stroke-width': 2, stroke: axisColor
         })
         ticksG.appendChild(endCap)
@@ -405,17 +387,17 @@ export class GanttRenderEngine {
 
         /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
-          const gridLine = Util.createSvg('line', Css.axis.gridline, {
+          const gridLine = createSvg('line', Css.axis.gridline, {
             x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight
           })
-          this.view.gridG.appendChild(gridLine)
+          this.view.gridLayer.appendChild(gridLine)
         }
 
-        const tick = Util.createSvg('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
+        const tick = createSvg('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
         ticksG.appendChild(tick)
 
         if (xPos - lastTextX > 80) {
-          const text = Util.createSvg('text', Css.axis.text, {x: xPos, y: 20})
+          const text = createSvg('text', Css.axis.text, {x: xPos, y: 20})
           text.textContent = createAxisDateDescription(currDays, calendarConfig)
 
           ticksG.appendChild(text)
@@ -431,11 +413,10 @@ export class GanttRenderEngine {
 
       if (calBadgeTextContent) {
         /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
-        const headerG = Util.createSvg('g')
-        individualAxisG.appendChild(headerG)
+        const headerG = individualAxisG.createSvg('g')
 
-        const badge = Util.createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
-        const label = Util.createSvg('text', Css.axis.label, {x: 14, y: 19})
+        const badge = createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
+        const label = createSvg('text', Css.axis.label, {x: 14, y: 19})
         headerG.appendChild(badge)
         headerG.appendChild(label)
 
@@ -447,7 +428,7 @@ export class GanttRenderEngine {
         badge.setAttribute('width', badgeWidth.toFixed(1))
       }
 
-      this.view.axisG.appendChild(individualAxisG)
+      this.view.calendarLayer.appendChild(individualAxisG)
     })
   }
 
@@ -458,11 +439,10 @@ export class GanttRenderEngine {
   }
 
   zoomOut(factor = 1.25) {
-    if (this.eventManager?.isDragging) return
+    const width = this.container.clientWidth
+    if (this.eventManager?.isDragging || !width || width <= 0) return
     if (this.plugin.settings.autoRestrictZoom && this.viewConfig.zoomFactor < 0.5) return
 
-    const width = this.container.clientWidth
-    if (!width || width <= 0) return
     const renderWidth = this.getRenderWidth(width)
     const centerX = renderWidth / 2
 
@@ -476,17 +456,16 @@ export class GanttRenderEngine {
   }
 
   zoomIn(factor = 1.25) {
-    if (this.eventManager?.isDragging) return
-
     const width = this.container.clientWidth
-    if (!width || width <= 0) return
+    if (this.eventManager?.isDragging || !width || width <= 0) return
+
     const renderWidth = this.getRenderWidth(width)
+    const centerX = renderWidth / 2
 
     /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
     const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
     if (this.plugin.settings.autoRestrictZoom && daysSpan <= 4) return
 
-    const centerX = renderWidth / 2
     const oldScale = this.viewConfig.zoomFactor
     const newScale = oldScale * factor
 
@@ -495,29 +474,26 @@ export class GanttRenderEngine {
     this.handlePanOrZoom()
   }
 
-  /** Shift view left by moving translateX positive */
+  /** Shift view left by moving translateX negative  */
   panLeft(percentage = 0.25) {
-    if (this.eventManager?.isDragging) return
-
-    const renderWidth = this.getRenderWidth()
-
-    this.viewConfig.panTranslateX += renderWidth * percentage
-    this.handlePanOrZoom()
+    this.pan(-1 * percentage)
   }
 
-  /** Shift view right by moving translateX negative */
+  /** Shift view right by moving translateX positive */
   panRight(percentage = 0.25) {
+    this.pan(percentage)
+  }
+
+  private pan(percentage: number) {
     if (this.eventManager?.isDragging) return
-
-    const renderWidth = this.getRenderWidth()
-
-    this.viewConfig.panTranslateX -= renderWidth * percentage
+    this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
     this.handlePanOrZoom()
   }
 
   updateViewAfterToggle() {
     this.initLayout()
-    this.initChartStructure()
+    this.view = this.redraw()
+    this.initEventListener()
     this.handleResize(false)
   }
 
@@ -615,13 +591,13 @@ export class GanttRenderEngine {
   }
 
   // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
-  //   const selector = `[data-id="${id}"]`
-  //   return Array.from(this.dataG.querySelectorAll<T>(selector))
+  // const selector = `[data-id="${id}"]`
+  // return Array.from(this.eventLayer.querySelectorAll<T>(selector))
   // }
 
   findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
     const selector = `[data-id="${id}"]`
-    return this.view.dataG.querySelector<T>(selector)
+    return this.view.eventLayer.querySelector<T>(selector)
   }
 
   getRenderWidth(width?: number) {

@@ -1,5 +1,5 @@
 import {BasesView, Notice, QueryController} from 'obsidian'
-import GanttRender from './view/svg-drawer-prestep'
+import GanttRender from './view/gantt-chart-manager'
 import {BaseKeys, CodeBlockContent} from './const/types'
 import FantasyGanttPlugin from './main'
 import {FrontMatterUtil} from './io/frontmatter-reader'
@@ -23,8 +23,6 @@ export class GanttThisBasesView extends BasesView {
   }
 
   public onDataUpdated(): void {
-
-    debugger
 
     this.containerEl.empty()
     const files = this.preFilterFiles()

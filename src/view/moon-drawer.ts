@@ -1,6 +1,6 @@
 import {GanttRenderEngine} from './svg-drawer'
 import {CalendarConfig, Moon} from '../const/types'
-import {Util} from './svg-drawer-util'
+import {drawMoonPhase} from './svg-drawer-util'
 
 export function drawMoons(engine: GanttRenderEngine,
                           ticksG: SVGGElement,
@@ -51,7 +51,7 @@ export function drawMoons(engine: GanttRenderEngine,
       if (exactDay < startDaysValue || exactDay > endDaysValue)
         return
 
-      if (x >= 0 && x <= renderWidth) Util.drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
+      if (x >= 0 && x <= renderWidth) drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
     }
 
     for (let k = minK; k <= maxK; k++) {

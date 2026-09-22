@@ -132,9 +132,9 @@
 }
 
 .gt-axis-label-badge {
-  height: 16px;
-  rx: 8px;
-  ry: 8px;
+  height: var(--main-font-size);
+  rx: var(--main-font-size-half);
+  ry: var(--main-font-size-half);
   fill: var(--text-accent);
   opacity: 1;
   filter: drop-shadow(0 2px 4px var(--shadow-color, var(--background-modifier-border)));
@@ -298,22 +298,12 @@
   outline-offset: 0;
 }
 
-.gt-item.timestamp {
-  height: 16px;
-  width: 16px;
-}
-
-.gt-item.timestamp.circle {
-  r: 8px;
-}
-
 .gt-item.timestamp.box {
   rx: 1px;
   ry: 1px;
 }
 
 .gt-item.timespan.bar {
-  height: 16px;
   rx: 2px;
   ry: 2px;
   stroke: var(--text-muted);

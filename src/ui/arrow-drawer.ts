@@ -1,4 +1,4 @@
-import {Util} from '../view/svg-drawer-util'
+import {createSvg} from '../view/svg-drawer-util'
 
 const diff = 2
 type Point = { x: number, y: number }
@@ -44,7 +44,7 @@ export class GanttConnectorDrawer {
     const pathData = `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${endX} ${endY}`
 
     // 3. Create path
-    const path = Util.createSvg('path', 'gt-dependency-arrow', {
+    const path = createSvg('path', 'gt-dependency-arrow', {
       d: pathData, fill: 'none',
       'marker-end': 'url(#gt-arrow-head)' // SVG marker definition
     })

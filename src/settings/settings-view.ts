@@ -332,7 +332,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             },
           },
           {
-            name: 'Tooltip', desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
+            name: 'Tooltip: Opacity', desc: '',
+            visible: false,
+            control: {
+              type: 'slider', key: 'uxTooltipOpacity',
+              min: 0, max: 1, step: 0.1,
+              defaultValue: DEFAULT_SETTINGS.uxTooltipOpacity
+            }
+          },
+          {
+            name: 'Tooltip: Absolute day', desc: 'Add absolute day to tooltip title. Useful for comparing calendars.',
             control: {
               type: 'toggle', key: 'uxAddDaySuffixToTooltipTitle',
               defaultValue: DEFAULT_SETTINGS.uxAddDaySuffixToTooltipTitle
@@ -445,7 +454,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       // control: { type: 'toggle', key: 'hideSettingsPageUx', defaultValue: DEFAULT_SETTINGS.hideSettingsPageUx }
       // }
       {
-        heading: 'Plugin',
+        heading: 'Workspace',
         type: 'group',
         items: [
           {
@@ -466,7 +475,41 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             control: {type: 'toggle', key: 'uxAddCommands', defaultValue: DEFAULT_SETTINGS.uxAddCommands}
           }
         ]
+      },
+      {
+        heading: 'Pixel magic',
+        type: 'group',
+        items: [
+          {
+            name: 'Event row height',
+            desc: 'Height of a default event row.',
+            control: {
+              type: 'slider', key: 'viewEventRowHeight',
+              min: 16, max: 40, step: 2,
+              defaultValue: DEFAULT_SETTINGS.viewEventRowHeight
+            }
+          },
+          {
+            name: 'Event shape size',
+            desc: 'Width and height of event shapes.',
+            control: {
+              type: 'slider', key: 'viewEventShapeHeight',
+              min: 10, max: 30, step: 2,
+              defaultValue: DEFAULT_SETTINGS.viewEventShapeHeight
+            }
+          },
+          {
+            name: 'Event icon size',
+            desc: 'Width and height of event icons.',
+            control: {
+              type: 'slider', key: 'viewEventIconHeight',
+              min: 10, max: 30, step: 2,
+              defaultValue: DEFAULT_SETTINGS.viewEventIconHeight
+            }
+          }
+        ]
       }
+
 
     ]
 

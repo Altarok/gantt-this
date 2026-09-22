@@ -8,9 +8,6 @@ import {createParsedDate} from '../date-calculations/event-date-input-calc'
 //   endDate?: number
 // }
 
-const iconSize = 16 // TODO sync with other 16s
-const doubleIconSize = 2 * iconSize
-
 export const Recurring = {
   createRepeatRule,
   expandRecurringEvents
@@ -71,11 +68,11 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
 
   }
 
-  const repeatRule: RepeatRule = {delta, startDate, endDate}
+  return {delta, startDate, endDate}
 
+  // const repeatRule: RepeatRule = {delta, startDate, endDate}
   // console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
-
-  return repeatRule
+  // return repeatRule
 }
 
 /**
@@ -86,6 +83,7 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
  * @param items
  */
 function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): GanttItem[] {
+  const doubleIconSize = 2 * engine.plugin.settings.viewEventIconHeight
   const expanded: GanttItem[] = []
 
   // debugger
@@ -112,9 +110,7 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
     const xPosition0 = engine.getXPosition(0)
 
     for (; ; minIntervalMultiplier++) {
-      /*
-       * TODO do this after each zoom !! #recurring
-       */
+      /* TODO do this after each zoom !! #recurring */
       if (engine.getXPosition(minIntervalMultiplier * interval) - xPosition0 > doubleIconSize) {
         break
       }

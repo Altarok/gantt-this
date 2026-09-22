@@ -1,10 +1,10 @@
 import {HoverParent, HoverPopover} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
-import {svgUrl} from '../const/constants'
 import {GanttRenderEngine} from '../view/svg-drawer'
-import {Util} from '../view/svg-drawer-util'
 import {FrontMatterUtil} from '../io/frontmatter-reader'
 import {GanttConnectorDrawer} from './arrow-drawer'
+import {GanttChartView} from '../views/gantt-chart-view'
+import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 
@@ -18,12 +18,12 @@ export class TooltipManager implements HoverParent {
   hoverPopover: HoverPopover | null = null
   private verticalGuides: VerticalOverlay[] = []
   private lastHoveredTarget: HTMLElement | null = null
-  private highlightElements: SVGElement[] = []
   private lastHoverTarget: HTMLElement | null = null
   private connectorDrawer = new GanttConnectorDrawer()
 
   constructor(readonly engine: GanttRenderEngine,
-              readonly pluginSettings: PluginSettings) {
+              readonly pluginSettings: PluginSettings,
+              private readonly svgDrawerUtil: SvgDrawerUtil) {
     this.searchForRelatedEventsOnHover = pluginSettings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && pluginSettings.uxConnectRelatedEvents
 
@@ -124,7 +124,7 @@ export class TooltipManager implements HoverParent {
       const cellVal = row.insertCell()
       cellVal.textContent = p.value
       /*
-       * TODO @CePeU replace startd and end dates with outputformat
+       * TODO @CePeU replace started and end dates with output format
        */
     }
   }
@@ -159,7 +159,7 @@ export class TooltipManager implements HoverParent {
       const x2 = targetRect.right - svgRect.left
 
       /* Ensure we have two guideline elements */
-      this.ensureVerticalGuidesCount(svg, 2)
+      this.ensureVerticalGuidesCount(2)
 
       if (this.verticalGuides.length === 2) {
         this.updateLine(ganttItem, this.verticalGuides[0]!, x1)
@@ -169,7 +169,7 @@ export class TooltipManager implements HoverParent {
       /* Calculate X position centered on the target element */
       const x = targetRect.left + targetRect.width / 2 - svgRect.left
 
-      this.ensureVerticalGuidesCount(svg, 1)
+      this.ensureVerticalGuidesCount(1)
 
       if (this.verticalGuides.length === 1) {
         this.updateLine(ganttItem, this.verticalGuides[0]!, x)
@@ -177,7 +177,7 @@ export class TooltipManager implements HoverParent {
     }
   }
 
-  private ensureVerticalGuidesCount(svg: SVGSVGElement, count: number) {
+  private ensureVerticalGuidesCount(count: number) {
     /* Remove excess if switching from bar to point */
     while (this.verticalGuides.length > count) {
       const lines = this.verticalGuides.pop()
@@ -185,17 +185,20 @@ export class TooltipManager implements HoverParent {
       lines?.lower?.remove()
     }
 
+
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
-      const upper = Util.createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
-      const lower = Util.createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
-      if (svg.firstChild) {
-        svg.insertBefore(upper, svg.firstChild)
-        svg.insertBefore(lower, svg.firstChild)
-      } else {
-        svg.appendChild(upper)
-        svg.appendChild(lower)
-      }
+      const upper = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
+      const lower = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
+      this.chartView.lowerHoverLayer.appendChild(upper)
+      this.chartView.calendarLayer.appendChild(lower)
+      // if (svg.firstChild) {
+      //   svg.insertBefore(upper, svg.firstChild)
+      //   svg.insertBefore(lower, svg.firstChild)
+      // } else {
+      //   svg.appendChild(upper)
+      //   svg.appendChild(lower)
+      // }
       this.verticalGuides.push({upper, lower})
     }
   }
@@ -291,14 +294,18 @@ export class TooltipManager implements HoverParent {
     relatedTargets.predecessors.forEach(r => {
       this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
 
-      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(r.svg, target, svgBackground)
+      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(r.svg, target,
+        // this.chartView.upperHoverLayer)
+        svgBackground)
     })
 
     relatedTargets.successors.forEach(r => {
       this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
 
       /* switch start and end in this loop */
-      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(target, r.svg, svgBackground)
+      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(target, r.svg,
+        // this.chartView.upperHoverLayer)
+        svgBackground)
     })
 
   }
@@ -324,28 +331,21 @@ export class TooltipManager implements HoverParent {
     if (ganttItem.displayType === 'era' || ganttItem.displayType === 'vertical-line') {
       shape = null // duplicate code added as fallback after method was split
     } else if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
-      shape = Util.createSvg('rect', cssClass, {
+      shape = createSvg('rect', cssClass, {
         x: x - 1, y: y - 1, width: width + 2, height: height + 2, stroke: this.overlayColor
       })
     } else if (ganttItem.displayType === 'point') {
-      shape = Util.createSvg('circle', cssClass, {
+      shape = createSvg('circle', cssClass, {
         cx: String(centreX), cy: String(centreY), r: String(width / 2 + 3), stroke: this.overlayColor
       })
     } else {
       const points = this.calculatePolygonPointsForOverlay(centreX, centreY, ganttItem.displayType)
-      shape = Util.createSvg('polygon', cssClass, {points, stroke: this.overlayColor})
+      shape = createSvg('polygon', cssClass, {points, stroke: this.overlayColor})
     }
 
     if (shape) {
-      const highlightElement: SVGGElement = window.document.createElementNS(svgUrl, 'g')
-      highlightElement.innerHTML = ''
+      const highlightElement: SVGGElement = this.chartView.upperHoverLayer.createSvg('g')
       highlightElement.appendChild(shape)
-
-      this.highlightElements.push(highlightElement)
-
-      if (highlightElement) {
-        backgroundContainer.insertBefore(highlightElement, backgroundContainer.firstChild)
-      }
     }
 
   }
@@ -353,26 +353,23 @@ export class TooltipManager implements HoverParent {
   private calculatePolygonPointsForOverlay(x: number, y: number, symbol: 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'octagon' | 'star') {
     switch (symbol) {
       case 'triangle':
-        return Util.calculatePolygonPoints(11, x, y + 2, 3)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 2, 3, 1, 0, 3)
       case 'diamond':
-        return Util.calculatePolygonPoints(11, x, y, 4)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y, 4, 1, 0, 3)
       case 'pentagon':
-        return Util.calculatePolygonPoints(11, x, y + 1, 5)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 1, 5, 1, 0, 3)
       case 'hexagon':
-        return Util.calculatePolygonPoints(11, x, y, 6)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y, 6, 1, 0, 3)
       case 'octagon':
-        return Util.calculatePolygonPoints(11, x, y, 8, 1, 1 / 8)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y, 8, 1, 1 / 8, 3)
       case 'star':
-        return Util.calculatePolygonPoints(12, x, y + 1, 10, 0.382)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 1, 10, 0.382, 1, 4)
     }
   }
 
   private hideHighlightAroundElement() {
     this.connectorDrawer.clearArrows()
-    if (this.highlightElements) {
-      this.highlightElements.forEach(el => el.remove())
-      this.highlightElements = []
-    }
+    this.chartView.clearHoverLayer()
   }
 
   /* Clean up if mouse drifted off a data element onto empty SVG space */
@@ -388,6 +385,10 @@ export class TooltipManager implements HoverParent {
 
   private getTooltipTitleSuffix(d: GanttItem) {
     return this.addDaySuffixToTooltipTitle ? ` (day ${d.startDays})` : ''
+  }
+
+  get chartView(): GanttChartView {
+    return this.engine.view
   }
 
   get settings(): PluginSettings {
