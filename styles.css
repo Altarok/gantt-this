@@ -299,8 +299,8 @@
 }
 
 .gt-item.timestamp.box {
-  rx: 1px;
-  ry: 1px;
+  rx: 2px;
+  ry: 2px;
 }
 
 .gt-item.timespan.bar {
@@ -366,6 +366,7 @@
   user-select: none;
 }
 
+.gt-item.text-timestamp,
 .gt-item.text-bar,
 .gt-item.text-era {
   font-size: 14px;
@@ -385,15 +386,7 @@
 }
 
 .gt-item.text-timestamp {
-  font-size: 14px;
-  dominant-baseline: middle;
-  pointer-events: none;
-  user-select: none;
   fill: var(--text-normal);
-}
-
-.gt-item.timestamp.vertical-line {
-  /* asd */
 }
 
 /* mouse-over vertical overlay */

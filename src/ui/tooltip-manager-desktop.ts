@@ -363,7 +363,7 @@ export class TooltipManager implements HoverParent {
       case 'octagon':
         return this.svgDrawerUtil.calculatePolygonPoints(x, y, 8, 1, 1 / 8, 3)
       case 'star':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 1, 10, 0.382, 1, 4)
+        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 1, 10, 0.382, 0, 4)
     }
   }
 

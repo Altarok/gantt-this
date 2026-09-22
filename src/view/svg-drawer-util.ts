@@ -31,17 +31,16 @@ export function createSvg<K extends keyof SVGElementTagNameMap>(tag: K,
 }
 
 export class SvgDrawerUtil {
-  private shapeSize: number // default 16
-  private shapeRadius: number // 8
-  private iconSize: number // 16
-  private iconRadius: number // 8
+  private readonly shapeSize: number // default 16
+  private readonly shapeRadius: number // 8
+  private readonly iconSize: number // 16
+  private readonly iconRadius: number // 8
 
   constructor(private readonly settings: PluginSettings) {
     this.shapeSize = settings.viewEventShapeHeight
     this.shapeRadius = this.shapeSize / 2
     this.iconSize = settings.viewEventIconHeight
     this.iconRadius = this.iconSize / 2
-    // console.log(`shapeSize: ${this.shapeSize} / shapeRadius: ${this.shapeRadius} / iconSize: ${this.iconSize} / iconRadius: ${this.iconRadius}`)
   }
 
   createIconInDiv(d: GanttItem): HTMLDivElement {
@@ -152,21 +151,21 @@ export class SvgDrawerUtil {
    * Draw small shape for event with a single timestamp (box|circle|diamond). Appends event color to SVG background and adds lucide icon on top if.
    * @param d event to draw
    * @param shape 'circle' | 'polygon' | 'rect'
-   * @param cssClass
    * @param attrs
    * @param x center of svg
    * @param y center of svg
    * @param svgContainer
    * @param availableWidth calculated width from this event to the next one to the right, used for event description
+   * @param cssClass
    */
-  drawSmallShape(d: GanttItem,
-                 shape: 'circle' | 'polygon' | 'rect',
-                 cssClass: string,
-                 attrs: Record<string, string | number>,
-                 x: number,
-                 y: number,
-                 svgContainer: SVGElement,
-                 availableWidth: number): void {
+  private drawSmallShape(d: GanttItem,
+                         shape: "circle" | "polygon" | "rect",
+                         attrs: Record<string, string | number>,
+                         x: number,
+                         y: number,
+                         svgContainer: SVGElement,
+                         availableWidth: number,
+                         cssClass: string = Css.item.timestamp): void {
     const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
     if (d.color) el.setAttribute('fill', d.color)
     svgContainer.appendChild(el)
@@ -185,12 +184,11 @@ export class SvgDrawerUtil {
    * @param availableWidth calculated width from this event to the next one to the right, used for event description
    */
   drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
-    this.drawSmallShape(d, 'rect', 'gt-item timestamp box',
-      {
-        x: cx - this.shapeRadius,
-        y: cy - this.shapeRadius,
-        width: this.shapeSize, height: this.shapeSize
-      }, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'rect', {
+      x: cx - this.shapeRadius,
+      y: cy - this.shapeRadius,
+      width: this.shapeSize, height: this.shapeSize
+    }, cx, cy, svgContainer, availableWidth, Css.item.box)
   }
 
   /**
@@ -203,7 +201,7 @@ export class SvgDrawerUtil {
    */
   drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 4)
-    this.drawSmallShape(d, 'polygon', 'gt-item timestamp diamond', {points}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, availableWidth)
   }
 
   /**
@@ -215,7 +213,11 @@ export class SvgDrawerUtil {
    * @param availableWidth calculated width from this event to the next one to the right, used for event description
    */
   drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
-    this.drawSmallShape(d, 'circle', 'gt-item', {cx, cy, r: this.shapeRadius}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'circle', {
+      cx,
+      cy,
+      r: this.shapeRadius
+    }, cx, cy, svgContainer, availableWidth)
   }
 
   /**
@@ -228,7 +230,7 @@ export class SvgDrawerUtil {
    */
   drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 3)
-    this.drawSmallShape(d, 'polygon', 'gt-item timestamp triangle', {points}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, availableWidth)
   }
 
   /**
@@ -241,12 +243,12 @@ export class SvgDrawerUtil {
    */
   drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 5)
-    this.drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, availableWidth)
   }
 
   drawStar(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 10, 0.382)
-    this.drawSmallShape(d, 'polygon', 'gt-item timestamp pentagon', {points}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, availableWidth)
   }
 
   /**
@@ -259,7 +261,7 @@ export class SvgDrawerUtil {
    */
   drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 6)
-    this.drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, availableWidth)
   }
 
   /**
@@ -272,7 +274,7 @@ export class SvgDrawerUtil {
    */
   drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, availableWidth: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 8, 1, 1 / 8)
-    this.drawSmallShape(d, 'polygon', 'gt-item timestamp hexagon', {points}, cx, cy, svgContainer, availableWidth)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, availableWidth)
   }
 
   /**
@@ -286,7 +288,7 @@ export class SvgDrawerUtil {
    * @param svgContainer
    */
   drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number, svgContainer: SVGElement): void {
-    const line = createSvg('line', Css.item.line, {
+    const line = createSvg('line', Css.item.timestamp, {
       x1, x2: x1, y1, y2, 'stroke-width': this.settings.uxVerticalLineEventWidth, 'data-id': d.id
     })
     if (d.color) line.setAttribute('stroke', d.color)

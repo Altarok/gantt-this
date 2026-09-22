@@ -22,22 +22,18 @@ export const Css = {
 
   item: {
     item: 'gt-item',
-    circle: 'gt-item timestamp circle',
-    diamond: 'gt-item timestamp diamond',
-    triangle: 'gt-item timestamp triangle',
-    hexagon: 'gt-item timestamp hexagon',
-    pentagram: 'gt-item timestamp pentagon',
-    line: 'gt-item timestamp vertical-line',
-
+    /** Use for all timestamp event shapes that do not require css */
+    timestamp: 'gt-item timestamp',
+    box: 'gt-item timestamp box',
     bar: 'gt-item timespan bar',
     era: 'gt-item timespan era',
 
-    textBar: 'gt-item text-bar',
-    textEra: 'gt-item text-era',
+    /** Use for all texts on timestamp events */
     textTimestamp: 'gt-item text-timestamp',
-
-    // icon: 'gt-item point-icon-container',
-    // iconExternal: 'gt-item point-icon-external',
+    /** Use for all texts on bar events */
+    textBar: 'gt-item text-bar',
+    /** Use for all texts on era events */
+    textEra: 'gt-item text-era',
   },
   group: {
     text: 'gt-group-text',
