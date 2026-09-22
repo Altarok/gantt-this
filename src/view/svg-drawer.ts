@@ -102,8 +102,7 @@ export class GanttRenderEngine {
     this.viewConfig.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.viewConfig.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
-    // TODO replace 'general' with configurable global fallback group
-    const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group || 'general')))
+    const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group || this.plugin.settings.defaultGroup)))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
     this.groups = []
@@ -192,11 +191,10 @@ export class GanttRenderEngine {
 
     if (!this.viewConfig.enableGrouping) return
 
-    this.groups.forEach((grp, i) => {
+    this.groups.forEach((g, i) => {
       const isEvenGroup = i % 2 === 0
-      this.view.addGroupBackground(grp.name, grp.yOffset, grp.height, isEvenGroup)
+      this.view.addGroupBackground(g.name, g.yOffset, g.height, isEvenGroup)
     })
-
   }
 
   private mapLaneItems(group: GanttGroup, width: number): Map<number, GanttItem[]> {
@@ -215,11 +213,7 @@ export class GanttRenderEngine {
   renderData(width: number) {
     this.view.clearEventLayer()
 
-    // const eraLayer = Util.createSvg('g', 'gt-layer-eras')
-    //
-    // this.view.eventLayer.appendChild(eraLayer)
-
-    const halfRowHeight = this.viewConfig.eventRowHeight / 2
+    const halfRowHeight = this.viewConfig.eventRowHeightHalf
     const firstYValue = this.viewConfig.margin.top
     const totalChartHeight = this.calculateTotalChartHeight()
 

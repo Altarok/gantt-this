@@ -9,7 +9,9 @@ export const Css = {
   inputLabel: 'gt-input-label',
   chartContainer: 'gt-chart-container',
   axis: {
+    /** Use for calendar axis baseline */
     baseline: 'gt-axis-baseline',
+    /** Use for calendar axis gridline */
     gridline: 'gt-axis-gridline',
     label: 'gt-axis-label',
     labelBadge: 'gt-axis-label-badge',
@@ -17,13 +19,16 @@ export const Css = {
     tick: 'gt-axis-tick',
     tickMinor: 'gt-axis-tick-minor',
   },
-
   item: {
+    /** Base CSS class event SVGs */
     item: 'gt-item',
     /** Use for all timestamp event shapes that do not require CSS */
     timestamp: 'gt-item timestamp',
+    /** Use for box events */
     box: 'gt-item timestamp box',
+    /** Use for bar events */
     bar: 'gt-item timespan bar',
+    /** Use for era events */
     era: 'gt-item timespan era',
 
     /** Use for all texts on timestamp events */

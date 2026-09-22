@@ -14,6 +14,7 @@ export type GanttChartViewModel = {
   activeAxesList: string[]
 
   readonly eventRowHeight: number
+  readonly eventRowHeightHalf: number
   readonly eventShapeHeight: number
   readonly eventIconHeight: number
 
@@ -67,6 +68,7 @@ export class GanttChartModelImpl implements GanttChartViewModel {
    * Constants
    */
   readonly eventRowHeight: number
+  readonly eventRowHeightHalf: number
   readonly eventShapeHeight: number
   readonly eventIconHeight: number
 
@@ -90,6 +92,7 @@ export class GanttChartModelImpl implements GanttChartViewModel {
 
   constructor(public readonly plugin: FantasyGanttPlugin) {
     this.eventRowHeight = plugin.settings.viewEventRowHeight
+    this.eventRowHeightHalf = this.eventRowHeight / 2
     this.eventShapeHeight = plugin.settings.viewEventShapeHeight
     this.eventIconHeight = plugin.settings.viewEventIconHeight
   }
