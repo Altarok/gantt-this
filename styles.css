@@ -291,21 +291,19 @@
   user-select: none;
 }
 
-/* Interactive Timeline Elements */
-.gt-item {
+.gt-item { /* Base class for timeline events */
   cursor: pointer;
   outline: none;
   outline-offset: 0;
 }
 
+.gt-item.timespan.bar, /* Base styles for rectangular event shapes */
 .gt-item.timestamp.box {
   rx: 2px;
   ry: 2px;
 }
 
 .gt-item.timespan.bar {
-  rx: 2px;
-  ry: 2px;
   stroke: var(--text-muted);
   stroke-width: 1px;
   vector-effect: non-scaling-stroke; /* prevent border width scaling when zooming/panning */
@@ -313,6 +311,13 @@
   /* shape-rendering: crispedges; !* prevent blurriness on non-integer display pixels *! */
 }
 
+.gt-item.timespan.era {
+  fill-opacity: 0.15;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Hover effect: Highlight on hovered event */
 .gt-item.symbol-hover {
   stroke-width: 1px;
   fill: none;
@@ -320,6 +325,7 @@
   user-select: none;
 }
 
+/* Hover effect: Highlight on events related to hovered event */
 .gt-item.symbol-hover-related {
   stroke-width: 1px;
   fill: none;
@@ -338,6 +344,7 @@
   filter: drop-shadow(0 0 3px #000) drop-shadow(0 0 6px #000);
 }
 
+/* Hover effect: Arrow from event to event */
 .gt-dependency-arrow {
   stroke-width: 1px;
   pointer-events: none;
@@ -351,19 +358,6 @@
 .theme-light .gt-dependency-arrow {
   stroke: #000;
   filter: drop-shadow(0 0 3px #000);
-}
-
-/* Base styles hover reset for rectangles */
-.gt-item.timestamp.box,
-.gt-item.timespan.bar {
-  outline: none;
-  outline-offset: 0;
-}
-
-.gt-item.timespan.era {
-  fill-opacity: 0.15;
-  pointer-events: none;
-  user-select: none;
 }
 
 .gt-item.text-timestamp,

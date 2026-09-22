@@ -5,6 +5,7 @@ import {FrontMatterUtil} from '../io/frontmatter-reader'
 import {GanttConnectorDrawer} from './arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
+import {Css} from "const/constants"
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 
@@ -98,11 +99,11 @@ export class TooltipManager implements HoverParent {
 
   private setTooltipContent(d: GanttItem, tooltip: HTMLElement) {
 
-    const g = tooltip.createDiv({cls: 'gt-tooltip'})
+    const g = tooltip.createDiv({cls: Css.tooltip.tooltip})
 
-    g.createDiv({text: (d.name || d.file.basename) + this.getTooltipTitleSuffix(d), cls: 'gt-tooltip-title'})
-    const table = g.createEl('table', {cls: 'gt-tooltip-table'})
-    g.createDiv({text: 'Click to open in new tab', cls: 'gt-tooltip-link'})
+    g.createDiv({text: (d.name || d.file.basename) + this.getTooltipTitleSuffix(d), cls: Css.tooltip.title})
+    const table = g.createEl('table', {cls: Css.tooltip.table})
+    g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
 
     const hasSelectedBaseProperties = Boolean((this.engine.selectedFrontmatterProperties?.length ?? 0) > 0)
 
@@ -289,10 +290,10 @@ export class TooltipManager implements HoverParent {
     const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
 
 
-    this.createShape(ganttItem, target, svgBackground, 'gt-item symbol-hover')
+    this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
 
     relatedTargets.predecessors.forEach(r => {
-      this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
+      this.createShape(r.item, r.svg, svgBackground, Css.hover.highlightRelatedEvent)
 
       if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(r.svg, target,
         // this.chartView.upperHoverLayer)
@@ -300,7 +301,7 @@ export class TooltipManager implements HoverParent {
     })
 
     relatedTargets.successors.forEach(r => {
-      this.createShape(r.item, r.svg, svgBackground, 'gt-item symbol-hover-related')
+      this.createShape(r.item, r.svg, svgBackground, Css.hover.highlightRelatedEvent)
 
       /* switch start and end in this loop */
       if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(target, r.svg,

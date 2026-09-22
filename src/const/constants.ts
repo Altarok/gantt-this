@@ -1,13 +1,11 @@
 export const Css = {
   wrapper: 'gt-main-container',
-
   toolbar: {
     container: 'gt-toolbar-container',
     buttonGroup: 'gt-toolbar-buttongroup', /* Reduces horizontal space between buttons */
     button: 'gt-toolbar-button', /* Button and SVG sizes */
     separator: 'gt-toolbar-separator', /* Separates button groups */
   },
-
   inputLabel: 'gt-input-label',
   chartContainer: 'gt-chart-container',
   axis: {
@@ -22,7 +20,7 @@ export const Css = {
 
   item: {
     item: 'gt-item',
-    /** Use for all timestamp event shapes that do not require css */
+    /** Use for all timestamp event shapes that do not require CSS */
     timestamp: 'gt-item timestamp',
     box: 'gt-item timestamp box',
     bar: 'gt-item timespan bar',
@@ -41,12 +39,15 @@ export const Css = {
     rowEven: 'gt-group-row-even',
     rowOdd: 'gt-group-row-odd',
   },
+  hover: {
+    highlightHoveredEvent: 'gt-item symbol-hover', /* Highlight on hovered event */
+    highlightRelatedEvent: 'gt-item symbol-hover-related' /* Highlight on events related to hovered event */
+  },
   tooltip: {
-    tooltip: 'gt-tooltip',
-    dates: 'gt-tooltip-dates',
-    isActive: 'is-active',
-    title: 'gt-tooltip-title',
-    link: 'gt-tooltip-link',
+    tooltip: 'gt-tooltip', /* Use for tooltip */
+    title: 'gt-tooltip-title',  /* Use for tooltip title */
+    table: 'gt-tooltip-table', /* Use for tooltip table */
+    link: 'gt-tooltip-link' /* Use for tooltip link to related note */
   },
   settings: {
     container: 'gt-settings-container',
