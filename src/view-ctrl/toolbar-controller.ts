@@ -2,7 +2,10 @@ import {Platform} from 'obsidian'
 import {ToolbarView} from '../views/toolbar-view'
 import {GanttRenderEngine} from '../view/svg-drawer'
 
-const panStep = Platform.isMobile ? 0.4 : 0.25
+const panRight = Platform.isMobile ? 0.4 : 0.25
+const panLeft = -1 * panRight
+const zoomOut = 0.8
+const zoomIn = 1.25
 
 export function setToolbarReactions(toolbar: ToolbarView,
                                     renderEngine: GanttRenderEngine,
@@ -24,11 +27,11 @@ export function setToolbarReactions(toolbar: ToolbarView,
       renderEngine.updateViewAfterToggle()
     }
   )
-  toolbar.panLeftButton?.addEventListener('click', () => renderEngine.panLeft(panStep))
-  toolbar.zoomOutButton?.addEventListener('click', () => renderEngine.zoomOut())
+  toolbar.panLeftButton?.addEventListener('click', () => renderEngine.pan(panLeft))
+  toolbar.zoomOutButton?.addEventListener('click', () => renderEngine.zoom(zoomOut))
   toolbar.resetZoomAndPanButton.addEventListener('click', () => renderEngine.resetZoom())
-  toolbar.zoomInButton?.addEventListener('click', () => renderEngine.zoomIn())
-  toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRight(panStep))
+  toolbar.zoomInButton?.addEventListener('click', () => renderEngine.zoom(zoomIn))
+  toolbar.panRightButton?.addEventListener('click', () => renderEngine.pan(panRight))
   toolbar.settingsButton.addEventListener('click', () => toolbar.handleSettingsButtonClick())
 
 }

@@ -150,27 +150,15 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   private zoom(e: WheelEvent) {
     if (!this.currentSvg) return
-    const width = this.engine.container.clientWidth
-    if (!width || width <= 0) return
+
+    // Determine direction: positive factor zooms in (> 1), negative factor zooms out (< 1)
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
+
     const rect = this.currentSvg.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.engine.viewConfig.margin.left
 
-    let newZoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-
-    const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
-
-    /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
-    if (this.settings.autoRestrictZoom && daysSpan <= 4 && newZoomFactor > 1) return
-
-    // if ( /* this.settings.autoRestrictZoom && */ this.engine.stepDays < 2 && zoomFactor > 1) zoomFactor = 1
-    let nextScale = this.viewConfig.zoomFactor * newZoomFactor
-    if (this.settings.autoRestrictZoom && nextScale < 0.5) nextScale = 0.5
-
-    this.viewConfig.panTranslateX = mouseX - (mouseX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
-    this.viewConfig.zoomFactor = nextScale
-
-    this.engine.renderData(width)
-    this.engine.drawAxes(width)
+    // Delegate to GanttRenderEngine
+    this.engine.zoom(factor, mouseX)
   }
 
   private handleSvgClick(event: MouseEvent) {

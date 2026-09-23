@@ -85,40 +85,37 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
 function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): GanttItem[] {
   const doubleIconSize = 2 * engine.plugin.settings.viewEventIconHeight
   const expanded: GanttItem[] = []
+  const xPosition0 = engine.getXPosition(0)
 
-  // debugger
+  debugger
 
   for (const item of items) {
     expanded.push(item) // Always include the base event
 
     if (!item.repeatRule) continue
 
-    // debugger
-
     const interval = item.repeatRule.delta
     const duration = item.endDays ? (item.endDays - item.startDays) : 0
-    // const isTimestamp = duration === 0
 
-    // Determine bounds for repetition
-    const {maxDays} = engine.viewConfig
-    const maxLimit = item.repeatRule.endDate ? Math.min(maxDays, item.repeatRule.endDate) : maxDays
-
-    let currentStart = item.startDays + interval
-
+// Compute minimum multiplier required at current zoom level to avoid overlap
     let minIntervalMultiplier = 1
-
-    const xPosition0 = engine.getXPosition(0)
-
-    for (; ; minIntervalMultiplier++) {
-      /* TODO do this after each zoom !! #recurring */
-      if (engine.getXPosition(minIntervalMultiplier * interval) - xPosition0 > doubleIconSize) {
-        break
-      }
+    while (engine.getXPosition(minIntervalMultiplier * interval) - xPosition0 <= doubleIconSize) {
+      minIntervalMultiplier++
+      if (minIntervalMultiplier > 1000) break // Guard clause against zero/infinite loop at extreme zoom-out
     }
 
-    while (currentStart <= maxLimit) {
+    // Determine bounds for repetition
+    const step = minIntervalMultiplier * interval
+    const {minDays, maxDays} = engine.viewConfig
+
+    const effectiveStart = item.repeatRule.startDate !== -Infinity ? Math.max(item.startDays, item.repeatRule.startDate) : item.startDays
+    const effectiveEnd = item.repeatRule.endDate !== +Infinity ? Math.min(maxDays, item.repeatRule.endDate) : maxDays
+
+    let currentStart = effectiveStart + step //  item.startDays + interval
+
+    while (currentStart <= effectiveEnd) {
       // Only create instances within render range (or slightly padded)
-      if (currentStart >= engine.viewConfig.minDays - interval) {
+      if (currentStart >= minDays - interval) {
         expanded.push({
           ...item,
           id: item.id, // Keep base ID if elements highlight together, or generate synthetic unique IDs
@@ -128,9 +125,11 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
           parentEventId: item.id
         })
       }
-      currentStart += (minIntervalMultiplier * interval)
+      currentStart += step
     }
   }
+
+  debugger
 
   return expanded
 }

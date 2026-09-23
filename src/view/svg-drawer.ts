@@ -92,12 +92,7 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeItems: GanttItem[] = this.filterActiveEventData()
-
-    // debugger
-
     let activeData: GanttItem[] = Recurring.expandRecurringEvents(this, activeItems)
-
-    // debugger
 
     this.viewConfig.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.viewConfig.activeAxesList, this.svgDrawerData.mappedCalConfigs)
@@ -162,6 +157,7 @@ export class GanttRenderEngine {
   }
 
   handlePanOrZoom() {
+    this.initLayout() /* FIXME Re-calculate repeating events */
     this.handleResize(false)
   }
 
@@ -432,53 +428,39 @@ export class GanttRenderEngine {
     this.handleViewReset()
   }
 
-  zoomOut(factor = 1.25) {
-    const width = this.container.clientWidth
-    if (this.eventManager?.isDragging || !width || width <= 0) return
-    if (this.plugin.settings.autoRestrictZoom && this.viewConfig.zoomFactor < 0.5) return
+  /**
+   * @param factor positive value zooms in, negative value zooms out
+   * @param focusX optional x value to zoom on
+   */
+  zoom(factor: number, focusX?: number) {
+    const renderWidth = this.getRenderWidth()
+    if (this.eventManager?.isDragging || renderWidth <= 1) return
 
-    const renderWidth = this.getRenderWidth(width)
-    const centerX = renderWidth / 2
+    if (this.plugin.settings.autoRestrictZoom) {
+      if (factor < 0 && this.viewConfig.zoomFactor < 0.5) /* Prevent max zoom-out */
+        return
+      else if (factor > 0) { /* Prevent maximum zoom-in */
+        const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
+        if (daysSpan <= 4) return
+      }
+    }
+
+    const centerX = focusX ?? renderWidth / 2
 
     const oldScale = this.viewConfig.zoomFactor
-    let newScale = oldScale / factor
+    let newScale = oldScale * factor
     if (this.plugin.settings.autoRestrictZoom && newScale < 0.5) newScale = 0.5
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
     this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
     this.handlePanOrZoom()
   }
-
-  zoomIn(factor = 1.25) {
-    const width = this.container.clientWidth
-    if (this.eventManager?.isDragging || !width || width <= 0) return
-
-    const renderWidth = this.getRenderWidth(width)
-    const centerX = renderWidth / 2
-
-    /* Restrict zoom-in if 1 day takes up more than 25% of screen width or stepDays is already at minimum */
-    const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
-    if (this.plugin.settings.autoRestrictZoom && daysSpan <= 4) return
-
-    const oldScale = this.viewConfig.zoomFactor
-    const newScale = oldScale * factor
-
-    /* Focal point zoom: adjust translateX so center point stays pinned */
-    this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
-    this.handlePanOrZoom()
-  }
-
-  /** Shift view left by moving translateX negative  */
-  panLeft(percentage = 0.25) {
-    this.pan(-1 * percentage)
-  }
-
-  /** Shift view right by moving translateX positive */
-  panRight(percentage = 0.25) {
-    this.pan(percentage)
-  }
-
-  private pan(percentage: number) {
+  
+  /**
+   * Shift view left or right.
+   * @param percentage - positive number shifts view right, negative number shifts view left
+   */
+  pan(percentage: number) {
     if (this.eventManager?.isDragging) return
     this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
     this.handlePanOrZoom()

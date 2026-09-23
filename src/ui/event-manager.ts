@@ -14,6 +14,19 @@ export type GanttEventManager = {
   destroy(): void
 }
 
+// export abstract class GanttEventManagerBase implements GanttEventManager {
+//   isDragging: boolean
+//
+//   constructor() {
+//   }
+//
+//   abstract attachSvgListeners() {
+//   }
+//
+//   abstract destroy() {
+//   }
+// }
+
 export function createGanttEventManager(renderEngine: GanttRenderEngine,
                                         pluginSettings: PluginSettings,
                                         svgDrawerUtil: SvgDrawerUtil): GanttEventManager {
