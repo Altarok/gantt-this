@@ -87,8 +87,6 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
   const expanded: GanttItem[] = []
   const xPosition0 = engine.getXPosition(0)
 
-  debugger
-
   for (const item of items) {
     expanded.push(item) // Always include the base event
 
@@ -128,8 +126,6 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
       currentStart += step
     }
   }
-
-  debugger
 
   return expanded
 }
