@@ -11,7 +11,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private startX = 0
   private startTranslateX = 0
   private rafId: number | null = null
-  private currentSvg: SVGElement | null = null
+  private svg: SVGElement | null = null
   private activeWindow: Window | null = null
 
   /* Bound handler references for clean removal */
@@ -52,17 +52,17 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     this.detachListeners()
 
-    this.currentSvg = this.engine.view.svg
-    if (!this.currentSvg) return
+    this.svg = this.engine.view.svg
+    if (!this.svg) return
 
-    this.activeWindow = this.currentSvg.ownerDocument.defaultView ?? window
+    this.activeWindow = this.svg.ownerDocument.defaultView ?? window
     const plugin = this.engine.plugin
 
     plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
     plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
     plugin.registerDomEvent(this.activeWindow, 'blur', () => tooltipManager.hideTooltip('blur'))
 
-    const svgEl = this.currentSvg as unknown as HTMLElement
+    const svgEl = this.svg as unknown as HTMLElement
 
     plugin.registerDomEvent(svgEl, 'mousedown', this.boundSvgMouseDown)
     plugin.registerDomEvent(svgEl, 'wheel', this.boundSvgWheel, {passive: false})
@@ -77,12 +77,12 @@ export class GanttDesktopEventManager implements GanttEventManager {
       this.activeWindow = null
     }
 
-    if (this.currentSvg) {
-      this.currentSvg.removeEventListener('mousedown', this.boundSvgMouseDown)
-      this.currentSvg.removeEventListener('wheel', this.boundSvgWheel)
-      this.currentSvg.removeEventListener('mousemove', this.boundSvgMouseMove)
-      this.currentSvg.removeEventListener('click', this.boundSvgClick)
-      this.currentSvg = null
+    if (this.svg) {
+      this.svg.removeEventListener('mousedown', this.boundSvgMouseDown)
+      this.svg.removeEventListener('wheel', this.boundSvgWheel)
+      this.svg.removeEventListener('mousemove', this.boundSvgMouseMove)
+      this.svg.removeEventListener('click', this.boundSvgClick)
+      this.svg = null
     }
   }
 
@@ -124,7 +124,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgWheel(e: WheelEvent) {
-    if (!this.currentSvg) return
+    if (!this.svg) return
 
     if (this.isModifierActive(e, this.settings.uxZoomButton)) {
       e.preventDefault()
@@ -149,12 +149,12 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private zoom(e: WheelEvent) {
-    if (!this.currentSvg) return
+    if (!this.svg) return
 
     // Determine direction: positive factor zooms in (> 1), negative factor zooms out (< 1)
     const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
 
-    const rect = this.currentSvg.getBoundingClientRect()
+    const rect = this.svg.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.engine.viewConfig.margin.left
 
     // Delegate to GanttRenderEngine

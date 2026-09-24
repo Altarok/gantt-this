@@ -10,7 +10,7 @@ import {
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
-import {createGanttEventManager, GanttEventManager} from '../view-ctrl/event-manager'
+import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription, Dates} from '../util/dates'
 import {createSvg, SvgDrawerUtil} from './svg-drawer-util'

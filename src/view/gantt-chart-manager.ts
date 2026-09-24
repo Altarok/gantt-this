@@ -5,7 +5,7 @@ import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ToolbarView} from '../views/toolbar-view'
-import {setToolbarReactions} from '../view-ctrl/toolbar-controller'
+import {setToolbarReactions} from '../ctrl/toolbar-controller'
 import TextWidthCache from './text-space-cache'
 import {GanttChartModelImpl} from '../model/gantt-chart-model'
 import {SvgDrawerUtil} from './svg-drawer-util'
@@ -21,7 +21,7 @@ export default class GanttRender {
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
     this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings)
   }
-  
+
   private async getGanttItems(pluginSettings: PluginSettings,
                               codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
     if (this.filesFilteredByBase !== null) {
