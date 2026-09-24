@@ -27,11 +27,11 @@ export function setToolbarReactions(toolbar: ToolbarView,
       renderEngine.updateViewAfterToggle()
     }
   )
-  toolbar.panLeftButton?.addEventListener('click', () => renderEngine.pan(panLeft))
+  toolbar.panLeftButton?.addEventListener('click', () => renderEngine.panRelative(panLeft))
   toolbar.zoomOutButton?.addEventListener('click', () => renderEngine.zoom(zoomOut))
   toolbar.resetZoomAndPanButton.addEventListener('click', () => renderEngine.resetZoom())
   toolbar.zoomInButton?.addEventListener('click', () => renderEngine.zoom(zoomIn))
-  toolbar.panRightButton?.addEventListener('click', () => renderEngine.pan(panRight))
+  toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRelative(panRight))
   toolbar.settingsButton.addEventListener('click', () => toolbar.handleSettingsButtonClick())
 
 }

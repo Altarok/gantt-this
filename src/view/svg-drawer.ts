@@ -460,9 +460,15 @@ export class GanttRenderEngine {
    * Shift view left or right.
    * @param percentage - positive number shifts view right, negative number shifts view left
    */
-  pan(percentage: number) {
+  panRelative(percentage: number) {
     if (this.eventManager?.isDragging) return
     this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
+    this.handlePanOrZoom()
+  }
+
+  panAbsolute(shift: number) {
+    if (this.eventManager?.isDragging) return
+    this.viewConfig.panTranslateX += shift
     this.handlePanOrZoom()
   }
 

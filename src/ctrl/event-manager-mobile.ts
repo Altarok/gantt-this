@@ -74,12 +74,21 @@ export class GanttMobileEventManager implements GanttEventManager {
       e.preventDefault()
       e.stopPropagation()
 
-      this.viewConfig.panTranslateX = this.startTranslateX + (e.touches[0]!.clientX - this.startX)
-      this.scheduleRender()
+      // const pan = (e.touches[0]!.clientX - this.startX)
+      // const renderWidth = this.engine.getRenderWidth()
+      const pan = e.touches[0]!.clientX - this.startX
+      this.schedulePan(pan)
     } else if (e.touches.length === 2 && this.pinchDistance) {
       if (e.cancelable) e.preventDefault()
       this.handlePinchZoom(e)
     }
+  }
+
+  private schedulePan(percentage: number) {
+    this.rafId ??= window.requestAnimationFrame(() => {
+      this.engine.panAbsolute(percentage)
+      this.rafId = null
+    })
   }
 
   private handleTouchStart(e: TouchEvent) {
@@ -96,7 +105,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     } else if (e.touches.length === 2) {
       this.isDragging = false
       this.isPinching = true
-      this.pinchDistance = this.getTouchDistance(e.touches[0]!, e.touches[1]!)
+      this.pinchDistance = this.getTouchDistanceHorizontal(e.touches[0]!, e.touches[1]!)
       this.initialZoomScale = this.viewConfig.zoomFactor
     }
   }
@@ -125,7 +134,7 @@ export class GanttMobileEventManager implements GanttEventManager {
 
     const t1 = e.touches[0]!
     const t2 = e.touches[1]!
-    const currentDistance = this.getTouchDistance(t1, t2)
+    const currentDistance = this.getTouchDistanceHorizontal(t1, t2)
 
     if (currentDistance === 0) return
 
@@ -135,24 +144,25 @@ export class GanttMobileEventManager implements GanttEventManager {
     const pinchFactor = currentDistance / this.pinchDistance
     let nextScale = this.initialZoomScale * pinchFactor
 
-    if (this.autoRestrictZoom && this.viewConfig.stepDays < 2 && nextScale > this.viewConfig.zoomFactor) {
-      nextScale = this.viewConfig.zoomFactor
-    }
-    if (this.autoRestrictZoom && nextScale < 0.5) {
-      nextScale = 0.5
-    }
+    // if (this.autoRestrictZoom && this.viewConfig.stepDays < 2 && nextScale > this.viewConfig.zoomFactor) {
+    //   nextScale = this.viewConfig.zoomFactor
+    // }
+    // if (this.autoRestrictZoom && nextScale < 0.5) {
+    //   nextScale = 0.5
+    // }
+    //
+    // this.viewConfig.panTranslateX = touchMidX - (touchMidX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
+    // this.viewConfig.zoomFactor = nextScale
+    //
+    // this.scheduleRender()
 
-    this.viewConfig.panTranslateX = touchMidX - (touchMidX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
-    this.viewConfig.zoomFactor = nextScale
-
-    this.scheduleRender()
+    // Delegate to GanttRenderEngine
+    this.scheduleZoom(nextScale, touchMidX)
   }
 
-  private scheduleRender() {
+  private scheduleZoom(factor: number, focusX: number) {
     this.rafId ??= window.requestAnimationFrame(() => {
-      const width = this.engine.container.clientWidth || 800
-      this.engine.renderData(width)
-      this.engine.drawAxes(width)
+      this.engine.zoom(factor, focusX)
       this.rafId = null
     })
   }
@@ -178,6 +188,10 @@ export class GanttMobileEventManager implements GanttEventManager {
 
   private getTouchDistance(t1: Touch, t2: Touch): number {
     return this.getDistance(t1.clientX, t1.clientY, t2.clientX, t2.clientY)
+  }
+
+  private getTouchDistanceHorizontal(t1: Touch, t2: Touch): number {
+    return t2.clientX - t1.clientX
   }
 
   private getDistance(x1: number, y1: number, x2: number, y2: number): number {
