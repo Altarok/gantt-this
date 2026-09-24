@@ -2,10 +2,10 @@ import {HoverParent, HoverPopover} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {FrontMatterUtil} from '../io/frontmatter-reader'
-import {GanttConnectorDrawer} from './arrow-drawer'
+import {GanttConnectorDrawer} from '../ui/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
-import {Css} from "const/constants"
+import {Css} from "../const/constants"
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 

@@ -10,7 +10,7 @@ import {
   SvgDrawerData
 } from '../const/types'
 import {Css} from '../const/constants'
-import {createGanttEventManager, GanttEventManager} from '../ui/event-manager'
+import {createGanttEventManager, GanttEventManager} from '../view-ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription, Dates} from '../util/dates'
 import {createSvg, SvgDrawerUtil} from './svg-drawer-util'
@@ -455,7 +455,7 @@ export class GanttRenderEngine {
     this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
     this.handlePanOrZoom()
   }
-  
+
   /**
    * Shift view left or right.
    * @param percentage - positive number shifts view right, negative number shifts view left
