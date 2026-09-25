@@ -163,7 +163,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     }
   }
 
-  private handleTouchEnd() {
+  private handleTouchEnd(e: TouchEvent) {
     if (e) this.logTouchEvent('touchend', e)
     this.isDragging = false
     this.isPinching = false
