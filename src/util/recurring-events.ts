@@ -95,7 +95,7 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
     const interval = item.repeatRule.delta
     const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
-// Compute minimum multiplier required at current zoom level to avoid overlap
+    // Compute minimum multiplier required at current zoom level to avoid overlap
     let minIntervalMultiplier = 1
     while (engine.getXPosition(minIntervalMultiplier * interval) - xPosition0 <= doubleIconSize) {
       minIntervalMultiplier++

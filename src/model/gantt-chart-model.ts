@@ -62,7 +62,7 @@ export class GanttChartModelImpl implements GanttChartViewModel {
   enableGrouping = true
 
   /** Collection of calendars to be shown as axis. */
-  activeAxesList = []
+  activeAxesList: string[] = []
 
   /*
    * Constants
@@ -108,7 +108,7 @@ export class GanttChartModelImpl implements GanttChartViewModel {
 
   setDayRange(min: number, max: number) {
     this.minDays = min
-    this.maxDays = max
+    this.maxDays = max // TODO add with fixed zoom range max: Math.max(min + 1, max)
   }
 
   toString() {

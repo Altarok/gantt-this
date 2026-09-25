@@ -87,19 +87,12 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
-    /* Set coordinates for tooltip*/
-    // const doc = this.activeDocument
-    // doc.documentElement.style.setProperty('--mouse-x', `${e.clientX + 15}px`)
-    // doc.documentElement.style.setProperty('--mouse-y', `${e.clientY + 15}px`)
-
     if (this.isDragging) {
       const deltaX = e.clientX - this.startX
-      this.viewConfig.panTranslateX = this.startTranslateX + deltaX
+      const targetTranslateX = this.startTranslateX + deltaX
 
       this.rafId ??= window.requestAnimationFrame(() => {
-        const width = this.engine.container.clientWidth || 800
-        this.engine.renderData(width)
-        this.engine.drawAxes(width)
+        this.engine.panAbsolute(targetTranslateX)
         this.rafId = null
       })
     }
@@ -136,14 +129,11 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private pan(e: WheelEvent) {
-    this.viewConfig.panTranslateX = this.viewConfig.panTranslateX - Math.floor(e.deltaY / 2)
+    const deltaX = -Math.floor(e.deltaY / 2)
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
     this.rafId ??= window.requestAnimationFrame(() => {
-      const width = this.engine.getRenderWidth()
-      if (!width || width <= 0) return
-      this.engine.renderData(width)
-      this.engine.drawAxes(width)
+      this.engine.panDiff(deltaX)
       this.rafId = null
     })
   }
@@ -189,8 +179,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private stopAnimation() {
-    if (this.rafId === null) return
-    window.cancelAnimationFrame(this.rafId)
+    if (this.rafId) window.cancelAnimationFrame(this.rafId)
     this.rafId = null
   }
 

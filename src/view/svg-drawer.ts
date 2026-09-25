@@ -157,7 +157,7 @@ export class GanttRenderEngine {
   }
 
   handlePanOrZoom() {
-    this.initLayout() /* FIXME Re-calculate repeating events */
+    this.initLayout() /* -> Re-calculate repeating events */
     this.handleResize(false)
   }
 
@@ -177,7 +177,7 @@ export class GanttRenderEngine {
 
     this.view.setWidth(this.getRenderWidth(width))
 
-    // this.drawGroupBackgrounds()
+    this.drawGroupBackgrounds()
     this.renderData(width)
     this.drawAxes(width)
   }
@@ -412,10 +412,10 @@ export class GanttRenderEngine {
 
         /* Calculate width accurately off-screen with explicit uppercase padding */
         label.textContent = calBadgeTextContent.toUpperCase()
-        const badgeWidth = this.textCache.getWidth(calBadgeTextContent)
+        const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
         // TODO choose algorithm
         // const badgeWidth = this.textCache.getSvgWidth(label, calBadgeTextContent)
-        badge.setAttribute('width', badgeWidth.toFixed(1))
+        badge.setAttribute('width', badgeWidth)
       }
 
       this.view.calendarLayer.appendChild(individualAxisG)
@@ -433,9 +433,10 @@ export class GanttRenderEngine {
    * @param focusX optional x value to zoom on
    */
   zoom(factor: number, focusX?: number) {
+    if (Math.abs(1 - factor) < 0.01) return // ignore micro-pinch zooms
+
     const renderWidth = this.getRenderWidth()
     if (this.eventManager?.isDragging || renderWidth <= 1) return
-
     if (this.plugin.settings.autoRestrictZoom) {
       if (factor < 0 && this.viewConfig.zoomFactor < 0.5) /* Prevent max zoom-out */
         return
@@ -461,14 +462,18 @@ export class GanttRenderEngine {
    * @param percentage - positive number shifts view right, negative number shifts view left
    */
   panRelative(percentage: number) {
-    if (this.eventManager?.isDragging) return
+    if (this.eventManager?.isDragging) return /* Triggered by buttons */
     this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
     this.handlePanOrZoom()
   }
 
-  panAbsolute(shift: number) {
-    if (this.eventManager?.isDragging) return
+  panDiff(shift: number) {
     this.viewConfig.panTranslateX += shift
+    this.handlePanOrZoom()
+  }
+
+  panAbsolute(value: number) {
+    this.viewConfig.panTranslateX = value
     this.handlePanOrZoom()
   }
 

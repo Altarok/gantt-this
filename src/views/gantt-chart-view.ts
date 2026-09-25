@@ -54,6 +54,9 @@ export class GanttChartView {
     const defs = this.svg.createSvg('defs')
 
     /* Dedicated grid container behind bars and points */
+    /*
+     * TODO create a chart specific ID (e.g. gantt-clip-UUID)
+     */
     const clipPath = defs.createSvg('clipPath', {attr: {id: 'gantt-clip'}})
     const itemsAreaHeight = this.viewConfig.totalHeight - (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight) - this.viewConfig.margin.bottom
     this.clipRect = clipPath.createSvg('rect', {attr: {height: itemsAreaHeight}})

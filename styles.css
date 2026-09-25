@@ -132,9 +132,9 @@
 }
 
 .gt-axis-label-badge {
-  height: var(--main-font-size);
-  rx: var(--main-font-size-half);
-  ry: var(--main-font-size-half);
+  height: 16px;
+  rx: 8px;
+  ry: 8px;
   fill: var(--text-accent);
   opacity: 1;
   filter: drop-shadow(0 2px 4px var(--shadow-color, var(--background-modifier-border)));
@@ -249,6 +249,9 @@
   cursor: grab;
   display: block;
   width: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gt-svg-canvas:active {
