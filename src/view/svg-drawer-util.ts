@@ -2,6 +2,7 @@ import {setIcon} from "obsidian"
 import {GanttItem, PluginSettings} from '../const/types'
 import {Css} from "const/constants"
 import {ManualSvg} from "./manual-svg-icons"
+import TextWidthCache from "./text-space-cache";
 
 const textLeftPadding = 3
 
@@ -35,12 +36,15 @@ export class SvgDrawerUtil {
   private readonly shapeRadius: number // 8
   private readonly iconSize: number // 16
   private readonly iconRadius: number // 8
+  private readonly dotPrefixWidth: number
 
-  constructor(private readonly settings: PluginSettings) {
+  constructor(private readonly settings: PluginSettings,
+              private readonly textWidthCache: TextWidthCache) {
     this.shapeSize = settings.viewEventShapeHeight
     this.shapeRadius = this.shapeSize / 2
     this.iconSize = settings.viewEventIconHeight
     this.iconRadius = this.iconSize / 2
+    this.dotPrefixWidth = textWidthCache.getWidth('...')
   }
 
   createIconInDiv(d: GanttItem): HTMLDivElement {
@@ -54,19 +58,37 @@ export class SvgDrawerUtil {
    * @param d event to draw icon for
    * @param x x-coordinate of upper-left corner of svg
    * @param y y-coordinate of upper-left corner of svg
+   * @param width for bar/era this is more than shape-radius
    * @param container
    */
   addIconIfPresent(d: GanttItem,
                    x: number, y: number,
-                   container: SVGElement): boolean {
-    if (!d.displayIcon) return false
+                   container: SVGElement,
+                   width: number): { hasIcon: boolean, targetX: number } {
+    let availableWidth: number
+    let targetX: number
+    if (width === 0) {
+      availableWidth = 0
+      targetX = x
+    } else {
+      availableWidth = x > 0 ? width : width - (-x)
+      targetX = availableWidth <= this.shapeRadius || x > 0 ? x : this.dotPrefixWidth
+    }
+
+
+    if (!d.displayIcon) return {hasIcon: false, targetX}
 
     const foreignObj = createSvg('foreignObject',
-      'gt-prevent-user-interactions', {x, y, width: this.iconSize, height: this.iconSize}
+      'gt-prevent-user-interactions', {x: targetX, y, width: this.iconSize, height: this.iconSize}
     )
     foreignObj.appendChild(this.createIconInDiv(d))
+    if (availableWidth !== 0) {
+      const textSvg = createSvg('text', Css.item.textBar, {x: 0, y});
+      textSvg.textContent = '...'
+      container.appendChild(textSvg)
+    }
     container.appendChild(foreignObj)
-    return true
+    return {hasIcon: true, targetX}
   }
 
   truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
@@ -119,8 +141,8 @@ export class SvgDrawerUtil {
     svgContainer.appendChild(bar)
 
     if (width > this.iconSize) {
-      const hasIcon = this.addIconIfPresent(d, x1, y - this.iconRadius, svgContainer)
-      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, x1, y, width, hasIcon, svgContainer, true, Css.item.textBar)
+      const {hasIcon, targetX} = this.addIconIfPresent(d, x1, y - this.iconRadius, svgContainer, width)
+      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, /*x1 TODO revert? */ targetX, y, width, hasIcon, svgContainer, true, Css.item.textBar)
     }
   }
 
@@ -141,8 +163,8 @@ export class SvgDrawerUtil {
     svgContainer.appendChild(era)
 
     if (width > this.iconSize) {
-      const hasIcon = this.addIconIfPresent(d, x1, y, svgContainer)
-      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, x1, y + this.iconRadius, width, hasIcon, svgContainer, true, Css.item.textEra)
+      const {hasIcon, targetX} = this.addIconIfPresent(d, x1, y, svgContainer, width)
+      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, /* x1 TODO revert? */ targetX, y + this.iconRadius, width, hasIcon, svgContainer, true, Css.item.textEra)
     }
   }
 
@@ -168,7 +190,7 @@ export class SvgDrawerUtil {
     const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
     if (d.color) el.setAttribute('fill', d.color)
     svgContainer.appendChild(el)
-    this.addIconIfPresent(d, x - this.iconRadius, y - this.iconRadius, svgContainer)
+    this.addIconIfPresent(d, x - this.iconRadius, y - this.iconRadius, svgContainer, 0)
     this.addTextIfFitting(d.name, x + this.shapeRadius, y, freeSpace, false, svgContainer, false, Css.item.textTimestamp)
   }
 

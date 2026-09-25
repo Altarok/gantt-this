@@ -13,13 +13,15 @@ import {SvgDrawerUtil} from './svg-drawer-util'
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
   private lastRenderTimestamp = 0
-  private svgDrawerUtil: SvgDrawerUtil
+  private readonly svgDrawerUtil: SvgDrawerUtil
+  private readonly textWidthCache: TextWidthCache
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly filesFilteredByBase: TFile[] | null,
               readonly selectedFrontmatterProperties: string[] | null) {
+    this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
-    this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings)
+    this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
   }
 
   private async getGanttItems(pluginSettings: PluginSettings,
@@ -106,7 +108,7 @@ export default class GanttRender {
       this.plugin,
       codeBlockContent,
       this.selectedFrontmatterProperties,
-      new TextWidthCache(),
+      this.textWidthCache,
       ganttChartModel,
       this.svgDrawerUtil
     )
