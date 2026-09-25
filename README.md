@@ -11,7 +11,7 @@ https://altarok.github.io/quartz/
 Welcome to the documentation for the Gantt Timeline Plugin for Obsidian.
 This plugin allows you to clearly display your notes and events in interactive timelines.
 
-![Timeline Example View](docs/images/showcase.png)
+![Timeline Example View](showcase.png)
 
 ### Features & Structure
 
