@@ -20,6 +20,7 @@ export class GanttMobileEventManager implements GanttEventManager {
   private readonly boundWindowTouchEnd: (e: TouchEvent) => void
   private readonly boundSvgTouchStart: (e: TouchEvent) => void
   private readonly boundSvgClick: (e: MouseEvent) => void
+  private readonly boundSvgWheel: (e: WheelEvent) => void // todo test
 
   viewConfig: GanttChartViewModel
 
@@ -30,6 +31,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     this.boundWindowTouchEnd = this.handleTouchEnd.bind(this)
     this.boundSvgTouchStart = this.handleTouchStart.bind(this)
     this.boundSvgClick = this.handleClick.bind(this)
+    this.boundSvgWheel = this.handleWheel.bind(this) // todo test
 
     this.attachSvgListeners()
   }
@@ -47,6 +49,7 @@ export class GanttMobileEventManager implements GanttEventManager {
 
     this.svg.addEventListener('touchstart', this.boundSvgTouchStart, {passive: false})
     this.svg.addEventListener('click', this.boundSvgClick)
+    this.svg.addEventListener('wheel', this.boundSvgWheel, {passive: false}) //  todo test
   }
 
   private detachListeners() {
@@ -60,12 +63,14 @@ export class GanttMobileEventManager implements GanttEventManager {
     if (this.svg) {
       this.svg.removeEventListener('touchstart', this.boundSvgTouchStart)
       this.svg.removeEventListener('click', this.boundSvgClick)
+      this.svg.removeEventListener('wheel', this.boundSvgWheel) //  todo test
       this.svg = null
     }
   }
 
 
   private handleTouchMove(e: TouchEvent) {
+    this.logTouchEvent('touchmove', e)
     if (e.touches.length === 1 && this.isDragging) {
       // Prevent default scroll / panel drag behavior
       e.preventDefault()
@@ -84,6 +89,7 @@ export class GanttMobileEventManager implements GanttEventManager {
   }
 
   private handleTouchStart(e: TouchEvent) {
+    this.logTouchEvent('touchstart', e)
     // Prevent Obsidian from interpreting this swipe as a sidebar trigger
     e.stopPropagation()
 
@@ -140,12 +146,50 @@ export class GanttMobileEventManager implements GanttEventManager {
     })
   }
 
+  private handleWheel(e: WheelEvent) {
+    // DevTools pinch simulation & physical trackpads emit wheel events with ctrlKey = true
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault()
+      if (!this.svg) return
+
+      const rect = this.svg.getBoundingClientRect()
+      const focusX = e.clientX - rect.left - this.engine.viewConfig.margin.left
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92
+
+      this.rafId ??= window.requestAnimationFrame(() => {
+        this.engine.zoom(zoomFactor, focusX)
+        this.rafId = null
+      })
+    }
+  }
+
   private handleTouchEnd() {
+    if (e) this.logTouchEvent('touchend', e)
     this.isDragging = false
     this.isPinching = false
     this.pinchDistance = null
     this.touchStartPos = null
     this.destroyAnimation()
+  }
+
+  private logTouchEvent(type: string, e: TouchEvent) {
+    const formatTouches = (list: TouchList) =>
+      Array.from(list).map(t => ({
+        id: t.identifier,
+        clientX: Math.round(t.clientX),
+        clientY: Math.round(t.clientY),
+        target: (t.target as HTMLElement)?.tagName ?? 'unknown'
+      }))
+
+    console.log(`[Touch Debug: ${type}]`, {
+      cancelable: e.cancelable,
+      defaultPrevented: e.defaultPrevented,
+      touchesCount: e.touches.length,
+      targetTouchesCount: e.targetTouches.length,
+      changedTouchesCount: e.changedTouches.length,
+      touches: formatTouches(e.touches),
+      changedTouches: formatTouches(e.changedTouches)
+    })
   }
 
   public destroy() {

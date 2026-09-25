@@ -58,37 +58,24 @@ export class SvgDrawerUtil {
    * @param d event to draw icon for
    * @param x x-coordinate of upper-left corner of svg
    * @param y y-coordinate of upper-left corner of svg
-   * @param width for bar/era this is more than shape-radius
    * @param container
    */
   addIconIfPresent(d: GanttItem,
                    x: number, y: number,
-                   container: SVGElement,
-                   width: number): { hasIcon: boolean, targetX: number } {
-    let availableWidth: number
-    let targetX: number
-    if (width === 0) {
-      availableWidth = 0
-      targetX = x
-    } else {
-      availableWidth = x > 0 ? width : width - (-x)
-      targetX = availableWidth <= this.shapeRadius || x > 0 ? x : this.dotPrefixWidth
-    }
-
-
-    if (!d.displayIcon) return {hasIcon: false, targetX}
+                   container: SVGElement): boolean {
+    if (!d.displayIcon) return false
 
     const foreignObj = createSvg('foreignObject',
-      'gt-prevent-user-interactions', {x: targetX, y, width: this.iconSize, height: this.iconSize}
+      'gt-prevent-user-interactions', {x, y, width: this.iconSize, height: this.iconSize}
     )
     foreignObj.appendChild(this.createIconInDiv(d))
-    if (availableWidth !== 0) {
-      const textSvg = createSvg('text', Css.item.textBar, {x: 0, y});
-      textSvg.textContent = '...'
-      container.appendChild(textSvg)
-    }
+    // if (availableWidth !== 0) {
+    //   const textSvg = createSvg('text', Css.item.textBar, {x: 0, y});
+    //   textSvg.textContent = '...'
+    //   container.appendChild(textSvg)
+    // }
     container.appendChild(foreignObj)
-    return {hasIcon: true, targetX}
+    return true
   }
 
   truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
@@ -107,15 +94,46 @@ export class SvgDrawerUtil {
    * @param svgContainer
    * @param textCssClass necessary to decide which CSS magic to apply
    */
-  addTextIfFitting(text: string, x: number, y: number, width: number, hasIcon: boolean, svgContainer: SVGElement,
-                   isTimeSpan: boolean, textCssClass: string): void {
-    const textSpacing = textLeftPadding + (hasIcon ? this.iconSize : 0)
-    const availableTextWidth = width - textSpacing
+  addTextIfFitting(text: string, x: number, y: number, width: number,
+                   svgContainer: SVGElement,
+                   textCssClass: string): void {
+    const availableTextWidth = width - textLeftPadding
 
     if (availableTextWidth > 0) {
-      const textSvg = createSvg('text', textCssClass, {x: x + textSpacing, y})
+      const textSvg = createSvg('text', textCssClass, {x: x + textLeftPadding, y})
       textSvg.textContent = this.truncateText(text, availableTextWidth)
       svgContainer.appendChild(textSvg)
+    }
+  }
+
+  /**
+   * @param d event to draw icon for
+   * @param x x-coordinate of upper-left corner of svg
+   * @param y y-coordinate of upper-left corner of svg
+   * @param container
+   * @param width
+   * @param textCssClass
+   */
+  addAndMoveIconAndText(d: GanttItem,
+                        x: number, y: number,
+                        container: SVGElement,
+                        width: number,
+                        textCssClass: string) {
+    let availableWidth: number
+    let targetX: number
+
+    if (x < 0) {
+      availableWidth = width + x // x is negative
+      targetX = 0
+    } else {
+      availableWidth = width
+      targetX = x
+    }
+
+
+    if (availableWidth > this.iconSize) {
+      const hasIcon = this.addIconIfPresent(d, targetX, y, container)
+      if (availableWidth > 2 * this.iconSize) this.addTextIfFitting(d.name, targetX + (hasIcon ? this.iconSize : 0), y + this.iconRadius, availableWidth, container, textCssClass)
     }
   }
 
@@ -140,10 +158,7 @@ export class SvgDrawerUtil {
     if (d.color) bar.setAttribute('fill', d.color)
     svgContainer.appendChild(bar)
 
-    if (width > this.iconSize) {
-      const {hasIcon, targetX} = this.addIconIfPresent(d, x1, y - this.iconRadius, svgContainer, width)
-      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, /*x1 TODO revert? */ targetX, y, width, hasIcon, svgContainer, true, Css.item.textBar)
-    }
+    this.addAndMoveIconAndText(d, x1, y - this.iconRadius, svgContainer, width, Css.item.textBar)
   }
 
   /**
@@ -151,7 +166,7 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param x1 left bound of svg to draw
    * @param x2 right bound of svg to draw
-   * @param y vertical center of svg to draw
+   * @param y upper bound of svg to draw
    * @param height height of svg to draw
    * @param svgContainer
    */
@@ -162,10 +177,7 @@ export class SvgDrawerUtil {
     if (d.color) era.setAttribute('fill', d.color)
     svgContainer.appendChild(era)
 
-    if (width > this.iconSize) {
-      const {hasIcon, targetX} = this.addIconIfPresent(d, x1, y, svgContainer, width)
-      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, /* x1 TODO revert? */ targetX, y + this.iconRadius, width, hasIcon, svgContainer, true, Css.item.textEra)
-    }
+    this.addAndMoveIconAndText(d, x1, y, svgContainer, width, Css.item.textEra)
   }
 
   /**
@@ -190,8 +202,8 @@ export class SvgDrawerUtil {
     const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
     if (d.color) el.setAttribute('fill', d.color)
     svgContainer.appendChild(el)
-    this.addIconIfPresent(d, x - this.iconRadius, y - this.iconRadius, svgContainer, 0)
-    this.addTextIfFitting(d.name, x + this.shapeRadius, y, freeSpace, false, svgContainer, false, Css.item.textTimestamp)
+    this.addIconIfPresent(d, x - this.iconRadius, y - this.iconRadius, svgContainer)
+    this.addTextIfFitting(d.name, x + this.shapeRadius, y, freeSpace, svgContainer, Css.item.textTimestamp)
   }
 
   /**
