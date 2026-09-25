@@ -26,6 +26,16 @@
   margin: 0;
 }
 
+.gt-layers-eras {
+  fill-opacity: 0.15;
+  stroke-opacity: 1;
+}
+
+.gt-layers-repeaters {
+  fill-opacity: 0.25;
+  stroke-opacity: 0.5;
+}
+
 /* Force full width on the generated SVG */
 .gt-chart-container svg {
   width: 100%;
@@ -315,7 +325,7 @@
 }
 
 .gt-item.timespan.era {
-  fill-opacity: 0.15;
+  /*fill-opacity: 0.15;*/
   pointer-events: none;
   user-select: none;
 }

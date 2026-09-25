@@ -38,6 +38,10 @@ export const Css = {
     /** Use for all texts on era events */
     textEra: 'gt-item text-era',
   },
+  itemLayer: {
+    era: 'gt-layers-eras',
+    repeater: 'gt-layers-repeaters',
+  },
   group: {
     text: 'gt-group-text',
     badge: 'gt-group-badge',

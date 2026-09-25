@@ -18,6 +18,7 @@ export class GanttChartView {
   eraLayer: SVGElement
   /** Inside foregroundLayer > dataLayer : layer used for mouse overlay */
   lowerHoverLayer: SVGElement
+  repeaterEventLayer: SVGElement
   /** Inside foregroundLayer > dataLayer : event layer used for other events */
   eventLayer: SVGElement
   upperHoverLayer: SVGElement
@@ -58,22 +59,30 @@ export class GanttChartView {
      * TODO create a chart specific ID (e.g. gantt-clip-UUID)
      */
     const clipPath = defs.createSvg('clipPath', {attr: {id: 'gantt-clip'}})
-    const itemsAreaHeight = this.viewConfig.totalHeight - (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight) - this.viewConfig.margin.bottom
-    this.clipRect = clipPath.createSvg('rect', {attr: {height: itemsAreaHeight}})
+    const eventsAreaHeight = this.calculateEventsAreaHeight()
+    this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
 
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': 'url(#gantt-clip)'}})
     this.calendarLayer = this.foregroundLayer.createSvg('g')
 
-    this.eraLayer = this.dataLayer.createSvg('g', {cls: 'gt-layer-eras'})
+    this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
+    this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
     this.eventLayer = this.dataLayer.createSvg('g')
     this.upperHoverLayer = this.dataLayer.createSvg('g')
   }
 
+  private calculateEventsAreaHeight() {
+    return this.viewConfig.totalHeight -
+      (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
+      - this.viewConfig.margin.bottom
+  }
+
   clearEventLayer() {
     this.eraLayer.empty()
+    this.repeaterEventLayer.empty()
     this.eventLayer.empty()
 
     this.clearHoverLayer()

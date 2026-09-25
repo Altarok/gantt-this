@@ -142,8 +142,7 @@ export class SvgDrawerUtil {
 
     if (width > this.iconSize) {
       const hasIcon = this.addIconIfPresent(d, x1, y, svgContainer)
-      const text = `${d.name}` // `Era: ${d.name} (${d.startDateDisplay} - ${d.endDateDisplay})`
-      if (width > 2 * this.iconSize) this.addTextIfFitting(text, x1, y + this.iconRadius, width, hasIcon, svgContainer, true, Css.item.textEra)
+      if (width > 2 * this.iconSize) this.addTextIfFitting(d.name, x1, y + this.iconRadius, width, hasIcon, svgContainer, true, Css.item.textEra)
     }
   }
 
