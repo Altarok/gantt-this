@@ -177,7 +177,7 @@ export class GanttRenderEngine {
 
     this.view.setWidth(this.getRenderWidth(width))
 
-    this.drawGroupBackgrounds()
+    // this.drawGroupBackgrounds()
     this.renderData(width)
     this.drawAxes(width)
   }

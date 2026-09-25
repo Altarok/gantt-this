@@ -68,28 +68,46 @@ export class GanttMobileEventManager implements GanttEventManager {
     }
   }
 
+  private scheduleRender() {
+    this.rafId ??= window.requestAnimationFrame(() => {
+      const width = this.engine.container.clientWidth || 800
+      this.engine.renderData(width)
+      this.engine.drawAxes(width)
+      this.rafId = null
+    })
+  }
+
   private handleTouchMove(e: TouchEvent) {
     if (e.touches.length === 1 && this.isDragging) {
       // Prevent default scroll / panel drag behavior
       e.preventDefault()
       e.stopPropagation()
 
+      /*
+       * TODO 1
+       */
+      this.viewConfig.panTranslateX = this.startTranslateX + (e.touches[0]!.clientX - this.startX)
+      this.scheduleRender()
+
+      /*
+       * TODO 2
+       */
       // const pan = (e.touches[0]!.clientX - this.startX)
       // const renderWidth = this.engine.getRenderWidth()
-      const pan = e.touches[0]!.clientX - this.startX
-      this.schedulePan(pan)
+      // const pan = e.touches[0]!.clientX - this.startX
+      // this.schedulePan(0)
     } else if (e.touches.length === 2 && this.pinchDistance) {
       if (e.cancelable) e.preventDefault()
       this.handlePinchZoom(e)
     }
   }
 
-  private schedulePan(percentage: number) {
-    this.rafId ??= window.requestAnimationFrame(() => {
-      this.engine.panAbsolute(percentage)
-      this.rafId = null
-    })
-  }
+  // private schedulePan(percentage: number) {
+  //   this.rafId ??= window.requestAnimationFrame(() => {
+  //     this.engine.panAbsolute(percentage)
+  //     this.rafId = null
+  //   })
+  // }
 
   private handleTouchStart(e: TouchEvent) {
     // Prevent Obsidian from interpreting this swipe as a sidebar trigger
@@ -105,7 +123,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     } else if (e.touches.length === 2) {
       this.isDragging = false
       this.isPinching = true
-      this.pinchDistance = this.getTouchDistanceHorizontal(e.touches[0]!, e.touches[1]!)
+      this.pinchDistance = this.getTouchDistance(e.touches[0]!, e.touches[1]!)
       this.initialZoomScale = this.viewConfig.zoomFactor
     }
   }
@@ -134,7 +152,7 @@ export class GanttMobileEventManager implements GanttEventManager {
 
     const t1 = e.touches[0]!
     const t2 = e.touches[1]!
-    const currentDistance = this.getTouchDistanceHorizontal(t1, t2)
+    const currentDistance = this.getTouchDistance(t1, t2)
 
     if (currentDistance === 0) return
 
@@ -144,28 +162,34 @@ export class GanttMobileEventManager implements GanttEventManager {
     const pinchFactor = currentDistance / this.pinchDistance
     let nextScale = this.initialZoomScale * pinchFactor
 
-    // if (this.autoRestrictZoom && this.viewConfig.stepDays < 2 && nextScale > this.viewConfig.zoomFactor) {
-    //   nextScale = this.viewConfig.zoomFactor
-    // }
-    // if (this.autoRestrictZoom && nextScale < 0.5) {
-    //   nextScale = 0.5
-    // }
-    //
-    // this.viewConfig.panTranslateX = touchMidX - (touchMidX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
-    // this.viewConfig.zoomFactor = nextScale
-    //
-    // this.scheduleRender()
+    /*
+     * TODO 1
+     */
+    if (this.autoRestrictZoom && this.viewConfig.stepDays < 2 && nextScale > this.viewConfig.zoomFactor) {
+      nextScale = this.viewConfig.zoomFactor
+    }
+    if (this.autoRestrictZoom && nextScale < 0.5) {
+      nextScale = 0.5
+    }
 
+    this.viewConfig.panTranslateX = touchMidX - (touchMidX - this.viewConfig.panTranslateX) * (nextScale / this.viewConfig.zoomFactor)
+    this.viewConfig.zoomFactor = nextScale
+
+    this.scheduleRender()
+
+    /*
+     * TODO 2
+     */
     // Delegate to GanttRenderEngine
-    this.scheduleZoom(nextScale, touchMidX)
+    // this.scheduleZoom(nextScale, touchMidX)
   }
 
-  private scheduleZoom(factor: number, focusX: number) {
-    this.rafId ??= window.requestAnimationFrame(() => {
-      this.engine.zoom(factor, focusX)
-      this.rafId = null
-    })
-  }
+  // private scheduleZoom(factor: number, focusX: number) {
+  //   this.rafId ??= window.requestAnimationFrame(() => {
+  //     this.engine.zoom(factor, focusX)
+  //     this.rafId = null
+  //   })
+  // }
 
   private handleTouchEnd() {
     this.isDragging = false

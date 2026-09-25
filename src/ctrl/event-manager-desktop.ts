@@ -140,7 +140,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
     this.rafId ??= window.requestAnimationFrame(() => {
-      const width = this.engine.container.clientWidth
+      const width = this.engine.getRenderWidth()
       if (!width || width <= 0) return
       this.engine.renderData(width)
       this.engine.drawAxes(width)
