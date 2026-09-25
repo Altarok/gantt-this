@@ -178,18 +178,18 @@ export class GanttRenderEngine {
     this.view.setWidth(this.getRenderWidth(width))
 
     this.drawGroupBackgrounds()
-    try {// Code that might crash
+    // try {// Code that might crash
       this.renderData(width)
       this.drawAxes()
-    } catch (error) {
-      debugger
-      if (error instanceof Error) {
-        console.error("Error drawing axes:", error.message)
-        console.error(error.stack)
-      } else {
-        console.error("An unexpected error occurred:", error)
-      }
-    }
+    // } catch (error) {
+    //   debugger
+    //   if (error instanceof Error) {
+    //     console.error("Error drawing axes:", error.message)
+    //     console.error(error.stack)
+    //   } else {
+    //     console.error("An unexpected error occurred:", error)
+    //   }
+    // }
   }
 
   private drawGroupBackgrounds() {
@@ -310,7 +310,7 @@ export class GanttRenderEngine {
     const h = this.viewConfig.totalHeight -
       (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
       - this.viewConfig.margin.bottom
-    console.log('Events area height', h, 'totalHeight', this.viewConfig.totalHeight)
+    // console.log('Events area height', h, 'totalHeight', this.viewConfig.totalHeight)
     return h
   }
 
@@ -401,10 +401,7 @@ export class GanttRenderEngine {
       //   ticksG.appendChild(title)
       // }
 
-      // debugger
-
-
-      let ticksDrawn = 0;
+      // let ticksDrawn = 0;
 
       for (let currDays = absoluteStartDay; currDays <= absoluteEndDay; currDays += this.viewConfig.stepDays) {
         if (currDays < effectiveStartDay - 1) continue
@@ -422,7 +419,7 @@ export class GanttRenderEngine {
 
         const tick = createSvg('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
         ticksG.appendChild(tick)
-        ticksDrawn++
+        // ticksDrawn++
 
         if (xPos - lastTextX > 80) {
           const text = createSvg('text', Css.axis.text, {x: xPos, y: 20})
@@ -433,16 +430,16 @@ export class GanttRenderEngine {
         }
       }
 
-      if (ticksDrawn === 0) {
-        console.warn("Axis rendered 0 ticks. Bounds check:", {
-          effectiveStartDay,
-          effectiveEndDay,
-          stepDays: this.viewConfig.stepDays,
-          calStart,
-          calEnd
-        })
-        debugger
-      }
+      // if (ticksDrawn === 0) {
+        // console.warn("Axis rendered 0 ticks. Bounds check:", {
+        //   effectiveStartDay,
+        //   effectiveEndDay,
+        //   stepDays: this.viewConfig.stepDays,
+        //   calStart,
+        //   calEnd
+        // })
+      //   debugger
+      // }
 
       if (showMoonPhases) {
         drawMoons(this, ticksG, renderWidth, calendarConfig, startDaysValue, endDaysValue,
@@ -633,8 +630,8 @@ export class GanttRenderEngine {
 
     const processedData = [...eras, ...nonEras, ...repeaters]
 
-    console.log('[Calculated stacking]', // TODO remove
-      {processedData, totalLanes: lanes.length})
+    // console.log('[Calculated stacking]', // TODO remove
+    //   {processedData, totalLanes: lanes.length})
 
     return {processedData, totalLanes: lanes.length}
   }
@@ -646,10 +643,10 @@ export class GanttRenderEngine {
     const percentage = (days - this.viewConfig.minDays) / (this.viewConfig.maxDays - this.viewConfig.minDays)
     const x = (percentage * renderWidth * this.viewConfig.zoomFactor) + this.viewConfig.panTranslateX
 
-    if (!Number.isFinite(x)) {
-      console.error("Invalid xPos detected:", {days, x, renderWidth})
-      debugger // Pause execution in DevTools
-    }
+    // if (!Number.isFinite(x)) {
+    //   console.error("Invalid xPos detected:", {days, x, renderWidth})
+    //   debugger // Pause execution in DevTools
+    // }
 
     return x
   }

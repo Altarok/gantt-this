@@ -87,7 +87,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
-    if (e) this.logTouchEvent('handleWindowMouseMove', e)
+    // if (e) this.logTouchEvent('handleWindowMouseMove', e)
     if (this.isDragging) {
       const deltaX = e.clientX - this.startX
       const targetTranslateX = this.startTranslateX + deltaX
@@ -100,7 +100,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgMouseDown(e: MouseEvent) {
-    if (e) this.logTouchEvent('handleSvgMouseDown', e)
+    // if (e) this.logTouchEvent('handleSvgMouseDown', e)
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
     this.isDragging = true
     this.startX = e.clientX
@@ -119,7 +119,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgWheel(e: WheelEvent) {
-    if (e) this.logTouchEvent('handleSvgWheel', e)
+    // if (e) this.logTouchEvent('handleSvgWheel', e)
     if (!this.svg) return
 
     if (this.isModifierActive(e, this.settings.uxZoomButton)) {
@@ -155,7 +155,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgClick(event: MouseEvent) {
-    if (event) this.logTouchEvent('handleSvgClick', event)
+    // if (event) this.logTouchEvent('handleSvgClick', event)
     const target = event.target as HTMLElement
 
     if (target?.hasAttribute('data-id')) {
@@ -195,7 +195,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     return this.pluginSettings
   }
 
-  private logTouchEvent(type: string, e: MouseEvent) {
+  // private logTouchEvent(type: string, e: MouseEvent) {
     // const formatTouches = (list: TouchList) =>
     //   Array.from(list).map(t => ({
     //     id: t.identifier,
@@ -213,6 +213,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
     //   // touches: formatTouches(e.touches),
     //   // changedTouches: formatTouches(e.changedTouches)
     // })
-  }
+  // }
 
 }
