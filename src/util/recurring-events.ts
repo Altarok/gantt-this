@@ -133,8 +133,6 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
     let currentStart = ruleStart + Math.max(step, firstStepOffset)
     let iterations = 0
 
-    // debugger
-
     while (currentStart <= renderMax && iterations < 100) {
       expanded.push({
         ...item,
@@ -163,8 +161,6 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
 //   const totalDaysSpan = engine.viewConfig.maxDays - engine.viewConfig.minDays
 //   if (totalDaysSpan <= 0) return items
 //   const pixelsPerDay = (renderWidth / totalDaysSpan) * engine.viewConfig.zoomFactor
-//
-//   debugger
 //
 //   for (const item of items) {
 //     expanded.push(item) // Always include the base event

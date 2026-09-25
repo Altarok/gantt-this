@@ -33,7 +33,7 @@ export function createGanttEventManager(renderEngine: GanttRenderEngine,
                                         pluginSettings: PluginSettings,
                                         svgDrawerUtil: SvgDrawerUtil): GanttEventManager {
 
-  console.log('Creating event manager. Is mobile?', isMobile)
+  // console.log('Creating event manager. Is mobile?', isMobile)
   if (isMobile)
     return new GanttMobileEventManager(renderEngine)
   else

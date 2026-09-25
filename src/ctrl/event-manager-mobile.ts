@@ -173,23 +173,23 @@ export class GanttMobileEventManager implements GanttEventManager {
   }
 
   private logTouchEvent(type: string, e: TouchEvent) {
-    const formatTouches = (list: TouchList) =>
-      Array.from(list).map(t => ({
-        id: t.identifier,
-        clientX: Math.round(t.clientX),
-        clientY: Math.round(t.clientY),
-        target: (t.target as HTMLElement)?.tagName ?? 'unknown'
-      }))
-
-    console.log(`[Touch Debug: ${type}]`, {
-      cancelable: e.cancelable,
-      defaultPrevented: e.defaultPrevented,
-      touchesCount: e.touches.length,
-      targetTouchesCount: e.targetTouches.length,
-      changedTouchesCount: e.changedTouches.length,
-      touches: formatTouches(e.touches),
-      changedTouches: formatTouches(e.changedTouches)
-    })
+    // const formatTouches = (list: TouchList) =>
+    //   Array.from(list).map(t => ({
+    //     id: t.identifier,
+    //     clientX: Math.round(t.clientX),
+    //     clientY: Math.round(t.clientY),
+    //     target: (t.target as HTMLElement)?.tagName ?? 'unknown'
+    //   }))
+    //
+    // console.log(`[Touch Debug: ${type}]`, {
+    //   cancelable: e.cancelable,
+    //   defaultPrevented: e.defaultPrevented,
+    //   touchesCount: e.touches.length,
+    //   targetTouchesCount: e.targetTouches.length,
+    //   changedTouchesCount: e.changedTouches.length,
+    //   touches: formatTouches(e.touches),
+    //   changedTouches: formatTouches(e.changedTouches)
+    // })
   }
 
   public destroy() {
