@@ -27,11 +27,14 @@ export type GanttEventManager = {
 //   }
 // }
 
+const isMobile = Platform.isMobile
+
 export function createGanttEventManager(renderEngine: GanttRenderEngine,
                                         pluginSettings: PluginSettings,
                                         svgDrawerUtil: SvgDrawerUtil): GanttEventManager {
 
-  if (Platform.isMobile)
+  console.log('Creating event manager. Is mobile?', isMobile)
+  if (isMobile)
     return new GanttMobileEventManager(renderEngine)
   else
     return new GanttDesktopEventManager(renderEngine, pluginSettings, svgDrawerUtil)

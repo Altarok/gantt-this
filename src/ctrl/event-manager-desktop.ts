@@ -2,8 +2,8 @@ import {ControlKey, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {TooltipManager} from './tooltip-manager-desktop'
-import {GanttChartViewModel} from "../model/gantt-chart-model";
-import {SvgDrawerUtil} from "../view/svg-drawer-util";
+import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {SvgDrawerUtil} from '../view/svg-drawer-util'
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -87,6 +87,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
+    if (e) this.logTouchEvent('handleWindowMouseMove', e)
     if (this.isDragging) {
       const deltaX = e.clientX - this.startX
       const targetTranslateX = this.startTranslateX + deltaX
@@ -99,6 +100,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgMouseDown(e: MouseEvent) {
+    if (e) this.logTouchEvent('handleSvgMouseDown', e)
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
     this.isDragging = true
     this.startX = e.clientX
@@ -117,6 +119,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgWheel(e: WheelEvent) {
+    if (e) this.logTouchEvent('handleSvgWheel', e)
     if (!this.svg) return
 
     if (this.isModifierActive(e, this.settings.uxZoomButton)) {
@@ -152,6 +155,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleSvgClick(event: MouseEvent) {
+    if (event) this.logTouchEvent('handleSvgClick', event)
     const target = event.target as HTMLElement
 
     if (target?.hasAttribute('data-id')) {
@@ -190,4 +194,25 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private get settings() {
     return this.pluginSettings
   }
+
+  private logTouchEvent(type: string, e: MouseEvent) {
+    const formatTouches = (list: TouchList) =>
+      Array.from(list).map(t => ({
+        id: t.identifier,
+        clientX: Math.round(t.clientX),
+        clientY: Math.round(t.clientY),
+        target: (t.target as HTMLElement)?.tagName ?? 'unknown'
+      }))
+
+    console.log(`[Touch Debug: ${type}]`, {
+      cancelable: e.cancelable,
+      defaultPrevented: e.defaultPrevented,
+      // touchesCount: e.touches.length,
+      // targetTouchesCount: e.targetTouches.length,
+      // changedTouchesCount: e.changedTouches.length,
+      // touches: formatTouches(e.touches),
+      // changedTouches: formatTouches(e.changedTouches)
+    })
+  }
+
 }
