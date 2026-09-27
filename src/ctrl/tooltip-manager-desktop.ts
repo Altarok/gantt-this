@@ -1,4 +1,4 @@
-import {HoverParent, HoverPopover} from 'obsidian'
+import {HoverParent, HoverPopover, TFile} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {FrontMatterUtil} from '../io/frontmatter-reader'
@@ -12,7 +12,7 @@ type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 type HighLightTarget = { item: GanttItem, svg: SVGElement }
 type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
-export class TooltipManager implements HoverParent {
+class TooltipManager implements HoverParent {
   private readonly searchForRelatedEventsOnHover: boolean
   private readonly isDrawArrows: boolean
 
@@ -118,6 +118,19 @@ export class TooltipManager implements HoverParent {
   private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem, selectedProps: string[]) {
     const properties: { key: string, value: string }[] = FrontMatterUtil.readUnknownProperties(d, selectedProps)
     if (properties.length === 0) return
+
+    console.log('Selected properties:', Object.keys(properties))
+
+
+    const file = this.engine.plugin.app.vault.getAbstractFileByPath(d.file.path)
+
+    if (file instanceof TFile) {
+      const cache = this.engine.plugin.app.metadataCache.getFileCache(file)
+      const frontmatter = cache?.frontmatter
+      console.log('Frontmatter:', Object.keys(frontmatter ?? ''))
+      debugger
+    }
+
     for (const p of properties) {
       const row = table.insertRow()
       const cellKey = row.insertCell()
@@ -405,3 +418,5 @@ export class TooltipManager implements HoverParent {
   }
 
 }
+
+export default TooltipManager

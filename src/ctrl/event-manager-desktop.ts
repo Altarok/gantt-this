@@ -1,7 +1,7 @@
 import {ControlKey, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
-import {TooltipManager} from './tooltip-manager-desktop'
+import TooltipManager from './tooltip-manager-desktop'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
 
