@@ -1,4 +1,4 @@
-import {HoverParent, HoverPopover, TFile} from 'obsidian'
+import {HoverParent, HoverPopover} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {FrontMatterUtil} from '../io/frontmatter-reader'
@@ -119,17 +119,16 @@ class TooltipManager implements HoverParent {
     const properties: { key: string, value: string }[] = FrontMatterUtil.readUnknownProperties(d, selectedProps)
     if (properties.length === 0) return
 
-    console.log('Selected properties:', Object.keys(properties))
-
-
-    const file = this.engine.plugin.app.vault.getAbstractFileByPath(d.file.path)
-
-    if (file instanceof TFile) {
-      const cache = this.engine.plugin.app.metadataCache.getFileCache(file)
-      const frontmatter = cache?.frontmatter
-      console.log('Frontmatter:', Object.keys(frontmatter ?? ''))
-      debugger
-    }
+    // console.log('Selected properties:', Object.keys(properties)) // TODO remove
+    //
+    // const file = this.engine.plugin.app.vault.getAbstractFileByPath(d.file.path) // TODO remove
+    //
+    // if (file instanceof TFile) {
+    //   const cache = this.engine.plugin.app.metadataCache.getFileCache(file)
+    //   const frontmatter = cache?.frontmatter
+    //   console.log('Frontmatter:', Object.keys(frontmatter ?? ''))
+    //   debugger
+    // }
 
     for (const p of properties) {
       const row = table.insertRow()
