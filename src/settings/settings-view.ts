@@ -633,7 +633,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
       {
         name: 'Event icon name',
-        desc: 'Optional. Name of the Lucide icon (see https://lucide.dev).',
+        desc: 'Optional. Name of the SVG icon (see https://lucide.dev for free examples).',
         control: {
           type: 'text', key: 'frontMatterProperty_event_icon_name',
           placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,

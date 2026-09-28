@@ -11,7 +11,7 @@ const isMobile = Platform.isMobile
 //   grouping: boolean
 // }
 
-/* See https://lucide.dev for icons */
+/* See https://lucide.dev for free icon examples */
 function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
   const btn = parentEl.createEl('button', {cls: Css.toolbar.button})
   setIcon(btn, icon)

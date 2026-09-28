@@ -130,7 +130,6 @@ export class SvgDrawerUtil {
       targetX = x
     }
 
-
     if (availableWidth > this.iconSize) {
       const hasIcon = this.addIconIfPresent(d, targetX, y, container)
       if (availableWidth > 2 * this.iconSize) this.addTextIfFitting(d.name, targetX + (hasIcon ? this.iconSize : 0), y + this.iconRadius, availableWidth, container, textCssClass)
@@ -181,7 +180,7 @@ export class SvgDrawerUtil {
   }
 
   /**
-   * Draw small shape for event with a single timestamp (box|circle|diamond). Appends event color to SVG background and adds lucide icon on top if.
+   * Draw small shape for event with a single timestamp (box|circle|diamond). Appends event color to SVG background and adds SVG icon on top it.
    * @param d event to draw
    * @param shape 'circle' | 'polygon' | 'rect'
    * @param attrs
