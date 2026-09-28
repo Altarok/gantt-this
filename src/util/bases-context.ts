@@ -2,16 +2,23 @@ import {BasesEntry, BasesPropertyId, BasesQueryResult, BasesView, BasesViewConfi
 import {GanttItem} from '../const/types'
 
 export default class BasesContext {
-  readonly selectedPropertiesInOrder: BasesPropertyId[]
-
   constructor(private readonly base: BasesView) {
-    this.selectedPropertiesInOrder = this.config.getOrder()
   }
 
+  /**
+   * Returns true if any property is selected. This does not guarantee, that all selected properties would return a
+   * truthy value when queried.
+   */
   hasSelectedProperties() {
     return this.selectedPropertiesInOrder.length > 0
   }
 
+  /**
+   * Reads all properties selected in the Base in correct order.
+   *
+   * @param item a Gantt chart event, pointing to a note
+   * @return key value pairs where value is truthy
+   */
   readPropertyValues(item: GanttItem): { key: string, value: string }[] {
     if (!item || this.selectedPropertiesInOrder.length === 0) return []
 
@@ -54,6 +61,10 @@ export default class BasesContext {
   /** Complete Bases query result */
   private get queryResult(): BasesQueryResult {
     return this.base.data
+  }
+
+  private get selectedPropertiesInOrder(): BasesPropertyId[] {
+    return this.config.getOrder()
   }
 
   /** Bases config, basically the query parameters */

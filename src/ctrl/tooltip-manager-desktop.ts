@@ -108,7 +108,8 @@ export default class TooltipManager implements HoverParent {
 
 
     if (this.hasSelectedBaseProperties) {
-      this.createBasesTooltipContent(table, d)
+      const success = this.createBasesTooltipContent(table, d)
+      if (!success) table.textContent = this.createFallbackTooltipContent(d) // fallback
     } else {
       table.textContent = this.createFallbackTooltipContent(d)
     }
@@ -118,10 +119,11 @@ export default class TooltipManager implements HoverParent {
     return this.basesCtx?.hasSelectedProperties() ?? false
   }
 
-  private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem) {
-    if (!this.basesCtx) return
+  private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem): boolean {
+    if (!this.basesCtx) return false
 
     const propertyKeyValues: { key: string, value: string }[] = this.basesCtx.readPropertyValues(d)
+    if (propertyKeyValues.length === 0) return false
 
     for (const p of propertyKeyValues) {
       const row = table.insertRow()
@@ -130,6 +132,8 @@ export default class TooltipManager implements HoverParent {
       const cellVal = row.insertCell()
       cellVal.textContent = p.value
     }
+
+    return true
   }
 
   private showNativePreview(event: MouseEvent, targetEl: HTMLElement, linktext?: string) {
