@@ -12,7 +12,7 @@ type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 type HighLightTarget = { item: GanttItem, svg: SVGElement }
 type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
 
-class TooltipManager implements HoverParent {
+export default class TooltipManager implements HoverParent {
   private readonly searchForRelatedEventsOnHover: boolean
   private readonly isDrawArrows: boolean
 
@@ -105,19 +105,25 @@ class TooltipManager implements HoverParent {
     const table = g.createEl('table', {cls: Css.tooltip.table})
     g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
 
-    const hasSelectedBaseProperties = Boolean((this.engine.selectedFrontmatterProperties?.length ?? 0) > 0)
 
-    if (hasSelectedBaseProperties) {
-      const selectedProps = this.engine.selectedFrontmatterProperties!
-      this.createBasesTooltipContent(table, d, selectedProps)
+    if (this.hasSelectedBaseProperties) {
+      this.createBasesTooltipContent(table, d)
     } else {
       table.textContent = this.createFallbackTooltipContent(d)
     }
   }
 
-  private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem, selectedProps: string[]) {
-    const properties: { key: string, value: string }[] = FrontMatterUtil.readUnknownProperties(d, selectedProps)
-    if (properties.length === 0) return
+  private get hasSelectedBaseProperties(): boolean {
+    return this.engine.basesProperties.formula.length > 0 ||
+      this.engine.basesProperties.note.length > 0
+  }
+
+  private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem) {
+
+    const selectedNoteProperties = this.engine.basesProperties.note;
+
+    const values: { key: string, value: string }[] = FrontMatterUtil.readUnknownProperties(d, selectedNoteProperties)
+    if (values.length === 0) return
 
     // console.log('Selected properties:', Object.keys(properties)) // TODO remove
     //
@@ -130,7 +136,7 @@ class TooltipManager implements HoverParent {
     //   debugger
     // }
 
-    for (const p of properties) {
+    for (const p of values) {
       const row = table.insertRow()
       const cellKey = row.insertCell()
       cellKey.textContent = p.key
@@ -417,5 +423,3 @@ class TooltipManager implements HoverParent {
   }
 
 }
-
-export default TooltipManager

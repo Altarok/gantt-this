@@ -1,6 +1,7 @@
 import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {ControlKeyMapped, DEFAULT_SETTINGS, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
+import {ControlKeyMapped, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
+import {DEFAULT_SETTINGS} from '../const/default-values'
 import {AddEntryModal} from './settings-util'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'

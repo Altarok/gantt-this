@@ -1,7 +1,7 @@
 import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
-import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
+import {BasesProperties, CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ToolbarView} from '../views/toolbar-view'
@@ -18,7 +18,7 @@ export default class GanttRender {
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly filesFilteredByBase: TFile[] | null,
-              readonly selectedFrontmatterProperties: string[] | null) {
+              readonly basesProperties: BasesProperties) {
     this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
     this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
@@ -107,7 +107,7 @@ export default class GanttRender {
       data,
       this.plugin,
       codeBlockContent,
-      this.selectedFrontmatterProperties,
+      this.basesProperties,
       this.textWidthCache,
       ganttChartModel,
       this.svgDrawerUtil

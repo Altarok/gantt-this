@@ -1,5 +1,6 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {CalendarConfig, CodeBlockContent, DEFAULT_SETTINGS, PluginSettings} from '../const/types'
+import {CalendarConfig, CodeBlockContent, PluginSettings} from '../const/types'
+import {DEFAULT_SETTINGS} from '../const/default-values'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'

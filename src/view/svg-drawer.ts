@@ -1,5 +1,6 @@
 import FantasyGanttPlugin from '../main'
 import {
+  BasesProperties,
   CalendarConfig,
   CodeBlockContent,
   GanttGroup,
@@ -32,7 +33,7 @@ export class GanttRenderEngine {
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
               public readonly codeBlockContent: CodeBlockContent,
-              public readonly selectedFrontmatterProperties: string[] | null,
+              public readonly basesProperties: BasesProperties,
               readonly textCache: TextWidthCache,
               readonly viewConfig: GanttChartViewModel,
               readonly svgDrawerUtil: SvgDrawerUtil) {
@@ -179,8 +180,8 @@ export class GanttRenderEngine {
 
     this.drawGroupBackgrounds()
     // try {// Code that might crash
-      this.renderData(width)
-      this.drawAxes()
+    this.renderData(width)
+    this.drawAxes()
     // } catch (error) {
     //   debugger
     //   if (error instanceof Error) {
@@ -431,13 +432,13 @@ export class GanttRenderEngine {
       }
 
       // if (ticksDrawn === 0) {
-        // console.warn("Axis rendered 0 ticks. Bounds check:", {
-        //   effectiveStartDay,
-        //   effectiveEndDay,
-        //   stepDays: this.viewConfig.stepDays,
-        //   calStart,
-        //   calEnd
-        // })
+      // console.warn("Axis rendered 0 ticks. Bounds check:", {
+      //   effectiveStartDay,
+      //   effectiveEndDay,
+      //   stepDays: this.viewConfig.stepDays,
+      //   calStart,
+      //   calEnd
+      // })
       //   debugger
       // }
 
