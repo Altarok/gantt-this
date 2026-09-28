@@ -15,7 +15,6 @@ export default class BasesContext {
 
   /**
    * Reads all properties selected in the Base in correct order.
-   *
    * @param item a Gantt chart event, pointing to a note
    * @return key value pairs where value is truthy
    */
