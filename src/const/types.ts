@@ -303,12 +303,6 @@ export type SvgDrawerData = {
   drawnCals: Record<string, GroupOrCalendarDrawerData>
 }
 
-export type BasesProperties = {
-  file: string[]
-  formula: string[]
-  note: string[]
-}
-
 export const BaseKeys = {
   calPath: 'bk-calendar-path',
   calPathRec: 'bk-calendar-path-recursive',

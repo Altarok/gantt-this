@@ -1,5 +1,5 @@
 import {FrontMatterCache} from 'obsidian'
-import {GanttItem, GanttItemDisplayType, GanttItemDisplayTypes, NO_GROUP, PluginSettings} from '../const/types'
+import {GanttItemDisplayType, GanttItemDisplayTypes, NO_GROUP, PluginSettings} from '../const/types'
 
 /*
  * Default key: 'gantt-type-definition'
@@ -102,18 +102,6 @@ function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettin
   return (value ? `#${value}` : '')
 }
 
-function readUnknownProperties(d: GanttItem, selectedProperties: string[]): { key: string, value: string }[] {
-  const {frontMatter: fm} = d
-  if (!fm) return []
-
-  let values: { key: string, value: string }[] = []
-
-  for (const key of selectedProperties) if (fm[key])  // keeps order, while Objects.keys does not
-    values.push({key, value: fm[key] as string})
-
-  return values
-}
-
 function getPredecessors(frontMatter: FrontMatterCache, settings: PluginSettings): string[] {
   return frontMatter[settings.frontMatterProperty_event_predecessors] as string[] ?? []
 }
@@ -136,7 +124,7 @@ export const FrontMatterUtil = {
   hasStartDate,
   getEventTimestamps,
   getHeaderToLinkTo,
-  readUnknownProperties,
+  // readUnknownProperties,
   getPredecessors,
   getSuccessors
 }

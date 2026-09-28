@@ -4,6 +4,8 @@ import {GanttMobileEventManager} from './event-manager-mobile'
 import {GanttDesktopEventManager} from './event-manager-desktop'
 import {PluginSettings} from '../const/types'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
+import TooltipManager from './tooltip-manager-desktop'
+import BasesContext from '../util/bases-context'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -14,28 +16,18 @@ export type GanttEventManager = {
   destroy(): void
 }
 
-// export abstract class GanttEventManagerBase implements GanttEventManager {
-//   isDragging: boolean
-//
-//   constructor() {
-//   }
-//
-//   abstract attachSvgListeners() {
-//   }
-//
-//   abstract destroy() {
-//   }
-// }
-
 const isMobile = Platform.isMobile
 
 export function createGanttEventManager(renderEngine: GanttRenderEngine,
                                         pluginSettings: PluginSettings,
-                                        svgDrawerUtil: SvgDrawerUtil): GanttEventManager {
+                                        svgDrawerUtil: SvgDrawerUtil,
+                                        basesCtx: BasesContext | null): GanttEventManager {
 
   // console.log('Creating event manager. Is mobile?', isMobile)
-  if (isMobile)
+  if (isMobile) {
     return new GanttMobileEventManager(renderEngine)
-  else
-    return new GanttDesktopEventManager(renderEngine, pluginSettings, svgDrawerUtil)
+  } else {
+    const tooltipManager = new TooltipManager(renderEngine, pluginSettings, svgDrawerUtil, basesCtx)
+    return new GanttDesktopEventManager(renderEngine, tooltipManager)
+  }
 }

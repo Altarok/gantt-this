@@ -1,8 +1,9 @@
 import {BasesView, Notice, QueryController} from 'obsidian'
 import GanttRender from './view/gantt-chart-manager'
-import {BaseKeys, BasesProperties, CodeBlockContent} from './const/types'
+import {BaseKeys, CodeBlockContent} from './const/types'
 import FantasyGanttPlugin from './main'
 import {FrontMatterUtil} from './io/frontmatter-reader'
+import BasesContext from './util/bases-context'
 
 /*
  * TODO change to 'gantt-this-view'
@@ -37,17 +38,9 @@ export class GanttThisBasesView extends BasesView {
 
     }
 
-    const selectedProperties: string[] = this.config.getOrder()
-    const basesProperties: BasesProperties = {file: [], formula: [], note: []}
+    const basesCtx = new BasesContext(this)
 
-    selectedProperties.forEach(p => {
-        if (p.startsWith('formula.')) basesProperties.formula.push(p.slice(8))
-        else if (p.startsWith('file.')) basesProperties.file.push(p.slice(8))
-        else if (p.startsWith('note.')) basesProperties.note.push(p.slice(5))
-      }
-    )
-
-    const render = new GanttRender(this.plugin, files, basesProperties)
+    const render = new GanttRender(this.plugin, files, basesCtx)
 
     try {
       void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)

@@ -1,7 +1,7 @@
 import {EventRef, MarkdownPostProcessorContext, MarkdownRenderChild, Notice, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
-import {BasesProperties, CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
+import {CodeBlockContent, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from './svg-drawer'
 import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader'
 import {ToolbarView} from '../views/toolbar-view'
@@ -9,6 +9,7 @@ import {setToolbarReactions} from '../ctrl/toolbar-controller'
 import TextWidthCache from './text-space-cache'
 import {GanttChartModelImpl} from '../model/gantt-chart-model'
 import {SvgDrawerUtil} from './svg-drawer-util'
+import BasesContext from '../util/bases-context'
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
@@ -18,7 +19,7 @@ export default class GanttRender {
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly filesFilteredByBase: TFile[] | null,
-              readonly basesProperties: BasesProperties) {
+              readonly basesCtx: BasesContext | null) {
     this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
     this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
@@ -107,7 +108,7 @@ export default class GanttRender {
       data,
       this.plugin,
       codeBlockContent,
-      this.basesProperties,
+      this.basesCtx,
       this.textWidthCache,
       ganttChartModel,
       this.svgDrawerUtil

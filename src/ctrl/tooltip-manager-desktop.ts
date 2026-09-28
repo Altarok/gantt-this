@@ -1,11 +1,11 @@
 import {HoverParent, HoverPopover} from 'obsidian'
 import {GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
-import {FrontMatterUtil} from '../io/frontmatter-reader'
 import {GanttConnectorDrawer} from '../ui/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
-import {Css} from "../const/constants"
+import {Css} from '../const/constants'
+import BasesContext from '../util/bases-context'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 
@@ -22,9 +22,10 @@ export default class TooltipManager implements HoverParent {
   private lastHoverTarget: HTMLElement | null = null
   private connectorDrawer = new GanttConnectorDrawer()
 
-  constructor(readonly engine: GanttRenderEngine,
-              readonly pluginSettings: PluginSettings,
-              private readonly svgDrawerUtil: SvgDrawerUtil) {
+  constructor(private readonly engine: GanttRenderEngine,
+              private readonly pluginSettings: PluginSettings,
+              private readonly svgDrawerUtil: SvgDrawerUtil,
+              private readonly basesCtx: BasesContext | null) {
     this.searchForRelatedEventsOnHover = pluginSettings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && pluginSettings.uxConnectRelatedEvents
 
@@ -114,37 +115,20 @@ export default class TooltipManager implements HoverParent {
   }
 
   private get hasSelectedBaseProperties(): boolean {
-    return this.engine.basesProperties.formula.length > 0 ||
-      this.engine.basesProperties.note.length > 0
+    return this.basesCtx?.hasSelectedProperties() ?? false
   }
 
   private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem) {
+    if (!this.basesCtx) return
 
-    const selectedNoteProperties = this.engine.basesProperties.note;
+    const propertyKeyValues: { key: string, value: string }[] = this.basesCtx.readPropertyValues(d)
 
-    const values: { key: string, value: string }[] = FrontMatterUtil.readUnknownProperties(d, selectedNoteProperties)
-    if (values.length === 0) return
-
-    // console.log('Selected properties:', Object.keys(properties)) // TODO remove
-    //
-    // const file = this.engine.plugin.app.vault.getAbstractFileByPath(d.file.path) // TODO remove
-    //
-    // if (file instanceof TFile) {
-    //   const cache = this.engine.plugin.app.metadataCache.getFileCache(file)
-    //   const frontmatter = cache?.frontmatter
-    //   console.log('Frontmatter:', Object.keys(frontmatter ?? ''))
-    //   debugger
-    // }
-
-    for (const p of values) {
+    for (const p of propertyKeyValues) {
       const row = table.insertRow()
       const cellKey = row.insertCell()
       cellKey.textContent = p.key
       const cellVal = row.insertCell()
       cellVal.textContent = p.value
-      /*
-       * TODO @CePeU replace started and end dates with output format
-       */
     }
   }
 

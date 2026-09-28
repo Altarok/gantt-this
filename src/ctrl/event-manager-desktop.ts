@@ -1,9 +1,8 @@
-import {ControlKey, PluginSettings} from '../const/types'
+import {ControlKey} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
-import {SvgDrawerUtil} from '../view/svg-drawer-util'
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -25,8 +24,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   viewConfig: GanttChartViewModel
 
   constructor(readonly engine: GanttRenderEngine,
-              readonly pluginSettings: PluginSettings,
-              private readonly svgDrawerUtil: SvgDrawerUtil) {
+              readonly tooltipManager: TooltipManager) {
     this.viewConfig = engine.viewConfig
 
     /* Bind all handlers _once_ */
@@ -48,8 +46,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   public attachSvgListeners() {
 
-    const tooltipManager = new TooltipManager(this.engine, this.pluginSettings, this.svgDrawerUtil)
-
     this.detachListeners()
 
     this.svg = this.engine.view.svg
@@ -60,7 +56,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
     plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(this.activeWindow, 'blur', () => tooltipManager.hideTooltip('blur'))
+    plugin.registerDomEvent(this.activeWindow, 'blur', () => this.tooltipManager.hideTooltip('blur'))
 
     const svgEl = this.svg as unknown as HTMLElement
 
@@ -192,27 +188,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private get settings() {
-    return this.pluginSettings
+    return this.engine.plugin.settings
   }
-
-  // private logTouchEvent(type: string, e: MouseEvent) {
-    // const formatTouches = (list: TouchList) =>
-    //   Array.from(list).map(t => ({
-    //     id: t.identifier,
-    //     clientX: Math.round(t.clientX),
-    //     clientY: Math.round(t.clientY),
-    //     target: (t.target as HTMLElement)?.tagName ?? 'unknown'
-    //   }))
-    //
-    // console.log(`[Touch Debug: ${type}]`, {
-    //   cancelable: e.cancelable,
-    //   defaultPrevented: e.defaultPrevented,
-    //   // touchesCount: e.touches.length,
-    //   // targetTouchesCount: e.targetTouches.length,
-    //   // changedTouchesCount: e.changedTouches.length,
-    //   // touches: formatTouches(e.touches),
-    //   // changedTouches: formatTouches(e.changedTouches)
-    // })
-  // }
 
 }
