@@ -100,7 +100,6 @@ export class GanttChartModelImpl implements GanttChartViewModel {
   setPanAndZoom(p: number, z: number) {
     this.panTranslateX = p
     this.zoomFactor = z
-    // console.log('Zoom', z, 'Pan', p)
   }
 
   resetPanAndZoom() {

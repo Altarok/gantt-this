@@ -60,7 +60,6 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
         if (parsedDate) endDate = parsedDate.days
       }
 
-
       // const endDateRaw = input.replace(/.*ending on \[([^\]]+)].*/g, '$1').trim()
       // const parsedDate = createParsedDate(endDateRaw, calendarConfig)
       // if (parsedDate) endDate = parsedDate.days
@@ -69,10 +68,6 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
   }
 
   return {delta, startDate, endDate}
-
-  // const repeatRule: RepeatRule = {delta, startDate, endDate}
-  // console.info(`input(${input}) --> repeatRule: delta(${repeatRule.delta}), startDate(${repeatRule.startDate}), endDate(${repeatRule.endDate})`)
-  // return repeatRule
 }
 
 /**

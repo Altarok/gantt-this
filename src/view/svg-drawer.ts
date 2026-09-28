@@ -184,13 +184,13 @@ export class GanttRenderEngine {
     this.renderData(width)
     this.drawAxes()
     // } catch (error) {
-    //   debugger
-    //   if (error instanceof Error) {
-    //     console.error("Error drawing axes:", error.message)
-    //     console.error(error.stack)
-    //   } else {
-    //     console.error("An unexpected error occurred:", error)
-    //   }
+    // TODO keep this for project #errorLog
+    // if (error instanceof Error) {
+    //   console.error("Error drawing axes:", error.message)
+    //   console.error(error.stack)
+    // } else {
+    //   console.error("An unexpected error occurred:", error)
+    // }
     // }
   }
 
@@ -371,7 +371,6 @@ export class GanttRenderEngine {
       const baseline = createSvg('line', Css.axis.baseline, {
         x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': 2.5, stroke: axisColor
       })
-      // console.log('Baseline x1', startX, 'x2', endX)
       ticksG.appendChild(baseline)
 
       // Draw start cap marker (if in visible range)
