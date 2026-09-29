@@ -131,16 +131,7 @@
   pointer-events: none;
 }
 
-/* Text of calendar axis badge */
-.gt-axis-label {
-  fill: var(--background-modifier-border);
-  font-size: 0.75em;
-  font-weight: bold;
-  text-transform: uppercase;
-  pointer-events: none;
-  user-select: none;
-}
-
+/* Calendar axis badge */
 .gt-axis-label-badge {
   height: 16px;
   rx: 8px;
@@ -148,6 +139,15 @@
   fill: var(--text-accent);
   opacity: 1;
   filter: drop-shadow(0 2px 4px var(--shadow-color, var(--background-modifier-border)));
+  cursor: pointer;
+}
+
+/* Text of calendar axis badge */
+.gt-axis-label {
+  fill: var(--background-modifier-border);
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
   pointer-events: none;
   user-select: none;
 }

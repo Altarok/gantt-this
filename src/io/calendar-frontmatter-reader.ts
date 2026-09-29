@@ -38,6 +38,8 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
   try {
     const newCalendarConfig = parseYaml(match[1]) as CalendarConfig
 
+    newCalendarConfig.link = targetFile.path
+
     /* Calculate offset once! */
     newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.sharedOffset)
     newCalendarConfig.startDay = newCalendarConfig.startDay ? runOffsetCalculations(newCalendarConfig.startDay) : undefined

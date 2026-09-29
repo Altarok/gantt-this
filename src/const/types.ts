@@ -78,6 +78,7 @@ export type CalendarConfig = {
   bcSuffix?: string
   adSuffix?: string
   moons?: Moon[]
+  link: string
 }
 
 export const DEFAULT_TIMESPAN = 'bar'
@@ -112,8 +113,10 @@ export const GanttItemDisplayTypes = {
 
 export type RepeatRule = {
   delta: number | 'yearly'
-  startDate: number
-  endDate: number
+  /** Start of repetitions. Absolute day on infinite timeline, or negative infinity. */
+  startDay: number
+  /** End of repetitions. Absolute day on infinite timeline, or positive infinity. */
+  endDay: number
 }
 
 export type ParsedDate = {

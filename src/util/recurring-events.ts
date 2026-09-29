@@ -14,13 +14,13 @@ export const Recurring = {
  * @param input - suffix of a date, what came after `' repeat '`
  * @param calendarConfig
  */
-function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: CalendarConfig): RepeatRule | undefined {
+function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
 
   const isEndDate = !isStartDate
 
   let delta: number | 'yearly' | undefined = undefined
-  let startDate = -Infinity
-  let endDate = +Infinity
+  let startDay = -Infinity
+  let endDay = +Infinity
 
   if (isStartDate && input === 'yearly') {
     delta = 'yearly'
@@ -37,33 +37,33 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig?: 
 
   if (calendarConfig) {
 
-    if (/starting from \[[^\]]+]( |$)/.test(input)) {
-      const startMatch = /starting from \[([^\]]+)]/.exec(input)
-      if (startMatch) {
-        const parsedDate = createParsedDate(startMatch[1]!.trim(), calendarConfig)
-        if (parsedDate) startDate = parsedDate.days
-      }
-
-      // const startDateRaw = input.replace(/.*starting from \[([^\]]+)].*?/g, '$1').trim()
-      // const parsedDate = createParsedDate(startDateRaw, calendarConfig)
-      // if (parsedDate) startDate = parsedDate.days
+    // if (/starting from \[[^\]]+]( |$)/.test(input)) {
+    const startMatch = /starting from \[([^\]]+)]/.exec(input)
+    if (startMatch) {
+      const parsedDate = createParsedDate(startMatch[1]!.trim(), calendarConfig)
+      if (parsedDate) startDay = parsedDate.days
     }
 
-    if (/ending on \[[^\]]+]( |$)/.test(input)) {
-      const endMatch = /ending on \[([^\]]+)]/.exec(input)
-      if (endMatch) {
-        const parsedDate = createParsedDate(endMatch[1]!.trim(), calendarConfig)
-        if (parsedDate) endDate = parsedDate.days
-      }
+    // const startDateRaw = input.replace(/.*starting from \[([^\]]+)].*?/g, '$1').trim()
+    // const parsedDate = createParsedDate(startDateRaw, calendarConfig)
+    // if (parsedDate) startDay = parsedDate.days
+    // }
 
-      // const endDateRaw = input.replace(/.*ending on \[([^\]]+)].*/g, '$1').trim()
-      // const parsedDate = createParsedDate(endDateRaw, calendarConfig)
-      // if (parsedDate) endDate = parsedDate.days
+    // if (/ending on \[[^\]]+]( |$)/.test(input)) {
+    const endMatch = /ending on \[([^\]]+)]/.exec(input)
+    if (endMatch) {
+      const parsedDate = createParsedDate(endMatch[1]!.trim(), calendarConfig)
+      if (parsedDate) endDay = parsedDate.days
     }
+
+    // const endDateRaw = input.replace(/.*ending on \[([^\]]+)].*/g, '$1').trim()
+    // const parsedDate = createParsedDate(endDateRaw, calendarConfig)
+    // if (parsedDate) endDate = parsedDate.days
+    // }
 
   }
 
-  return {delta, startDate, endDate}
+  return {delta, startDay, endDay}
 }
 
 /**
@@ -152,12 +152,12 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
     const nextStartDays = nextParsedDate.days
 
     // Stop if we have swept past the physical screen viewport or rule limits
-    if (nextStartDays > visibleMaxDays || nextStartDays > item.repeatRule.endDate) {
+    if (nextStartDays > visibleMaxDays || nextStartDays > item.repeatRule.endDay) {
       break
     }
 
     // Only push if it falls within the visible screen area
-    if (nextStartDays >= visibleMinDays && nextStartDays >= item.repeatRule.startDate) {
+    if (nextStartDays >= visibleMinDays && nextStartDays >= item.repeatRule.startDay) {
       expanded.push(createItem(item, nextStartDays, duration))
     }
 
@@ -188,8 +188,8 @@ function duplicateEventWithNumericDelta(item: GanttItem,
   if (step <= 0 || !Number.isFinite(step)) return // continue loop in calling method
 
 // 1. Get real bounds of event's rule
-  const ruleStart = item.repeatRule.startDate !== -Infinity ? Math.max(item.startDays, item.repeatRule.startDate) : item.startDays
-  const ruleEnd = item.repeatRule.endDate !== +Infinity ? item.repeatRule.endDate : renderEngine.viewConfig.maxDays
+  const ruleStart = item.repeatRule.startDay !== -Infinity ? Math.max(item.startDays, item.repeatRule.startDay) : item.startDays
+  const ruleEnd = item.repeatRule.endDay !== +Infinity ? item.repeatRule.endDay : renderEngine.viewConfig.maxDays
 
 // 2. Intersect rule bounds strictly with physical screen viewport (+/- 1 step buffer)
   const renderMin = Math.max(ruleStart, visibleMinDays - step)
@@ -209,12 +209,14 @@ function duplicateEventWithNumericDelta(item: GanttItem,
   }
 }
 
-function createItem(item: GanttItem, startDays: number, duration: number) {
+function createItem(item: GanttItem,
+                    startDay: number,
+                    duration: number): GanttItem {
   return {
     ...item,
-    id: `${item.id}-rep-${startDays}`,
-    startDays: startDays,
-    endDays: item.endDays ? startDays + duration : startDays,
+    id: `${item.id}-rep-${startDay}`,
+    startDays: startDay,
+    endDays: item.endDays ? startDay + duration : startDay,
     isRecurringInstance: true,
     parentEventId: item.id,
     lane: item.lane

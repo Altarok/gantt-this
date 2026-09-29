@@ -333,11 +333,9 @@ export default class TooltipManager implements HoverParent {
     this.addHighLightAroundSvg(ganttItem, svgBackground, target)
   }
 
-
   private addHighLightAroundSvg(ganttItem: GanttItem, svgBackground: SVGElement, target: SVGElement | HTMLElement) {
 
     const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
-
 
     this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
 

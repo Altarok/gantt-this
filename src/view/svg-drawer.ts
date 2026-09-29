@@ -348,6 +348,11 @@ export class GanttRenderEngine {
 
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
+
+      /*
+       * TODO remove undefined CalendarConfig - skip loop when undefined
+       */
+
       const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
       const axisColor = (this.plugin.settings.uxUseCalColorForCalAxis ? this.svgDrawerData.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
 
@@ -437,6 +442,12 @@ export class GanttRenderEngine {
         const headerG = individualAxisG.createSvg('g')
 
         const badge = createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
+
+        if (calendarConfig?.link) this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click', () => {
+            void this.plugin.app.workspace.openLinkText(calendarConfig.link, '', true)
+          }
+        )
+
         const label = createSvg('text', Css.axis.label, {x: 14, y: 19})
         headerG.appendChild(badge)
         headerG.appendChild(label)
@@ -648,11 +659,8 @@ export class GanttRenderEngine {
           return this.viewConfig.showBars
         case "era":
           return this.viewConfig.showEras
-      } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) {
-        return this.viewConfig.showPoints
-      } else {
-        return false
-      }
+      } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) return this.viewConfig.showPoints
+      else return false
     })
   }
 

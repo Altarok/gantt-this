@@ -158,9 +158,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const id = target.getAttribute('data-id')
       if (id === null) return
       const link = this.engine.rawData.find(d => d.id === id)?.link
-      if (link) {
-        void this.engine.plugin.app.workspace.openLinkText(link, '', true)
-      }
+      if (link) void this.engine.plugin.app.workspace.openLinkText(link, '', true)
     }
   }
 
