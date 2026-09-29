@@ -1,4 +1,4 @@
-import FantasyGanttPlugin from "../main";
+import FantasyGanttPlugin from '../main'
 
 export type GanttChartViewModel = {
   /** Will hide eras if false, default: true */

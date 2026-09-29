@@ -29,6 +29,8 @@ export class GanttRenderEngine {
   svgDrawerData: SvgDrawerData
   view!: GanttChartView
 
+  drawnData: GanttItem[] = []
+
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
@@ -93,12 +95,13 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeItems: GanttItem[] = this.filterActiveEventData()
-    let activeData: GanttItem[] = Recurring.expandRecurringEvents(this, activeItems)
+    this.drawnData = Recurring.expandRecurringEvents(this, activeItems)
 
-    this.viewConfig.activeAxesList = Array.from(new Set(activeData.map(d => d.calendarType)))
+    // TODO #performance: filter activeItems instead of drawnData
+    this.viewConfig.activeAxesList = Array.from(new Set(this.drawnData.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.viewConfig.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
-    const groupNames: string[] = Array.from(new Set(activeData.map(d => d.group || this.plugin.settings.defaultGroup)))
+    const groupNames: string[] = Array.from(new Set(this.drawnData.map(d => d.group || this.plugin.settings.defaultGroup)))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
     this.groups = []
@@ -109,7 +112,7 @@ export class GanttRenderEngine {
       for (const name of groupNames) { /* groupNames is sorted! */
         groupedMap.set(name, [])
       }
-      activeData.forEach(item => {
+      this.drawnData.forEach(item => {
         const gName = item.group || this.plugin.settings.defaultGroup
         if (!groupedMap.has(gName)) groupedMap.set(gName, [])
         groupedMap.get(gName)?.push(item)
@@ -131,7 +134,7 @@ export class GanttRenderEngine {
         currentYOffset += groupHeight
       })
     } else {
-      const {processedData, totalLanes} = this.calculateStacking(activeData)
+      const {processedData, totalLanes} = this.calculateStacking(this.drawnData)
       const groupContentLanes = totalLanes > 0 ? totalLanes : 0
       const groupHeight = /* Math.max(1, totalLanes) */
         groupContentLanes * this.viewConfig.eventRowHeight
@@ -570,7 +573,7 @@ export class GanttRenderEngine {
     const eras = items.filter(i => i.displayType === 'era')
     const nonEras = items.filter(i => i.displayType !== 'era' && !i.isRecurringInstance).sort((a, b) => a.startDays - b.startDays)
 
-    const itemLaneMap = new Map<number, number>()
+    const itemLaneMap = new Map<string, number>()
     const lanes: GanttItem[][] = []
 
     nonEras.forEach(item => {
@@ -620,7 +623,7 @@ export class GanttRenderEngine {
   // return Array.from(this.eventLayer.querySelectorAll<T>(selector))
   // }
 
-  findSvgElementById<T extends SVGElement = SVGElement>(id: number): T | null {
+  findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
     const selector = `[data-id="${id}"]`
     return this.view.eventLayer.querySelector<T>(selector)
   }

@@ -56,6 +56,7 @@ export const Css = {
     tooltip: 'gt-tooltip', /* Use for tooltip */
     title: 'gt-tooltip-title',  /* Use for tooltip title */
     table: 'gt-tooltip-table', /* Use for tooltip table */
+    repeaterSuffix: 'gt-tooltip-repeat-dates', /* Use for tooltip table */
     link: 'gt-tooltip-link' /* Use for tooltip link to related note */
   },
   settings: {

@@ -124,9 +124,11 @@ export type ParsedDate = {
   repeatRule?: RepeatRule
 }
 
+export type EventId = string
+
 /** Calendar event */
 export type GanttItem = {
-  id: number
+  id: EventId
   name: string
   startDateDisplay: string /* human-readable for UI */
   endDateDisplay: string
@@ -142,15 +144,15 @@ export type GanttItem = {
   lane?: number
   frontMatter: FrontMatterCache
   file: TFile
-  predecessors: number[] // IDs of predecessor GanttItems
-  successors: number[] // IDs of successors GanttItems
+  predecessors: EventId[] // IDs of predecessor GanttItems
+  successors: EventId[] // IDs of successors GanttItems
 
   // stuff for repetition:
   repeatRule?: RepeatRule
   // repeatEveryDays?: number // X interval in days from your regex
   // repeatUntilDays?: number // Optional upper end bound for recurrence
   isRecurringInstance?: boolean
-  parentEventId?: number
+  parentEventId?: EventId
 }
 
 export type GanttGroup = {

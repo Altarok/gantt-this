@@ -214,6 +214,25 @@
   white-space: normal;
 }
 
+.gt-tooltip-repeat-dates {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-smaller, 0.85em);
+  color: var(--text-muted);
+}
+
+.gt-tooltip-repeat-dates .gt-repeat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gt-tooltip-repeat-dates .gt-repeat-value {
+  font-family: var(--font-monospace);
+  color: var(--text-normal);
+}
+
 .gt-tooltip-table td {
   padding: 2px 6px;
   vertical-align: top;

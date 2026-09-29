@@ -110,10 +110,8 @@ export class GanttMobileEventManager implements GanttEventManager {
     }
 
     const target = e.target as HTMLElement
-    const rawId = target?.getAttribute?.('data-id')
-    if (rawId === null || rawId === undefined) return
-
-    const id = Number(rawId)
+    const id = target?.getAttribute?.('data-id')
+    if (id === null || id === undefined) return
     const link = this.engine.rawData.find(d => d.id === id)?.link
     if (link) {
       void this.engine.plugin.app.workspace.openLinkText(link, '', true)

@@ -1,8 +1,8 @@
 import {setIcon} from "obsidian"
 import {GanttItem, PluginSettings} from '../const/types'
 import {Css} from "const/constants"
-import {ManualSvg} from "./manual-svg-icons"
-import TextWidthCache from "./text-space-cache";
+import {ManualSvg} from './manual-svg-icons'
+import TextWidthCache from './text-space-cache'
 
 const textLeftPadding = 3
 

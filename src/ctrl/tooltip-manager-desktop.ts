@@ -1,11 +1,12 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {GanttItem, PluginSettings} from '../const/types'
+import {CalendarConfig, EventId, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttConnectorDrawer} from '../ui/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
 import {Css} from '../const/constants'
 import BasesContext from '../util/bases-context'
+import {createAxisDateDescription} from "../util/dates";
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 
@@ -78,17 +79,15 @@ export default class TooltipManager implements HoverParent {
     })
   }
 
-  private getEventById(id: number): GanttItem | undefined {
-    return this.engine.rawData.find(d => d.id === id) // is it a GanttItem?
+  private getEventById(id: EventId): GanttItem | undefined {
+    return this.engine.drawnData.find(d => d.id === id) // is it a GanttItem?
   }
 
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
-
     const target = evt.target as HTMLElement // Find the closest task element (works for SVG rects or HTML bars)
     if (!target?.hasAttribute('data-id')) return this.hideTooltip('not data-id') // is it a gantt chart with data?
-    const rawId = target.getAttribute('data-id') // extract data ID (unique)
-    if (rawId === null) return this.hideTooltip('data-id is null')
-    const id = Number(rawId)
+    const id = target.getAttribute('data-id') // extract data ID (unique)
+    if (id === null) return this.hideTooltip('data-id is null')
     const ganttItem: GanttItem | undefined = this.getEventById(id)
     if (!ganttItem) return this.hideTooltip('target not a GanttItem')
 
@@ -102,10 +101,18 @@ export default class TooltipManager implements HoverParent {
 
     const g = tooltip.createDiv({cls: Css.tooltip.tooltip})
 
-    g.createDiv({text: (d.name || d.file.basename) + this.getTooltipTitleSuffix(d), cls: Css.tooltip.title})
-    const table = g.createEl('table', {cls: Css.tooltip.table})
-    g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
+    const tooltipTitle = (d.name || d.file.basename) + this.getTooltipTitleSuffix(d)
 
+
+    g.createDiv({text: tooltipTitle, cls: Css.tooltip.title})
+
+    const table = g.createEl('table', {cls: Css.tooltip.table})
+
+    if (d.isRecurringInstance) {
+      this.addRepeaterEventSuffix(g, d)
+    }
+
+    g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
 
     if (this.hasSelectedBaseProperties) {
       const success = this.createBasesTooltipContent(table, d)
@@ -113,6 +120,42 @@ export default class TooltipManager implements HoverParent {
     } else {
       table.textContent = this.createFallbackTooltipContent(d)
     }
+  }
+
+  private dateInOutputFormat(days: number,
+                             cc: CalendarConfig): string {
+    return createAxisDateDescription(days, cc)
+  }
+
+  private addRepeaterEventSuffix(g: HTMLDivElement, d: GanttItem) {
+
+    const calendarConfig = this.engine.plugin.calendarConfigsCache.get(d.calendarType)
+    if (!calendarConfig) return
+
+    const datesContainer = g.createDiv({cls: Css.tooltip.repeaterSuffix})
+
+    // Parent / Original Event Date Range
+    const originalItem = this.getEventById(d.parentEventId!)
+    if (originalItem) {
+      const origRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
+      origRow.createSpan({text: 'original date:', cls: 'gt-repeat-label'})
+      origRow.createSpan({
+        text: originalItem.displayType === 'bar' ?
+          `${this.dateInOutputFormat(originalItem.startDays, calendarConfig)} - ${this.dateInOutputFormat(originalItem.endDays, calendarConfig)}`
+          : this.dateInOutputFormat(originalItem.startDays, calendarConfig),
+        cls: 'gt-repeat-value'
+      })
+    }
+
+    // Active Instance Date Range
+    const dateRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
+    dateRow.createSpan({text: 'repeat date:', cls: 'gt-repeat-label'})
+    dateRow.createSpan({
+      text: d.displayType === 'bar' ? `${this.dateInOutputFormat(d.startDays, calendarConfig)} - ${this.dateInOutputFormat(d.endDays, calendarConfig)}`
+        : this.dateInOutputFormat(d.startDays, calendarConfig),
+      cls: 'gt-repeat-value'
+    })
+
   }
 
   private get hasSelectedBaseProperties(): boolean {

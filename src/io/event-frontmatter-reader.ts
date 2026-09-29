@@ -1,6 +1,7 @@
 import {
   CalendarConfig,
   CodeBlockContent,
+  EventId,
   GanttItem,
   GanttItemDisplayType,
   GroupOrCalendarSettings,
@@ -65,7 +66,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
     const calendarConfig = await getCalendarDefinition(plugin, calendarId, partialPluginSettings, codeBlockContent)
 
-    const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate, calendarId, calendarConfig, file, frontMatter, ++incrementalId)
+    const ganttItem: GanttItem | null = createItem(plugin, startDate, endDate, calendarId, calendarConfig, file, frontMatter, `${++incrementalId}`)
     if (!ganttItem) continue
     items.push(ganttItem)
   }
@@ -104,7 +105,7 @@ function createItem(plugin: FantasyGanttPlugin,
                     calendarConfig: CalendarConfig | null,
                     file: TFile,
                     frontMatter: FrontMatterCache,
-                    id: number): GanttItem | null {
+                    id: EventId): GanttItem | null {
 
   let startRes: ParsedDate | null = null
   let endRes: ParsedDate | null = null
