@@ -258,6 +258,6 @@ export function createAxisDateDescription(days: number, config: CalendarConfig |
   return description
 }
 
-function getTodayInDays(){
- return Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+function getTodayInDays() {
+  return Math.floor(Date.now() / (24 * 60 * 60 * 1000))
 }

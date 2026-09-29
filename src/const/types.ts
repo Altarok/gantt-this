@@ -111,7 +111,7 @@ export const GanttItemDisplayTypes = {
 }
 
 export type RepeatRule = {
-  delta: number
+  delta: number | 'yearly'
   startDate: number
   endDate: number
 }
