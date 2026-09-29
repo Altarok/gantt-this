@@ -90,7 +90,6 @@ export class SvgDrawerUtil {
    * @param x left bound of surrounding svg
    * @param y upper bound of surrounding svg
    * @param width of surrounding svg
-   * @param hasIcon moves text to the right if true
    * @param svgContainer
    * @param textCssClass necessary to decide which CSS magic to apply
    */

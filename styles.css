@@ -67,14 +67,14 @@
 
 .gt-toolbar-separator {
   width: 2px;
-  height: 18px; /* Match the height of your icons */
-  background-color: currentcolor; /* Inherits text/icon color */
-  opacity: 0.25; /* Makes it subtle */
-  margin: 0; /* Spacing on the left and right */
-  align-self: center; /* Centers it vertically */
+  height: 18px; /* match icon height */
+  background-color: currentcolor;
+  opacity: 0.25;
+  margin: 0;
+  align-self: center;
 }
 
-/* --------- icon-only buttons --------- */
+/* ---- toolbar buttons have no description, only icon ---- */
 
 .gt-toolbar-button {
   display: inline-flex;
@@ -425,13 +425,20 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke: currentcolor;
-  fill: none;
+  fill: currentcolor;
   vector-effect: non-scaling-stroke;
   margin: 0;
   padding: 1px;
   display: block;
 }
 
+/*
+ * Lucide icons are stroke only, RPG awesome icons are fill only.
+ * This class tries to preserve unfilled lucide stroke-only icons.
+ */
+.gt-item.icon-container svg[fill="none"] {
+  fill: none;
+}
 
 /* Move pointer-events directly to the element class or a generic SVG helper */
 .gt-prevent-user-interactions {
