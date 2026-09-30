@@ -37,15 +37,19 @@ export function parseEventDate(doCheckForRepetitions: boolean,
 }
 
 export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
-  if (config.type === 'positional') return parseEventDateWithPositionalConfig(cleanInput, config)
-  else if (config.type === 'rule-based') return parseEventDateWithRuleBasedConfig(cleanInput, config)
-  else return null
+  switch (config.type) {
+    case 'positional':
+      return parseEventDateWithPositionalConfig(cleanInput, config)
+    case 'rule-based':
+      return parseEventDateWithRuleBasedConfig(cleanInput, config)
+    default:
+      return null
+  }
 }
-
 
 /** Parse _positional_ event date. */
 function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: CalendarConfig): ParsedDate | null {
-  if (!cleanInput.includes(calendarConfig.delimiter)) return null
+  if (!cleanInput.includes(calendarConfig.delimiter) || calendarConfig.type !== 'positional') return null
 
   const segments = cleanInput.split(calendarConfig.delimiter).map(Number)
   let totalDays = 0

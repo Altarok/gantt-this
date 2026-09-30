@@ -228,30 +228,28 @@ function parseDaysToNonGregorianDateString(days: number,
 /* Update the axis label formatter inside the Gantt render engine class */
 
 // called during runtime, to get axis description
-export function createAxisDateDescription(days: number, config: CalendarConfig, asInput = false): string {
+export function createAxisDateDescription(days: number, calendarConfig: CalendarConfig, asInput = false): string {
 
   let description: string
 
-  switch (config.type) {
-    case "rule-based":
-    case "gregorian":
-      if (config.id === 'gregorian') {
-        description = parseDaysToGregorianDateString(days, config, asInput)
+  switch (calendarConfig.type) {
+    case 'rule-based': {
+      if (calendarConfig.id === 'gregorian') {
+        description = parseDaysToGregorianDateString(days, calendarConfig, asInput)
       } else {
-        description = parseDaysToNonGregorianDateString(days, config, asInput)
+        description = parseDaysToNonGregorianDateString(days, calendarConfig, asInput)
       }
+    }
       break;
-    case "positional": {
-      let localDays = days - config.offsetToDayZero
-
+    case 'positional': {
+      let localDays = days - calendarConfig.offsetToDayZero
       const stringSegments: string[] = []
-      config.positionalUnits?.forEach(unit => {
+      calendarConfig.positionalUnits?.forEach(unit => {
         const unitCount = Math.floor(localDays / unit.days)
         stringSegments.push(unitCount.toString())
         localDays %= unit.days
       })
-
-      description = stringSegments.join(config.delimiter)
+      description = stringSegments.join(calendarConfig.delimiter)
     }
       break;
     default:

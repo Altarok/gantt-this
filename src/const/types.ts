@@ -1,16 +1,6 @@
 import {FrontMatterCache, TFile} from 'obsidian'
 
 export const NO_GROUP = ''
-export const CALENDAR_CONFIG_TYPES = [
-  'positional',
-  'rule-based',
-  'gregorian' /* default value */
-] as const
-export type CalendarConfigType = (typeof CALENDAR_CONFIG_TYPES)[number]
-
-// export function isCalendarIdentifier(value: string): value is CalendarConfigType {
-//   return (CALENDAR_CONFIG_TYPES as readonly string[]).includes(value)
-// }
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
@@ -54,27 +44,24 @@ export type RuleBasedDetails = {
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
+
 /**
  * This one has to be implemented by the user inside a Markdown note.
  */
 export type CalendarConfig = {
+  /** Mandatory, unique, and case-sensitive identifier. */
   id: string
   name?: string
   displayName?: string
-  /* Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
+  /** Defined by user, in Markdown file. Not to be used during zooming/panning calculation. */
   sharedOffset: EpochOffsetDefinition
   startDay?: EpochOffsetDefinition
   endDay?: EpochOffsetDefinition
-  /* Not defined by user, calculated based on shared offset */
+  /** Not defined by user, calculated based on shared offset */
   offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in Markdown */
-  type: CalendarConfigType
+  /** Calendar type */
+  type: 'positional' | 'rule-based'
   delimiter: string
-  positionalUnits?: {
-    name: string
-    days: number
-  }[]
-  /* Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.) */
-  ruleBasedDetails?: RuleBasedDetails
   bcSuffix?: string
   adSuffix?: string
   moons?: Moon[]
@@ -83,6 +70,19 @@ export type CalendarConfig = {
   /** Current date in fantasy world. MUST match the calendar's date format. */
   today?: number
 }
+
+export  type TypedCalendarConfig = CalendarConfig & {
+  type: 'positional',
+  /* Used if type === 'positional' (Mayan, etc.) */
+  positionalUnits: { name: string, days: number }[]
+}
+
+export type RuleBasedCalendarConfig = CalendarConfig & {
+  type: 'rule-based',
+  /* Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.) */
+  ruleBasedDetails: RuleBasedDetails
+}
+
 
 export const DEFAULT_TIMESPAN = 'bar'
 export const DEFAULT_TIMESTAMP = 'point'

@@ -1,14 +1,15 @@
 import {describe, expect, it} from 'vitest'
 import {isCustomLeapYear, isGregorianLeapYear} from '../src/date-calculations/leap-year-calc'
-import {gregorianConfig, mayanConfig, shireConfig} from './test-configs'
+import {gregorianConfig, mayanConfig, MockCalendarConfig, shireConfig} from './test-configs'
 import {CalendarConfig, LeapYearRule} from '../src/const/types'
 
 
 const bullshitCalendarConfig: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'id',
   sharedOffset: 0,
   offsetToDayZero: 0,
-  type: 'gregorian',
+  type: 'rule-based',
   delimiter: '',
   ruleBasedDetails: {
     daysInStandardYear: 365,
@@ -69,7 +70,7 @@ describe('Leap year calculations should be skipped for', () => {
   })
 
   it('nonsense data', () => {
-    bullshitCalendarConfig.ruleBasedDetails.leapYearRule.ruleType = 'interval'
+    bullshitCalendarConfig.ruleBasedDetails!.leapYearRule.ruleType = 'interval'
     expect(isCustomLeapYear(0, bullshitCalendarConfig)).toBe(false)
 
     // @ts-ignore bullshit data
@@ -90,9 +91,11 @@ describe('Leap year calculations should be skipped for', () => {
 describe('noYearZero with interval rules', () => {
 
   const shireNoYearZeroConfig: CalendarConfig = {
+    ...MockCalendarConfig,
     ...shireConfig,
+    type: 'rule-based',
     ruleBasedDetails: {
-      ...shireConfig.ruleBasedDetails,
+      ...shireConfig.ruleBasedDetails!,
       noYearZero: true,
       leapYearRule: {ruleType: 'interval', intervalYears: 4}
     }
@@ -127,6 +130,7 @@ describe('noYearZero with interval rules', () => {
 describe('Sci-Fi Gregorian workaround with negative years', () => {
 
   const sciFiConfig: CalendarConfig = {
+    ...MockCalendarConfig,
     id: 'sci-fi',
     type: 'rule-based',
     delimiter: '-',

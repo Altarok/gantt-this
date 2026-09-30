@@ -52,7 +52,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
   frontMatterProperty_event_name: 'gantt-name', // ... or filename
-  frontMatterProperty_event_calendar: 'gantt-calendar', // name of matching calendar or 'Gregorian'
+  frontMatterProperty_event_calendar: 'gantt-calendar', // name of matching calendar or global fallback
   frontMatterProperty_event_group: 'gantt-group', // ... or 'general'
   frontMatterProperty_event_symbol: 'gantt-symbol', // diamond ... or auto-(bar | point)
   frontMatterProperty_event_color: 'gantt-color', // hex value | human-readable color  ... or global fallback color

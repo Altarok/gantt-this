@@ -2,7 +2,12 @@ import {CalendarConfig, DateFormatComponent} from '../src/const/types'
 
 const formatYMD: DateFormatComponent[] = ['year', 'month', 'day']
 
+export const MockCalendarConfig = {
+  link: '' // falsy mock file path
+}
+
 export const gregorianConfig: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'gregorian',
   name: 'Gregorian Calendar',
   displayName: 'Gregorian',
@@ -35,6 +40,7 @@ export const gregorianConfig: CalendarConfig = {
 }
 
 export const gregorianConfigWithoutYearZero: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'gregorian-natural',
   name: 'Gregorian Calendar',
   displayName: 'Gregorian',
@@ -54,6 +60,7 @@ export const gregorianConfigWithoutYearZero: CalendarConfig = {
 }
 
 export const gregorianWithoutMonthsConfig: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'gregorian-no-months',
   name: 'Gregorian Calendar without months',
   sharedOffset: 0,
@@ -69,6 +76,7 @@ export const gregorianWithoutMonthsConfig: CalendarConfig = {
 }
 
 export const shireConfig: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'shire',
   name: 'Shire Reckoning',
   sharedOffset: {year: 0, month: 12, day: 23},
@@ -106,6 +114,7 @@ export const shireConfig: CalendarConfig = {
 }
 
 export const mayanConfig: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'mayan',
   name: 'Mayan Long Count',
   sharedOffset: {year: -3114, month: 8, day: 11},
@@ -122,6 +131,7 @@ export const mayanConfig: CalendarConfig = {
 }
 
 export const frenchRevolutionConfig: CalendarConfig = {
+  ...MockCalendarConfig,
   id: 'french-revolution',
   name: 'French Revolution',
   sharedOffset: {year: 1792, month: 9, day: 22},

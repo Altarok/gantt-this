@@ -81,7 +81,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: CodeBlockContent) {
 
   if (!codeBlockContent) return
-  const calendarConfig = plugin.calendarConfigsCache.get(codeBlockContent.calendar ?? 'gregorian')
+  const calendarConfig = plugin.calendarConfigsCache.get(codeBlockContent.calendar ?? plugin.settings.defaultCalendar)
   if (!calendarConfig) return
 
   if (codeBlockContent.lowerBoundDate) codeBlockContent.lowerBoundDateParsed = parseCodeBlockDate(codeBlockContent.lowerBoundDate, calendarConfig)

@@ -7,7 +7,7 @@ export function isGregorianLeapYear(year: number): boolean {
 
 /** Checks whether a target year is a leap year according to rules */
 export function isCustomLeapYear(year: number, config: CalendarConfig, yearWasAlreadyShifted = false): boolean {
-  if (year === null || config === null) return false
+  if (year === null || config?.type !== 'rule-based') return false
 
   const leapYearRule: LeapYearRule | undefined = config.ruleBasedDetails?.leapYearRule
 
