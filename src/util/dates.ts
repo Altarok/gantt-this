@@ -232,33 +232,31 @@ export function createAxisDateDescription(days: number, config: CalendarConfig, 
 
   let description: string
 
-  // if (!config) {
-  //
-  //   /* Workaround: fall back to default Gregorian, but since 1970 */
-  //   description = new Date(days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!
-  //
-  // } else
+  switch (config.type) {
+    case "rule-based":
+    case "gregorian":
+      if (config.id === 'gregorian') {
+        description = parseDaysToGregorianDateString(days, config, asInput)
+      } else {
+        description = parseDaysToNonGregorianDateString(days, config, asInput)
+      }
+      break;
+    case "positional": {
+      let localDays = days - config.offsetToDayZero
 
-  if (config.type === 'rule-based' || config.type === 'gregorian') {
-    if (config.id === 'gregorian') {
-      description = parseDaysToGregorianDateString(days, config, asInput)
-    } else {
-      description = parseDaysToNonGregorianDateString(days, config, asInput)
+      const stringSegments: string[] = []
+      config.positionalUnits?.forEach(unit => {
+        const unitCount = Math.floor(localDays / unit.days)
+        stringSegments.push(unitCount.toString())
+        localDays %= unit.days
+      })
+
+      description = stringSegments.join(config.delimiter)
     }
-  } else if (config.type === 'positional') {
-    /* STRATEGY B: Reverse Engine Positional Multipliers (Mayan, etc.) */
-    let localDays = days - config.offsetToDayZero
-
-    const stringSegments: string[] = []
-    config.positionalUnits?.forEach(unit => {
-      const unitCount = Math.floor(localDays / unit.days)
-      stringSegments.push(unitCount.toString())
-      localDays %= unit.days
-    })
-
-    description = stringSegments.join(config.delimiter)
-  } else {
-    description = 'n/a'
+      break;
+    default:
+      description = 'n/a'
+      break;
   }
 
   return description
