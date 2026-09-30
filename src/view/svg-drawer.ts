@@ -78,10 +78,6 @@ export class GanttRenderEngine {
     if (this.rawData.length === 0) {
 
       const defaultCalendarConfig = this.plugin.calendarConfigsCache.get(this.plugin.settings.defaultCalendar)
-
-      /*
-       * TODO replace with calendar related today date
-       */
       const todayDays = defaultCalendarConfig?.today ?? Dates.getGregorianTodayInAbsoluteDays()
       this.viewConfig.setDayRange(todayDays - 15, todayDays + 15)
       return
@@ -101,14 +97,14 @@ export class GanttRenderEngine {
 
   initLayout() {
     let activeItems: GanttItem[] = this.filterActiveEventData()
-    this.drawnData = Recurring.expandRecurringEvents(this, activeItems)
 
-    // TODO #performance: filter activeItems instead of drawnData
-    this.viewConfig.activeAxesList = Array.from(new Set(this.drawnData.map(d => d.calendarType)))
+    this.viewConfig.activeAxesList = Array.from(new Set(activeItems.map(d => d.calendarType)))
     Priorities.sortCalendarAxisByPriority(this.viewConfig.activeAxesList, this.svgDrawerData.mappedCalConfigs)
 
-    const groupNames: string[] = Array.from(new Set(this.drawnData.map(d => d.group || this.plugin.settings.defaultGroup)))
+    const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.plugin.settings.defaultGroup)))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
+
+    this.drawnData = Recurring.expandRecurringEvents(this, activeItems)
 
     this.groups = []
     let currentYOffset = this.viewConfig.margin.top
@@ -193,7 +189,7 @@ export class GanttRenderEngine {
     this.renderData(width)
     this.drawAxes()
     // } catch (error) {
-    // TODO keep this for project #errorLog
+    // TODO #errorCache keep code
     // if (error instanceof Error) {
     //   console.error("Error drawing axes:", error.message)
     //   console.error(error.stack)
@@ -259,14 +255,6 @@ export class GanttRenderEngine {
 
         const nextX = nextItem ? this.getXPosition(nextItem.startDays, width) : renderWidth
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
-
-        // TODO add CSS for events duplicates
-        // // Inside renderData() loop:
-        // if (d.isRecurringInstance) {
-        //   // Option A: Target via CSS selector in your stylesheet using class gt-recurring-instance
-        //   // Option B: Render opacity dynamically if needed
-        // }
-
         const svgLayer = d.isRecurringInstance ? this.view.repeaterEventLayer : this.view.eventLayer
 
         if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
@@ -353,17 +341,14 @@ export class GanttRenderEngine {
       const ticksG = individualAxisG.createSvg('g')
 
       let lastTextX = -999
-      const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType) ?? undefined
+      const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType)
+      if (!calendarConfig) return // continue to next axis
 
-      /*
-       * TODO remove undefined CalendarConfig - skip loop when undefined
-       */
-
-      const calBadgeTextContent = calendarConfig?.displayName ?? calendarConfig?.name ?? calType
+      const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
       const axisColor = (this.plugin.settings.uxUseCalColorForCalAxis ? this.svgDrawerData.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
 
-      const calStart = calendarConfig?.startDay as number ?? -Infinity
-      const calEnd = calendarConfig?.endDay as number ?? Infinity
+      const calStart = calendarConfig.startDay as number ?? -Infinity
+      const calEnd = calendarConfig.endDay as number ?? Infinity
 
       // Skip rendering, if current view is completely outside of calendar's lifetime
       if (endDaysValue < calStart || startDaysValue > calEnd) return
@@ -387,16 +372,16 @@ export class GanttRenderEngine {
       })
       ticksG.appendChild(baseline)
 
-      // Draw start cap marker (if in visible range)
-      if (calendarConfig?.startDay && calendarConfig.startDay as number >= startDaysValue) {
+      /* Draw start cap marker (if in visible range) */
+      if (calendarConfig.startDay && calendarConfig.startDay as number >= startDaysValue) {
         const startCap = createSvg('line', 'calendar-cap-marker', {
           x1: startX, y1: -6, x2: startX, y2: 6, stroke: axisColor
         })
         ticksG.appendChild(startCap)
       }
 
-      // Draw end cap marker (if in visible range)
-      if (calendarConfig?.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
+      /* Draw end cap marker (if in visible range) */
+      if (calendarConfig.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
         const endCap = createSvg('line', 'calendar-cap-marker', {
           x1: endX, y1: -6, x2: endX, y2: 6, stroke: axisColor
         })
@@ -438,7 +423,7 @@ export class GanttRenderEngine {
         }
       }
 
-      if (showMoonPhases) {
+      if (showMoonPhases && calendarConfig.moons) {
         drawMoons(this, ticksG, renderWidth, calendarConfig, startDaysValue, endDaysValue,
           effectiveStartDay, effectiveEndDay, renderWidth)
       }
@@ -449,7 +434,7 @@ export class GanttRenderEngine {
 
         const badge = createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
 
-        if (calendarConfig?.link) this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click', () => {
+        if (calendarConfig.link) this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click', () => {
             void this.plugin.app.workspace.openLinkText(calendarConfig.link, '', true)
           }
         )

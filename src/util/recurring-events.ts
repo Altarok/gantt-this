@@ -113,7 +113,6 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
                                        renderEngine: GanttRenderEngine,
                                        visibleMinDays: number,
                                        visibleMaxDays: number): void {
-  // TODO here - but only if calendar is year based (type: 'rule-based') AND the date format actually contains years
 
   if (!item.repeatRule) return // continue loop in calling method
 
@@ -128,7 +127,7 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
   const dateParts = item.startDateDisplay.split(calendarConfig.delimiter)
   const yearIndex = calendarConfig.ruleBasedDetails.format.indexOf('year')
 
-  if (yearIndex === -1 || dateParts.length < 3) return // continue loop in calling method
+  if (yearIndex === -1 /* || dateParts.length < 3 */) return // continue loop in calling method
 
   let currentYear = parseInt(dateParts[yearIndex]!, 10)
   if (isNaN(currentYear)) return // continue loop in calling method

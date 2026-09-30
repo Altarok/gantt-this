@@ -113,7 +113,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: Calend
 
   const noYearZero = calendarConfig.ruleBasedDetails?.noYearZero
   if (noYearZero === true) {
-    if (year === 0) return null // TODO #error caching
+    if (year === 0) return null // TODO #errorCache
     if (year < 0) year = year + 1
   }
 

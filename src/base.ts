@@ -6,7 +6,7 @@ import {FrontMatterUtil} from './io/frontmatter-reader'
 import BasesContext from './util/bases-context'
 
 /*
- * TODO change to 'gantt-this-view'
+ * TODO #v2: change to 'gantt-this-view'
  * Sadly, this is a breaking change for users!
  * They'd have to manually change the base file.
  */
@@ -114,8 +114,6 @@ export class GanttThisBasesView extends BasesView {
 //    if (!toolbar || toolbar.querySelector('.bases-toolbar-gantt-custom')) return
 //
 //    /*
-//     * TODO evtl frueher setzen
-//     *
 //     * const newItem = toolbar.querySelector('.bases-toolbar-new-item-menu')
 //if (newItem) {
 //  toolbar.insertBefore(customItem, newItem)

@@ -28,9 +28,6 @@ export default class BasesContext {
     if (basesEntry) this.selectedPropertiesInOrder.forEach((propertyKey: BasesPropertyId) => {
       const value: Value | null = basesEntry.getValue(propertyKey)
       if (value?.isTruthy()) { // isTruthy() should remove non-null empty values
-        /*
-         * TODO @CePeU replace started and end dates with output format
-         */
         const key = this.trimPropertyKey(propertyKey)
         results.push({key, value: value.toString()})
       }

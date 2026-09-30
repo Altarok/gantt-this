@@ -278,8 +278,8 @@ export type PluginSettings = GanttChartSources & {
   autoRestrictZoom: boolean
   // uxOverrideNoteScrollInCalendar: boolean
   // uxSwitchZoomAndPan: boolean
-  uxPanButton: ControlKey // TODO #v2.0.0 rename to '..Key'
-  uxZoomButton: ControlKey
+  uxPanButton: ControlKey // TODO #v2: keyboard key! not button
+  uxZoomButton: ControlKey // TODO #v2: keyboard key! not button
   showPanAndZoomButtonsInToolbar: boolean
   // customTooltipButton: OptionalControlKey
   // nativeTooltipButton: OptionalControlKey

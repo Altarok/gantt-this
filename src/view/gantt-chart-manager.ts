@@ -38,18 +38,8 @@ export default class GanttRender {
                     pluginSettings: PluginSettings,
                     codeBlockContent: CodeBlockContent,
                     ctx?: MarkdownPostProcessorContext) {
-    /*
-     * TODO no longer used after PR #6
-        const createCheckbox = (label: string, id: string, checked = true) => {
-          const lbl = toolbar.createEl('label', {cls: Css.inputLabel})
-          const input = lbl.createEl('input', {attr: {type: 'checkbox', id}})
-          input.checked = checked
-          lbl.createSpan({text: ` ${label}`})
-          return input
-        }
-    */
 
-    /* Define the callback synchronously TODO move to toolbar view */
+    /* Define the callback synchronously */
     const refreshChartCallback = () => {
       if (!renderEngine) return
 

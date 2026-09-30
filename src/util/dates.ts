@@ -21,7 +21,7 @@ function getGregorianTodayInAbsoluteDays(): number {
  */
 function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig) {
   // calculate today absolute day count (since day 0)
-  // TODO #errorLog move to error container
+  // TODO #errorCache move to error container
   if (!config.today) return `Calendar has no valid today value: ${config.id}`
 
   let absoluteDay = config.today
@@ -228,16 +228,18 @@ function parseDaysToNonGregorianDateString(days: number,
 /* Update the axis label formatter inside the Gantt render engine class */
 
 // called during runtime, to get axis description
-export function createAxisDateDescription(days: number, config: CalendarConfig | undefined, asInput = false): string {
+export function createAxisDateDescription(days: number, config: CalendarConfig, asInput = false): string {
 
   let description: string
 
-  if (!config) {
+  // if (!config) {
+  //
+  //   /* Workaround: fall back to default Gregorian, but since 1970 */
+  //   description = new Date(days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!
+  //
+  // } else
 
-    /* Workaround: fall back to default Gregorian, but since 1970 */
-    description = new Date(days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!
-
-  } else if (config.type === 'rule-based' || config.type === 'gregorian') {
+  if (config.type === 'rule-based' || config.type === 'gregorian') {
     if (config.id === 'gregorian') {
       description = parseDaysToGregorianDateString(days, config, asInput)
     } else {

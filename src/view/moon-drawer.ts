@@ -5,14 +5,14 @@ import {drawMoonPhase} from './svg-drawer-util'
 export function drawMoons(engine: GanttRenderEngine,
                           ticksG: SVGGElement,
                           width: number,
-                          calendarConfig: CalendarConfig | undefined,
+                          calendarConfig: CalendarConfig,
                           startDaysValue: number,
                           endDaysValue: number,
                           effectiveStartDay: number,
                           effectiveEndDay: number,
                           renderWidth: number) {
 
-  const moons = calendarConfig?.moons ?? []
+  const moons = calendarConfig.moons ?? []
   const moonCount = moons?.length ?? 0
 
   if (moonCount) moons.forEach((moon: Moon, index: number) => {
