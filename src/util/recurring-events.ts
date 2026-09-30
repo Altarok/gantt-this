@@ -1,4 +1,4 @@
-import {CalendarConfig, GanttItem, RepeatRule} from '../const/types'
+import {CalendarConfig, GanttItem, RepeatRule, RuleBasedCalendarConfig} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 
@@ -117,8 +117,10 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
   if (!item.repeatRule) return // continue loop in calling method
 
   // 1. Resolve calendar config
-  const calendarConfig = renderEngine.plugin.calendarConfigsCache.get(item.calendarType)
-  if (calendarConfig?.type !== 'rule-based' || !calendarConfig.ruleBasedDetails) return // continue loop in calling method
+  const calConfig = renderEngine.plugin.calendarConfigsCache.get(item.calendarType)
+  if (calConfig?.type !== 'rule-based') return
+  const calendarConfig = calConfig as RuleBasedCalendarConfig
+  if (!calendarConfig.ruleBasedDetails) return // continue loop in calling method
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0
 

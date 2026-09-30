@@ -71,15 +71,15 @@ export type CalendarConfig = {
   today?: number
 }
 
-export  type TypedCalendarConfig = CalendarConfig & {
+  /* e.g. Mayan */
+export type PositionalCalendarConfig = CalendarConfig & {
   type: 'positional',
-  /* Used if type === 'positional' (Mayan, etc.) */
   positionalUnits: { name: string, days: number }[]
 }
 
+  /* e.g. Gregorian */
 export type RuleBasedCalendarConfig = CalendarConfig & {
   type: 'rule-based',
-  /* Used if type === 'rule-based' (Gregorian, Hobbit, Elven, etc.) */
   ruleBasedDetails: RuleBasedDetails
 }
 

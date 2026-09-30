@@ -1,7 +1,7 @@
-import {CalendarConfig} from './types'
+import { RuleBasedCalendarConfig} from './types'
 
 
-export const GregorianCalendar: CalendarConfig = {
+export const GregorianCalendar: RuleBasedCalendarConfig = {
   id: 'gregorian',
   name: 'Gregorian Calendar',
   displayName: 'Gregorian',

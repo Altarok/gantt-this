@@ -1,4 +1,4 @@
-import {CalendarConfig, LeapYearRule} from '../const/types'
+import {CalendarConfig, LeapYearRule, RuleBasedCalendarConfig} from '../const/types'
 
 export function isGregorianLeapYear(year: number): boolean {
   const absYear = Math.abs(year)
@@ -6,8 +6,9 @@ export function isGregorianLeapYear(year: number): boolean {
 }
 
 /** Checks whether a target year is a leap year according to rules */
-export function isCustomLeapYear(year: number, config: CalendarConfig, yearWasAlreadyShifted = false): boolean {
-  if (year === null || config?.type !== 'rule-based') return false
+export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, yearWasAlreadyShifted = false): boolean {
+  if (year === null || calendarConfig?.type !== 'rule-based') return false
+  const config = calendarConfig as RuleBasedCalendarConfig
 
   const leapYearRule: LeapYearRule | undefined = config.ruleBasedDetails?.leapYearRule
 

@@ -1,5 +1,5 @@
 import {Notice} from 'obsidian'
-import {CalendarConfig, DateFormatComponent} from '../const/types'
+import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 
 const TODAY = 'today'
@@ -45,7 +45,9 @@ function getDaysToYearStart(year: number): number {
   return y * 365 + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400)
 }
 
-function parseDaysToGregorianDateString(days: number, config: CalendarConfig, asInput: boolean) {
+function parseDaysToGregorianDateString(days: number,
+                                        config: RuleBasedCalendarConfig,
+                                        asInput: boolean): string {
   let remainingDays = days
 
   let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
@@ -119,8 +121,8 @@ function parseDaysToGregorianDateString(days: number, config: CalendarConfig, as
 }
 
 function parseDaysToNonGregorianDateString(days: number,
-                                           config: CalendarConfig,
-                                           asInput: boolean) {
+                                           config: RuleBasedCalendarConfig,
+                                           asInput: boolean): string {
 
   const details = config.ruleBasedDetails
   if (!details) return `Error: No details found for ${config.id}`
@@ -225,37 +227,32 @@ function parseDaysToNonGregorianDateString(days: number,
   return prefix + outputParts.filter(Boolean).join(config.delimiter) + suffix
 }
 
+function parseDaysToPositionalDateString(days: number,
+                                         config: PositionalCalendarConfig): string {
+  let localDays = days - config.offsetToDayZero
+  const stringSegments: string[] = []
+  config.positionalUnits.forEach(unit => {
+    const unitCount = Math.floor(localDays / unit.days)
+    stringSegments.push(unitCount.toString())
+    localDays %= unit.days
+  })
+  return stringSegments.join(config.delimiter)
+}
+
 /* Update the axis label formatter inside the Gantt render engine class */
 
 // called during runtime, to get axis description
 export function createAxisDateDescription(days: number, calendarConfig: CalendarConfig, asInput = false): string {
 
-  let description: string
-
   switch (calendarConfig.type) {
-    case 'rule-based': {
-      if (calendarConfig.id === 'gregorian') {
-        description = parseDaysToGregorianDateString(days, calendarConfig, asInput)
-      } else {
-        description = parseDaysToNonGregorianDateString(days, calendarConfig, asInput)
-      }
-    }
-      break;
-    case 'positional': {
-      let localDays = days - calendarConfig.offsetToDayZero
-      const stringSegments: string[] = []
-      calendarConfig.positionalUnits?.forEach(unit => {
-        const unitCount = Math.floor(localDays / unit.days)
-        stringSegments.push(unitCount.toString())
-        localDays %= unit.days
-      })
-      description = stringSegments.join(calendarConfig.delimiter)
-    }
-      break;
+    case 'rule-based':
+      if (calendarConfig.id === 'gregorian')
+        return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput)
+      else
+        return parseDaysToNonGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput)
+    case 'positional':
+      return parseDaysToPositionalDateString(days, calendarConfig as PositionalCalendarConfig)
     default:
-      description = 'n/a'
-      break;
+      return 'n/a'
   }
-
-  return description
 }

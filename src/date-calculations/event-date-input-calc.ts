@@ -1,4 +1,11 @@
-import {CalendarConfig, ParsedDate, RepeatRule, RuleBasedDetails} from '../const/types'
+import {
+  CalendarConfig,
+  ParsedDate,
+  PositionalCalendarConfig,
+  RepeatRule,
+  RuleBasedCalendarConfig,
+  RuleBasedDetails
+} from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
 import {Dates} from '../util/dates'
 import {Recurring} from '../util/recurring-events'
@@ -39,17 +46,17 @@ export function parseEventDate(doCheckForRepetitions: boolean,
 export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
   switch (config.type) {
     case 'positional':
-      return parseEventDateWithPositionalConfig(cleanInput, config)
+      return parseEventDateWithPositionalConfig(cleanInput, config as PositionalCalendarConfig)
     case 'rule-based':
-      return parseEventDateWithRuleBasedConfig(cleanInput, config)
+      return parseEventDateWithRuleBasedConfig(cleanInput, config as RuleBasedCalendarConfig)
     default:
       return null
   }
 }
 
 /** Parse _positional_ event date. */
-function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: CalendarConfig): ParsedDate | null {
-  if (!cleanInput.includes(calendarConfig.delimiter) || calendarConfig.type !== 'positional') return null
+function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: PositionalCalendarConfig): ParsedDate | null {
+  if (!cleanInput.includes(calendarConfig.delimiter)) return null
 
   const segments = cleanInput.split(calendarConfig.delimiter).map(Number)
   let totalDays = 0
@@ -76,7 +83,7 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 }
 
 /** Parse _rule-based_ event date. */
-function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: CalendarConfig): ParsedDate | null {
+function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */
 
