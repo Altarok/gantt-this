@@ -78,7 +78,10 @@ export type CalendarConfig = {
   bcSuffix?: string
   adSuffix?: string
   moons?: Moon[]
+  /** Filepath or calendar note, used for click listener. */
   link: string
+  /** Current date in fantasy world. MUST match the calendar's date format. */
+  today?: number
 }
 
 export const DEFAULT_TIMESPAN = 'bar'

@@ -22,7 +22,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
                                             codeBlockContent: CodeBlockContent): Promise<CalendarConfig | null> {
   if (!calendarId || !pluginSettings) return null
 
-  const cachedCalendarConfig = plugin.calendarConfigsCache.get(calendarId)
+  const cachedCalendarConfig: CalendarConfig | undefined = plugin.calendarConfigsCache.get(calendarId)
 
   if (cachedCalendarConfig) return cachedCalendarConfig
 
