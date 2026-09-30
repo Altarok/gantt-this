@@ -210,13 +210,13 @@ function duplicateEventWithNumericDelta(item: GanttItem,
 }
 
 function createItem(item: GanttItem,
-                    startDay: number,
+                    startDays: number,
                     duration: number): GanttItem {
   return {
     ...item,
-    id: `${item.id}-rep-${startDay}`,
-    startDays: startDay,
-    endDays: item.endDays ? startDay + duration : startDay,
+    id: `${item.id}-rep-${startDays}`,
+    startDays,
+    endDays: item.endDays ? startDays + duration : startDays,
     isRecurringInstance: true,
     parentEventId: item.id,
     lane: item.lane
