@@ -1,7 +1,6 @@
 import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
-import {Consts} from '../const/constants'
 
 const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -9,7 +8,11 @@ const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
 export const Dates = {
   TODAY,
   parseDescriptiveDateToValidInput,
-  getTodayInDays
+  getGregorianTodayInAbsoluteDays
+}
+
+function getGregorianTodayInAbsoluteDays(): number {
+  return Math.floor(Date.now() / (24 * 60 * 60 * 1000))
 }
 
 /**
@@ -18,9 +21,10 @@ export const Dates = {
  */
 function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig) {
   // calculate today absolute day count (since day 0)
-  let absoluteDay: number = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
-    + (config.sharedOffset as number)  // config.sharedOffset was parsed to a number by now
-    + Consts.DAYS_FROM_0_12_31_TO_1_1_1970
+  // TODO #errorLog move to error container
+  if (!config.today) return `Calendar has no valid today value: ${config.id}`
+
+  let absoluteDay = config.today
 
   if (input.length > TODAY.length) {
     const suffix = input.slice(TODAY.length).trim()
@@ -256,8 +260,4 @@ export function createAxisDateDescription(days: number, config: CalendarConfig |
   }
 
   return description
-}
-
-function getTodayInDays() {
-  return Math.floor(Date.now() / (24 * 60 * 60 * 1000))
 }

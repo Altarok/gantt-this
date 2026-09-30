@@ -76,7 +76,10 @@ export class GanttRenderEngine {
 
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
-      const todayDays = Dates.getTodayInDays()
+      /*
+       * TODO replace with calendar related today date
+       */
+      const todayDays = Dates.getGregorianTodayInAbsoluteDays()
       this.viewConfig.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
