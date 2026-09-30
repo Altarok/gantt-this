@@ -9,7 +9,6 @@ export function parseDate(input?: string, config?: CalendarConfig | null): Parse
   return parseEventDate(false, false, input, config)
 }
 
-
 describe('Parsing event dates fails for', () => {
 
   it('missing input', () => {

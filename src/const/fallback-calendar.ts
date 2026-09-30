@@ -32,5 +32,6 @@ export const GregorianCalendar: CalendarConfig = {
   },
   moons: [{offset: 18.2, cycle: 29.53059, color: "orange"}],
   bcSuffix: 'BC',
-  adSuffix: 'AD'
+  adSuffix: 'AD',
+  link: '' // falsy mock file path
 }
