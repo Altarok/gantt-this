@@ -1,5 +1,4 @@
-import { RuleBasedCalendarConfig} from './types'
-
+import {RuleBasedCalendarConfig} from './types'
 
 export const GregorianCalendar: RuleBasedCalendarConfig = {
   id: 'gregorian',
@@ -31,7 +30,7 @@ export const GregorianCalendar: RuleBasedCalendarConfig = {
     ]
   },
   moons: [{offset: 18.2, cycle: 29.53059, color: "orange"}],
-  bcSuffix: 'BC',
-  adSuffix: 'AD',
+  bcSuffix: 'BCE',
+  adSuffix: 'CE',
   link: '' // falsy mock file path
 }
