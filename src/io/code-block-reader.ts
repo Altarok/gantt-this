@@ -3,14 +3,17 @@ import {StringUtils} from '../const/constants'
 
 /**
  * Reads given code block content and returns values in a new copy of the plugin's settings.
+ * Used for Markdown code blocks, not Bases.
  *
  * @param currentFolder set to setting values 'eventPath' and 'calendarPath' if their respective value equals 'local'
  * @param source code block content
+ * @param calendarId plugin's default calendar ID
  */
 export function readCodeBlock(currentFolder: string,
-                              source: string): CodeBlockContent {
+                              source: string,
+                              calendarId: string): CodeBlockContent {
 
-  const codeBlockContent: CodeBlockContent = {calendar: 'gregorian'}
+  const codeBlockContent: CodeBlockContent = {calendar: calendarId}
 
   const lines = source.split('\n').filter(Boolean)
 

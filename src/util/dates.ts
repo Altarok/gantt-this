@@ -48,7 +48,8 @@ function getDaysToYearStart(year: number): number {
 function parseDaysToGregorianDateString(days: number,
                                         config: RuleBasedCalendarConfig,
                                         asInput: boolean): string {
-  let remainingDays = days
+  const {delimiter, ruleBasedDetails: details} = config
+  let remainingDays = days - (config.offsetToDayZero ?? 0)
 
   let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
 
@@ -82,15 +83,16 @@ function parseDaysToGregorianDateString(days: number,
     }
   }
 
-  const {delimiter, ruleBasedDetails} = config
-  const monthCount = ruleBasedDetails?.months?.length ?? 12
+  const monthCount = details.months?.length ?? 12
 
   if (month > monthCount) {
     month -= monthCount
     year += 1
   }
 
-  const absYear = Math.abs(year)
+  const displayedYear = (details.noYearZero === true && year <= 0) ? year - 1 : year
+  const absYear = Math.abs(displayedYear)
+
   const paddedYear = absYear.toString().padStart(4, '0')
 
   const day = remainingDays
@@ -98,15 +100,15 @@ function parseDaysToGregorianDateString(days: number,
   const suffix = suffixRaw ? ` ${suffixRaw}` : ''
 
 
-  const monthDef = ruleBasedDetails?.months ?.[month - 1]
+  const monthDef = details.months?.[month - 1]
   const monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
   const dayFinal = day.toString().padStart(2, '0')
 
   let format: DateFormatComponent[]
   if (asInput)
-    format = ruleBasedDetails?.format ?? ['year', 'month', 'day']
+    format = details.format ?? ['year', 'month', 'day']
   else
-    format = (ruleBasedDetails?.outputFormat ?? ruleBasedDetails?.format) ?? ['year', 'month', 'day']
+    format = (details.outputFormat ?? details.format) ?? ['year', 'month', 'day']
 
   const outputParts = format.map(component => {
     if (component === 'year') return paddedYear
@@ -115,7 +117,7 @@ function parseDaysToGregorianDateString(days: number,
     return ''
   })
 
-  const prefix = year < 0 ? '-' : ''
+  const prefix = displayedYear < 0 ? '-' : ''
 
   return prefix + outputParts.filter(Boolean).join(delimiter) + suffix
 }
@@ -125,9 +127,7 @@ function parseDaysToNonGregorianDateString(days: number,
                                            asInput: boolean): string {
 
   const details = config.ruleBasedDetails
-  if (!details) return `Error: No details found for ${config.id}`
 
-  const noYearZero = !!details.noYearZero // <-- READ NEW YAML SETTING
   let remainingDays = days - config.offsetToDayZero
   let year = 1
 
@@ -176,7 +176,7 @@ function parseDaysToNonGregorianDateString(days: number,
 
   // Resolve displayed year when year zero is absent
   let displayedYear = year
-  if (noYearZero && year <= 0) displayedYear = year - 1
+  if (details.noYearZero === true && year <= 0) displayedYear = year - 1
 
   /* Determine the Month and Day */
   let monthName = ''

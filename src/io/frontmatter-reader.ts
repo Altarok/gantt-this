@@ -5,9 +5,7 @@ import {GanttItemDisplayType, GanttItemDisplayTypes, NO_GROUP, PluginSettings} f
  * Default key: 'gantt-type-definition'
  */
 function isMatchingCalendarDefinition(frontMatter: FrontMatterCache, settings: PluginSettings, calendarId: string): boolean {
-  const b = frontMatter[settings.frontMatterProperty_calendar_name] === calendarId
-  debugger
-  return b
+  return frontMatter[settings.frontMatterProperty_calendar_name] === calendarId
 }
 
 /*

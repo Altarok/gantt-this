@@ -12,7 +12,7 @@ import {
 import {Css} from '../const/constants'
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
-import {createAxisDateDescription, Dates} from '../util/dates'
+import {createAxisDateDescription} from '../util/dates'
 import {createSvg, SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
@@ -76,9 +76,8 @@ export class GanttRenderEngine {
 
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
-
       const defaultCalendarConfig = this.plugin.calendarConfigsCache.get(this.plugin.settings.defaultCalendar)
-      const todayDays = defaultCalendarConfig?.today ?? Dates.getGregorianTodayInAbsoluteDays()
+      const todayDays = defaultCalendarConfig?.today ?? 0
       this.viewConfig.setDayRange(todayDays - 15, todayDays + 15)
       return
     }

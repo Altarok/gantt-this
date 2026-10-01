@@ -100,6 +100,10 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
     if (typeof interval === 'number') {
       duplicateEventWithNumericDelta(item, expanded, engine, interval, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
     } else if (interval === 'yearly') {
+
+      /*
+       * TODO add tests for this - fails for leap days
+       */
       duplicateEventWithYearlyDelta(item, expanded, engine, visibleMinDays, visibleMaxDays)
     }
 

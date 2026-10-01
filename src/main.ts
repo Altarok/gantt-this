@@ -59,6 +59,7 @@ export default class FantasyGanttPlugin extends Plugin {
             type: 'text',
             displayName: 'Calendar used for bounds',
             key: BaseKeys.cal,
+            /* Do not use DEFAULT_SETTINGS.defaultCalendar here, user may have changed it */
             default: this.settings.defaultCalendar, placeholder: this.settings.defaultCalendar
           }
         ]
@@ -93,7 +94,7 @@ export default class FantasyGanttPlugin extends Plugin {
       return
     }
 
-    const codeBlockContent = readCodeBlock(currentFile.parent.path, source)
+    const codeBlockContent = readCodeBlock(currentFile.parent.path, source, this.settings.defaultCalendar)
 
     const render = new GanttRender(this, null, null)
 

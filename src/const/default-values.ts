@@ -1,16 +1,19 @@
 import {DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP, PluginSettings} from './types'
 
+export const DEFAULT_FALLBACK_CALENDAR = 'gregorian'
+export const DEFAULT_FALLBACK_GROUP = 'general'
+
 export const DEFAULT_SETTINGS: PluginSettings = {
   eventPath: '/',
   eventPathSearchRecursive: false,
   calendarPath: '/',
   calendarPathSearchRecursive: false,
-  defaultCalendar: 'gregorian',
-  defaultGroup: 'general',
+  defaultCalendar: DEFAULT_FALLBACK_CALENDAR,
+  defaultGroup: DEFAULT_FALLBACK_GROUP,
   fallbackColor: '#1565C0',
   fallbackColorForIcons: '#FF8800',
-  calendars: [{id: 'gregorian', visible: true, priority: 0}],
-  groups: [{id: 'general', visible: true, priority: 0}],
+  calendars: [{id: DEFAULT_FALLBACK_CALENDAR, visible: true, priority: 0}],
+  groups: [{id: DEFAULT_FALLBACK_GROUP, visible: true, priority: 0}],
 
   /*
    * Advanced UX settings
@@ -53,7 +56,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
   frontMatterProperty_event_name: 'gantt-name', // ... or filename
   frontMatterProperty_event_calendar: 'gantt-calendar', // name of matching calendar or global fallback
-  frontMatterProperty_event_group: 'gantt-group', // ... or 'general'
+  frontMatterProperty_event_group: 'gantt-group', // ... or general
   frontMatterProperty_event_symbol: 'gantt-symbol', // diamond ... or auto-(bar | point)
   frontMatterProperty_event_color: 'gantt-color', // hex value | human-readable color  ... or global fallback color
   frontMatterProperty_event_icon_name: 'gantt-displayIcon', // SVG icon ID

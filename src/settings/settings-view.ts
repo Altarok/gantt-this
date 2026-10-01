@@ -1,7 +1,7 @@
 import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {ControlKeyMapped, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
-import {DEFAULT_SETTINGS} from '../const/default-values'
+import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_FALLBACK_GROUP, DEFAULT_SETTINGS} from '../const/default-values'
 import {AddEntryModal} from './settings-util'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
@@ -114,7 +114,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           new Notice(`Can't delete default calendar!`)
           return
         }
-        if (calendar.id === 'gregorian') {
+        if (calendar.id === DEFAULT_FALLBACK_CALENDAR) {
           new Notice(`Can't delete fallback calendar!`)
           return
         }
@@ -182,7 +182,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           new Notice(`Can't delete default group!`)
           return
         }
-        if (group.id === 'general') {
+        if (group.id === DEFAULT_FALLBACK_GROUP) {
           new Notice(`Can't delete fallback group!`)
           return
         }

@@ -7,10 +7,10 @@ export function isGregorianLeapYear(year: number): boolean {
 
 /** Checks whether a target year is a leap year according to rules */
 export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, yearWasAlreadyShifted = false): boolean {
-  if (year === null || calendarConfig?.type !== 'rule-based') return false
+  if (year === null || calendarConfig.type !== 'rule-based') return false
   const config = calendarConfig as RuleBasedCalendarConfig
 
-  const leapYearRule: LeapYearRule | undefined = config.ruleBasedDetails?.leapYearRule
+  const leapYearRule: LeapYearRule | undefined = config.ruleBasedDetails.leapYearRule
 
   /* No rule means there never is a leap year. */
   if (!leapYearRule || leapYearRule.ruleType === 'none') return false
@@ -18,8 +18,8 @@ export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, y
   // Apply noYearZero offset once upfront if active on negative years
   let targetYear = year
   if (!yearWasAlreadyShifted) {
-    const noYearZero = !!config.ruleBasedDetails?.noYearZero
-    targetYear = (noYearZero && year < 0) ? year + 1 : year
+    const noYearZero = config.ruleBasedDetails.noYearZero
+    targetYear = (noYearZero === true && year < 0) ? year + 1 : year
   }
 
   if (leapYearRule.ruleType === 'gregorian') {

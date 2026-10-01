@@ -80,23 +80,6 @@ export const Css = {
 
 } as const
 
-export const Colors: Record<string, string> = {
-  red: '#ff0000',
-  white: '#ffffff',
-  blue: '#002fff',
-  green: '#3cb371',
-  yellow: '#ffff00',
-  gold: '#ffd700',
-  black: '#000000',
-  orange: '#ff8c00',
-  pink: '#ff1493',
-  purple: '#9400d3',
-} as const
-
-// export const EventIDs = {
-//   tooltip: 'gantt-tooltip-element'
-// } as const
-
 export const svgUrl = 'http://www.w3.org/2000/svg'
 
 export const StringUtils = {

@@ -11,7 +11,6 @@ import {
 import {getCalendarDefinition} from './calendar-frontmatter-reader'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, Notice, TFile} from 'obsidian'
-import {Colors} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../util/dates'
@@ -177,15 +176,8 @@ function createItem(plugin: FantasyGanttPlugin,
  * @param calendar name of calendar, e.g. 'mayan'
  */
 function getItemColor(frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string) {
-
-  let clr = FrontMatterUtil.getEventColor(frontMatter, settings) ??
+  return FrontMatterUtil.getEventColor(frontMatter, settings) ??
     settings.groups.filter((value) => value.id === group)?.[0]?.color ??
     settings.calendars.filter((value) => value.id === calendar)?.[0]?.color ??
     settings.fallbackColor
-
-  if (!clr.startsWith('#') && clr in Object.keys(Colors)) {
-    clr = Colors[clr] ?? settings.fallbackColor
-  }
-
-  return clr
 }

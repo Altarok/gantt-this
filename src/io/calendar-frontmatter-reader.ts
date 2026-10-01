@@ -1,13 +1,13 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
 import {CalendarConfig, CodeBlockContent, ParsedDate, PluginSettings} from '../const/types'
-import {DEFAULT_SETTINGS} from '../const/default-values'
+import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_SETTINGS} from '../const/default-values'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {Consts} from '../const/constants'
-import {GregorianCalendar} from '../const/fallback-calendar'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {Dates} from '../util/dates'
+import {GregorianCalendar} from "../const/fallback-calendar";
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -24,7 +24,8 @@ function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
       delete newCalendarConfig.today
     }
 
-  } else if ('gregorian' === newCalendarConfig.id.toLowerCase()) {
+  } else if (DEFAULT_FALLBACK_CALENDAR === newCalendarConfig.id.toLowerCase()) {
+    /* Add the current date to gregorian calendar */
     newCalendarConfig.today = Dates.getGregorianTodayInAbsoluteDays()
   }
 }
@@ -40,22 +41,15 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
                                             calendarId: string,
                                             pluginSettings: PluginSettings,
                                             codeBlockContent: CodeBlockContent): Promise<CalendarConfig | null> {
-  debugger
   if (!calendarId || !pluginSettings) return null
 
   const cachedCalendarConfig: CalendarConfig | undefined = plugin.calendarConfigsCache.get(calendarId)
 
-  if (cachedCalendarConfig) {
-    debugger
-    return cachedCalendarConfig
-  }
+  if (cachedCalendarConfig) return cachedCalendarConfig
 
   let targetFile = getMatchingMarkdownFile(plugin, calendarId, pluginSettings, codeBlockContent)
 
-  if (!targetFile) {
-    debugger
-    return fallbackIfGregorian(calendarId, plugin)
-  }
+  if (!targetFile) return fallbackIfGregorian(calendarId, plugin) // TODO remove
 
   const content = await plugin.app.vault.read(targetFile)
   const match = yamlRegex.exec(content)
@@ -74,8 +68,6 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
     addTodayDateAsAbsoluteDay(newCalendarConfig)
 
-    debugger
-
     /* Cache calendar */
     plugin.calendarConfigsCache.set(calendarId, newCalendarConfig)
     return newCalendarConfig
@@ -89,7 +81,6 @@ function fallbackIfGregorian(calendarId: string, plugin: FantasyGanttPlugin): Ca
   if (calendarId === DEFAULT_SETTINGS.defaultCalendar) {
     new Notice('Failed to load Gregorian calendar. Will use pre-set fallback.')
     plugin.calendarConfigsCache.set(calendarId, GregorianCalendar)
-    debugger
     return GregorianCalendar
   } else return null
 }
@@ -102,8 +93,6 @@ function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
                                  pluginSettings: PluginSettings,
                                  codeBlockContent: CodeBlockContent): TFile | null {
   const allFiles: TFile[] = plugin.app.vault.getMarkdownFiles()
-
-  debugger
 
   let calendarSourcePath = codeBlockContent.calendarPath ?? pluginSettings.calendarPath
   /* Normalize root path reference */
