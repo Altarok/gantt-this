@@ -22,8 +22,6 @@ function parseFirstPart(input?: string): { delta: number, step: Step } | null {
   else if (input === 'daily')
     return {delta: 1, step: 'day'}
 
-  debugger
-
   const parts: string[] = input.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return null
 
@@ -50,8 +48,6 @@ function parseFirstPart(input?: string): { delta: number, step: Step } | null {
  */
 function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
 
-  debugger
-
   const parts: string[] = input.split(',').flatMap(x => x.trim())
 
   if (parts.length === 0) return undefined
@@ -66,8 +62,6 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: C
     delta = parsedFirstPart.delta
     step = parsedFirstPart.step
   } else return undefined /* First part is mandatory */
-
-  debugger
 
   if (parts[1] && calendarConfig) {
 
@@ -95,7 +89,6 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: C
     // const parsedDate = createParsedDate(endDateRaw, calendarConfig)
     // if (parsedDate) endDate = parsedDate.days
     // }
-
   }
 
   if (delta && step) return {delta, step, startDay, endDay}
@@ -128,19 +121,12 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
   for (const item of items) {
     expanded.push(item) // Always include the base event
 
-    if (!item.repeatRule) continue
+    if (!item.repeatRule?.delta) continue
 
-    const interval = item.repeatRule.delta as number
-    if (!interval) continue
-
-    if (typeof interval === 'number') {
-      duplicateEventWithNumericDelta(item, expanded, engine, interval, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
-    } else if (interval === 'yearly') {
-
-      /*
-       * TODO add tests for this - fails for leap days
-       */
-      duplicateEventWithYearlyDelta(item, expanded, engine, visibleMinDays, visibleMaxDays)
+    if (item.repeatRule.step === 'day') {
+      duplicateEventWithDayDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
+    } else if (item.repeatRule.step === 'year') {
+      duplicateEventWithYearDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
     }
 
   }
@@ -148,13 +134,16 @@ function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): G
   return expanded
 }
 
-function duplicateEventWithYearlyDelta(item: GanttItem,
-                                       expanded: GanttItem[],
-                                       renderEngine: GanttRenderEngine,
-                                       visibleMinDays: number,
-                                       visibleMaxDays: number): void {
-
+function duplicateEventWithYearDelta(item: GanttItem,
+                                     expanded: GanttItem[],
+                                     renderEngine: GanttRenderEngine,
+                                     pixelsPerDay: number,
+                                     doubleIconSize: number,
+                                     visibleMinDays: number,
+                                     visibleMaxDays: number): void {
+  debugger
   if (!item.repeatRule) return // continue loop in calling method
+  const {delta} = item.repeatRule
 
   // 1. Resolve calendar config
   const calConfig = renderEngine.plugin.calendarConfigsCache.get(item.calendarType)
@@ -164,9 +153,16 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
+  let absoluteDate: string = item.startDateDisplay
+  let yearModifier: number = 1
+  if (calendarConfig.delimiter === '-' && item.startDateDisplay.startsWith(calendarConfig.delimiter)) {
+    absoluteDate = item.startDateDisplay.slice(1)
+    yearModifier = -1
+  }
+
   // 2. Extract year, month, and day components from item's startDateDisplay
   // Assumes format like "1420-05-12" or custom delimiters
-  const dateParts = item.startDateDisplay.split(calendarConfig.delimiter)
+  const dateParts = absoluteDate.split(calendarConfig.delimiter)
   const yearIndex = calendarConfig.ruleBasedDetails.format.indexOf('year')
 
   if (yearIndex === -1 /* || dateParts.length < 3 */) return // continue loop in calling method
@@ -175,16 +171,42 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
   if (isNaN(currentYear)) return // continue loop in calling method
 
   // 3. Iteratively increment year integer forward
-  let yearOffset = 1
+  // let yearOffset = delta
+
+  // 3. Compute minimum year multiplier to prevent icon overlapping on screen
+  // Assume an average year length to estimate pixel spacing per interval
+  const approxDaysPerYear = 365
+  const pixelSpacingPerInterval = delta * approxDaysPerYear * pixelsPerDay
+  let minIntervalMultiplier = 1
+
+  if (pixelSpacingPerInterval < doubleIconSize && pixelSpacingPerInterval > 0) {
+    minIntervalMultiplier = Math.ceil(doubleIconSize / pixelSpacingPerInterval)
+  }
+
+  const effectiveDelta = delta * minIntervalMultiplier
+  if (effectiveDelta <= 0 || !Number.isFinite(effectiveDelta)) return
+
+  // 4. Calculate starting year offset
+  // Jump closer to the visible window to minimize unnecessary iterations
+  let yearOffset = effectiveDelta
+  if (item.startDays < visibleMinDays) {
+    const estimatedYearSpan = Math.max(0, (visibleMinDays - item.startDays) / approxDaysPerYear)
+    const estimatedSteps = Math.floor(estimatedYearSpan / effectiveDelta)
+    if (estimatedSteps > 0) {
+      yearOffset = estimatedSteps * effectiveDelta
+    }
+  }
+
+  // 5. Iteratively increment year integer forward
   let safetyGuard = 0
 
-  while (safetyGuard < 100) {
+  while (safetyGuard < 100) { // minimal distance of double icon make the real maximum circa 32
     safetyGuard++
 
     // Replace the year part in the date string
     const nextDateParts = [...dateParts]
-    nextDateParts[yearIndex] = String(currentYear + yearOffset)
-    const nextDateStr = nextDateParts.join(calendarConfig.delimiter)
+    nextDateParts[yearIndex] = String(currentYear + (yearModifier * yearOffset))
+    const nextDateStr = (yearModifier < 0 ? '-' : '') + nextDateParts.join(calendarConfig.delimiter)
 
     // Re-evaluate through your parser engine
     const nextParsedDate = createParsedDate(nextDateStr, calendarConfig)
@@ -202,43 +224,43 @@ function duplicateEventWithYearlyDelta(item: GanttItem,
       expanded.push(createItem(item, nextStartDays, duration))
     }
 
-    yearOffset++
+    yearOffset += effectiveDelta // delta
   }
 }
 
-function duplicateEventWithNumericDelta(item: GanttItem,
-                                        expanded: GanttItem[],
-                                        renderEngine: GanttRenderEngine,
-                                        interval: number,
-                                        pixelsPerDay: number,
-                                        doubleIconSize: number,
-                                        visibleMinDays: number,
-                                        visibleMaxDays: number): void {
+function duplicateEventWithDayDelta(item: GanttItem,
+                                    expanded: GanttItem[],
+                                    renderEngine: GanttRenderEngine,
+                                    pixelsPerDay: number,
+                                    doubleIconSize: number,
+                                    visibleMinDays: number,
+                                    visibleMaxDays: number): void {
   if (!item.repeatRule) return // continue loop in calling method
+  const {delta} = item.repeatRule
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
-// Compute minimum multiplier cleanly in O(1) without iterating
-  const pixelSpacingPerInterval = interval * pixelsPerDay
+  // Compute minimum multiplier cleanly in O(1) without iterating
+  const pixelSpacingPerInterval = delta * pixelsPerDay
   let minIntervalMultiplier = 1
   if (pixelSpacingPerInterval < doubleIconSize && pixelSpacingPerInterval > 0) {
     minIntervalMultiplier = Math.ceil(doubleIconSize / pixelSpacingPerInterval)
   }
 
-  const step = minIntervalMultiplier * interval
+  const step = minIntervalMultiplier * delta
   if (step <= 0 || !Number.isFinite(step)) return // continue loop in calling method
 
-// 1. Get real bounds of event's rule
+  // 1. Get real bounds of event's rule
   const ruleStart = item.repeatRule.startDay !== -Infinity ? Math.max(item.startDays, item.repeatRule.startDay) : item.startDays
   const ruleEnd = item.repeatRule.endDay !== +Infinity ? item.repeatRule.endDay : renderEngine.viewConfig.maxDays
 
-// 2. Intersect rule bounds strictly with physical screen viewport (+/- 1 step buffer)
+  // 2. Intersect rule bounds strictly with physical screen viewport (+/- 1 step buffer)
   const renderMin = Math.max(ruleStart, visibleMinDays - step)
   const renderMax = Math.min(ruleEnd, visibleMaxDays + step)
 
   if (renderMin > renderMax) return // continue loop in calling method
 
-// 3. Jump directly to the first visible occurrence inside the render window
+  // 3. Jump directly to the first visible occurrence inside the render window
   const firstStepOffset = Math.ceil((renderMin - ruleStart) / step) * step
   let currentStart = ruleStart + Math.max(step, firstStepOffset)
   let iterations = 0
