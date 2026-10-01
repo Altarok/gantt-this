@@ -49,7 +49,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
   let targetFile = getMatchingMarkdownFile(plugin, calendarId, pluginSettings, codeBlockContent)
 
-  if (!targetFile) return fallbackIfGregorian(calendarId, plugin) // TODO remove
+  if (!targetFile) return fallbackIfGregorian(calendarId, plugin)
 
   const content = await plugin.app.vault.read(targetFile)
   const match = yamlRegex.exec(content)

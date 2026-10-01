@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {isCustomLeapYear, isGregorianLeapYear} from '../src/date-calculations/leap-year-calc'
 import {gregorianConfig, mayanConfig, MockCalendarConfig, shireConfig} from './test-configs'
-import {LeapYearRule, RuleBasedCalendarConfig} from '../src/const/types'
+import {RuleBasedCalendarConfig} from '../src/const/types'
 
 
 const bullshitCalendarConfig: RuleBasedCalendarConfig = {
@@ -65,7 +65,6 @@ describe('Leap year calculations should work for', () => {
 describe('Leap year calculations should be skipped for', () => {
 
   it('positional calendars', () => {
-    const mayanLeapYearRule: LeapYearRule = {ruleType: 'none'}
     expect(isCustomLeapYear(0, mayanConfig)).toBe(false)
   })
 
