@@ -156,6 +156,9 @@ function duplicateEventWithYearDelta(item: GanttItem,
   let absoluteDate: string = item.startDateDisplay
   let yearModifier: number = 1
   if (calendarConfig.delimiter === '-' && item.startDateDisplay.startsWith(calendarConfig.delimiter)) {
+    /*
+     * TODO remove this IF and split including minus prefix
+     */
     absoluteDate = item.startDateDisplay.slice(1)
     yearModifier = -1
   }
