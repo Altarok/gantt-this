@@ -1,4 +1,4 @@
-import {CalendarConfig, DateFormatComponent} from '../src/const/types'
+import {DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../src/const/types'
 
 const formatYMD: DateFormatComponent[] = ['year', 'month', 'day']
 
@@ -6,7 +6,7 @@ export const MockCalendarConfig = {
   link: '' // falsy mock file path
 }
 
-export const gregorianConfig: CalendarConfig = {
+export const gregorianConfig: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'gregorian',
   name: 'Gregorian Calendar',
@@ -39,7 +39,7 @@ export const gregorianConfig: CalendarConfig = {
   moons: [{offset: 18.2, cycle: 29.53059, color: "orange"}]
 }
 
-export const gregorianConfigWithoutYearZero: CalendarConfig = {
+export const gregorianConfigWithoutYearZero: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'gregorian-natural',
   name: 'Gregorian Calendar',
@@ -59,7 +59,7 @@ export const gregorianConfigWithoutYearZero: CalendarConfig = {
   moons: [{offset: 18.2, cycle: 29.53059, color: "orange"}]
 }
 
-export const gregorianWithoutMonthsConfig: CalendarConfig = {
+export const gregorianWithoutMonthsConfig: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'gregorian-no-months',
   name: 'Gregorian Calendar without months',
@@ -75,7 +75,7 @@ export const gregorianWithoutMonthsConfig: CalendarConfig = {
   }
 }
 
-export const shireConfig: CalendarConfig = {
+export const shireConfig: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'shire',
   name: 'Shire Reckoning',
@@ -113,7 +113,7 @@ export const shireConfig: CalendarConfig = {
   }
 }
 
-export const mayanConfig: CalendarConfig = {
+export const mayanConfig: PositionalCalendarConfig = {
   ...MockCalendarConfig,
   id: 'mayan',
   name: 'Mayan Long Count',
@@ -130,7 +130,7 @@ export const mayanConfig: CalendarConfig = {
   ]
 }
 
-export const frenchRevolutionConfig: CalendarConfig = {
+export const frenchRevolutionConfig: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'french-revolution',
   name: 'French Revolution',

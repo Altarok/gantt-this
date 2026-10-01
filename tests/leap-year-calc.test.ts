@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest'
 import {isCustomLeapYear, isGregorianLeapYear} from '../src/date-calculations/leap-year-calc'
 import {gregorianConfig, mayanConfig, MockCalendarConfig, shireConfig} from './test-configs'
-import {CalendarConfig, LeapYearRule} from '../src/const/types'
+import {LeapYearRule, RuleBasedCalendarConfig} from '../src/const/types'
 
 
-const bullshitCalendarConfig: CalendarConfig = {
+const bullshitCalendarConfig: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'id',
   sharedOffset: 0,
@@ -90,12 +90,12 @@ describe('Leap year calculations should be skipped for', () => {
  */
 describe('noYearZero with interval rules', () => {
 
-  const shireNoYearZeroConfig: CalendarConfig = {
+  const shireNoYearZeroConfig: RuleBasedCalendarConfig = {
     ...MockCalendarConfig,
     ...shireConfig,
     type: 'rule-based',
     ruleBasedDetails: {
-      ...shireConfig.ruleBasedDetails!,
+      ...shireConfig.ruleBasedDetails,
       noYearZero: true,
       leapYearRule: {ruleType: 'interval', intervalYears: 4}
     }
@@ -129,7 +129,7 @@ describe('noYearZero with interval rules', () => {
  */
 describe('Sci-Fi Gregorian workaround with negative years', () => {
 
-  const sciFiConfig: CalendarConfig = {
+  const sciFiConfig: RuleBasedCalendarConfig = {
     ...MockCalendarConfig,
     id: 'sci-fi',
     type: 'rule-based',
