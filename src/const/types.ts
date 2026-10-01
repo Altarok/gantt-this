@@ -71,13 +71,13 @@ export type CalendarConfig = {
   today?: number
 }
 
-  /* e.g. Mayan */
+/* e.g. Mayan */
 export type PositionalCalendarConfig = CalendarConfig & {
   type: 'positional',
   positionalUnits: { name: string, days: number }[]
 }
 
-  /* e.g. Gregorian */
+/* e.g. Gregorian */
 export type RuleBasedCalendarConfig = CalendarConfig & {
   type: 'rule-based',
   ruleBasedDetails: RuleBasedDetails
@@ -114,11 +114,15 @@ export const GanttItemDisplayTypes = {
   isTimestamp: isGanttItemDisplayTypeTimestamp
 }
 
+export type Step = 'day' /* always works */
+  | 'year' /* works only for year-based calendars */
+
 export type RepeatRule = {
-  delta: number | 'yearly'
-  /** Start of repetitions. Absolute day on infinite timeline, or negative infinity. */
+  delta: number
+  step: Step
+  /** Start of repetitions. Absolute day on timeline, or negative infinity. */
   startDay: number
-  /** End of repetitions. Absolute day on infinite timeline, or positive infinity. */
+  /** End of repetitions. Absolute day on timeline, or positive infinity. */
   endDay: number
 }
 

@@ -1,10 +1,44 @@
-import {CalendarConfig, GanttItem, RepeatRule, RuleBasedCalendarConfig} from '../const/types'
+import {CalendarConfig, GanttItem, RepeatRule, RuleBasedCalendarConfig, Step} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 
 export const Recurring = {
   createRepeatRule,
   expandRecurringEvents
+}
+
+function toStep(input: string | undefined): Step | null {
+  if (input === 'days' || input === 'day') return 'day'
+  else if (input === 'years' || input === 'year') return 'year'
+  else return null
+}
+
+/** Parse input like /^after 1-9\d* (days|years)$/ */
+function parseFirstPart(input?: string): { delta: number, step: Step } | null {
+  if (!input)
+    return null
+  else if (input === 'yearly')
+    return {delta: 1, step: 'year'}
+  else if (input === 'daily')
+    return {delta: 1, step: 'day'}
+
+  debugger
+
+  const parts: string[] = input.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return null
+
+  if (parts[0] === 'after' || parts[0] === 'every') {
+    const rawNum = Number(parts[1])
+    if (!Number.isNaN(rawNum) && Number.isFinite(rawNum)) {
+      const delta = Math.round(rawNum)
+      const step = toStep(parts[2])
+      if (delta > 0 && step) {
+        return {delta, step}
+      }
+    }
+  }
+
+  return null
 }
 
 /**
@@ -16,43 +50,44 @@ export const Recurring = {
  */
 function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
 
-  const isEndDate = !isStartDate
+  debugger
 
-  let delta: number | 'yearly' | undefined = undefined
+  const parts: string[] = input.split(',').flatMap(x => x.trim())
+
+  if (parts.length === 0) return undefined
+
+  let delta: number
+  let step: Step
   let startDay = -Infinity
   let endDay = +Infinity
 
-  if (isStartDate && input === 'yearly') {
-    delta = 'yearly'
-  } else if (isStartDate && /^(after|every) [1-9]\d* days/.test(input)) {
-    delta = Number(input.replace(/^(after|every) (\d+) days.*/g, '$2'))
-  } else if (isEndDate && /^after \d+ days/.test(input)) {
-    delta = Number(input.replace(/^after (\d+) days.*/g, '$1'))
-  }
+  const parsedFirstPart = parseFirstPart(parts[0])
+  if (parsedFirstPart) {
+    delta = parsedFirstPart.delta
+    step = parsedFirstPart.step
+  } else return undefined /* First part is mandatory */
 
-  if (!delta) {
-    // console.info(`input(${input}) --> repeatRule: undefined`)
-    return undefined
-  }
+  debugger
 
-  if (calendarConfig) {
+  if (parts[1] && calendarConfig) {
 
     // if (/starting from \[[^\]]+]( |$)/.test(input)) {
-    const startMatch = /starting from \[([^\]]+)]/.exec(input)
-    if (startMatch) {
-      const parsedDate = createParsedDate(startMatch[1]!.trim(), calendarConfig)
-      if (parsedDate) startDay = parsedDate.days
-    }
-
+    // const startMatch = /starting from \[([^\]]+)]/.exec(input)
+    // if (startMatch) {
+    //   const parsedDate = createParsedDate(startMatch[1]!.trim(), calendarConfig)
+    //   if (parsedDate) startDay = parsedDate.days
+    // }
+    //
     // const startDateRaw = input.replace(/.*starting from \[([^\]]+)].*?/g, '$1').trim()
     // const parsedDate = createParsedDate(startDateRaw, calendarConfig)
     // if (parsedDate) startDay = parsedDate.days
     // }
 
     // if (/ending on \[[^\]]+]( |$)/.test(input)) {
-    const endMatch = /ending on \[([^\]]+)]/.exec(input)
+    const endMatch = /until (.+)/.exec(parts[1])
     if (endMatch) {
-      const parsedDate = createParsedDate(endMatch[1]!.trim(), calendarConfig)
+      const cleanDate = endMatch[1]!.trim()
+      const parsedDate = createParsedDate(cleanDate, calendarConfig)
       if (parsedDate) endDay = parsedDate.days
     }
 
@@ -63,7 +98,8 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: C
 
   }
 
-  return {delta, startDay, endDay}
+  if (delta && step) return {delta, step, startDay, endDay}
+  else return undefined
 }
 
 /**
