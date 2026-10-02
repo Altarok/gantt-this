@@ -313,9 +313,8 @@ export class GanttRenderEngine {
     const renderWidth = this.getRenderWidth()
 
     const itemsAreaHeight = this.calculateEventsAreaHeight()
-    const totalDaysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
 
-    this.viewConfig.stepDays = Math.max(1, Math.floor(totalDaysSpan / (renderWidth / 120)))
+    this.viewConfig.stepDays = this.tickStepInDays
 
     const startDaysValue = Math.floor(this.viewConfig.minDays / this.viewConfig.stepDays) * this.viewConfig.stepDays - this.viewConfig.stepDays
     const endDaysValue = Math.ceil(this.viewConfig.maxDays / this.viewConfig.stepDays) * this.viewConfig.stepDays + this.viewConfig.stepDays
@@ -415,7 +414,7 @@ export class GanttRenderEngine {
 
         if (xPos - lastTextX > 80) {
           const text = createSvg('text', Css.axis.text, {x: xPos, y: 20})
-          text.textContent = createAxisDateDescription(currDays, calendarConfig)
+          text.textContent = createAxisDateDescription(currDays, calendarConfig, false, this.tickStepInDays)
 
           ticksG.appendChild(text)
           lastTextX = xPos
@@ -652,6 +651,12 @@ export class GanttRenderEngine {
       } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) return this.viewConfig.showPoints
       else return false
     })
+  }
+
+  private get tickStepInDays(): number {
+    const renderWidth = this.getRenderWidth()
+    const totalDaysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
+    return Math.max(1, Math.floor(totalDaysSpan / (renderWidth / 120)))
   }
 
 }

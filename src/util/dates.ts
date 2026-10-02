@@ -2,6 +2,7 @@ import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
+import {GregorianDateFormatter} from "./gregorian-date-formatter";
 
 const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -48,7 +49,8 @@ function getDaysToYearStart(year: number): number {
 
 function parseDaysToGregorianDateString(days: number,
                                         config: RuleBasedCalendarConfig,
-                                        asInput: boolean): string {
+                                        asInput: boolean,
+                                        tickStepInDays = 0): string {
   const {delimiter, ruleBasedDetails: details} = config
   let remainingDays = days - (config.offsetToDayZero ?? 0)
 
@@ -94,7 +96,8 @@ function parseDaysToGregorianDateString(days: number,
   const displayedYear = (details.noYearZero === true && year <= 0) ? year - 1 : year
   const absYear = Math.abs(displayedYear)
 
-  const paddedYear = absYear.toString().padStart(4, '0')
+  // const paddedYear = absYear.toString().padStart(4, '0')
+  const formattedYear = GregorianDateFormatter.formatYearValue(absYear)
 
   const day = remainingDays
   const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
@@ -111,10 +114,13 @@ function parseDaysToGregorianDateString(days: number,
   else
     format = (details.outputFormat ?? details.format) ?? ['year', 'month', 'day']
 
-  const outputParts = format.map(component => {
-    if (component === 'year') return paddedYear
-    if (component === 'month') return monthFinal
-    if (component === 'day') return dayFinal
+  const hideDays = !asInput && tickStepInDays > 365
+  const hideMonths = !asInput && tickStepInDays > 730
+
+  const outputParts: string[] = format.map(component => {
+    if (component === 'year') return formattedYear
+    if (component === 'month' && !hideMonths) return monthFinal
+    if (component === 'day' && !hideDays) return dayFinal
     return ''
   })
 
@@ -243,12 +249,15 @@ function parseDaysToPositionalDateString(days: number,
 /* Update the axis label formatter inside the Gantt render engine class */
 
 // called during runtime, to get axis description
-export function createAxisDateDescription(days: number, calendarConfig: CalendarConfig, asInput = false): string {
+export function createAxisDateDescription(days: number,
+                                          calendarConfig: CalendarConfig,
+                                          asInput = false,
+                                          tickStepInDays = 0): string {
 
   switch (calendarConfig.type) {
     case 'rule-based':
       if (calendarConfig.id === 'gregorian')
-        return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput)
+        return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, tickStepInDays)
       else
         return parseDaysToNonGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput)
     case 'positional':
