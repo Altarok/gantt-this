@@ -48,7 +48,7 @@ function parseFirstPart(input?: string): { delta: number, step: Step } | null {
  */
 function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
 
-  const parts: string[] = input.split(',').flatMap(x => x.trim())
+  const parts: string[] = input.split(',').map(x => x.trim()).filter(Boolean)
 
   if (parts.length === 0) return undefined
 
@@ -141,7 +141,6 @@ function duplicateEventWithYearDelta(item: GanttItem,
                                      doubleIconSize: number,
                                      visibleMinDays: number,
                                      visibleMaxDays: number): void {
-  debugger
   if (!item.repeatRule) return // continue loop in calling method
   const {delta} = item.repeatRule
 
@@ -153,19 +152,18 @@ function duplicateEventWithYearDelta(item: GanttItem,
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
-  let absoluteDate: string = item.startDateDisplay
-  let yearModifier: number = 1
-  if (calendarConfig.delimiter === '-' && item.startDateDisplay.startsWith(calendarConfig.delimiter)) {
-    /*
-     * TODO remove this IF and split including minus prefix
-     */
-    absoluteDate = item.startDateDisplay.slice(1)
-    yearModifier = -1
+  /* Extract  date parts components from item's start date */
+  const startDate: string = item.startDateDisplay.trim()
+  let dateParts: string[]
+  if (calendarConfig.delimiter === '-' && startDate.startsWith('-')) {
+    /* special handling for negative years using minus as date part separator */
+    /* alternative for old iOS devices : startDate.match(/^-?\w+|\w+/g) ?? [] */
+    dateParts = startDate.split(/(?<=\w)-/)
+  } else {
+    dateParts = startDate.split(calendarConfig.delimiter)
   }
 
-  // 2. Extract year, month, and day components from item's startDateDisplay
-  // Assumes format like "1420-05-12" or custom delimiters
-  const dateParts = absoluteDate.split(calendarConfig.delimiter)
+
   const yearIndex = calendarConfig.ruleBasedDetails.format.indexOf('year')
 
   if (yearIndex === -1 /* || dateParts.length < 3 */) return // continue loop in calling method
@@ -173,8 +171,6 @@ function duplicateEventWithYearDelta(item: GanttItem,
   let currentYear = parseInt(dateParts[yearIndex]!, 10)
   if (isNaN(currentYear)) return // continue loop in calling method
 
-  // 3. Iteratively increment year integer forward
-  // let yearOffset = delta
 
   // 3. Compute minimum year multiplier to prevent icon overlapping on screen
   // Assume an average year length to estimate pixel spacing per interval
@@ -208,8 +204,8 @@ function duplicateEventWithYearDelta(item: GanttItem,
 
     // Replace the year part in the date string
     const nextDateParts = [...dateParts]
-    nextDateParts[yearIndex] = String(currentYear + (yearModifier * yearOffset))
-    const nextDateStr = (yearModifier < 0 ? '-' : '') + nextDateParts.join(calendarConfig.delimiter)
+    nextDateParts[yearIndex] = String(currentYear + (yearOffset))
+    const nextDateStr = nextDateParts.join(calendarConfig.delimiter)
 
     // Re-evaluate through your parser engine
     const nextParsedDate = createParsedDate(nextDateStr, calendarConfig)
