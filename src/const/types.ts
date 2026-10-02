@@ -295,6 +295,7 @@ export type PluginSettings = GanttChartSources & {
   uxHighlightRelatedEvents: boolean // highlight predecessors and successors
   uxConnectRelatedEvents: boolean // connect predecessors and successors
   uxMoveToolbarBelowChart: boolean
+  uxMakeToolbarSticky: boolean
 
   viewEventRowHeight: number
   viewEventShapeHeight: number

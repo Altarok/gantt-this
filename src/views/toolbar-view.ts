@@ -56,7 +56,6 @@ export class ToolbarView {
               readonly viewConfig: GanttChartViewModel,
               refreshChartCallback: () => void) {
     const {showPanAndZoomButtonsInToolbar} = plugin.settings
-    // this.toggleStates = {bars: true, timestamps: true, grouping: true}
 
     this.reloadButton = createButton(container, 'refresh-cw', 'Reload data')
 

@@ -416,16 +416,21 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
               type: 'toggle', key: 'uxUseCalColorForCalAxis',
               defaultValue: DEFAULT_SETTINGS.uxUseCalColorForCalAxis
             }
-          },
-          {
-            name: 'Move toolbar down',
+          }, {
+            name: 'Move Toolbar down',
             desc: 'Displays toolbar below the Gantt chart.',
             control: {
               type: 'toggle', key: 'uxMoveToolbarBelowChart',
               defaultValue: DEFAULT_SETTINGS.uxMoveToolbarBelowChart
             }
-          },
-          {
+          }, {
+            name: 'Sticky Toolbar',
+            desc: 'Keep toolbar visible when scrolling down.',
+            control: {
+              type: 'toggle', key: 'uxMakeToolbarSticky',
+              defaultValue: DEFAULT_SETTINGS.uxMakeToolbarSticky
+            }
+          }, {
             name: 'Rerender cooldown (seconds)',
             desc: 'For those nerds changing files every second.',
             control: {

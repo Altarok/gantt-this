@@ -65,15 +65,27 @@ export default class GanttRender {
       }, remainingCooldown)
     }
 
-    const mainWrapper = el.createDiv({cls: Css.wrapper})
-
     let chartContainer: HTMLDivElement
     let toolbarContainer: HTMLDivElement
 
-    if (pluginSettings.uxMoveToolbarBelowChart) {
+    if (pluginSettings.uxMoveToolbarBelowChart && pluginSettings.uxMakeToolbarSticky) {
+      /* separate toolbar and chart, chart first */
+      const mainWrapper = el.createDiv({cls: Css.wrapper})
+      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      toolbarContainer = el.createDiv({cls: Css.toolbar.container})
+    } else if (pluginSettings.uxMoveToolbarBelowChart) {
+      /* join toolbar and chart, chart first  */
+      const mainWrapper = el.createDiv({cls: Css.wrapper})
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
+    } else if (pluginSettings.uxMakeToolbarSticky) {
+      /* separate toolbar and chart, toolbar first */
+      toolbarContainer = el.createDiv({cls: Css.toolbar.container})
+      const mainWrapper = el.createDiv({cls: Css.wrapper})
+      chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     } else {
+      /* join toolbar and chart, toolbar first */
+      const mainWrapper = el.createDiv({cls: Css.wrapper})
       toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }

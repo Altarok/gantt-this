@@ -49,11 +49,16 @@
 
 /* base toolbar layout */
 .gt-toolbar-container {
+  position: sticky; /* new Keeps the toolbar anchored at the top of the container while scrolling down */
+  top: 0;
+  z-index: 10;
+  background-color: var(--background-primary);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin: 4px;
+  padding: 4px;
+  margin: 0;
 }
 
 /* Reduces horizontal space between buttons */

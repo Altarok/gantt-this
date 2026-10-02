@@ -45,6 +45,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   uxHighlightRelatedEvents: true,
   uxConnectRelatedEvents: false,
   uxMoveToolbarBelowChart: false,
+  uxMakeToolbarSticky: true,
 
   /*
    * Front-matter property names
