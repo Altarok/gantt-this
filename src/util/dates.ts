@@ -1,6 +1,7 @@
 import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
+import {Consts} from '../const/constants'
 
 const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -12,7 +13,7 @@ export const Dates = {
 }
 
 function getGregorianTodayInAbsoluteDays(): number {
-  return Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+  return Consts.DAYS_FROM_0_12_31_TO_1_1_1970 + Math.floor(Date.now() / (24 * 60 * 60 * 1000))
 }
 
 /**

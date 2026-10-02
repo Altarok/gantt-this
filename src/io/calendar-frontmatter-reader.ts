@@ -7,7 +7,7 @@ import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {Consts} from '../const/constants'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {Dates} from '../util/dates'
-import {GregorianCalendar} from "../const/fallback-calendar";
+import {GregorianCalendar} from '../const/fallback-calendar'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 

@@ -6,7 +6,7 @@ import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
 import {Css} from '../const/constants'
 import BasesContext from '../util/bases-context'
-import {createAxisDateDescription} from "../util/dates";
+import {createAxisDateDescription} from '../util/dates'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 

@@ -70,7 +70,7 @@ export class SvgDrawerUtil {
     )
     foreignObj.appendChild(this.createIconInDiv(d))
     // if (availableWidth !== 0) {
-    //   const textSvg = createSvg('text', Css.item.textBar, {x: 0, y});
+    //   const textSvg = createSvg('text', Css.item.textBar, {x: 0, y})
     //   textSvg.textContent = '...'
     //   container.appendChild(textSvg)
     // }

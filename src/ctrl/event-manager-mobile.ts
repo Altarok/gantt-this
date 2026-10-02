@@ -1,6 +1,6 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
-import {GanttChartViewModel} from "../model/gantt-chart-model";
+import {GanttChartViewModel} from '../model/gantt-chart-model'
 
 export class GanttMobileEventManager implements GanttEventManager {
   public isDragging = false

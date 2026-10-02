@@ -75,9 +75,8 @@ export class GanttChartView {
   }
 
   private calculateEventsAreaHeight() {
-    return this.viewConfig.totalHeight -
+    return this.viewConfig.totalHeight - this.viewConfig.margin.bottom -
       (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
-      - this.viewConfig.margin.bottom
   }
 
   clearEventLayer() {
