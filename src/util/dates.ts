@@ -2,7 +2,6 @@ import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
-import {GregorianDateFormatter} from "./gregorian-date-formatter";
 
 const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -97,7 +96,7 @@ function parseDaysToGregorianDateString(days: number,
   const absYear = Math.abs(displayedYear)
 
   // const paddedYear = absYear.toString().padStart(4, '0')
-  const formattedYear = GregorianDateFormatter.formatYearValue(absYear)
+  const formattedYear = formatYearValue(absYear)
 
   const day = remainingDays
   const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
@@ -265,4 +264,15 @@ export function createAxisDateDescription(days: number,
     default:
       return 'n/a'
   }
+}
+
+/**
+ * Helper to format large year numbers with commas or dynamic compact units (M/B).
+ */
+function formatYearValue(absYear: number): string {
+  if (absYear >= 1_000_000_000) return `${(absYear / 1_000_000_000).toFixed(1)}B`
+  if (absYear >= 1_000_000) return `${(absYear / 1_000_000).toFixed(1)}M`
+  if (absYear >= 100_000) return `${(absYear / 1_000).toFixed(1)}K`
+  if (absYear >= 10_000) return absYear.toLocaleString('en-US')
+  return absYear.toString().padStart(4, '0')
 }
