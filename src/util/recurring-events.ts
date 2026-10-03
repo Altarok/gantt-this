@@ -158,7 +158,8 @@ function duplicateEventWithYearDelta(item: GanttItem,
   if (calendarConfig.delimiter === '-' && startDate.startsWith('-')) {
     /* special handling for negative years using minus as date part separator */
     /* alternative for old iOS devices : startDate.match(/^-?\w+|\w+/g) ?? [] */
-    dateParts = startDate.split(/(?<=\w)-/)
+    dateParts = startDate.match(/^-?\w+|\w+/g) ?? []
+    // dateParts = startDate.split(/(?<=\w)-/)
   } else {
     dateParts = startDate.split(calendarConfig.delimiter)
   }
