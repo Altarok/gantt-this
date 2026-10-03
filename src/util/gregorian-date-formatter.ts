@@ -89,18 +89,9 @@ export class GregorianDateFormatter {
    * Helper to format large year numbers with commas or dynamic compact units (M/B).
    */
   public static formatYearValue(absYear: number): string {
-    if (absYear >= 1_000_000_000) {
-      return `${(absYear / 1_000_000_000).toFixed(2).replace('.', ',')}B`
-    }
-
-    if (absYear >= 1_000_000) {
-      return `${(absYear / 1_000_000).toFixed(2).replace('.', ',')}M`
-    }
-
-    if (absYear >= 10_000) {
-      return absYear.toLocaleString('en-US')
-    }
-
+    if (absYear >= 1_000_000_000) return `${(absYear / 1_000_000_000).toFixed(1)}B`
+    if (absYear >= 1_000_000) return `${(absYear / 1_000_000).toFixed(1)}M`
+    if (absYear >= 10_000) return absYear.toLocaleString('en-US')
     return absYear.toString().padStart(4, '0')
   }
 
