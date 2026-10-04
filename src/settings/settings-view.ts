@@ -12,7 +12,6 @@ import {createWorkspaceSettings} from './settings-subpage-workspace'
 const VISIBLE_ICON = 'eye' /* an open eye */
 const INVISIBLE_ICON = 'eye-off' /* an open eye, with strike-through */
 
-
 export class FantasyGanttSettingTab extends PluginSettingTab {
   constructor(public readonly plugin: FantasyGanttPlugin) {
     super(plugin.app, plugin)

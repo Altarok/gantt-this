@@ -1,5 +1,5 @@
 import {MarkdownPostProcessorContext, Platform, Plugin} from 'obsidian'
-import FantasyGanttSettingTab from './settings/settings-view'
+import {FantasyGanttSettingTab} from './settings/settings-view'
 import {BaseKeys, CalendarConfig, PluginSettings} from './const/types'
 import {DEFAULT_SETTINGS} from './const/default-values'
 import {readCodeBlock} from './io/code-block-reader'

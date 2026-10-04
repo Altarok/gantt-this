@@ -1,5 +1,4 @@
 import FantasyGanttPlugin from '../main'
-
 import {Notice, TFile} from 'obsidian'
 
 /**
