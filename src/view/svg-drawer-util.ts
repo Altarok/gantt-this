@@ -3,6 +3,7 @@ import {GanttItem, PluginSettings} from '../const/types'
 import {Css} from "const/constants"
 import {ManualSvg} from './manual-svg-icons'
 import TextWidthCache from './text-space-cache'
+import {GanttEventManager} from "../ctrl/event-manager";
 
 const textLeftPadding = 3
 
@@ -38,6 +39,8 @@ export class SvgDrawerUtil {
   private readonly iconRadius: number // 8
   private readonly dotPrefixWidth: number
 
+  private eventManager?: GanttEventManager
+
   constructor(private readonly settings: PluginSettings,
               private readonly textWidthCache: TextWidthCache) {
     this.shapeSize = settings.viewEventShapeHeight
@@ -45,6 +48,10 @@ export class SvgDrawerUtil {
     this.iconSize = settings.viewEventIconHeight
     this.iconRadius = this.iconSize / 2
     this.dotPrefixWidth = textWidthCache.getWidth('...')
+  }
+
+  setEventManager(em: GanttEventManager) {
+    this.eventManager = em
   }
 
   createIconInDiv(d: GanttItem): HTMLDivElement {
@@ -60,10 +67,10 @@ export class SvgDrawerUtil {
    * @param y y-coordinate of upper-left corner of svg
    * @param container
    */
-  addIconIfPresent(d: GanttItem,
-                   x: number, y: number,
-                   container: SVGElement): boolean {
-    if (!d.displayIcon) return false
+  private addIconIfPresent(d: GanttItem,
+                           x: number, y: number,
+                           container: SVGElement): boolean {
+    if (!d.displayIcon || this.eventManager?.isDragging) return false
 
     const foreignObj = createSvg('foreignObject',
       'gt-prevent-user-interactions', {x, y, width: this.iconSize, height: this.iconSize}
@@ -78,7 +85,7 @@ export class SvgDrawerUtil {
     return true
   }
 
-  truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
+  private truncateText(text: string, maxWidth: number, charWidthEstimate = 7): string {
     const maxChars = Math.floor(maxWidth / charWidthEstimate)
     if (text.length <= maxChars) return text
     if (maxChars <= 3) return '...'
@@ -93,9 +100,11 @@ export class SvgDrawerUtil {
    * @param svgContainer
    * @param textCssClass necessary to decide which CSS magic to apply
    */
-  addTextIfFitting(text: string, x: number, y: number, width: number,
-                   svgContainer: SVGElement,
-                   textCssClass: string): void {
+  private addTextIfFitting(text: string, x: number, y: number, width: number,
+                           svgContainer: SVGElement,
+                           textCssClass: string): void {
+    if (this.eventManager?.isDragging) return
+
     const availableTextWidth = width - textLeftPadding
 
     if (availableTextWidth > 0) {
@@ -118,6 +127,8 @@ export class SvgDrawerUtil {
                         container: SVGElement,
                         width: number,
                         textCssClass: string) {
+    if (this.eventManager?.isDragging) return
+
     let availableWidth: number
     let targetX: number
 

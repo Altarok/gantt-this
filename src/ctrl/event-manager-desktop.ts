@@ -167,6 +167,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
       this.isDragging = false
     }
     this.stopAnimation()
+    this.engine.handlePanOrZoom()
   }
 
   /** Fully unhook and release all window and SVG listeners to prevent leaks */

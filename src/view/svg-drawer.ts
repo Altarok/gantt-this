@@ -158,8 +158,8 @@ export class GanttRenderEngine {
 
   initEventListener(): void {
     if (this.eventManager) this.eventManager.destroy()
-    this.eventManager = createGanttEventManager(this, this.plugin.settings, this.svgDrawerUtil,
-      this.basesCtx)
+    this.eventManager = createGanttEventManager(this, this.plugin.settings, this.svgDrawerUtil, this.basesCtx)
+    this.svgDrawerUtil.setEventManager(this.eventManager)
   }
 
   handlePanOrZoom() {
