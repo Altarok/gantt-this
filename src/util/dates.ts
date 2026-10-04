@@ -49,7 +49,8 @@ function getDaysToYearStart(year: number): number {
 function parseDaysToGregorianDateString(days: number,
                                         config: RuleBasedCalendarConfig,
                                         asInput: boolean,
-                                        tickStepInDays = 0): string {
+                                        hideDays = false,
+                                        hideMonths = false): string {
   const {delimiter, ruleBasedDetails: details} = config
   let remainingDays = days - (config.offsetToDayZero ?? 0)
 
@@ -92,41 +93,31 @@ function parseDaysToGregorianDateString(days: number,
     year += 1
   }
 
-  const displayedYear = (details.noYearZero === true && year <= 0) ? year - 1 : year
-  const absYear = Math.abs(displayedYear)
-
-  // const paddedYear = absYear.toString().padStart(4, '0')
-  const formattedYear = formatYearValue(absYear)
+  const displayedYear = shiftYearIfNeeded(year, details.noYearZero)
+  const formattedYear = formatYearValue(displayedYear)
 
   const day = remainingDays
-  const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
-  const suffix = suffixRaw ? ` ${suffixRaw}` : ''
-
 
   const monthDef = details.months?.[month - 1]
   const monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
   const dayFinal = day.toString().padStart(2, '0')
 
-  let format: DateFormatComponent[]
-  if (asInput)
-    format = details.format ?? ['year', 'month', 'day']
-  else
-    format = (details.outputFormat ?? details.format) ?? ['year', 'month', 'day']
-
-  const hideDays = !asInput && tickStepInDays > 365
-  const hideMonths = !asInput && tickStepInDays > 730
-
+  /* Construct date based on details.format */
+  const format: DateFormatComponent[] = asInput ? details.format : details.outputFormat
+ 
   const outputParts: string[] = format.map(component => {
     if (component === 'year') return formattedYear
-    if (component === 'month' && !hideMonths) return monthFinal
-    if (component === 'day' && !hideDays) return dayFinal
+    if (component === 'month' && (asInput || !hideMonths)) return monthFinal
+    if (component === 'day' && (asInput || !hideDays)) return dayFinal
     return ''
   })
 
   const prefix = displayedYear < 0 ? '-' : ''
 
-  return prefix + outputParts.filter(Boolean).join(delimiter) + suffix
+  return prefix + outputParts.filter(Boolean).join(delimiter)
+    + getEpochSuffix(days, config)
 }
+
 
 function parseDaysToNonGregorianDateString(days: number,
                                            config: RuleBasedCalendarConfig,
@@ -178,11 +169,11 @@ function parseDaysToNonGregorianDateString(days: number,
 
   /* At this point, remainingDays represents the day offset inside the current 'year' (1-indexed base).
    If remainingDays was 0 (which shouldn't happen with 1-based days), we default it to 1 */
-//  if (remainingDays <= 0) remainingDays = 1
+  //  if (remainingDays <= 0) remainingDays = 1
 
   // Resolve displayed year when year zero is absent
-  let displayedYear = year
-  if (details.noYearZero === true && year <= 0) displayedYear = year - 1
+  const displayedYear = shiftYearIfNeeded(year, details.noYearZero)
+  const formattedYear = formatYearValue(displayedYear)
 
   /* Determine the Month and Day */
   let monthName = ''
@@ -212,25 +203,20 @@ function parseDaysToNonGregorianDateString(days: number,
     dayOfPeriod = remainingDays
   }
 
-  /* Construct the dynamic string based on details.format */
-  let format: DateFormatComponent[]
-  if (asInput)
-    format = details.format ?? ['year', 'month', 'day']
-  else
-    format = details.outputFormat ?? details.format ?? ['year', 'month', 'day']
+  /* Construct date based on details.format */
+  const format: DateFormatComponent[] = asInput ? details.format : details.outputFormat
 
   const outputParts = format.map(component => {
-    if (component === 'year') return Math.abs(displayedYear).toString().padStart(4, '0') // USE displayedYear
+    if (component === 'year') return formattedYear
     if (component === 'month') return monthName
     if (component === 'day') return dayOfPeriod.toString()
     return ''
   })
 
-  const suffixRaw = displayedYear < 0 ? config.bcSuffix : config.adSuffix // USE displayedYear
-  const suffix = suffixRaw ? ` ${suffixRaw}` : ''
-  const prefix = displayedYear < 0 ? '-' : '' // USE displayedYear
+  const prefix = displayedYear < 0 ? '-' : ''
 
-  return prefix + outputParts.filter(Boolean).join(config.delimiter) + suffix
+  return prefix + outputParts.filter(Boolean).join(config.delimiter)
+    + getEpochSuffix(days, config)
 }
 
 function parseDaysToPositionalDateString(days: number,
@@ -247,16 +233,18 @@ function parseDaysToPositionalDateString(days: number,
 
 /* Update the axis label formatter inside the Gantt render engine class */
 
+
 // called during runtime, to get axis description
 export function createAxisDateDescription(days: number,
                                           calendarConfig: CalendarConfig,
                                           asInput = false,
-                                          tickStepInDays = 0): string {
+                                          hideDays = false,
+                                          hideMonths = false): string {
 
   switch (calendarConfig.type) {
     case 'rule-based':
       if (calendarConfig.id === 'gregorian')
-        return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, tickStepInDays)
+        return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, hideDays, hideMonths)
       else
         return parseDaysToNonGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput)
     case 'positional':
@@ -266,10 +254,21 @@ export function createAxisDateDescription(days: number,
   }
 }
 
+function getEpochSuffix(days: number, config: RuleBasedCalendarConfig) {
+  const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
+  return suffixRaw ? ` ${suffixRaw}` : ''
+}
+
+function shiftYearIfNeeded(year: number, noYearZero: boolean | undefined) {
+  return (noYearZero === true && year <= 0) ? year - 1 : year
+}
+
 /**
  * Helper to format large year numbers with commas or dynamic compact units (M/B).
  */
-function formatYearValue(absYear: number): string {
+function formatYearValue(year: number): string {
+  const absYear = Math.abs(year)
+
   if (absYear >= 1_000_000_000) return `${(absYear / 1_000_000_000).toFixed(1)}B`
   if (absYear >= 1_000_000) return `${(absYear / 1_000_000).toFixed(1)}M`
   if (absYear >= 100_000) return `${(absYear / 1_000).toFixed(1)}K`

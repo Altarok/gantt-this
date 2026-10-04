@@ -122,8 +122,7 @@ export default class TooltipManager implements HoverParent {
     }
   }
 
-  private dateInOutputFormat(days: number,
-                             cc: CalendarConfig): string {
+  private dateInOutputFormat(days: number, cc: CalendarConfig): string {
     return createAxisDateDescription(days, cc)
   }
 

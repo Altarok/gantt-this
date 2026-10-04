@@ -1,7 +1,8 @@
-import {DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP, PluginSettings} from './types'
+import {DateFormatComponent, DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP, PluginSettings} from './types'
 
 export const DEFAULT_FALLBACK_CALENDAR = 'gregorian'
 export const DEFAULT_FALLBACK_GROUP = 'general'
+export const DEFAULT_CAL_DATE_FORMAT: DateFormatComponent[] = ['year', 'month', 'day']
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   eventPath: '/',

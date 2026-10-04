@@ -1,6 +1,13 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {CalendarConfig, CodeBlockContent, ParsedDate, PluginSettings} from '../const/types'
-import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_SETTINGS} from '../const/default-values'
+import {
+  CalendarConfig,
+  CodeBlockContent,
+  ParsedDate,
+  PluginSettings,
+  PositionalCalendarConfig,
+  RuleBasedCalendarConfig,
+} from '../const/types'
+import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR, DEFAULT_SETTINGS} from '../const/default-values'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
@@ -56,6 +63,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
   if (!match?.[1]) return null
 
+
   try {
     const newCalendarConfig = parseYaml(match[1]) as CalendarConfig
 
@@ -65,6 +73,18 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
     newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.sharedOffset)
     newCalendarConfig.startDay = newCalendarConfig.startDay ? runOffsetCalculations(newCalendarConfig.startDay) : undefined
     newCalendarConfig.endDay = newCalendarConfig.endDay ? runOffsetCalculations(newCalendarConfig.endDay) : undefined
+
+    switch (newCalendarConfig.type) {
+      case "positional":
+        safetyCheckPositionalConfig(newCalendarConfig as PositionalCalendarConfig)
+        break;
+      case "rule-based":
+        safetyCheckRuleBasedConfig(newCalendarConfig as RuleBasedCalendarConfig)
+        break;
+      default:
+        new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarId}'`)
+        return null
+    }
 
     addTodayDateAsAbsoluteDay(newCalendarConfig)
 
@@ -114,3 +134,18 @@ function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
   }
   return null
 }
+
+function safetyCheckPositionalConfig(config: PositionalCalendarConfig) {
+  if (config.positionalUnits?.length === 0) {
+    // TODO throw error #errorCache
+  }
+}
+
+function safetyCheckRuleBasedConfig(config: RuleBasedCalendarConfig) {
+  const {ruleBasedDetails} = config
+  ruleBasedDetails.format = ruleBasedDetails.format ?? DEFAULT_CAL_DATE_FORMAT
+  ruleBasedDetails.outputFormat = ruleBasedDetails.outputFormat ?? ruleBasedDetails.format
+  ruleBasedDetails.months = ruleBasedDetails.months ?? []
+}
+
+

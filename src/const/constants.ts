@@ -103,6 +103,9 @@ export const StringUtils = {
   }
 }
 
+/**
+ * Magic numbers
+ */
 export const Consts = {
   // DAYS_FROM_1_1_1_TO_1_1_1970: 719162, //  = days between 1-1-1 (day 1) and 1970-1-1
   CODEBLOCK_ID: 'gantt-this',
@@ -110,5 +113,7 @@ export const Consts = {
   MILLIS_IN_1_DAY: 86_400_000, // = 24 * 60 * 60 * 1000
   ROOT_PATH: '/',
   ROOT_PATH_NORMALIZED: '',
-  DIR_SEPARATOR: '/'
+  DIR_SEPARATOR: '/',
+  AXIS_TICK_DIFF_TO_HIDE_DAYS: 365,
+  AXIS_TICK_DIFF_TO_HIDE_MONTHS: 730,
 } as const

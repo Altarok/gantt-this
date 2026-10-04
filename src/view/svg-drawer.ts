@@ -9,7 +9,7 @@ import {
   NO_GROUP,
   SvgDrawerData
 } from '../const/types'
-import {Css} from '../const/constants'
+import {Consts, Css} from '../const/constants'
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
@@ -30,6 +30,8 @@ export class GanttRenderEngine {
   view!: GanttChartView
 
   drawnData: GanttItem[] = []
+  hideDays = false
+  hideMonths = false
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
@@ -172,6 +174,7 @@ export class GanttRenderEngine {
   }
 
   handleResize(includeViewReset = false) {
+    this.updateWhichDateElementsToHide()
     const width = this.container.clientWidth
     if (!width || width <= 0) return
 
@@ -414,7 +417,7 @@ export class GanttRenderEngine {
 
         if (xPos - lastTextX > 80) {
           const text = createSvg('text', Css.axis.text, {x: xPos, y: 20})
-          text.textContent = createAxisDateDescription(currDays, calendarConfig, false, this.tickStepInDays)
+          text.textContent = createAxisDateDescription(currDays, calendarConfig, false, this.hideDays, this.hideMonths)
 
           ticksG.appendChild(text)
           lastTextX = xPos
@@ -484,9 +487,17 @@ export class GanttRenderEngine {
       if (newScale < 0.5) newScale = 0.5  /* Prevent further zoom-out when already min */
     }
 
+    this.updateWhichDateElementsToHide()
+
     /* Focal point zoom: adjust translateX so center point stays pinned */
     this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
     this.handlePanOrZoom()
+  }
+
+  private updateWhichDateElementsToHide() {
+    const updatedTickStepInDays = this.tickStepInDays
+    this.hideDays = updatedTickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_DAYS
+    this.hideMonths = updatedTickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_MONTHS
   }
 
   /**
