@@ -1,8 +1,12 @@
-import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinition, SettingDefinitionItem} from 'obsidian'
+import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {ControlKeyMapped, GanttItemDisplayTypes, GroupOrCalendarSettings} from '../const/types'
 import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_FALLBACK_GROUP, DEFAULT_SETTINGS} from '../const/default-values'
-import {AddEntryModal} from './settings-util'
+import {AddEntryModal} from './settings-cal-grp-creation'
+import {SettingsUtil} from './settings-util'
+import {createFrontMatterSettingDefinitions} from './settings-subpage-frontmatter'
+import {createPixelMagicSettings} from './settings-subpage-pixelmagic'
+import {createWorkspaceSettings} from './settings-subpage-workspace'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
 const VISIBLE_ICON = 'eye' /* an open eye */
@@ -55,8 +59,14 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       /* Advanced UX settings */
       this.createAdvancedUxSettingDefinition(),
+
+      /* Size of events, event rows, and icons */
+      createPixelMagicSettings(),
       /* FrontMatter property names */
-      this.createFrontMatterSettingDefinitions()
+      createFrontMatterSettingDefinitions(this.settings),
+      /* Add ribbon icons and commands */
+      createWorkspaceSettings()
+
     ]
   }
 
@@ -236,7 +246,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             desc: `Default symbol for timestamp events. Override with property: '${this.settings.frontMatterProperty_event_symbol}'`,
             control: {
               type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
-              options: toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
+              options: SettingsUtil.toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
               defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
             }
           },
@@ -245,7 +255,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             desc: `Default calendar for events. Override with property: '${this.settings.frontMatterProperty_event_calendar}'`,
             control: {
               type: 'dropdown', key: 'defaultCalendar',
-              options: toRecord(this.settings.calendars.map(c => c.id)),
+              options: SettingsUtil.toRecord(this.settings.calendars.map(c => c.id)),
               defaultValue: DEFAULT_SETTINGS.defaultCalendar
             }
           },
@@ -254,7 +264,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
             desc: `Default group for events. Override with property: '${this.settings.frontMatterProperty_event_group}'`,
             control: {
               type: 'dropdown', key: 'defaultGroup',
-              options: toRecord(this.settings.groups.map(g => g.id)),
+              options: SettingsUtil.toRecord(this.settings.groups.map(g => g.id)),
               defaultValue: DEFAULT_SETTINGS.defaultGroup
             }
           },
@@ -459,64 +469,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,
       // control: { type: 'toggle', key: 'hideSettingsPageUx', defaultValue: DEFAULT_SETTINGS.hideSettingsPageUx }
       // }
-      {
-        heading: 'Workspace',
-        type: 'group',
-        items: [
-          {
-            name: 'Add ribbon icon (desktop only)',
-            desc: 'Adds a ribbon icon to quickly open a live chart preview.',
-            control: {type: 'toggle', key: 'uxAddRibbonIcon', defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon}
-          },
-          {
-            name: 'Add menu option (mobile ony)',
-            desc: 'Adds a menu option to quickly open a live chart preview.',
-            control: {
-              type: 'toggle', key: 'uxAddRibbonIconMobile', defaultValue: DEFAULT_SETTINGS.uxAddRibbonIconMobile
-            }
-          },
-          {
-            name: 'Add plugin commands',
-            desc: 'Adds commands to insert event properties, calendar definitions, and code blocks.',
-            control: {type: 'toggle', key: 'uxAddCommands', defaultValue: DEFAULT_SETTINGS.uxAddCommands}
-          }
-        ]
-      },
-      {
-        heading: 'Pixel magic',
-        type: 'group',
-        items: [
-          {
-            name: 'Event row height',
-            desc: 'Height of a default event row.',
-            control: {
-              type: 'slider', key: 'viewEventRowHeight',
-              min: 16, max: 40, step: 2,
-              defaultValue: DEFAULT_SETTINGS.viewEventRowHeight
-            }
-          },
-          {
-            name: 'Event shape size',
-            desc: 'Width and height of event shapes.',
-            control: {
-              type: 'slider', key: 'viewEventShapeHeight',
-              min: 10, max: 30, step: 2,
-              defaultValue: DEFAULT_SETTINGS.viewEventShapeHeight
-            }
-          },
-          {
-            name: 'Event icon size',
-            desc: 'Width and height of event icons.',
-            control: {
-              type: 'slider', key: 'viewEventIconHeight',
-              min: 10, max: 30, step: 2,
-              defaultValue: DEFAULT_SETTINGS.viewEventIconHeight
-            }
-          }
-        ]
-      }
-
-
     ]
 
     // if (this.settings.hideSettingsPageUx)
@@ -534,197 +486,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     // }
   }
 
-  private createFrontMatterSettingDefinitions(): SettingDefinitionItem {
-
-    const items: SettingDefinition[] = [
-      {
-        name: 'Gantt event marker',
-        desc: 'Primary frontmatter property used to identify Gantt events. Can be disabled using the toggle below.',
-        control: {
-          type: 'text',
-          key: 'frontMatterProperty_gantt_this',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
-          disabled: () => this.settings.frontMatterProperty_gantt_this_optional,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Make Gantt event marker optional',
-        desc: 'Enabling this saves one property per file, but offers less control.',
-        control: {
-          type: 'toggle', key: 'frontMatterProperty_gantt_this_optional',
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this_optional
-        }
-      },
-      {
-        name: 'Calendar definition',
-        desc: 'Property name used to identify calendar definition files.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_calendar_name',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event calendar',
-        desc: 'Optional. Defines which calendar to apply this event to.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_calendar',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event name',
-        desc: 'Optional. Name of the event.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_name',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_name,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_name,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event start date',
-        desc: 'Mandatory property defining event start dates.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_time_start',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event end date',
-        desc: 'Optional property defining event end dates.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_time_end',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event color',
-        desc: 'Optional. Hex color or human-readable name.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_color',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_color,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_color,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event group',
-        desc: 'Optional. Used to sort, group, and color events.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_group',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_group,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_group,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event symbol',
-        desc: 'Optional property overriding the event symbol.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_symbol',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event icon name',
-        desc: 'Optional. Name of the SVG icon (see https://lucide.dev for free examples).',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_icon_name',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
-          validate: (value: string) => testFrontMatterInput(value)
-        },
-      },
-      {
-        name: 'Event icon color',
-        desc: 'Optional. Hex color or human-readable name.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_icon_color',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
-          validate: (value: string) => testFrontMatterInput(value)
-        }
-      },
-      {
-        name: 'Target Header',
-        desc: 'Optional property. Clicking an event scrolls to this specific header within the note.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_note_header',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_note_header,
-          validate: (value: string) => testFrontMatterInput(value)
-        }
-      },
-      {
-        name: 'Event predecessors',
-        desc: 'Optional property (list). Predecessors will be highlighted on chart.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_predecessors',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
-          validate: (value: string) => testFrontMatterInput(value)
-        }
-      },
-      {
-        name: 'Event successors',
-        desc: 'Optional property (list). Successors will be highlighted on chart.',
-        control: {
-          type: 'text', key: 'frontMatterProperty_event_successors',
-          placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
-          defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
-          validate: (value: string) => testFrontMatterInput(value)
-        }
-      },
-
-      /*
-       * TODO #hide-setting-groups
-       */
-      // {
-      // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,
-      // control: { type: 'toggle', key: 'hideSettingsPageFrontmatterProperties', defaultValue: DEFAULT_SETTINGS.hideSettingsPageFrontmatterProperties  }
-      // }
-    ]
-
-    if (this.settings.hideSettingsPageFrontmatterProperties) return {
-      type: 'page',
-      name: 'Frontmatter properties',
-      desc: 'Rename frontmatter properties used by the plugin.',
-      items: items
-    }
-    else return {
-      type: 'group',
-      heading: 'Frontmatter properties',
-      items: items
-    }
-  }
-
 
 }
 
-/**
- * Validate FrontMatter input
- * @param value
- * @return undefined if the input is fine, otherwise a string explaining why it isn't
- */
-function testFrontMatterInput(value: string): string | undefined {
-  return /^[\w.-]+$/.test(value) ? undefined /* input OK */ : 'Key must only contain letters, numbers, hyphens, underscores, and dots.' /* input NOK */
-}
-
-function toRecord(strings: readonly string[]): Record<string, string> {
-  return Object.fromEntries(strings.map((s) => [s, s]))
-}
 
 export function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
   if (!value || calendars?.length === 0) return false
