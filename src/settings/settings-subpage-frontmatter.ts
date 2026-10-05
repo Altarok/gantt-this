@@ -1,5 +1,5 @@
-import {DEFAULT_SETTINGS} from 'const/default-values'
 import {SettingDefinition, SettingDefinitionItem} from 'obsidian'
+import {DEFAULT_SETTINGS} from 'const/default-values'
 import {PluginSettings} from 'const/types'
 
 export function createFrontMatterSettingDefinitions(settings: PluginSettings): SettingDefinitionItem {

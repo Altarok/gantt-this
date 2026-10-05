@@ -1,7 +1,7 @@
 import {Modal, Notice, Setting} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {GroupOrCalendarSettings} from '../const/types'
-import {SettingsUtil} from "./settings-util";
+import {SettingsUtil} from './settings-util'
 
 const ID_REGEX = /^[\w -]+$/
 const DESCRIPTION = `Must be unique. Allowed: letters, numbers, spaces, '-' and '_'.`
