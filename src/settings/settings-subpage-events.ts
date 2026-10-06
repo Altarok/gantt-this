@@ -42,22 +42,14 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
             }
           },
           {
-            name: 'Color',
+            name: 'Shape Color',
             desc: `Default color for events. Used when not given in property: '${settings.frontMatterProperty_event_color}'`,
             control: {type: 'color', key: 'fallbackColor', defaultValue: DEFAULT_SETTINGS.fallbackColor}
           },
           {
-            name: 'Icon color',
+            name: 'Icon Color',
             desc: `Default color for event icons. Used when not given in property: '${settings.frontMatterProperty_event_icon_color}'`,
             control: {type: 'color', key: 'fallbackColorForIcons', defaultValue: DEFAULT_SETTINGS.fallbackColorForIcons}
-          },
-          {
-            name: 'Vertical line width',
-            desc: 'Set the line stroke width (in pixels) for vertical line events.',
-            control: {
-              type: 'slider', key: 'uxVerticalLineEventWidth',
-              min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
-            }
           },
           {
             name: 'Filename as start date',
@@ -72,10 +64,18 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
         ]
       },
       {
-        name: 'Pixel magic',
+        heading: 'Pixel magic',
         type: 'group',
         desc: 'Change elemental sizes to match your screen.',
         items: [
+          {
+            name: 'Vertical line width',
+            desc: `Set the line stroke width (in pixels) for 'vertical-line' events.`,
+            control: {
+              type: 'slider', key: 'uxVerticalLineEventWidth',
+              min: 1, max: 10, step: 1, defaultValue: DEFAULT_SETTINGS.uxVerticalLineEventWidth
+            }
+          },
           {
             name: 'Event row height',
             desc: 'Height of a default event row.',
@@ -106,7 +106,7 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
         ]
       },
       {
-        heading: 'Event overlay',
+        heading: 'Event Overlay / Tooltip',
         type: 'group',
         items: [
           {

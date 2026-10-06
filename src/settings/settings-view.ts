@@ -4,7 +4,6 @@ import {GroupOrCalendarSettings} from '../const/types'
 import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_FALLBACK_GROUP, DEFAULT_SETTINGS} from '../const/default-values'
 import {AddEntryModal} from './settings-cal-grp-creation'
 import {createFrontMatterSettingDefinitions} from './settings-subpage-frontmatter'
-import {createPixelMagicSettings} from './settings-subpage-pixelmagic'
 import {createWorkspaceSettings} from './settings-subpage-workspace'
 import {createEventSettings} from "./settings-subpage-events";
 import {createAdvancedUxSettingDefinition} from "./settings-subpage-chart";
@@ -58,10 +57,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
 
       createEventSettings(this.settings),
+
+      {
+        heading: 'Controls',
+        type: 'group',
+      },
+
       /* Advanced UX settings */
       createAdvancedUxSettingDefinition(this.settings),
-      /* Size of events, event rows, and icons */
-      createPixelMagicSettings(),
+      // /* Size of events, event rows, and icons */
+      // createPixelMagicSettings(),
 
       {
         heading: 'Advanced',
