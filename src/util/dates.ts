@@ -51,8 +51,8 @@ function parseDaysToGregorianDateString(days: number,
                                         asInput: boolean,
                                         hideDays = false,
                                         hideMonths = false): string {
-  const {delimiter, ruleBasedDetails: details} = config
-  let remainingDays = days - (config.offsetToDayZero ?? 0)
+  const details = config.ruleBasedDetails
+  let remainingDays = days - config.offsetToDayZero
 
   let year = Math.floor((remainingDays - 1) / 365.2425 + 1)
 
@@ -74,6 +74,7 @@ function parseDaysToGregorianDateString(days: number,
   /* Calculate 1-based day of the year (e.g., Jan 1st is Day 1) */
   remainingDays -= totalDaysToYearStart
 
+
   const monthDays = [31, isGregorianLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
   let month = 1
@@ -81,9 +82,7 @@ function parseDaysToGregorianDateString(days: number,
     if (remainingDays > daysInMonth) {
       remainingDays -= daysInMonth
       month++
-    } else {
-      break
-    }
+    } else break
   }
 
   const monthCount = details.months?.length ?? 12
@@ -93,39 +92,27 @@ function parseDaysToGregorianDateString(days: number,
     year += 1
   }
 
-  const displayedYear = shiftYearIfNeeded(year, details.noYearZero)
-  const formattedYear = formatYearValue(displayedYear)
+  let monthFinal: string | undefined
+  let dayFinal: number | undefined
 
-  const day = remainingDays
+  if (!hideMonths) {
+    const monthDef = details.months?.[month - 1]
+    monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
+    if (!hideDays) dayFinal = remainingDays
+  }
 
-  const monthDef = details.months?.[month - 1]
-  const monthFinal = monthDef?.shortname ?? monthDef?.name ?? month.toString().padStart(2, '0')
-  const dayFinal = day.toString().padStart(2, '0')
-
-  /* Construct date based on details.format */
-  const format: DateFormatComponent[] = asInput ? details.format : details.outputFormat
- 
-  const outputParts: string[] = format.map(component => {
-    if (component === 'year') return formattedYear
-    if (component === 'month' && (asInput || !hideMonths)) return monthFinal
-    if (component === 'day' && (asInput || !hideDays)) return dayFinal
-    return ''
-  })
-
-  const prefix = displayedYear < 0 ? '-' : ''
-
-  return prefix + outputParts.filter(Boolean).join(delimiter)
-    + getEpochSuffix(days, config)
+  return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
 }
-
 
 function parseDaysToNonGregorianDateString(days: number,
                                            config: RuleBasedCalendarConfig,
-                                           asInput: boolean): string {
+                                           asInput: boolean,
+                                           hideDays = false,
+                                           hideMonths = false): string {
 
   const details = config.ruleBasedDetails
-
   let remainingDays = days - config.offsetToDayZero
+
   let year = 1
 
   /* Fast-forward or rewind large day counts using interval cycles */
@@ -167,60 +154,42 @@ function parseDaysToNonGregorianDateString(days: number,
     }
   }
 
-  /* At this point, remainingDays represents the day offset inside the current 'year' (1-indexed base).
-   If remainingDays was 0 (which shouldn't happen with 1-based days), we default it to 1 */
-  //  if (remainingDays <= 0) remainingDays = 1
-
-  // Resolve displayed year when year zero is absent
-  const displayedYear = shiftYearIfNeeded(year, details.noYearZero)
-  const formattedYear = formatYearValue(displayedYear)
-
   /* Determine the Month and Day */
-  let monthName = ''
-  let dayOfPeriod = 1
-  const isLeap = isCustomLeapYear(year, config, true)
+  let monthFinal: string | undefined
+  let dayFinal: number | undefined
 
-  if (details.months?.length > 0) {
-    for (let m = 0; m < details.months.length; m++) {
-      const monthDef = details.months[m]
-      if (!monthDef) break
-      let monthDays = monthDef.days
+  if (!hideMonths) {
+    const isLeap = isCustomLeapYear(year, config, true)
 
-      /* Apply leap year day adjustments to the matching month/holiday index */
-      if (isLeap && details.leapYearRule?.applyToMonthIndex === m) {
-        monthDays += details.leapYearRule.extraDays ?? 1
+    if (details.months?.length > 0) {
+      for (let m = 0; m < details.months.length; m++) {
+        const monthDef = details.months[m]
+        if (!monthDef) break
+        let monthDays = monthDef.days
+
+        /* Apply leap year day adjustments to the matching month/holiday index */
+        if (isLeap && details.leapYearRule?.applyToMonthIndex === m) {
+          monthDays += details.leapYearRule.extraDays ?? 1
+        }
+
+        if (remainingDays > monthDays) {
+          remainingDays -= monthDays
+        } else {
+          monthFinal = monthDef.shortname ?? monthDef.name ?? String(m + 1).padStart(2, '0')
+          if (!hideDays) dayFinal = remainingDays
+          break
+        }
       }
-
-      if (remainingDays > monthDays) {
-        remainingDays -= monthDays
-      } else {
-        monthName = monthDef.shortname ?? monthDef.name ?? String(m + 1)
-        dayOfPeriod = remainingDays
-        break
-      }
+    } else {
+      if (!hideDays) dayFinal = remainingDays
     }
-  } else {
-    dayOfPeriod = remainingDays
   }
 
-  /* Construct date based on details.format */
-  const format: DateFormatComponent[] = asInput ? details.format : details.outputFormat
 
-  const outputParts = format.map(component => {
-    if (component === 'year') return formattedYear
-    if (component === 'month') return monthName
-    if (component === 'day') return dayOfPeriod.toString()
-    return ''
-  })
-
-  const prefix = displayedYear < 0 ? '-' : ''
-
-  return prefix + outputParts.filter(Boolean).join(config.delimiter)
-    + getEpochSuffix(days, config)
+  return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
 }
 
-function parseDaysToPositionalDateString(days: number,
-                                         config: PositionalCalendarConfig): string {
+function parseDaysToPositionalDateString(days: number, config: PositionalCalendarConfig): string {
   let localDays = days - config.offsetToDayZero
   const stringSegments: string[] = []
   config.positionalUnits.forEach(unit => {
@@ -237,30 +206,19 @@ function parseDaysToPositionalDateString(days: number,
 // called during runtime, to get axis description
 export function createAxisDateDescription(days: number,
                                           calendarConfig: CalendarConfig,
-                                          asInput = false,
-                                          hideDays = false,
-                                          hideMonths = false): string {
+                                          asInput = false, hideDays = false, hideMonths = false): string {
 
   switch (calendarConfig.type) {
     case 'rule-based':
       if (calendarConfig.id === 'gregorian')
         return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, hideDays, hideMonths)
       else
-        return parseDaysToNonGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput)
+        return parseDaysToNonGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, hideDays, hideMonths)
     case 'positional':
       return parseDaysToPositionalDateString(days, calendarConfig as PositionalCalendarConfig)
     default:
       return 'n/a'
   }
-}
-
-function getEpochSuffix(days: number, config: RuleBasedCalendarConfig) {
-  const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
-  return suffixRaw ? ` ${suffixRaw}` : ''
-}
-
-function shiftYearIfNeeded(year: number, noYearZero: boolean | undefined) {
-  return (noYearZero === true && year <= 0) ? year - 1 : year
 }
 
 /**
@@ -275,3 +233,36 @@ function formatYearValue(year: number): string {
   if (absYear >= 10_000) return absYear.toLocaleString('en-US')
   return absYear.toString().padStart(4, '0')
 }
+
+/** Construct date based on calConfig.ruleBasedDetails.format */
+function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMonths: boolean,
+                                       hideDays: boolean,
+                                       calConfig: RuleBasedCalendarConfig,
+                                       year: number, month?: string, day?: number) {
+
+  const format: DateFormatComponent[] = asInput ? calConfig.ruleBasedDetails.format : calConfig.ruleBasedDetails.outputFormat
+  const displayedYear = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
+
+  const outputParts: string[] = format.map(component => {
+    if (component === 'year') return formatYearValue(displayedYear)
+    if (component === 'month' && (asInput || !hideMonths)) return month ?? ''
+    if (component === 'day' && (asInput || !hideDays)) return day?.toString().padStart(2, '0') ?? ''
+    return ''
+
+  })
+
+  const prefix = displayedYear < 0 ? '-' : ''
+
+  return prefix + outputParts.filter(Boolean).join(calConfig.delimiter)
+    + getEpochSuffix(absDays, calConfig)
+}
+
+function shiftYearIfNeeded(year: number, noYearZero: boolean | undefined) {
+  return (noYearZero === true && year <= 0) ? year - 1 : year
+}
+
+function getEpochSuffix(days: number, config: RuleBasedCalendarConfig) {
+  const suffixRaw = days < 1 ? config.bcSuffix : config.adSuffix
+  return suffixRaw ? ` ${suffixRaw}` : ''
+}
+
