@@ -156,14 +156,14 @@ function duplicateEventWithYearDelta(item: GanttItem,
   const startDate: string = item.startDateDisplay.trim()
   let dateParts: string[]
   if (calendarConfig.delimiter === '-' && startDate.startsWith('-')) {
-    /* special handling for negative years using minus as date part separator */
-    /* alternative for old iOS devices : startDate.match(/^-?\w+|\w+/g) ?? [] */
+    /*
+     * Special handling for negative years using minus as date part separator.
+     * Overly complicated regex used to comply with pre 16.4 iOS devices.
+     */
     dateParts = startDate.match(/^-?\w+|\w+/g) ?? []
-    // dateParts = startDate.split(/(?<=\w)-/)
   } else {
     dateParts = startDate.split(calendarConfig.delimiter)
   }
-
 
   const yearIndex = calendarConfig.ruleBasedDetails.format.indexOf('year')
 
@@ -186,8 +186,7 @@ function duplicateEventWithYearDelta(item: GanttItem,
   const effectiveDelta = delta * minIntervalMultiplier
   if (effectiveDelta <= 0 || !Number.isFinite(effectiveDelta)) return
 
-  // 4. Calculate starting year offset
-  // Jump closer to the visible window to minimize unnecessary iterations
+  /* Calculate starting year offset. Jump closer to the visible window to minimize unnecessary iterations */
   let yearOffset = effectiveDelta
   if (item.startDays < visibleMinDays) {
     const estimatedYearSpan = Math.max(0, (visibleMinDays - item.startDays) / approxDaysPerYear)
