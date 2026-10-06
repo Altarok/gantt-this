@@ -143,9 +143,13 @@ function safetyCheckPositionalConfig(config: PositionalCalendarConfig) {
 
 function safetyCheckRuleBasedConfig(config: RuleBasedCalendarConfig) {
   const {ruleBasedDetails} = config
+  config.offsetToDayZero = Number.isNaN(config.offsetToDayZero) ? 0 : config.offsetToDayZero
   ruleBasedDetails.format = ruleBasedDetails.format ?? DEFAULT_CAL_DATE_FORMAT
   ruleBasedDetails.outputFormat = ruleBasedDetails.outputFormat ?? ruleBasedDetails.format
   ruleBasedDetails.months = ruleBasedDetails.months ?? []
+  // if (ruleBasedDetails.leapYearRule && ruleBasedDetails.leapYearRule.ruleType !== 'none') {
+  //   ruleBasedDetails.leapYearRule.extraDays = Number.isNaN(ruleBasedDetails.leapYearRule.extraDays) ? 1 : ruleBasedDetails.leapYearRule.extraDays
+  // }
 }
 
 
