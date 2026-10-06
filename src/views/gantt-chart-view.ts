@@ -3,6 +3,7 @@ import {Css} from '../const/constants'
 import {ManualSvg} from '../view/manual-svg-icons'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
 import TextWidthCache from '../view/text-space-cache'
+import {createSvg} from "../view/svg-drawer-util";
 
 export class GanttChartView {
   svg: SVGElement
@@ -24,7 +25,8 @@ export class GanttChartView {
   upperHoverLayer: SVGElement
 
   /** Inside foregroundLayer: calendars */
-  calendarLayer: SVGElement
+  dynamicCalendarLayer: SVGElement
+  staticCalendarLayer: SVGElement
   /** Prevent overflow rectangle */
   private readonly clipRect: SVGElement
 
@@ -65,7 +67,10 @@ export class GanttChartView {
 
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': 'url(#gantt-clip)'}})
-    this.calendarLayer = this.foregroundLayer.createSvg('g')
+
+    this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
+    this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
+
 
     this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
@@ -92,8 +97,9 @@ export class GanttChartView {
     this.upperHoverLayer.empty()
   }
 
-  clearCalendarLayer() {
-    this.calendarLayer.empty()
+  clearCalendarLayer(completeReset = false) {
+    this.dynamicCalendarLayer.empty()
+    if (completeReset) this.staticCalendarLayer.empty()
     this.gridLayer.empty()
   }
 
@@ -101,7 +107,7 @@ export class GanttChartView {
     this.backgroundLayer.empty()
   }
 
-  addGroupBackground(name: string, yOffset: number, height: number, isEvenGroup: boolean) {
+  drawGroupBackground(name: string, yOffset: number, height: number, isEvenGroup: boolean) {
 
     const groupG = this.backgroundLayer.createSvg('g')
     groupG.setAttribute('transform', `translate(0, ${yOffset})`)
@@ -116,6 +122,82 @@ export class GanttChartView {
     label.textContent = name.toUpperCase()
     const badgeWidth = this.textCache.getSvgWidth(label, name)
     badge.setAttribute('width', String(badgeWidth))
+  }
+
+  drawCalendarBadge(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
+    /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
+    // const headerG = individualAxisG.createSvg('g')
+    const headerG = this.staticCalendarLayer.createSvg('g')
+    headerG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
+
+    const badge = createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
+
+    if (sourceFilePath) this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click',
+      () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
+    )
+
+    const label = createSvg('text', Css.axis.label, {x: 14, y: 19})
+    headerG.appendChild(badge)
+    headerG.appendChild(label)
+
+    /* Calculate width accurately off-screen with explicit uppercase padding */
+    label.textContent = calBadgeTextContent.toUpperCase()
+    const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
+    badge.setAttribute('width', badgeWidth)
+  }
+
+  /**
+   * add this
+
+   * CSS *
+   .axis-label-badge {
+   background-color: var(--badge-bg, #333);
+   padding: 2px 6px;
+   border-radius: 3px;
+   * Ensure SVG text container respects inline formatting if rendered as HTML/SVG foreign object,
+   or apply directly if using CSS on SVG text *
+   }
+
+   * @param calBadgeTextContent
+   * @param sourceFilePath
+   * @param currentAxisYStart
+   */
+  drawCalendarBadge2(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
+    const label = createSvg('text', Css.axis.labelBadge, {      x: 14, y: currentAxisYStart + 19    })
+    label.textContent = calBadgeTextContent.toUpperCase()
+
+    if (sourceFilePath) {
+      this.plugin.registerDomEvent(label as unknown as HTMLElement, 'click',
+        () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
+      )
+    }
+
+    this.staticCalendarLayer.appendChild(label)
+  }
+
+  drawCalendarBadge3(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
+    const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
+
+    const badge = createSvg('rect', Css.axis.labelBadge, {
+      x: 8,
+      y: currentAxisYStart + 7,
+      width: badgeWidth
+    })
+
+    const label = createSvg('text', Css.axis.label, {
+      x: 14,
+      y: currentAxisYStart + 19
+    })
+    label.textContent = calBadgeTextContent.toUpperCase()
+
+    if (sourceFilePath) {
+      this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click',
+        () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
+      )
+    }
+
+    this.staticCalendarLayer.appendChild(badge)
+    this.staticCalendarLayer.appendChild(label)
   }
 
   setWidth(width: number) {

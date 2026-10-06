@@ -159,6 +159,7 @@ export class GanttRenderEngine {
   }
 
   initEventListener(): void {
+    // debugger
     if (this.eventManager) this.eventManager.destroy()
     this.eventManager = createGanttEventManager(this, this.plugin.settings, this.svgDrawerUtil, this.basesCtx)
     this.svgDrawerUtil.setEventManager(this.eventManager)
@@ -189,7 +190,7 @@ export class GanttRenderEngine {
     this.drawGroupBackgrounds()
     // try {// Code that might crash
     this.renderData(width)
-    this.drawAxes()
+    this.drawAxes(includeViewReset)
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
@@ -208,7 +209,7 @@ export class GanttRenderEngine {
 
     this.groups.forEach((g, i) => {
       const isEvenGroup = i % 2 === 0
-      this.view.addGroupBackground(g.name, g.yOffset, g.height, isEvenGroup)
+      this.view.drawGroupBackground(g.name, g.yOffset, g.height, isEvenGroup)
     })
   }
 
@@ -311,8 +312,8 @@ export class GanttRenderEngine {
       (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
   }
 
-  private drawAxes() {
-    this.view.clearCalendarLayer()
+  private drawAxes(completeReset = false) {
+    this.view.clearCalendarLayer(completeReset)
     const renderWidth = this.getRenderWidth()
 
     const itemsAreaHeight = this.calculateEventsAreaHeight()
@@ -334,7 +335,7 @@ export class GanttRenderEngine {
       }
 
       // const individualAxisG = createSvg('g')
-      const individualAxisG = this.view.calendarLayer.createSvg('g')
+      const individualAxisG = this.view.dynamicCalendarLayer.createSvg('g')
       individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
       // this.view.calendarLayer.appendChild(individualAxisG)
 
@@ -429,28 +430,9 @@ export class GanttRenderEngine {
           effectiveStartDay, effectiveEndDay, renderWidth)
       }
 
-      if (calBadgeTextContent) {
-        /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
-        const headerG = individualAxisG.createSvg('g')
-
-        const badge = createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
-
-        if (calendarConfig.link) this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click', () => {
-            void this.plugin.app.workspace.openLinkText(calendarConfig.link, '', true)
-          }
-        )
-
-        const label = createSvg('text', Css.axis.label, {x: 14, y: 19})
-        headerG.appendChild(badge)
-        headerG.appendChild(label)
-
-        /* Calculate width accurately off-screen with explicit uppercase padding */
-        label.textContent = calBadgeTextContent.toUpperCase()
-        const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
-        badge.setAttribute('width', badgeWidth)
+      if (completeReset && calBadgeTextContent) {
+        this.view.drawCalendarBadge3(calBadgeTextContent, calendarConfig.link, currentAxisYStart)
       }
-
-      // this.view.calendarLayer.appendChild(individualAxisG)
     })
   }
 

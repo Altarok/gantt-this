@@ -240,7 +240,7 @@ export default class TooltipManager implements HoverParent {
       const upper = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
       const lower = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
       this.chartView.lowerHoverLayer.appendChild(upper)
-      this.chartView.calendarLayer.appendChild(lower)
+      this.chartView.dynamicCalendarLayer.appendChild(lower)
       // if (svg.firstChild) {
       //   svg.insertBefore(upper, svg.firstChild)
       //   svg.insertBefore(lower, svg.firstChild)
@@ -391,6 +391,7 @@ export default class TooltipManager implements HoverParent {
     }
 
     if (shape) {
+      shape.style.pointerEvents = 'none' // TODO move to css
       const highlightElement: SVGGElement = this.chartView.upperHoverLayer.createSvg('g')
       highlightElement.appendChild(shape)
     }
