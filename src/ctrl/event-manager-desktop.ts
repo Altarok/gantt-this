@@ -97,6 +97,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   private handleSvgMouseDown(e: MouseEvent) {
     // if (e) this.logTouchEvent('handleSvgMouseDown', e)
+    // console.log(`handleSvgMouseDown`, e.target)
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
     this.isDragging = true
     this.startX = e.clientX
@@ -154,20 +155,29 @@ export class GanttDesktopEventManager implements GanttEventManager {
     // if (event) this.logTouchEvent('handleSvgClick', event)
     const target = event.target as HTMLElement
 
+    // console.log(`handleSvgClick`, target)
+    // debugger
+
     if (target?.hasAttribute('data-id')) {
       const id = target.getAttribute('data-id')
       if (id === null) return
       const link = this.engine.rawData.find(d => d.id === id)?.link
       if (link) void this.engine.plugin.app.workspace.openLinkText(link, '', true)
     }
+
   }
 
   private handleWindowMouseUp() {
+    // console.log(`handleWindowMouseUp`)
     if (this.isDragging) {
       this.isDragging = false
+      /*
+       * TODO Doing a final 0-diff pan re-draws event text and icons
+       * (which do not get drawn while panning)
+       */
+      this.engine.panDiff(0)
     }
     this.stopAnimation()
-    this.engine.handlePanOrZoom()
   }
 
   /** Fully unhook and release all window and SVG listeners to prevent leaks */
@@ -188,5 +198,25 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private get settings() {
     return this.engine.plugin.settings
   }
+
+  // private logTouchEvent(type: string, e: MouseEvent) {
+  //   const formatTouches = (list: TouchList) =>
+  //     Array.from(list).map(t => ({
+  //       id: t.identifier,
+  //       clientX: Math.round(t.clientX),
+  //       clientY: Math.round(t.clientY),
+  //       target: (t.target as HTMLElement)?.tagName ?? 'unknown'
+  //     }))
+  //
+  //   console.log(`[Touch Debug: ${type}]`, {
+  //     cancelable: e.cancelable,
+  //     defaultPrevented: e.defaultPrevented,
+  //     // touchesCount: e.touches.length,
+  //     // targetTouchesCount: e.targetTouches.length,
+  //     // changedTouchesCount: e.changedTouches.length,
+  //     // touches: formatTouches(e.touches),
+  //     // changedTouches: formatTouches(e.changedTouches)
+  //   })
+  // }
 
 }
