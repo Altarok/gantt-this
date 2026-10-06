@@ -85,8 +85,13 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private handleWindowMouseMove(e: MouseEvent) {
     // if (e) this.logTouchEvent('handleWindowMouseMove', e)
     if (this.isDragging) {
+
       const deltaX = e.clientX - this.startX
       const targetTranslateX = this.startTranslateX + deltaX
+
+      console.log('handleWindowMouseMove > targetTranslateX', targetTranslateX)
+
+      console.info(e.clientX, deltaX)
 
       this.rafId ??= window.requestAnimationFrame(() => {
         this.engine.panAbsolute(targetTranslateX)
@@ -99,6 +104,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
     // if (e) this.logTouchEvent('handleSvgMouseDown', e)
     // console.log(`handleSvgMouseDown`, e.target)
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
+
+    console.log(e.clientX)
+
     this.isDragging = true
     this.startX = e.clientX
     this.startTranslateX = this.viewConfig.panTranslateX
@@ -168,7 +176,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseUp() {
-    // console.log(`handleWindowMouseUp`)
+    console.log(`handleWindowMouseUp`)
     if (this.isDragging) {
       this.isDragging = false
       /*

@@ -32,6 +32,9 @@ export class GanttRenderEngine {
   drawnData: GanttItem[] = []
   hideDays = false
   hideMonths = false
+  lastWidth = -1
+
+  private resizeRafId: number | null = null
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
@@ -49,7 +52,14 @@ export class GanttRenderEngine {
     this.initEventListener()
     this.handleResize(true)
 
-    this.resizeObserver = new ResizeObserver(() => this.handleResize())
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.resizeRafId !== null) cancelAnimationFrame(this.resizeRafId)
+      this.resizeRafId = requestAnimationFrame(() => {
+        this.handleResize()
+        this.resizeRafId = null
+      })
+      // this.handleResize()
+    })
     this.resizeObserver.observe(this.container)
   }
 
@@ -175,9 +185,24 @@ export class GanttRenderEngine {
   }
 
   handleResize(includeViewReset = false) {
-    this.updateWhichDateElementsToHide()
+
+    // this.updateWhichDateElementsToHide()
     const width = this.container.clientWidth
     if (!width || width <= 0) return
+    // this.view.setWidth(this.getRenderWidth(width))
+
+    /* keep focus on chart centre */
+    // if (!includeViewReset && this.lastWidth > 0 && this.lastWidth !== width) {
+    //   const oldRenderWidth = this.getRenderWidth(this.lastWidth)
+    //   const newRenderWidth = this.getRenderWidth(width)
+    //   const renderWidthDiff = newRenderWidth - oldRenderWidth
+    //   this.viewConfig.panTranslateX += (renderWidthDiff / 2) * (1 - this.viewConfig.zoomFactor)
+    //   // const halfWidthDiff = Math.floor((width - this.lastWidth) / 2)
+    //   // this.viewConfig.panTranslateX += halfWidthDiff
+    // }
+    this.lastWidth = width
+
+    console.log('handleResize', includeViewReset, width, this.viewConfig.panTranslateX)
 
     if (includeViewReset &&
       /* Re-evaluate predefined bounds now that we have the true container width */
@@ -190,7 +215,7 @@ export class GanttRenderEngine {
     this.drawGroupBackgrounds()
     // try {// Code that might crash
     this.renderData(width)
-    this.drawAxes(includeViewReset)
+    this.drawAxes(width, includeViewReset)
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
@@ -234,6 +259,8 @@ export class GanttRenderEngine {
     const totalChartHeight = this.calculateTotalChartHeight()
 
     const headerHeight = this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0
+
+    // console.log('renderData > width', width)
 
     this.groups.forEach(group => {
       const groupContentHeight = (group.lanes ?? 1) * this.viewConfig.eventRowHeight
@@ -312,9 +339,9 @@ export class GanttRenderEngine {
       (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
   }
 
-  private drawAxes(completeReset = false) {
+  private drawAxes(renderWidth: number, completeReset = false) {
     this.view.clearCalendarLayer(completeReset)
-    const renderWidth = this.getRenderWidth()
+    // const renderWidth = this.getRenderWidth()
 
     const itemsAreaHeight = this.calculateEventsAreaHeight()
 
@@ -447,7 +474,7 @@ export class GanttRenderEngine {
    * @param focusX optional x value to zoom on
    */
   zoom(factor: number, focusX?: number) {
-    // console.log('Zoom', factor)
+    console.log('zoom >', factor, focusX)
     if (Math.abs(1 - factor) < 0.01) return // ignore micro-pinch zooms
 
     const renderWidth = this.getRenderWidth()
@@ -480,6 +507,7 @@ export class GanttRenderEngine {
     const updatedTickStepInDays = this.tickStepInDays
     this.hideDays = updatedTickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_DAYS
     this.hideMonths = updatedTickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_MONTHS
+    // console.log('updateWhichDateElementsToHide > hideDays', this.hideDays, 'hideMonths',this.hideMonths )
   }
 
   /**
@@ -487,17 +515,20 @@ export class GanttRenderEngine {
    * @param percentage - positive number shifts view right, negative number shifts view left
    */
   panRelative(percentage: number) {
+    console.log('panRelative > percentage', percentage)
     if (this.eventManager?.isDragging) return /* Triggered by buttons */
     this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
     this.handlePanOrZoom()
   }
 
   panDiff(shift: number) {
+    console.log('panDiff > shift', shift)
     this.viewConfig.panTranslateX += shift
     this.handlePanOrZoom()
   }
 
   panAbsolute(value: number) {
+    console.log('panAbsolute > value', value)
     this.viewConfig.panTranslateX = value
     this.handlePanOrZoom()
   }
@@ -522,6 +553,7 @@ export class GanttRenderEngine {
 
     const totalRange = this.viewConfig.maxDays - this.viewConfig.minDays
     if (totalRange <= 0) {
+      console.log('transitionToPredefinedBounds > resetPanAndZoom')
       this.viewConfig.resetPanAndZoom()
       return
     }
@@ -540,6 +572,7 @@ export class GanttRenderEngine {
         const minXAtScale1 = ((targetMin - this.viewConfig.minDays) / totalRange) * renderWidth
         // Shift targetMin to pixel X = 0 under the new zoomScale:
         this.viewConfig.panTranslateX = -(minXAtScale1 * this.viewConfig.zoomFactor)
+        console.log('transitionToPredefinedBounds > panTranslateX', this.viewConfig.panTranslateX)
         return
       }
     }
@@ -604,7 +637,11 @@ export class GanttRenderEngine {
   }
 
   getXPosition(days: number, width?: number): number {
-    if (this.viewConfig.maxDays <= this.viewConfig.minDays) return this.viewConfig.panTranslateX // fail-safe
+    if (this.viewConfig.maxDays <= this.viewConfig.minDays) {
+      console.log('WTF')
+      debugger
+      return this.viewConfig.panTranslateX
+    } // fail-safe
 
     const renderWidth = this.getRenderWidth(width)
     const percentage = (days - this.viewConfig.minDays) / (this.viewConfig.maxDays - this.viewConfig.minDays)
