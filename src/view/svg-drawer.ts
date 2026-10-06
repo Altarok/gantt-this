@@ -431,7 +431,7 @@ export class GanttRenderEngine {
       }
 
       if (completeReset && calBadgeTextContent) {
-        this.view.drawCalendarBadge3(calBadgeTextContent, calendarConfig.link, currentAxisYStart)
+        this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }
     })
   }

@@ -64,13 +64,11 @@ export class GanttChartView {
     const eventsAreaHeight = this.calculateEventsAreaHeight()
     this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
-
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': 'url(#gantt-clip)'}})
 
     this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
     this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
-
 
     this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
@@ -125,70 +123,16 @@ export class GanttChartView {
   }
 
   drawCalendarBadge(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
-    /* Layer 2: Badge and label (rendered on top so ticks scroll beneath them) */
-    // const headerG = individualAxisG.createSvg('g')
-    const headerG = this.staticCalendarLayer.createSvg('g')
-    headerG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
-
-    const badge = createSvg('rect', Css.axis.labelBadge, {x: 8, y: 7})
-
-    if (sourceFilePath) this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click',
-      () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
-    )
-
-    const label = createSvg('text', Css.axis.label, {x: 14, y: 19})
-    headerG.appendChild(badge)
-    headerG.appendChild(label)
-
-    /* Calculate width accurately off-screen with explicit uppercase padding */
-    label.textContent = calBadgeTextContent.toUpperCase()
-    const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
-    badge.setAttribute('width', badgeWidth)
-  }
-
-  /**
-   * add this
-
-   * CSS *
-   .axis-label-badge {
-   background-color: var(--badge-bg, #333);
-   padding: 2px 6px;
-   border-radius: 3px;
-   * Ensure SVG text container respects inline formatting if rendered as HTML/SVG foreign object,
-   or apply directly if using CSS on SVG text *
-   }
-
-   * @param calBadgeTextContent
-   * @param sourceFilePath
-   * @param currentAxisYStart
-   */
-  drawCalendarBadge2(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
-    const label = createSvg('text', Css.axis.labelBadge, {      x: 14, y: currentAxisYStart + 19    })
-    label.textContent = calBadgeTextContent.toUpperCase()
-
-    if (sourceFilePath) {
-      this.plugin.registerDomEvent(label as unknown as HTMLElement, 'click',
-        () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
-      )
-    }
-
-    this.staticCalendarLayer.appendChild(label)
-  }
-
-  drawCalendarBadge3(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
     const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
 
     const badge = createSvg('rect', Css.axis.labelBadge, {
-      x: 8,
-      y: currentAxisYStart + 7,
-      width: badgeWidth
+      x: 8, y: currentAxisYStart + 7, width: badgeWidth
     })
 
     const label = createSvg('text', Css.axis.label, {
-      x: 14,
-      y: currentAxisYStart + 19
+      x: 14, y: currentAxisYStart + 19
     })
-    label.textContent = calBadgeTextContent.toUpperCase()
+    label.textContent = calBadgeTextContent
 
     if (sourceFilePath) {
       this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click',

@@ -379,7 +379,8 @@ export default class TooltipManager implements HoverParent {
       shape = null // duplicate code added as fallback after method was split
     } else if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
       shape = createSvg('rect', cssClass, {
-        x: x - 1, y: y - 1, width: width + 2, height: height + 2, stroke: this.overlayColor
+        x: x - 1, y: y - 1, width: width + 2, height: height + 2, stroke: this.overlayColor,
+        'pointer-events': 'none'
       })
     } else if (ganttItem.displayType === 'point') {
       shape = createSvg('circle', cssClass, {
@@ -391,7 +392,6 @@ export default class TooltipManager implements HoverParent {
     }
 
     if (shape) {
-      shape.style.pointerEvents = 'none' // TODO move to css
       const highlightElement: SVGGElement = this.chartView.upperHoverLayer.createSvg('g')
       highlightElement.appendChild(shape)
     }
