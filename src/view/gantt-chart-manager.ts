@@ -90,7 +90,7 @@ export default class GanttRender {
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
-    const ganttChartModel = new GanttChartViewModel(this.plugin, chartContainer)
+    const ganttChartModel = new GanttChartViewModel(this.plugin, chartContainer.clientWidth ?? 0)
 
     const tv = new ToolbarView(toolbarContainer, this.plugin, ganttChartModel, refreshChartCallback)
 

@@ -31,9 +31,6 @@ export class GanttRenderEngine {
 
   drawnData: GanttItem[] = []
 
-  private currRenderWidth = -1
-  private lastRenderWidth = -1
-
   private resizeRafId: number | null = null
 
   constructor(public readonly container: HTMLElement,
@@ -44,6 +41,8 @@ export class GanttRenderEngine {
               private readonly textCache: TextWidthCache,
               readonly viewModel: GanttChartViewModel,
               private readonly svgDrawerUtil: SvgDrawerUtil) {
+
+    this.viewModel.currRenderWidth = this.container.clientWidth
 
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
@@ -64,6 +63,7 @@ export class GanttRenderEngine {
   }
 
   public updateData(newData: GanttItem[]) {
+    this.viewModel.currRenderWidth = this.container.clientWidth
     this.svgDrawerData = this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
@@ -182,47 +182,49 @@ export class GanttRenderEngine {
     this.handleResize(true)
   }
 
-  handleResize(includeViewReset = false) {
+  handleResize(fullReset = false) {
 
-    this.currRenderWidth = this.viewModel.calculateRenderWidth
-    if (this.currRenderWidth <= 0) return
+    this.viewModel.currRenderWidth = this.container.clientWidth
 
-    if (!includeViewReset && this.lastRenderWidth > 0 && this.lastRenderWidth !== this.currRenderWidth) {
+    const currRenderWidth = this.viewModel.calculateRenderWidth()
+    const lastRenderWidth = this.lastRenderWidth
+
+    if (currRenderWidth <= 0) return
+
+    if (!fullReset && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
       // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
       const totalDaysSpan = this.viewModel.totalDaysSpan
-      const oldCenterPixel = this.lastRenderWidth / 2
+      const oldCenterPixel = lastRenderWidth / 2
 
       // Invertierte Formel von getXPosition, um 'centerDay' zu bestimmen:
       // centerPixel = percentage * oldRenderWidth * zoomFactor + panTranslateX
-      const centerPercentage = (oldCenterPixel - this.viewModel.panTranslateX) / (this.lastRenderWidth * this.viewModel.zoomFactor)
+      const centerPercentage = (oldCenterPixel - this.viewModel.panTranslateX) / (lastRenderWidth * this.viewModel.zoomFactor)
       const centerDays = this.viewModel.minDays + (centerPercentage * totalDaysSpan)
 
       // 2. Setze lastWidth neu
-      this.lastRenderWidth = this.currRenderWidth
+      this.viewModel.lastRenderWidth = currRenderWidth
 
       // 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt
       const newCenterPercentage = (centerDays - this.viewModel.minDays) / totalDaysSpan
-      this.viewModel.panTranslateX = (this.currRenderWidth / 2) - (newCenterPercentage * this.currRenderWidth * this.viewModel.zoomFactor)
+      this.viewModel.panTranslateX = (currRenderWidth / 2) - (newCenterPercentage * currRenderWidth * this.viewModel.zoomFactor)
     } else {
-      this.lastRenderWidth = this.currRenderWidth
+      this.viewModel.lastRenderWidth = currRenderWidth
     }
-
-    /// 2
 
     // console.log('handleResize', includeViewReset, width, this.viewModel.panTranslateX)
 
-    if (includeViewReset &&
+    if (fullReset &&
       /* Re-evaluate predefined bounds now that we have the true container width */
       (this.codeBlockContent.lowerBoundDateParsed || this.codeBlockContent.upperBoundDateParsed || this.codeBlockContent.centerHereDateParsed)) {
       this.transitionToPredefinedBounds()
     }
 
-    this.view.setWidth(this.currRenderWidth)
+    this.setWidth(currRenderWidth)
 
     this.drawGroupBackgrounds()
     // try {// Code that might crash
     this.renderData()
-    this.drawAxes(includeViewReset)
+    this.drawAxes(fullReset)
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
@@ -701,4 +703,16 @@ export class GanttRenderEngine {
     return Math.max(1, Math.floor(this.viewModel.totalDaysSpanRelativeToZoom / (this.currRenderWidth / 120)))
   }
 
+  private get currRenderWidth() {
+    return this.viewModel.currRenderWidth
+  }
+
+  private get lastRenderWidth() {
+    return this.viewModel.lastRenderWidth
+  }
+
+  private setWidth(newWidth: number) {
+    this.viewModel.currRenderWidth = newWidth
+    this.view.setWidth(newWidth)
+  }
 }

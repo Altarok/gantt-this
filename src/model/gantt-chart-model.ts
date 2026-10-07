@@ -52,24 +52,21 @@ export class GanttChartViewModel {
   /* Default = 400 */
   totalHeight = 400
 
+  currRenderWidth: number
+  lastRenderWidth: number
 
   constructor(plugin: FantasyGanttPlugin,
-              /**
-               * TODO replace with number
-               */
-              private readonly chartContainer: HTMLDivElement) {
+              currRenderWidth: number) {
     this.eventRowHeight = plugin.settings.viewEventRowHeight
     this.eventRowHeightHalf = this.eventRowHeight / 2
     this.eventShapeHeight = plugin.settings.viewEventShapeHeight
     this.eventIconHeight = plugin.settings.viewEventIconHeight
+    this.currRenderWidth = currRenderWidth
+    this.lastRenderWidth = -1
   }
 
-  /*
-   * TODO cleanup, evaluate usage
-   */
-  get calculateRenderWidth(): number {
-    const containerWidth = this.chartContainer.clientWidth ?? 0
-    return Math.max(0, containerWidth - this.margin.left - this.margin.right)
+  calculateRenderWidth(): number {
+    return Math.max(0, this.currRenderWidth - this.margin.left - this.margin.right)
   }
 
   get getCalenderCount() {
@@ -119,17 +116,17 @@ export class GanttChartViewModel {
     return this.isEnableGrouping
   }
 
-  get toggleShowBars(): boolean {
+  toggleShowBars(): boolean {
     this.isShowBars = !this.isShowBars
     return this.isShowBars
   }
 
-  get toggleShowPoints(): boolean {
+  toggleShowPoints(): boolean {
     this.isShowPoints = !this.isShowPoints
     return this.isShowPoints
   }
 
-  get toggleEnableGrouping(): boolean {
+  toggleEnableGrouping(): boolean {
     this.isEnableGrouping = !this.isEnableGrouping
     return this.isEnableGrouping
   }

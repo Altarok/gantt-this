@@ -109,15 +109,15 @@ export class ToolbarView {
 
 
   handleToggleBarsButtonClick(): void {
-    setIcon(this.toggleBarsButton, this.viewModel.toggleShowBars ? 'chart-bar-big' : 'customBarChartCrossed')
+    setIcon(this.toggleBarsButton, this.viewModel.toggleShowBars() ? 'chart-bar-big' : 'customBarChartCrossed')
   }
 
   handleToggleTimestampsButtonClick(): void {
-    setIcon(this.toggleTimestampButton, this.viewModel.toggleShowPoints ? 'customScatterChart' : 'customScatterChartCrossed')
+    setIcon(this.toggleTimestampButton, this.viewModel.toggleShowPoints() ? 'customScatterChart' : 'customScatterChartCrossed')
   }
 
   handleToggleGroupingButtonClick(): void {
-    setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping ? 'group' : 'customGroupCrossed')
+    setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping() ? 'group' : 'customGroupCrossed')
   }
 
   /**
