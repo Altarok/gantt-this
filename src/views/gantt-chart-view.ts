@@ -116,6 +116,27 @@ export class GanttChartView {
     badge.setAttribute('width', String(badgeWidth))
   }
 
+  createCalAxisGroup(currentAxisYStart: number): SVGGElement {
+    const g: SVGGElement = this.dynamicCalendarLayer.createSvg('g')
+    g.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
+    return g
+  }
+
+  drawCalAxisBaseline(group: SVGGElement, x1: number, x2: number, axisColor: string) {
+    group.createSvg('line', {
+      cls: Css.axis.baseline,
+      attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
+    })
+  }
+
+  drawCalAxisCap(group: SVGGElement, x: number, axisColor: string) {
+    group.createSvg('line', {
+      cls: 'calendar-cap-marker',
+      attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke: axisColor}
+    })
+  }
+
+
   drawCalendarBadge(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
     const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
 
@@ -141,6 +162,7 @@ export class GanttChartView {
   setWidth(width: number) {
     this.clipRect.setAttribute('width', width.toString())
   }
+
 
   private get clientWidth() {
     return this.container.clientWidth

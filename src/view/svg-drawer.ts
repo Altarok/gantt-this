@@ -31,7 +31,7 @@ export class GanttRenderEngine {
 
   drawnData: GanttItem[] = []
 
-  private resizeRafId: number | null = null
+  // private resizeRafId: number | null = null
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
@@ -42,7 +42,7 @@ export class GanttRenderEngine {
               readonly viewModel: GanttChartViewModel,
               private readonly svgDrawerUtil: SvgDrawerUtil) {
 
-    this.viewModel.currRenderWidth = this.container.clientWidth
+    this.viewModel.setRawContainerWidth(this.container.clientWidth)
 
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
@@ -51,19 +51,12 @@ export class GanttRenderEngine {
     this.initEventListener()
     this.handleResize(true)
 
-    this.resizeObserver = new ResizeObserver(() => {
-      if (this.resizeRafId !== null) window.cancelAnimationFrame(this.resizeRafId)
-      this.resizeRafId = window.requestAnimationFrame(() => {
-        this.handleResize()
-        this.resizeRafId = null
-      })
-      // this.handleResize()
-    })
+    this.resizeObserver = new ResizeObserver(() => this.handleResize())
     this.resizeObserver.observe(this.container)
   }
 
   public updateData(newData: GanttItem[]) {
-    this.viewModel.currRenderWidth = this.container.clientWidth
+    this.viewModel.setRawContainerWidth(this.container.clientWidth)
     this.svgDrawerData = this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
@@ -74,6 +67,7 @@ export class GanttRenderEngine {
   }
 
   redraw() {
+    // if (this.view) this.view.destroy()
     return new GanttChartView(this.plugin, this.container, this.viewModel, this.textCache)
   }
 
@@ -162,8 +156,7 @@ export class GanttRenderEngine {
     /* Before going on, we have to sort groups by their respective priority */
     Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.svgDrawerData.mappedGrpConfigs)
 
-    const combinedAxesHeight = this.viewModel.getCalenderCount * this.viewModel.calendarAxisRowHeight
-    this.viewModel.totalHeight = currentYOffset + combinedAxesHeight + this.viewModel.margin.bottom
+    this.viewModel.calculateTotalHeight(currentYOffset)
   }
 
   initEventListener(): void {
@@ -184,10 +177,10 @@ export class GanttRenderEngine {
 
   handleResize(fullReset = false) {
 
-    this.viewModel.currRenderWidth = this.container.clientWidth
+    this.viewModel.setRawContainerWidth(this.container.clientWidth)
 
-    const currRenderWidth = this.viewModel.calculateRenderWidth()
-    const lastRenderWidth = this.lastRenderWidth
+    const currRenderWidth = this.viewModel.getCurrRenderWidth()
+    const lastRenderWidth = this.viewModel.getLastRenderWidth()
 
     if (currRenderWidth <= 0) return
 
@@ -202,13 +195,13 @@ export class GanttRenderEngine {
       const centerDays = this.viewModel.minDays + (centerPercentage * totalDaysSpan)
 
       // 2. Setze lastWidth neu
-      this.viewModel.lastRenderWidth = currRenderWidth
+      this.viewModel.cacheCurrentRenderWidth()
 
       // 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt
       const newCenterPercentage = (centerDays - this.viewModel.minDays) / totalDaysSpan
       this.viewModel.panTranslateX = (currRenderWidth / 2) - (newCenterPercentage * currRenderWidth * this.viewModel.zoomFactor)
     } else {
-      this.viewModel.lastRenderWidth = currRenderWidth
+      this.viewModel.cacheCurrentRenderWidth()
     }
 
     // console.log('handleResize', includeViewReset, width, this.viewModel.panTranslateX)
@@ -219,7 +212,7 @@ export class GanttRenderEngine {
       this.transitionToPredefinedBounds()
     }
 
-    this.setWidth(currRenderWidth)
+    this.view.setWidth(currRenderWidth)
 
     this.drawGroupBackgrounds()
     // try {// Code that might crash
@@ -235,6 +228,7 @@ export class GanttRenderEngine {
     // }
     // }
   }
+
 
   private drawGroupBackgrounds() {
     this.view.clearGroupBackground()
@@ -371,13 +365,8 @@ export class GanttRenderEngine {
         y2: currentAxisYStart + this.viewModel.calendarAxisRowHeight - 1
       }
 
-      // const individualAxisG = createSvg('g')
-      const individualAxisG = this.view.dynamicCalendarLayer.createSvg('g')
-      individualAxisG.setAttribute('transform', `translate(0, ${currentAxisYStart})`)
-      // this.view.calendarLayer.appendChild(individualAxisG)
-
       /* Layer 1: Ticks, baseline, and dates (rendered underneath) */
-      const ticksG = individualAxisG.createSvg('g')
+      const ticksG = this.view.createCalAxisGroup(currentAxisYStart)
 
       let lastTextX = -999
       const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType)
@@ -406,25 +395,16 @@ export class GanttRenderEngine {
       const startX = effectiveStartDay <= visibleMinDays ? 0 : this.getXPosition(effectiveStartDay)
       const endX = effectiveEndDay >= visibleMaxDays ? this.currRenderWidth : this.getXPosition(effectiveEndDay)
 
-      const baseline = createSvg('line', Css.axis.baseline, {
-        x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': 2.5, stroke: axisColor
-      })
-      ticksG.appendChild(baseline)
+      this.view.drawCalAxisBaseline(ticksG, startX, endX, axisColor)
 
       /* Draw start cap marker (if in visible range) */
       if (calendarConfig.startDay && calendarConfig.startDay as number >= startDaysValue) {
-        const startCap = createSvg('line', 'calendar-cap-marker', {
-          x1: startX, y1: -6, x2: startX, y2: 6, stroke: axisColor
-        })
-        ticksG.appendChild(startCap)
+        this.view.drawCalAxisCap(ticksG, startX, axisColor)
       }
 
       /* Draw end cap marker (if in visible range) */
       if (calendarConfig.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
-        const endCap = createSvg('line', 'calendar-cap-marker', {
-          x1: endX, y1: -6, x2: endX, y2: 6, stroke: axisColor
-        })
-        ticksG.appendChild(endCap)
+        this.view.drawCalAxisCap(ticksG, endX, axisColor)
       }
 
       // if (!calBadgeTextContent && calendarConfig?.name) {
@@ -704,15 +684,7 @@ export class GanttRenderEngine {
   }
 
   private get currRenderWidth() {
-    return this.viewModel.currRenderWidth
+    return this.viewModel.getCurrRenderWidth()
   }
 
-  private get lastRenderWidth() {
-    return this.viewModel.lastRenderWidth
-  }
-
-  private setWidth(newWidth: number) {
-    this.viewModel.currRenderWidth = newWidth
-    this.view.setWidth(newWidth)
-  }
 }

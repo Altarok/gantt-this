@@ -52,29 +52,46 @@ export class GanttChartViewModel {
   /* Default = 400 */
   totalHeight = 400
 
-  currRenderWidth: number
-  lastRenderWidth: number
+  private currRenderWidth = -1
+  private lastRenderWidth = -1
 
-  constructor(plugin: FantasyGanttPlugin,
-              currRenderWidth: number) {
+  constructor(plugin: FantasyGanttPlugin) {
     this.eventRowHeight = plugin.settings.viewEventRowHeight
     this.eventRowHeightHalf = this.eventRowHeight / 2
     this.eventShapeHeight = plugin.settings.viewEventShapeHeight
     this.eventIconHeight = plugin.settings.viewEventIconHeight
-    this.currRenderWidth = currRenderWidth
-    this.lastRenderWidth = -1
   }
 
-  calculateRenderWidth(): number {
-    return Math.max(0, this.currRenderWidth - this.margin.left - this.margin.right)
+  getCurrRenderWidth(): number {
+    return this.currRenderWidth
   }
 
-  get getCalenderCount() {
+  getLastRenderWidth(): number {
+    return this.lastRenderWidth
+  }
+
+  setRawContainerWidth(rawContainerWidth: number): void {
+    this.currRenderWidth = Math.max(0, rawContainerWidth - this.margin.left - this.margin.right)
+  }
+
+  cacheCurrentRenderWidth(): void {
+    this.lastRenderWidth = this.currRenderWidth
+  }
+
+  get calenderCount() {
     return this.activeCalendars.length
   }
 
+  get combinedAxesHeight() {
+    return this.calenderCount * this.calendarAxisRowHeight
+  }
+
   get eventsAreaHeight() {
-    return this.totalHeight - this.margin.bottom - (this.getCalenderCount * this.calendarAxisRowHeight)
+    return this.totalHeight - this.margin.bottom - this.combinedAxesHeight
+  }
+
+  calculateTotalHeight(currentEventAreaHeight: number) {
+    this.totalHeight = currentEventAreaHeight + this.combinedAxesHeight + this.margin.bottom
   }
 
   get totalDaysSpan() {
@@ -95,9 +112,8 @@ export class GanttChartViewModel {
   }
 
   setDayRange(min: number, max: number) {
-    // console.log('setDayRange', 'min', min, 'max', max)
     this.minDays = min
-    this.maxDays = max // TODO add with fixed zoom range max: Math.max(min + 1, max)
+    this.maxDays = max
   }
 
   get showEras(): boolean {

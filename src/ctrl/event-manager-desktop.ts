@@ -83,7 +83,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
-    // if (e) this.logTouchEvent('handleWindowMouseMove', e)
     if (this.isDragging) {
 
       const deltaX = e.clientX - this.startX
