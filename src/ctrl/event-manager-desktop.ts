@@ -21,11 +21,11 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private readonly boundSvgMouseMove: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  viewConfig: GanttChartViewModel
+  viewModel: GanttChartViewModel
 
   constructor(readonly engine: GanttRenderEngine,
               readonly tooltipManager: TooltipManager) {
-    this.viewConfig = engine.viewConfig
+    this.viewModel = engine.viewModel
 
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
@@ -109,7 +109,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     this.isDragging = true
     this.startX = e.clientX
-    this.startTranslateX = this.viewConfig.panTranslateX
+    this.startTranslateX = this.viewModel.panTranslateX
   }
 
   private isModifierActive(e: MouseEvent, key: ControlKey): boolean {
@@ -153,7 +153,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
 
     const rect = this.svg.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left - this.engine.viewConfig.margin.left
+    const mouseX = e.clientX - rect.left - this.viewModel.margin.left
 
     // Delegate to GanttRenderEngine
     this.engine.zoom(factor, mouseX)

@@ -48,12 +48,12 @@ export class ToolbarView {
   /**
    * @param container HTML div destined to contains the Gantt chart's toolbar
    * @param plugin
-   * @param viewConfig
+   * @param viewModel
    * @param refreshChartCallback
    */
   constructor(container: HTMLDivElement,
               readonly plugin: FantasyGanttPlugin,
-              readonly viewConfig: GanttChartViewModel,
+              readonly viewModel: GanttChartViewModel,
               refreshChartCallback: () => void) {
     const {showPanAndZoomButtonsInToolbar} = plugin.settings
 
@@ -108,22 +108,16 @@ export class ToolbarView {
   }
 
 
-  handleToggleBarsButtonClick(): boolean {
-    this.viewConfig.showBars = !this.viewConfig.showBars
-    setIcon(this.toggleBarsButton, this.viewConfig.showBars ? 'chart-bar-big' : 'customBarChartCrossed')
-    return this.viewConfig.showBars
+  handleToggleBarsButtonClick(): void {
+    setIcon(this.toggleBarsButton, this.viewModel.toggleShowBars ? 'chart-bar-big' : 'customBarChartCrossed')
   }
 
-  handleToggleTimestampsButtonClick(): boolean {
-    this.viewConfig.showPoints = !this.viewConfig.showPoints
-    setIcon(this.toggleTimestampButton, this.viewConfig.showPoints ? 'customScatterChart' : 'customScatterChartCrossed')
-    return this.viewConfig.showPoints
+  handleToggleTimestampsButtonClick(): void {
+    setIcon(this.toggleTimestampButton, this.viewModel.toggleShowPoints ? 'customScatterChart' : 'customScatterChartCrossed')
   }
 
-  handleToggleGroupingButtonClick(): boolean {
-    this.viewConfig.enableGrouping = !this.viewConfig.enableGrouping
-    setIcon(this.toggleEventGroupingButton, this.viewConfig.enableGrouping ? 'group' : 'customGroupCrossed')
-    return this.viewConfig.enableGrouping
+  handleToggleGroupingButtonClick(): void {
+    setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping ? 'group' : 'customGroupCrossed')
   }
 
   /**

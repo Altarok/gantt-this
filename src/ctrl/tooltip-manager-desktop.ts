@@ -97,28 +97,28 @@ export default class TooltipManager implements HoverParent {
     return {target, ganttItem}
   }
 
-  private setTooltipContent(d: GanttItem, tooltip: HTMLElement) {
+  private setTooltipContent(event: GanttItem, tooltip: HTMLElement) {
 
     const g = tooltip.createDiv({cls: Css.tooltip.tooltip})
 
-    const tooltipTitle = (d.name || d.file.basename) + this.getTooltipTitleSuffix(d)
+    const tooltipTitle = (event.name || event.file.basename) + this.getTooltipTitleSuffix(event)
 
 
     g.createDiv({text: tooltipTitle, cls: Css.tooltip.title})
 
     const table = g.createEl('table', {cls: Css.tooltip.table})
 
-    if (d.isRecurringInstance) {
-      this.addRepeaterEventSuffix(g, d)
+    if (event.isRecurringInstance) {
+      this.addRepeaterEventSuffix(g, event)
     }
 
     g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
 
     if (this.hasSelectedBaseProperties) {
-      const success = this.createBasesTooltipContent(table, d)
-      if (!success) table.textContent = this.createFallbackTooltipContent(d) // fallback
+      const success = this.createBasesTooltipContent(table, event)
+      if (!success) table.textContent = this.createFallbackTooltipContent(event) // fallback
     } else {
-      table.textContent = this.createFallbackTooltipContent(d)
+      table.textContent = this.createFallbackTooltipContent(event)
     }
   }
 
@@ -265,12 +265,12 @@ export default class TooltipManager implements HoverParent {
    */
   private updateLine(ganttItem: GanttItem, line: VerticalOverlay, x: number) {
 
-    const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.viewConfig.margin.top
+    const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.viewModel.margin.top
 
     const xS = String(x)
 
     line.upper.setAttribute('x1', xS)
-    line.upper.setAttribute('y1', String(this.engine.viewConfig.margin.top))
+    line.upper.setAttribute('y1', String(this.engine.viewModel.margin.top))
     line.upper.setAttribute('x2', xS)
     line.upper.setAttribute('y2', String(totalChartHeight))
 
@@ -432,7 +432,9 @@ export default class TooltipManager implements HoverParent {
   }
 
   private getTooltipTitleSuffix(d: GanttItem) {
-    return this.addDaySuffixToTooltipTitle ? ` (day ${d.startDays})` : ''
+    if (!this.addDaySuffixToTooltipTitle) return ''
+    if (!isNaN(d.endDays) && d.endDays > d.startDays) return ` (days: ${d.startDays} > ${d.endDays})`
+    else return ` (day: ${d.startDays})`
   }
 
   get chartView(): GanttChartView {

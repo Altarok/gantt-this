@@ -9,7 +9,7 @@ import {
   NO_GROUP,
   SvgDrawerData
 } from '../const/types'
-import {Consts, Css} from '../const/constants'
+import {Css} from '../const/constants'
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
@@ -30,20 +30,20 @@ export class GanttRenderEngine {
   view!: GanttChartView
 
   drawnData: GanttItem[] = []
-  hideDays = false
-  hideMonths = false
-  lastWidth = -1
+
+  private currRenderWidth = -1
+  private lastRenderWidth = -1
 
   private resizeRafId: number | null = null
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
-              public readonly codeBlockContent: CodeBlockContent,
-              public readonly basesCtx: BasesContext | null,
-              readonly textCache: TextWidthCache,
-              readonly viewConfig: GanttChartViewModel,
-              readonly svgDrawerUtil: SvgDrawerUtil) {
+              private readonly codeBlockContent: CodeBlockContent,
+              private readonly basesCtx: BasesContext | null,
+              private readonly textCache: TextWidthCache,
+              readonly viewModel: GanttChartViewModel,
+              private readonly svgDrawerUtil: SvgDrawerUtil) {
 
     this.svgDrawerData = this.updateSvgDrawerData()
     this.calculateGlobalBounds()
@@ -74,7 +74,7 @@ export class GanttRenderEngine {
   }
 
   redraw() {
-    return new GanttChartView(this.plugin, this.container, this.viewConfig, this.textCache)
+    return new GanttChartView(this.plugin, this.container, this.viewModel, this.textCache)
   }
 
   private updateSvgDrawerData() {
@@ -90,7 +90,7 @@ export class GanttRenderEngine {
     if (this.rawData.length === 0) {
       const defaultCalendarConfig = this.plugin.calendarConfigsCache.get(this.plugin.settings.defaultCalendar)
       const todayDays = defaultCalendarConfig?.today ?? 0
-      this.viewConfig.setDayRange(todayDays - 15, todayDays + 15)
+      this.viewModel.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
 
@@ -103,24 +103,25 @@ export class GanttRenderEngine {
 
     const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
 
-    this.viewConfig.setDayRange(lowerBound - paddingDays, upperBound + paddingDays)
+    this.viewModel.setDayRange(lowerBound - paddingDays, upperBound + paddingDays)
   }
 
   initLayout() {
     let activeItems: GanttItem[] = this.filterActiveEventData()
 
-    this.viewConfig.activeAxesList = Array.from(new Set(activeItems.map(d => d.calendarType)))
-    Priorities.sortCalendarAxisByPriority(this.viewConfig.activeAxesList, this.svgDrawerData.mappedCalConfigs)
+    this.viewModel.activeCalendars = Array.from(new Set(activeItems.map(d => d.calendarType)))
+
+    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendars, this.svgDrawerData.mappedCalConfigs)
 
     const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.plugin.settings.defaultGroup)))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
-    this.drawnData = Recurring.expandRecurringEvents(this, activeItems)
+    this.drawnData = Recurring.expandRecurringEvents(this, activeItems, this.currRenderWidth)
 
     this.groups = []
-    let currentYOffset = this.viewConfig.margin.top
+    let currentYOffset = this.viewModel.margin.top
 
-    if (this.viewConfig.enableGrouping) {
+    if (this.viewModel.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
       for (const name of groupNames) { /* groupNames is sorted! */
         groupedMap.set(name, [])
@@ -134,9 +135,7 @@ export class GanttRenderEngine {
       groupedMap.forEach((items, groupName) => {
         const {processedData, totalLanes} = this.calculateStacking(items)
         const groupContentLanes = totalLanes > 0 ? totalLanes : 0
-        const groupHeight = /* Math.max(1, totalLanes) */
-          groupContentLanes * this.viewConfig.eventRowHeight + /* this.config.groupHeaderHeight */
-          (this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0)
+        const groupHeight = groupContentLanes * this.viewModel.eventRowHeight + this.viewModel.getGroupHeaderHeight
         this.groups.push({
           name: groupName,
           items: processedData,
@@ -149,8 +148,7 @@ export class GanttRenderEngine {
     } else {
       const {processedData, totalLanes} = this.calculateStacking(this.drawnData)
       const groupContentLanes = totalLanes > 0 ? totalLanes : 0
-      const groupHeight = /* Math.max(1, totalLanes) */
-        groupContentLanes * this.viewConfig.eventRowHeight
+      const groupHeight = groupContentLanes * this.viewModel.eventRowHeight
       this.groups.push({
         name: 'All',
         items: processedData,
@@ -164,8 +162,8 @@ export class GanttRenderEngine {
     /* Before going on, we have to sort groups by their respective priority */
     Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.svgDrawerData.mappedGrpConfigs)
 
-    const combinedAxesHeight = this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight
-    this.viewConfig.totalHeight = currentYOffset + combinedAxesHeight + this.viewConfig.margin.bottom
+    const combinedAxesHeight = this.viewModel.getCalenderCount * this.viewModel.calendarAxisRowHeight
+    this.viewModel.totalHeight = currentYOffset + combinedAxesHeight + this.viewModel.margin.bottom
   }
 
   initEventListener(): void {
@@ -186,67 +184,45 @@ export class GanttRenderEngine {
 
   handleResize(includeViewReset = false) {
 
-    // this.updateWhichDateElementsToHide()
-    const width = this.container.clientWidth
-    if (!width || width <= 0) return
-    // this.view.setWidth(this.getRenderWidth(width))
+    this.currRenderWidth = this.viewModel.calculateRenderWidth
+    if (this.currRenderWidth <= 0) return
 
-    // /* keep focus on chart center */
-    // if (!includeViewReset && this.lastWidth > 0 && this.lastWidth !== width) {
-    //   const oldRenderWidth = this.getRenderWidth(this.lastWidth)
-    //   const newRenderWidth = this.getRenderWidth(width)
-    //   const renderWidthDiff = newRenderWidth - oldRenderWidth
-    //   // this.viewConfig.panTranslateX += (renderWidthDiff / 2) * (1 - this.viewConfig.zoomFactor)
-    //
-    //   const centerPercentage = 0.5
-    //   this.viewConfig.panTranslateX -= renderWidthDiff * centerPercentage * this.viewConfig.zoomFactor
-    //
-    //   // const halfWidthDiff = Math.floor((width - this.lastWidth) / 2)
-    //   // this.viewConfig.panTranslateX += halfWidthDiff
-    // }
-    // this.lastWidth = width
-
-    /// 1
-
-    const oldRenderWidth = this.lastWidth > 0 ? this.getRenderWidth(this.lastWidth) : 0
-    const newRenderWidth = this.getRenderWidth(width)
-
-    if (!includeViewReset && oldRenderWidth > 0 && oldRenderWidth !== newRenderWidth) {
+    if (!includeViewReset && this.lastRenderWidth > 0 && this.lastRenderWidth !== this.currRenderWidth) {
       // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
-      const totalDaysSpan = this.viewConfig.maxDays - this.viewConfig.minDays
-      const oldCenterPixel = oldRenderWidth / 2
+      const totalDaysSpan = this.viewModel.totalDaysSpan
+      const oldCenterPixel = this.lastRenderWidth / 2
 
       // Invertierte Formel von getXPosition, um 'centerDay' zu bestimmen:
       // centerPixel = percentage * oldRenderWidth * zoomFactor + panTranslateX
-      const centerPercentage = (oldCenterPixel - this.viewConfig.panTranslateX) / (oldRenderWidth * this.viewConfig.zoomFactor)
-      const centerDays = this.viewConfig.minDays + (centerPercentage * totalDaysSpan)
+      const centerPercentage = (oldCenterPixel - this.viewModel.panTranslateX) / (this.lastRenderWidth * this.viewModel.zoomFactor)
+      const centerDays = this.viewModel.minDays + (centerPercentage * totalDaysSpan)
 
       // 2. Setze lastWidth neu
-      this.lastWidth = width
+      this.lastRenderWidth = this.currRenderWidth
 
       // 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt
-      const newCenterPercentage = (centerDays - this.viewConfig.minDays) / totalDaysSpan
-      this.viewConfig.panTranslateX = (newRenderWidth / 2) - (newCenterPercentage * newRenderWidth * this.viewConfig.zoomFactor)
+      const newCenterPercentage = (centerDays - this.viewModel.minDays) / totalDaysSpan
+      this.viewModel.panTranslateX = (this.currRenderWidth / 2) - (newCenterPercentage * this.currRenderWidth * this.viewModel.zoomFactor)
     } else {
-      this.lastWidth = width
+      this.lastRenderWidth = this.currRenderWidth
     }
 
     /// 2
 
-    // console.log('handleResize', includeViewReset, width, this.viewConfig.panTranslateX)
+    // console.log('handleResize', includeViewReset, width, this.viewModel.panTranslateX)
 
     if (includeViewReset &&
       /* Re-evaluate predefined bounds now that we have the true container width */
       (this.codeBlockContent.lowerBoundDateParsed || this.codeBlockContent.upperBoundDateParsed || this.codeBlockContent.centerHereDateParsed)) {
-      this.transitionToPredefinedBounds(width)
+      this.transitionToPredefinedBounds()
     }
 
-    this.view.setWidth(this.getRenderWidth(width))
+    this.view.setWidth(this.currRenderWidth)
 
     this.drawGroupBackgrounds()
     // try {// Code that might crash
-    this.renderData(width)
-    this.drawAxes(width, includeViewReset)
+    this.renderData()
+    this.drawAxes(includeViewReset)
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
@@ -261,7 +237,7 @@ export class GanttRenderEngine {
   private drawGroupBackgrounds() {
     this.view.clearGroupBackground()
 
-    if (!this.viewConfig.enableGrouping) return
+    if (!this.viewModel.enableGrouping) return
 
     this.groups.forEach((g, i) => {
       const isEvenGroup = i % 2 === 0
@@ -269,7 +245,7 @@ export class GanttRenderEngine {
     })
   }
 
-  private mapLaneItems(group: GanttGroup, width: number): Map<number, GanttItem[]> {
+  private mapLaneItems(group: GanttGroup): Map<number, GanttItem[]> {
     const laneItemsMap = new Map<number, GanttItem[]>()
     group.items.forEach(item => {
       const lane = item.lane ?? 0
@@ -277,51 +253,51 @@ export class GanttRenderEngine {
       laneItemsMap.get(lane)?.push(item)
     })
     laneItemsMap.forEach(items => {
-      items.sort((a, b) => this.getXPosition(a.startDays, width) - this.getXPosition(b.startDays, width))
+      items.sort((a, b) => this.getXPosition(a.startDays) - this.getXPosition(b.startDays))
     })
     return laneItemsMap
   }
 
-  renderData(width: number) {
+  renderData() {
     // console.log('renderData', {
     //   containerClientWidth: this.container.clientWidth,
     //   renderWidth: this.getRenderWidth(width),
-    //   panTranslateX: this.viewConfig.panTranslateX,
-    //   sampleX: this.getXPosition(this.viewConfig.minDays, width)
+    //   panTranslateX: this.viewModel.panTranslateX,
+    //   sampleX: this.getXPosition(this.viewModel.minDays, width)
     // })
 
     this.view.clearEventLayer()
 
-    const halfRowHeight = this.viewConfig.eventRowHeightHalf
-    const firstYValue = this.viewConfig.margin.top
+    const halfRowHeight = this.viewModel.eventRowHeightHalf
+    const firstYValue = this.viewModel.margin.top
     const totalChartHeight = this.calculateTotalChartHeight()
 
-    const headerHeight = this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0
+    const headerHeight = this.viewModel.getGroupHeaderHeight
 
     // console.log('renderData > width', width)
 
     this.groups.forEach(group => {
-      const groupContentHeight = (group.lanes ?? 1) * this.viewConfig.eventRowHeight
+      const groupContentHeight = (group.lanes ?? 1) * this.viewModel.eventRowHeight
       const totalGroupHeight = headerHeight + groupContentHeight
       const groupYStart = group.yOffset + headerHeight
 
-      const laneItemsMap: Map<number, GanttItem[]> = this.mapLaneItems(group, width)
+      const laneItemsMap: Map<number, GanttItem[]> = this.mapLaneItems(group)
 
       group.items.forEach((d: GanttItem) => {
         const lane = d.lane
-        const laneY = groupYStart + (lane ?? 0) * this.viewConfig.eventRowHeight
+        const laneY = groupYStart + (lane ?? 0) * this.viewModel.eventRowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
-        const x1 = this.getXPosition(d.startDays, width)
-        const x2 = (d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays, width)
-        const renderWidth = this.getRenderWidth(width)
+        const x1 = this.getXPosition(d.startDays)
+        const x2 = (d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays)
+        // const renderWidth = this.getRenderWidth(width)
 
         // Calculate available width for timestamp text (Method 1)
         const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
         const currentIndex = currentLaneItems.indexOf(d)
         const nextItem = currentIndex !== -1 ? currentLaneItems[currentIndex + 1] : undefined
 
-        const nextX = nextItem ? this.getXPosition(nextItem.startDays, width) : renderWidth
+        const nextX = nextItem ? this.getXPosition(nextItem.startDays) : this.currRenderWidth
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
         const svgLayer = d.isRecurringInstance ? this.view.repeaterEventLayer : this.view.eventLayer
 
@@ -366,37 +342,31 @@ export class GanttRenderEngine {
 
   calculateTotalChartHeight() {
     return this.groups.reduce((acc, g) => {
-      const header = this.viewConfig.enableGrouping ? this.viewConfig.groupHeaderHeight : 0
-      const content = (g.lanes ?? 1) * this.viewConfig.eventRowHeight
-      return acc + header + content
+      const content = (g.lanes ?? 1) * this.viewModel.eventRowHeight
+      return acc + this.viewModel.getGroupHeaderHeight + content
     }, 0)
   }
 
-  private calculateEventsAreaHeight() {
-    return this.viewConfig.totalHeight - this.viewConfig.margin.bottom -
-      (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
-  }
-
-  private drawAxes(renderWidth: number, completeReset = false) {
+  private drawAxes(completeReset = false) {
     this.view.clearCalendarLayer(completeReset)
     // const renderWidth = this.getRenderWidth()
 
-    const itemsAreaHeight = this.calculateEventsAreaHeight()
+    const itemsAreaHeight = this.viewModel.eventsAreaHeight
 
-    this.viewConfig.stepDays = this.tickStepInDays
+    this.viewModel.stepDays = this.tickStepInDays
 
-    const startDaysValue = Math.floor(this.viewConfig.minDays / this.viewConfig.stepDays) * this.viewConfig.stepDays - this.viewConfig.stepDays
-    const endDaysValue = Math.ceil(this.viewConfig.maxDays / this.viewConfig.stepDays) * this.viewConfig.stepDays + this.viewConfig.stepDays
+    const startDaysValue = Math.floor(this.viewModel.minDays / this.viewModel.stepDays) * this.viewModel.stepDays - this.viewModel.stepDays
+    const endDaysValue = Math.ceil(this.viewModel.maxDays / this.viewModel.stepDays) * this.viewModel.stepDays + this.viewModel.stepDays
 
-    this.viewConfig.activeAxesList.forEach((calType, index) => {
+    this.viewModel.activeCalendars.forEach((calType, index) => {
 
-      const currentAxisYStart = itemsAreaHeight + (index * this.viewConfig.calendarAxisRowHeight)
-      const tickPixelSpacing = (this.viewConfig.stepDays / (this.viewConfig.maxDays - this.viewConfig.minDays)) * renderWidth * this.viewConfig.zoomFactor
+      const currentAxisYStart = itemsAreaHeight + (index * this.viewModel.calendarAxisRowHeight)
+      const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
       const showMoonPhases: boolean = this.plugin.settings.uxShowMoons && tickPixelSpacing >= 24
 
       this.svgDrawerData.drawnCals[calType] = {
         y1: currentAxisYStart,
-        y2: currentAxisYStart + this.viewConfig.calendarAxisRowHeight - 1
+        y2: currentAxisYStart + this.viewModel.calendarAxisRowHeight - 1
       }
 
       // const individualAxisG = createSvg('g')
@@ -424,15 +394,15 @@ export class GanttRenderEngine {
       const absoluteStartDay = Math.max(startDaysValue, calStart)
       const absoluteEndDay = Math.min(endDaysValue, calEnd)
 
-      const pixelsPerDay = (renderWidth / (this.viewConfig.maxDays - this.viewConfig.minDays)) * this.viewConfig.zoomFactor
-      const visibleMinDays = this.viewConfig.minDays + (-this.viewConfig.panTranslateX / pixelsPerDay)
-      const visibleMaxDays = visibleMinDays + (renderWidth / pixelsPerDay)
+      const pixelsPerDay = (this.currRenderWidth / (this.viewModel.totalDaysSpan)) * this.viewModel.zoomFactor
+      const visibleMinDays = this.viewModel.minDays + (-this.viewModel.panTranslateX / pixelsPerDay)
+      const visibleMaxDays = visibleMinDays + (this.currRenderWidth / pixelsPerDay)
 
       const effectiveStartDay = Math.max(startDaysValue, calStart, visibleMinDays - 1)
       const effectiveEndDay = Math.min(endDaysValue, calEnd, visibleMaxDays + 1)
 
-      const startX = effectiveStartDay <= visibleMinDays ? 0 : this.getXPosition(effectiveStartDay, renderWidth)
-      const endX = effectiveEndDay >= visibleMaxDays ? renderWidth : this.getXPosition(effectiveEndDay, renderWidth)
+      const startX = effectiveStartDay <= visibleMinDays ? 0 : this.getXPosition(effectiveStartDay)
+      const endX = effectiveEndDay >= visibleMaxDays ? this.currRenderWidth : this.getXPosition(effectiveEndDay)
 
       const baseline = createSvg('line', Css.axis.baseline, {
         x1: startX, y1: 0, x2: endX, y2: 0, 'stroke-width': 2.5, stroke: axisColor
@@ -464,11 +434,11 @@ export class GanttRenderEngine {
       //   ticksG.appendChild(title)
       // }
 
-      for (let currDays = absoluteStartDay; currDays <= absoluteEndDay; currDays += this.viewConfig.stepDays) {
+      for (let currDays = absoluteStartDay; currDays <= absoluteEndDay; currDays += this.viewModel.stepDays) {
         if (currDays < effectiveStartDay - 1) continue
         if (currDays > effectiveEndDay + 1) break
-        const xPos = this.getXPosition(currDays, renderWidth)
-        if (xPos < 0 || xPos > renderWidth) continue
+        const xPos = this.getXPosition(currDays)
+        if (xPos < 0 || xPos > this.currRenderWidth) continue
 
         /* Draw vertical gridlines into dedicated grid container */
         if (index === 0) {
@@ -483,7 +453,7 @@ export class GanttRenderEngine {
 
         if (xPos - lastTextX > 80) {
           const text = createSvg('text', Css.axis.text, {x: xPos, y: 20})
-          text.textContent = createAxisDateDescription(currDays, calendarConfig, false, this.hideDays, this.hideMonths)
+          text.textContent = createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths)
 
           ticksG.appendChild(text)
           lastTextX = xPos
@@ -491,8 +461,9 @@ export class GanttRenderEngine {
       }
 
       if (showMoonPhases && calendarConfig.moons) {
-        drawMoons(this, ticksG, renderWidth, calendarConfig, startDaysValue, endDaysValue,
-          effectiveStartDay, effectiveEndDay, renderWidth)
+        // TODO remove double param!!
+        drawMoons(this, ticksG, calendarConfig, startDaysValue, endDaysValue,
+          effectiveStartDay, effectiveEndDay, this.currRenderWidth)
       }
 
       if (completeReset && calBadgeTextContent) {
@@ -503,7 +474,7 @@ export class GanttRenderEngine {
 
   resetZoom() {
     if (this.eventManager?.isDragging) return
-    this.viewConfig.resetPanAndZoom()
+    this.viewModel.resetPanAndZoom()
     this.handleViewReset()
   }
 
@@ -515,20 +486,20 @@ export class GanttRenderEngine {
     // console.log('zoom >', factor, focusX)
     if (Math.abs(1 - factor) < 0.01) return // ignore micro-pinch zooms
 
-    const renderWidth = this.getRenderWidth()
+    const renderWidth = this.currRenderWidth
     if (this.eventManager?.isDragging || renderWidth <= 1) return
     if (this.plugin.settings.autoRestrictZoom) {
-      if (factor < 1 && this.viewConfig.zoomFactor < 0.5) /* No zoom-out when already min */
+      if (factor < 1 && this.viewModel.zoomFactor < 0.5) /* No zoom-out when already min */
         return
       else if (factor > 1) { /* No zoom-in when already max */
-        const daysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
+        const daysSpan = (this.viewModel.totalDaysSpan) / this.viewModel.zoomFactor
         if (daysSpan <= 4) return
       }
     }
 
     const centerX = focusX ?? renderWidth / 2
 
-    const oldScale = this.viewConfig.zoomFactor
+    const oldScale = this.viewModel.zoomFactor
     let newScale = oldScale * factor
     if (this.plugin.settings.autoRestrictZoom) {
       if (newScale < 0.5) newScale = 0.5  /* Prevent further zoom-out when already min */
@@ -537,15 +508,13 @@ export class GanttRenderEngine {
     this.updateWhichDateElementsToHide()
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
-    this.viewConfig.setPanAndZoom(centerX - (centerX - this.viewConfig.panTranslateX) * (newScale / oldScale), newScale)
+    this.viewModel.setPanAndZoom(centerX - (centerX - this.viewModel.panTranslateX) * (newScale / oldScale), newScale)
     this.handlePanOrZoom()
   }
 
   private updateWhichDateElementsToHide() {
     const updatedTickStepInDays = this.tickStepInDays
-    this.hideDays = updatedTickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_DAYS
-    this.hideMonths = updatedTickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_MONTHS
-    // console.log('updateWhichDateElementsToHide > hideDays', this.hideDays, 'hideMonths',this.hideMonths )
+    this.viewModel.updateWhichDateElementsToHide(updatedTickStepInDays)
   }
 
   /**
@@ -555,19 +524,19 @@ export class GanttRenderEngine {
   panRelative(percentage: number) {
     // console.log('panRelative > percentage', percentage)
     if (this.eventManager?.isDragging) return /* Triggered by buttons */
-    this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
+    this.viewModel.panTranslateX += this.currRenderWidth * percentage
     this.handlePanOrZoom()
   }
 
   panDiff(shift: number) {
     // console.log('panDiff > shift', shift)
-    this.viewConfig.panTranslateX += shift
+    this.viewModel.panTranslateX += shift
     this.handlePanOrZoom()
   }
 
   panAbsolute(value: number) {
     // console.log('panAbsolute > value', value)
-    this.viewConfig.panTranslateX = value
+    this.viewModel.panTranslateX = value
     this.handlePanOrZoom()
   }
 
@@ -583,53 +552,53 @@ export class GanttRenderEngine {
     this.eventManager?.destroy()
   }
 
-  private transitionToPredefinedBounds(width: number): void {
+  private transitionToPredefinedBounds(): void {
 
     const lower = this.codeBlockContent.lowerBoundDateParsed?.days
     const upper = this.codeBlockContent.upperBoundDateParsed?.days
     const center = this.codeBlockContent.centerHereDateParsed?.days
 
-    const totalRange = this.viewConfig.maxDays - this.viewConfig.minDays
+    const totalRange = this.viewModel.totalDaysSpan
     if (totalRange <= 0) {
       // console.log('transitionToPredefinedBounds > resetPanAndZoom')
-      this.viewConfig.resetPanAndZoom()
+      this.viewModel.resetPanAndZoom()
       return
     }
 
-    const renderWidth = this.getRenderWidth(width)
+    const renderWidth = this.currRenderWidth
 
     // Case A: Predefined min and/or max bounds supplied
     if (lower !== undefined || upper !== undefined) {
-      const targetMin = lower ?? this.viewConfig.minDays
-      const targetMax = upper ?? this.viewConfig.maxDays
+      const targetMin = lower ?? this.viewModel.minDays
+      const targetMax = upper ?? this.viewModel.maxDays
       const targetRange = targetMax - targetMin
 
       if (targetRange > 0) {
-        this.viewConfig.zoomFactor = totalRange / targetRange
+        this.viewModel.zoomFactor = totalRange / targetRange
         // Pixel position of targetMin at scale 1:
-        const minXAtScale1 = ((targetMin - this.viewConfig.minDays) / totalRange) * renderWidth
+        const minXAtScale1 = ((targetMin - this.viewModel.minDays) / totalRange) * renderWidth
         // Shift targetMin to pixel X = 0 under the new zoomScale:
-        this.viewConfig.panTranslateX = -(minXAtScale1 * this.viewConfig.zoomFactor)
-        // console.log('transitionToPredefinedBounds > panTranslateX', this.viewConfig.panTranslateX)
+        this.viewModel.panTranslateX = -(minXAtScale1 * this.viewModel.zoomFactor)
+        // console.log('transitionToPredefinedBounds > panTranslateX', this.viewModel.panTranslateX)
         return
       }
     }
 
     // Case B: Single center point specified
     if (center !== undefined) {
-      const currentScale = this.viewConfig.zoomFactor > 0 ? this.viewConfig.zoomFactor : 1
-      this.viewConfig.zoomFactor = currentScale
+      const currentScale = this.viewModel.zoomFactor > 0 ? this.viewModel.zoomFactor : 1
+      this.viewModel.zoomFactor = currentScale
 
-      const centerXAtScale1 = ((center - this.viewConfig.minDays) / totalRange) * renderWidth
+      const centerXAtScale1 = ((center - this.viewModel.minDays) / totalRange) * renderWidth
       const centerXZoomed = centerXAtScale1 * currentScale
 
       // Center the target day in the middle of renderWidth:
-      this.viewConfig.panTranslateX = (renderWidth / 2) - centerXZoomed
+      this.viewModel.panTranslateX = (renderWidth / 2) - centerXZoomed
       return
     }
 
     // Default: Full view reset
-    this.viewConfig.resetPanAndZoom()
+    this.viewModel.resetPanAndZoom()
   }
 
   private calculateStacking(items: GanttItem[]): { processedData: GanttItem[], totalLanes: number } {
@@ -674,23 +643,23 @@ export class GanttRenderEngine {
     return {processedData, totalLanes: lanes.length}
   }
 
-  getXPosition(days: number, width?: number): number {
+  getXPosition(days: number): number {
     // console.log('getXPosition', {
     //   containerClientWidth: this.container.clientWidth,
     //   renderWidth: this.getRenderWidth(width),
-    //   panTranslateX: this.viewConfig.panTranslateX
-    //   // sampleX: this.getXPosition(this.viewConfig.minDays, width)
+    //   panTranslateX: this.viewModel.panTranslateX
+    //   // sampleX: this.getXPosition(this.viewModel.minDays, width)
     // })
 
-    if (this.viewConfig.maxDays <= this.viewConfig.minDays) {
+    if (this.viewModel.maxDays <= this.viewModel.minDays) {
       // console.log('WTF')
       // debugger
-      return this.viewConfig.panTranslateX
+      return this.viewModel.panTranslateX
     } // fail-safe
 
-    const renderWidth = this.getRenderWidth(width)
-    const percentage = (days - this.viewConfig.minDays) / (this.viewConfig.maxDays - this.viewConfig.minDays)
-    return (percentage * renderWidth * this.viewConfig.zoomFactor) + this.viewConfig.panTranslateX
+    const renderWidth = this.currRenderWidth
+    const percentage = (days - this.viewModel.minDays) / (this.viewModel.totalDaysSpan)
+    return (percentage * renderWidth * this.viewModel.zoomFactor) + this.viewModel.panTranslateX
   }
 
   // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
@@ -703,10 +672,10 @@ export class GanttRenderEngine {
     return this.view.eventLayer.querySelector<T>(selector)
   }
 
-  getRenderWidth(width?: number) {
-    const containerWidth = width ?? this.container.clientWidth
-    return Math.max(1, containerWidth - this.viewConfig.margin.left - this.viewConfig.margin.right)
-  }
+  // getRenderWidth(width?: number) {
+  //   const containerWidth = width ?? this.container.clientWidth
+  //   return Math.max(1, containerWidth - this.viewModel.margin.left - this.viewModel.margin.right)
+  // }
 
   filterActiveEventData(): GanttItem[] {
     const {mappedGrpConfigs, mappedCalConfigs} = this.svgDrawerData
@@ -720,18 +689,16 @@ export class GanttRenderEngine {
 
       if (GanttItemDisplayTypes.isTimespan(d.displayType)) switch (d.displayType) {
         case "bar":
-          return this.viewConfig.showBars
+          return this.viewModel.showBars
         case "era":
-          return this.viewConfig.showEras
-      } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) return this.viewConfig.showPoints
+          return this.viewModel.showEras
+      } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) return this.viewModel.showPoints
       else return false
     })
   }
 
   private get tickStepInDays(): number {
-    const renderWidth = this.getRenderWidth()
-    const totalDaysSpan = (this.viewConfig.maxDays - this.viewConfig.minDays) / this.viewConfig.zoomFactor
-    return Math.max(1, Math.floor(totalDaysSpan / (renderWidth / 120)))
+    return Math.max(1, Math.floor(this.viewModel.totalDaysSpanRelativeToZoom / (this.currRenderWidth / 120)))
   }
 
 }

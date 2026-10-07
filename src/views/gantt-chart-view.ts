@@ -32,7 +32,7 @@ export class GanttChartView {
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly container: HTMLElement,
-              readonly viewConfig: GanttChartViewModel,
+              readonly viewModel: GanttChartViewModel,
               readonly textCache: TextWidthCache) {
 
     this.container.empty()
@@ -46,9 +46,8 @@ export class GanttChartView {
      */
     this.svg = this.container.createSvg('svg', {
       cls: Css.svg.canvas,
-      attr: {height: this.viewConfig.totalHeight.toString()}
+      attr: {height: this.viewModel.totalHeight.toString()}
     })
-    // this.svg.setAttribute('height', this.viewConfig.totalHeight.toString())
 
     ManualSvg.addArrowTipAsSvgDef(this.svg)
 
@@ -61,7 +60,7 @@ export class GanttChartView {
      * TODO create a chart specific ID (e.g. gantt-clip-UUID)
      */
     const clipPath = defs.createSvg('clipPath', {attr: {id: 'gantt-clip'}})
-    const eventsAreaHeight = this.calculateEventsAreaHeight()
+    const eventsAreaHeight = this.viewModel.eventsAreaHeight
     this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
     this.gridLayer = this.foregroundLayer.createSvg('g')
@@ -75,11 +74,6 @@ export class GanttChartView {
     this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
     this.eventLayer = this.dataLayer.createSvg('g')
     this.upperHoverLayer = this.dataLayer.createSvg('g')
-  }
-
-  private calculateEventsAreaHeight() {
-    return this.viewConfig.totalHeight - this.viewConfig.margin.bottom -
-      (this.viewConfig.activeAxesList.length * this.viewConfig.calendarAxisRowHeight)
   }
 
   clearEventLayer() {

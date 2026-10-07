@@ -101,21 +101,21 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: C
  *
  * @param engine
  * @param items
+ * @param renderWidth
  */
-function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[]): GanttItem[] {
+function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[], renderWidth: number): GanttItem[] {
   const doubleIconSize = 2 * engine.plugin.settings.viewEventIconHeight
   const expanded: GanttItem[] = []
 
-  const renderWidth = engine.getRenderWidth()
-  const totalDaysSpan = engine.viewConfig.maxDays - engine.viewConfig.minDays
+  const totalDaysSpan = engine.viewModel.totalDaysSpan
   if (totalDaysSpan <= 0) return items
 
-  const pixelsPerDay = (renderWidth / totalDaysSpan) * engine.viewConfig.zoomFactor
+  const pixelsPerDay = (renderWidth / totalDaysSpan) * engine.viewModel.zoomFactor
   if (pixelsPerDay <= 0) return items
 
   // Compute exact start/end days currently visible on the physical screen
-  const panX = engine.viewConfig.panTranslateX
-  const visibleMinDays = engine.viewConfig.minDays + (-panX / pixelsPerDay)
+  const panX = engine.viewModel.panTranslateX
+  const visibleMinDays = engine.viewModel.minDays + (-panX / pixelsPerDay)
   const visibleMaxDays = visibleMinDays + (renderWidth / pixelsPerDay)
 
   for (const item of items) {
@@ -251,7 +251,7 @@ function duplicateEventWithDayDelta(item: GanttItem,
 
   // 1. Get real bounds of event's rule
   const ruleStart = item.repeatRule.startDay !== -Infinity ? Math.max(item.startDays, item.repeatRule.startDay) : item.startDays
-  const ruleEnd = item.repeatRule.endDay !== +Infinity ? item.repeatRule.endDay : renderEngine.viewConfig.maxDays
+  const ruleEnd = item.repeatRule.endDay !== +Infinity ? item.repeatRule.endDay : renderEngine.viewModel.maxDays
 
   // 2. Intersect rule bounds strictly with physical screen viewport (+/- 1 step buffer)
   const renderMin = Math.max(ruleStart, visibleMinDays - step)

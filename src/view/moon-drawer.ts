@@ -4,7 +4,6 @@ import {drawMoonPhase} from './svg-drawer-util'
 
 export function drawMoons(engine: GanttRenderEngine,
                           ticksG: SVGGElement,
-                          width: number,
                           calendarConfig: CalendarConfig,
                           startDaysValue: number,
                           endDaysValue: number,
@@ -22,8 +21,8 @@ export function drawMoons(engine: GanttRenderEngine,
 
     // Pixel distance for a 1/4 cycle step (quarter moon to quarter moon)
     const quarterCycleDays = L / 4
-    const x0 = engine.getXPosition(startDaysValue, width)
-    const xQuarter = engine.getXPosition(startDaysValue + quarterCycleDays, width)
+    const x0 = engine.getXPosition(startDaysValue)
+    const xQuarter = engine.getXPosition(startDaysValue + quarterCycleDays)
     const quarterCyclePixels = Math.abs(xQuarter - x0)
 
     // Pixel distance for a 1/2 cycle step (New to Full)
@@ -57,22 +56,22 @@ export function drawMoons(engine: GanttRenderEngine,
     for (let k = minK; k <= maxK; k++) {
       // 1. New Moon (Progress 0.0) -> Phase Index 0
       const newMoonDay = k * L - O
-      renderPhaseIfVisible(engine.getXPosition(newMoonDay, width), newMoonDay, 0)
+      renderPhaseIfVisible(engine.getXPosition(newMoonDay), newMoonDay, 0)
 
       // 2. First Quarter (Progress 0.25) -> Phase Index 1
       if (showQuarterPhases) {
         const firstQuarterDay = (k + 0.25) * L - O
-        renderPhaseIfVisible(engine.getXPosition(firstQuarterDay, width), firstQuarterDay, 1)
+        renderPhaseIfVisible(engine.getXPosition(firstQuarterDay), firstQuarterDay, 1)
       }
 
       // 3. Full Moon (Progress 0.5) -> Phase Index 2
       const fullMoonDay = (k + 0.5) * L - O
-      renderPhaseIfVisible(engine.getXPosition(fullMoonDay, width), fullMoonDay, 2)
+      renderPhaseIfVisible(engine.getXPosition(fullMoonDay), fullMoonDay, 2)
 
       // 4. Third Quarter (Progress 0.75) -> Phase Index 3
       if (showQuarterPhases) {
         const thirdQuarterDay = (k + 0.75) * L - O
-        renderPhaseIfVisible(engine.getXPosition(thirdQuarterDay, width), thirdQuarterDay, 3)
+        renderPhaseIfVisible(engine.getXPosition(thirdQuarterDay), thirdQuarterDay, 3)
       }
     }
   })

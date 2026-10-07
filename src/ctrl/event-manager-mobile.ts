@@ -21,10 +21,10 @@ export class GanttMobileEventManager implements GanttEventManager {
   private readonly boundSvgTouchStart: (e: TouchEvent) => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  viewConfig: GanttChartViewModel
+  private readonly viewModel: GanttChartViewModel
 
   constructor(private engine: GanttRenderEngine) {
-    this.viewConfig = engine.viewConfig
+    this.viewModel = engine.viewModel
 
     this.boundWindowTouchMove = this.handleTouchMove.bind(this)
     this.boundWindowTouchEnd = this.handleTouchEnd.bind(this)
@@ -92,7 +92,7 @@ export class GanttMobileEventManager implements GanttEventManager {
       this.isDragging = true
       this.isPinching = false
       this.startX = touch.clientX
-      this.startTranslateX = this.viewConfig.panTranslateX
+      this.startTranslateX = this.viewModel.panTranslateX
       this.touchStartPos = {x: touch.clientX, y: touch.clientY}
     } else if (e.touches.length === 2) {
       this.isDragging = false
@@ -128,7 +128,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     if (currentDistance === 0) return
 
     const rect = this.svg.getBoundingClientRect()
-    const touchMidX = (t1.clientX + t2.clientX) / 2 - rect.left - this.engine.viewConfig.margin.left
+    const touchMidX = (t1.clientX + t2.clientX) / 2 - rect.left - this.engine.viewModel.margin.left
 
     const frameFactor = currentDistance / this.pinchDistance
     this.pinchDistance = currentDistance

@@ -7,9 +7,9 @@ import {getGanttDataFromFolder, parseFiles} from '../io/event-frontmatter-reader
 import {ToolbarView} from '../views/toolbar-view'
 import {setToolbarReactions} from '../ctrl/toolbar-controller'
 import TextWidthCache from './text-space-cache'
-import {GanttChartModelImpl} from '../model/gantt-chart-model'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import BasesContext from '../util/bases-context'
+import {GanttChartViewModel} from '../model/gantt-chart-model'
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
@@ -90,7 +90,7 @@ export default class GanttRender {
       chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
-    const ganttChartModel = new GanttChartModelImpl(this.plugin)
+    const ganttChartModel = new GanttChartViewModel(this.plugin, chartContainer)
 
     const tv = new ToolbarView(toolbarContainer, this.plugin, ganttChartModel, refreshChartCallback)
 
