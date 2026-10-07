@@ -107,7 +107,7 @@ export class GanttChartModelImpl implements GanttChartViewModel {
   }
 
   setDayRange(min: number, max: number) {
-    console.log('setDayRange', 'min', min, 'max', max)
+    // console.log('setDayRange', 'min', min, 'max', max)
     this.minDays = min
     this.maxDays = max // TODO add with fixed zoom range max: Math.max(min + 1, max)
   }

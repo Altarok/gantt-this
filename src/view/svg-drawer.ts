@@ -53,8 +53,8 @@ export class GanttRenderEngine {
     this.handleResize(true)
 
     this.resizeObserver = new ResizeObserver(() => {
-      if (this.resizeRafId !== null) cancelAnimationFrame(this.resizeRafId)
-      this.resizeRafId = requestAnimationFrame(() => {
+      if (this.resizeRafId !== null) window.cancelAnimationFrame(this.resizeRafId)
+      this.resizeRafId = window.requestAnimationFrame(() => {
         this.handleResize()
         this.resizeRafId = null
       })
@@ -191,18 +191,49 @@ export class GanttRenderEngine {
     if (!width || width <= 0) return
     // this.view.setWidth(this.getRenderWidth(width))
 
-    /* keep focus on chart centre */
+    // /* keep focus on chart center */
     // if (!includeViewReset && this.lastWidth > 0 && this.lastWidth !== width) {
     //   const oldRenderWidth = this.getRenderWidth(this.lastWidth)
     //   const newRenderWidth = this.getRenderWidth(width)
     //   const renderWidthDiff = newRenderWidth - oldRenderWidth
-    //   this.viewConfig.panTranslateX += (renderWidthDiff / 2) * (1 - this.viewConfig.zoomFactor)
+    //   // this.viewConfig.panTranslateX += (renderWidthDiff / 2) * (1 - this.viewConfig.zoomFactor)
+    //
+    //   const centerPercentage = 0.5
+    //   this.viewConfig.panTranslateX -= renderWidthDiff * centerPercentage * this.viewConfig.zoomFactor
+    //
     //   // const halfWidthDiff = Math.floor((width - this.lastWidth) / 2)
     //   // this.viewConfig.panTranslateX += halfWidthDiff
     // }
-    this.lastWidth = width
+    // this.lastWidth = width
 
-    console.log('handleResize', includeViewReset, width, this.viewConfig.panTranslateX)
+    /// 1
+
+    const oldRenderWidth = this.lastWidth > 0 ? this.getRenderWidth(this.lastWidth) : 0
+    const newRenderWidth = this.getRenderWidth(width)
+
+    if (!includeViewReset && oldRenderWidth > 0 && oldRenderWidth !== newRenderWidth) {
+      // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
+      const totalDaysSpan = this.viewConfig.maxDays - this.viewConfig.minDays
+      const oldCenterPixel = oldRenderWidth / 2
+
+      // Invertierte Formel von getXPosition, um 'centerDay' zu bestimmen:
+      // centerPixel = percentage * oldRenderWidth * zoomFactor + panTranslateX
+      const centerPercentage = (oldCenterPixel - this.viewConfig.panTranslateX) / (oldRenderWidth * this.viewConfig.zoomFactor)
+      const centerDays = this.viewConfig.minDays + (centerPercentage * totalDaysSpan)
+
+      // 2. Setze lastWidth neu
+      this.lastWidth = width
+
+      // 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt
+      const newCenterPercentage = (centerDays - this.viewConfig.minDays) / totalDaysSpan
+      this.viewConfig.panTranslateX = (newRenderWidth / 2) - (newCenterPercentage * newRenderWidth * this.viewConfig.zoomFactor)
+    } else {
+      this.lastWidth = width
+    }
+
+    /// 2
+
+    // console.log('handleResize', includeViewReset, width, this.viewConfig.panTranslateX)
 
     if (includeViewReset &&
       /* Re-evaluate predefined bounds now that we have the true container width */
@@ -252,6 +283,13 @@ export class GanttRenderEngine {
   }
 
   renderData(width: number) {
+    // console.log('renderData', {
+    //   containerClientWidth: this.container.clientWidth,
+    //   renderWidth: this.getRenderWidth(width),
+    //   panTranslateX: this.viewConfig.panTranslateX,
+    //   sampleX: this.getXPosition(this.viewConfig.minDays, width)
+    // })
+
     this.view.clearEventLayer()
 
     const halfRowHeight = this.viewConfig.eventRowHeightHalf
@@ -474,7 +512,7 @@ export class GanttRenderEngine {
    * @param focusX optional x value to zoom on
    */
   zoom(factor: number, focusX?: number) {
-    console.log('zoom >', factor, focusX)
+    // console.log('zoom >', factor, focusX)
     if (Math.abs(1 - factor) < 0.01) return // ignore micro-pinch zooms
 
     const renderWidth = this.getRenderWidth()
@@ -515,20 +553,20 @@ export class GanttRenderEngine {
    * @param percentage - positive number shifts view right, negative number shifts view left
    */
   panRelative(percentage: number) {
-    console.log('panRelative > percentage', percentage)
+    // console.log('panRelative > percentage', percentage)
     if (this.eventManager?.isDragging) return /* Triggered by buttons */
     this.viewConfig.panTranslateX += this.getRenderWidth() * percentage
     this.handlePanOrZoom()
   }
 
   panDiff(shift: number) {
-    console.log('panDiff > shift', shift)
+    // console.log('panDiff > shift', shift)
     this.viewConfig.panTranslateX += shift
     this.handlePanOrZoom()
   }
 
   panAbsolute(value: number) {
-    console.log('panAbsolute > value', value)
+    // console.log('panAbsolute > value', value)
     this.viewConfig.panTranslateX = value
     this.handlePanOrZoom()
   }
@@ -553,7 +591,7 @@ export class GanttRenderEngine {
 
     const totalRange = this.viewConfig.maxDays - this.viewConfig.minDays
     if (totalRange <= 0) {
-      console.log('transitionToPredefinedBounds > resetPanAndZoom')
+      // console.log('transitionToPredefinedBounds > resetPanAndZoom')
       this.viewConfig.resetPanAndZoom()
       return
     }
@@ -572,7 +610,7 @@ export class GanttRenderEngine {
         const minXAtScale1 = ((targetMin - this.viewConfig.minDays) / totalRange) * renderWidth
         // Shift targetMin to pixel X = 0 under the new zoomScale:
         this.viewConfig.panTranslateX = -(minXAtScale1 * this.viewConfig.zoomFactor)
-        console.log('transitionToPredefinedBounds > panTranslateX', this.viewConfig.panTranslateX)
+        // console.log('transitionToPredefinedBounds > panTranslateX', this.viewConfig.panTranslateX)
         return
       }
     }
@@ -637,9 +675,16 @@ export class GanttRenderEngine {
   }
 
   getXPosition(days: number, width?: number): number {
+    // console.log('getXPosition', {
+    //   containerClientWidth: this.container.clientWidth,
+    //   renderWidth: this.getRenderWidth(width),
+    //   panTranslateX: this.viewConfig.panTranslateX
+    //   // sampleX: this.getXPosition(this.viewConfig.minDays, width)
+    // })
+
     if (this.viewConfig.maxDays <= this.viewConfig.minDays) {
-      console.log('WTF')
-      debugger
+      // console.log('WTF')
+      // debugger
       return this.viewConfig.panTranslateX
     } // fail-safe
 
