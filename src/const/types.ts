@@ -205,20 +205,6 @@ export type CodeBlockContent = Partial<GanttChartSources> & {
   calendar?: string
 }
 
-export type GanttChartButtonSelection = {
-  showEras: boolean
-  showBars: boolean
-  showPoints: boolean
-  enableGrouping: boolean
-}
-
-// export type GanttChartConfig = GanttChartButtonSelection & CodeBlockContent & {
-//   // rowHeight: number,
-//   groupHeaderHeight: number,
-//   singleAxisHeight: number,
-//   margin: { top: number, right: number, bottom: number, left: number }
-// }
-
 export type ControlKey = 'ctrl' | 'alt' | 'shift'
 export const ControlKeyMapped = {
   'alt': 'alt / option',
@@ -226,6 +212,9 @@ export const ControlKeyMapped = {
   'shift': 'shift'
 }
 
+/**
+ * Global, unique settings
+ */
 export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   defaultGroup: string

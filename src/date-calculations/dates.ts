@@ -1,6 +1,6 @@
 // import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
-import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
+import {isCustomLeapYear, isGregorianLeapYear} from './leap-year-calc'
 import {Consts} from '../const/constants'
 
 export const TODAY = 'today'

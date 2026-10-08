@@ -7,7 +7,7 @@ import {
   RuleBasedDetails
 } from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
-import {parseDescriptiveDateToValidInput, TODAY} from '../util/dates'
+import {parseDescriptiveDateToValidInput, TODAY} from './dates'
 import {createRepeatRule} from '../util/recurring-events'
 
 /**

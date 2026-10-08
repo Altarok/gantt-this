@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {createAxisDateDescription} from '../src/util/dates'
+import {createAxisDateDescription} from '../src/date-calculations/dates'
 import {
   frenchRevolutionConfig,
   gregorianConfig,

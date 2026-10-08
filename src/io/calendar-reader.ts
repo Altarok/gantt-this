@@ -9,11 +9,11 @@ import {
 } from '../const/types'
 import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR, DEFAULT_SETTINGS} from '../const/default-values'
 import FantasyGanttPlugin from '../main'
-import {FrontMatterUtil} from './frontmatter-reader'
+import {EventPropertyReader} from './event-property-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {Consts} from '../const/constants'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
-import {getGregorianTodayInAbsoluteDays} from '../util/dates'
+import {getGregorianTodayInAbsoluteDays} from '../date-calculations/dates'
 import {GregorianCalendar} from '../const/fallback-calendar'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
@@ -40,13 +40,13 @@ function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
 /**
  * Reads folder contents and build calendar definitions.
  * @param plugin
- * @param frontMatterUtil
+ * @param eventPropertyReader
  * @param calendarId name reference of calendar, must  match front-matter property
  * @param pluginSettings partial plugin settings
  * @param codeBlockContent
  */
 export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
-                                            frontMatterUtil: FrontMatterUtil,
+                                            eventPropertyReader: EventPropertyReader,
                                             calendarId: string,
                                             pluginSettings: PluginSettings,
                                             codeBlockContent: CodeBlockContent): Promise<CalendarConfig | null> {
@@ -56,7 +56,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
   if (cachedCalendarConfig) return cachedCalendarConfig
 
-  const targetFile = getMatchingMarkdownFile(plugin, frontMatterUtil, calendarId, pluginSettings, codeBlockContent)
+  const targetFile = getMatchingMarkdownFile(plugin, eventPropertyReader, calendarId, pluginSettings, codeBlockContent)
 
   if (!targetFile) return fallbackIfGregorian(calendarId, plugin)
 
@@ -110,7 +110,7 @@ function fallbackIfGregorian(calendarId: string, plugin: FantasyGanttPlugin): Ca
  * Search for Markdown file defining the missing calendar config.
  */
 function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
-                                 frontMatterUtil: FrontMatterUtil,
+                                 eventPropertyReader: EventPropertyReader,
                                  calendarId: string,
                                  pluginSettings: PluginSettings,
                                  codeBlockContent: CodeBlockContent): TFile | null {
@@ -131,8 +131,8 @@ function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
 
   for (const file of files) {
     const fileMetadata = plugin.app.metadataCache.getFileCache(file)
-    if (fileMetadata?.frontmatter && frontMatterUtil.isMatchingCalendarDefinition(fileMetadata.frontmatter, file, calendarId))
-      return file
+    if (!fileMetadata?.frontmatter) continue
+    if (eventPropertyReader.isMatchingCalendarDefinition(fileMetadata.frontmatter, file, calendarId)) return file
   }
   return null
 }

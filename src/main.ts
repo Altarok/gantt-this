@@ -2,14 +2,15 @@ import {MarkdownPostProcessorContext, Platform, Plugin} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings/settings-view'
 import {BaseKeys, CalendarConfig, PluginSettings} from './const/types'
 import {DEFAULT_SETTINGS} from './const/default-values'
-import {readCodeBlock} from './io/code-block-reader'
-import {CodeBlockCreatorModal} from './ui/gantt-codeblock-creator'
+import {readCodeBlock} from './io/codeblock-reader'
+import {CodeBlockCreatorModal} from './util/gantt-codeblock-creator'
 import {Consts} from './const/constants'
 import GanttRender from './view/gantt-chart-manager'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'
-import {FrontMatterUtil} from "./io/frontmatter-reader";
+import {EventPropertyReader} from './io/event-property-reader'
+import {SettingsContext} from "./util/settings-context";
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -33,9 +34,8 @@ export default class FantasyGanttPlugin extends Plugin {
     else if (Platform.isMobile && this.settings.uxAddRibbonIconMobile)
       this.addPluginRibbonIcon()
 
-    if (this.settings.uxAddCommands) {
+    if (this.settings.uxAddCommands)
       Commands.addAll(this)
-    }
 
     this.registerBasesView(GanttBaseViewExampleName, {
       name: 'Gantt this',
@@ -43,28 +43,24 @@ export default class FantasyGanttPlugin extends Plugin {
       factory: (controller, containerEl) => {
         return new GanttThisBasesView(this, controller, containerEl)
       },
-      options: () => (
-        [
-          {
-            type: 'folder', displayName: 'Use calendars in', key: BaseKeys.calPath,
-            placeholder: 'Pre-set by plugin settings',
-            default: this.settings.calendarPath
-          },
-          {
-            type: 'toggle', displayName: 'Search sub-folders', key: BaseKeys.calPathRec,
-            default: this.settings.calendarPathSearchRecursive
-          },
-          {type: 'text', displayName: 'Lower bound date', key: BaseKeys.lbd},
-          {type: 'text', displayName: 'Upper bound date', key: BaseKeys.ubd},
-          {
-            type: 'text',
-            displayName: 'Calendar used for bounds',
-            key: BaseKeys.cal,
-            /* Do not use DEFAULT_SETTINGS.defaultCalendar here, user may have changed it */
-            default: this.settings.defaultCalendar, placeholder: this.settings.defaultCalendar
-          }
-        ]
-      ) /* end options */
+      options: () => ([
+        {
+          type: 'folder', displayName: 'Use calendars in', key: BaseKeys.calPath,
+          placeholder: 'Pre-set by plugin settings',
+          default: this.settings.calendarPath
+        },
+        {
+          type: 'toggle', displayName: 'Search sub-folders', key: BaseKeys.calPathRec,
+          default: this.settings.calendarPathSearchRecursive
+        },
+        {type: 'text', displayName: 'Lower bound date', key: BaseKeys.lbd},
+        {type: 'text', displayName: 'Upper bound date', key: BaseKeys.ubd},
+        {
+          type: 'text', displayName: 'Calendar used for bounds', key: BaseKeys.cal,
+          /* Do not use DEFAULT_SETTINGS.defaultCalendar here, user may have changed it */
+          default: this.settings.defaultCalendar, placeholder: this.settings.defaultCalendar
+        }
+      ]) /* end options */
 
     }) /* end registerBasesView() */
   }
@@ -97,7 +93,9 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const codeBlockContent = readCodeBlock(currentFile.parent.path, source, this.settings.defaultCalendar)
 
-    const render = new GanttRender(this, null, null, new FrontMatterUtil(this.settings))
+    const settings = new SettingsContext(this.settings, codeBlockContent)
+
+    const render = new GanttRender(this, new EventPropertyReader(settings))
 
     await render.renderGantt(el, this.settings, codeBlockContent, ctx)
   }

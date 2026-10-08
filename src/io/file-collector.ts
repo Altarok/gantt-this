@@ -2,10 +2,10 @@ import {TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {CodeBlockContent, PluginSettings} from '../const/types'
 import {Consts} from '../const/constants'
-import {FrontMatterUtil} from './frontmatter-reader'
+import {EventPropertyReader} from './event-property-reader'
 
 export function getFilteredFiles(plugin: FantasyGanttPlugin,
-                                 frontMatterUtil: FrontMatterUtil,
+                                 eventPropertyReader: EventPropertyReader,
                                  pluginSettings: PluginSettings,
                                  codeBlockContent: CodeBlockContent): TFile[] {
   const allFiles = plugin.app.vault.getMarkdownFiles()
@@ -32,6 +32,6 @@ export function getFilteredFiles(plugin: FantasyGanttPlugin,
 
     if (!frontMatter) return false
 
-    return frontMatterProperty_gantt_this_optional || frontMatterUtil.isFileMarkedAsEvent(frontMatter, f)
+    return frontMatterProperty_gantt_this_optional || eventPropertyReader.isFileMarkedAsEvent(frontMatter, f)
   })
 }

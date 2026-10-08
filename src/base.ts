@@ -2,8 +2,9 @@ import {BasesView, Notice, QueryController} from 'obsidian'
 import GanttRender from './view/gantt-chart-manager'
 import {BaseKeys, CodeBlockContent} from './const/types'
 import FantasyGanttPlugin from './main'
-import {FrontMatterUtil} from './io/frontmatter-reader'
+import {EventPropertyReader} from './io/event-property-reader'
 import BasesContext from './util/bases-context'
+import {SettingsContext} from "./util/settings-context";
 
 /*
  * TODO #v2: change to 'gantt-this-view'
@@ -16,7 +17,6 @@ export class GanttThisBasesView extends BasesView {
   readonly type = GanttBaseViewExampleName
   private readonly containerEl: HTMLElement
   private readonly basesCtx: BasesContext
-  private readonly frontMatterUtil: FrontMatterUtil
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly controller: QueryController,
@@ -24,13 +24,11 @@ export class GanttThisBasesView extends BasesView {
     super(controller)
     this.containerEl = parentEl.createDiv('bases-example-view-container')
     this.basesCtx = new BasesContext(this)
-    this.frontMatterUtil = new FrontMatterUtil(plugin.settings, this.basesCtx)
   }
 
   public onDataUpdated(): void {
 
     this.containerEl.empty()
-    const files = this.preFilterFiles()
 
     /* Omit event path stuff - use base filters instead! */
     const codeBlockContent: CodeBlockContent = {
@@ -41,28 +39,32 @@ export class GanttThisBasesView extends BasesView {
       calendar: this.calendarForBounds
     }
 
+    const settings = new SettingsContext(this.plugin.settings, codeBlockContent)
 
-    const render = new GanttRender(this.plugin, files, this.basesCtx, this.frontMatterUtil)
+    const eventPropertyReader = new EventPropertyReader(settings, this.basesCtx)
+
+    const files = this.preFilterFiles(eventPropertyReader)
+
+    const render = new GanttRender(this.plugin, eventPropertyReader, files, this.basesCtx)
 
     try {
-      void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)
+      void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent)
     } catch {
       new Notice('Failed to render Gantt chart base!')
     }
   }
 
-  private preFilterFiles() {
+  private preFilterFiles(eventPropertyReader: EventPropertyReader) {
     const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
 
     /* Pre-filter files */
-    return this.data.data.map(entry => entry.file)
-    .filter(file => {
+    return this.data.data.map(entry => entry.file).filter(file => {
       const cache = this.plugin.app.metadataCache.getFileCache(file)
       const frontmatter = cache?.frontmatter
       if (!frontmatter) return false
 
-      const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || this.frontMatterUtil.hasStartDate(frontmatter, file)
-      const hasValidMarker = isCheckboxMarkerOptional || this.frontMatterUtil.isFileMarkedAsEvent(frontmatter, file)
+      const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || eventPropertyReader.hasStartDate(frontmatter, file)
+      const hasValidMarker = isCheckboxMarkerOptional || eventPropertyReader.isFileMarkedAsEvent(frontmatter, file)
 
       // Check if note contains the required frontmatter properties
       return hasStartDate && hasValidMarker
@@ -100,81 +102,81 @@ export class GanttThisBasesView extends BasesView {
   /*
    * TODO test code used to overwrite toolbar
    */
-// private toolbarEl: HTMLElement | null = null
-//  onload(): void {
-//    super.onload()
-//    this.injectToolbarButton()
-//  }
-//
-//  private injectToolbarButton(): void {
-//    // Find the container parent of your view to locate the sibling toolbar
-//    const viewEl = this.containerEl.closest('.bases-view') || this.containerEl.parentElement
-//    const toolbar = viewEl?.parentElement?.querySelector('.bases-toolbar')
-//
-//
-//    // Prevent duplicate buttons when onDataUpdated fires multiple times
-//    if (!toolbar || toolbar.querySelector('.bases-toolbar-gantt-custom')) return
-//
-//    /*
-//     * const newItem = toolbar.querySelector('.bases-toolbar-new-item-menu')
-//if (newItem) {
-//  toolbar.insertBefore(customItem, newItem)
-//} else {
-//  toolbar.appendChild(customItem)
-//}
-//     *
-//     *
-//     * oder nach properties
-//     *
-//     * const propsItem = toolbar.querySelector('.bases-toolbar-properties-menu')
-//if (propsItem?.nextSibling) {
-//  toolbar.insertBefore(customItem, propsItem.nextSibling)
-//}
-//     *
-//     */
-//
-//    // Create the outer wrapper matching Bases toolbar item structure
-//    const customItem = toolbar.createDiv({
-//      cls: 'bases-toolbar-item bases-toolbar-gantt-custom'
-//    })
-//
-//    // Create the inner button matching Obsidian/Bases button structure
-//    const button = customItem.createDiv({
-//      cls: 'text-icon-button',
-//      attr: {tabindex: '0', role: 'button', 'aria-label': 'Reset Zoom'}
-//    })
-//
-//    const iconSpan = button.createSpan({cls: 'text-button-icon'})
-//    setIcon(iconSpan, 'lucide-rotate-ccw') // Using standard Obsidian Lucide icons
-//
-//    button.createSpan({
-//      cls: 'text-button-label',
-//      text: 'Reset Zoom'
-//    })
-//
-//    // Event Handler
-//    this.plugin.registerDomEvent(button, 'click', (evt: MouseEvent) => {
-//      evt.preventDefault()
-//      this.handleCustomAction()
-//    })
-//
-//    // Keyboard navigation support (Enter / Space)
-//    this.plugin.registerDomEvent(button, 'keydown', (evt: KeyboardEvent) => {
-//      if (evt.key === 'Enter' || evt.key === ' ') {
-//        evt.preventDefault()
-//        this.handleCustomAction()
-//      }
-//    })
-//  }
-//
-//  private handleCustomAction(): void {
-//    // Custom action logic here (e.g., reset SVG zoom, trigger refresh)
-//  }
-//
-//  onunload(): void {
-//    // Clean up DOM injections when the view closes
-//    this.toolbarEl?.remove()
-//    super.onunload()
-//  }
+  // private toolbarEl: HTMLElement | null = null
+  //  onload(): void {
+  //    super.onload()
+  //    this.injectToolbarButton()
+  //  }
+  //
+  //  private injectToolbarButton(): void {
+  //    // Find the container parent of your view to locate the sibling toolbar
+  //    const viewEl = this.containerEl.closest('.bases-view') || this.containerEl.parentElement
+  //    const toolbar = viewEl?.parentElement?.querySelector('.bases-toolbar')
+  //
+  //
+  //    // Prevent duplicate buttons when onDataUpdated fires multiple times
+  //    if (!toolbar || toolbar.querySelector('.bases-toolbar-gantt-custom')) return
+  //
+  //    /*
+  //     * const newItem = toolbar.querySelector('.bases-toolbar-new-item-menu')
+  //if (newItem) {
+  //  toolbar.insertBefore(customItem, newItem)
+  //} else {
+  //  toolbar.appendChild(customItem)
+  //}
+  //     *
+  //     *
+  //     * oder nach properties
+  //     *
+  //     * const propsItem = toolbar.querySelector('.bases-toolbar-properties-menu')
+  //if (propsItem?.nextSibling) {
+  //  toolbar.insertBefore(customItem, propsItem.nextSibling)
+  //}
+  //     *
+  //     */
+  //
+  //    // Create the outer wrapper matching Bases toolbar item structure
+  //    const customItem = toolbar.createDiv({
+  //      cls: 'bases-toolbar-item bases-toolbar-gantt-custom'
+  //    })
+  //
+  //    // Create the inner button matching Obsidian/Bases button structure
+  //    const button = customItem.createDiv({
+  //      cls: 'text-icon-button',
+  //      attr: {tabindex: '0', role: 'button', 'aria-label': 'Reset Zoom'}
+  //    })
+  //
+  //    const iconSpan = button.createSpan({cls: 'text-button-icon'})
+  //    setIcon(iconSpan, 'lucide-rotate-ccw') // Using standard Obsidian Lucide icons
+  //
+  //    button.createSpan({
+  //      cls: 'text-button-label',
+  //      text: 'Reset Zoom'
+  //    })
+  //
+  //    // Event Handler
+  //    this.plugin.registerDomEvent(button, 'click', (evt: MouseEvent) => {
+  //      evt.preventDefault()
+  //      this.handleCustomAction()
+  //    })
+  //
+  //    // Keyboard navigation support (Enter / Space)
+  //    this.plugin.registerDomEvent(button, 'keydown', (evt: KeyboardEvent) => {
+  //      if (evt.key === 'Enter' || evt.key === ' ') {
+  //        evt.preventDefault()
+  //        this.handleCustomAction()
+  //      }
+  //    })
+  //  }
+  //
+  //  private handleCustomAction(): void {
+  //    // Custom action logic here (e.g., reset SVG zoom, trigger refresh)
+  //  }
+  //
+  //  onunload(): void {
+  //    // Clean up DOM injections when the view closes
+  //    this.toolbarEl?.remove()
+  //    super.onunload()
+  //  }
 
 }

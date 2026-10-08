@@ -1,10 +1,14 @@
 import {FrontMatterCache, TFile} from 'obsidian'
-import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP, PluginSettings} from '../const/types'
+import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../const/types'
 import BasesContext from '../util/bases-context'
+import {SettingsContext} from '../util/settings-context'
 
 
-export class FrontMatterUtil {
-  constructor(private readonly settings: PluginSettings,
+export class EventPropertyReader {
+  // constructor(private readonly settings: PluginSettings,
+  //             private readonly basesCtx?: BasesContext) {
+  // }
+  constructor(private readonly settings: SettingsContext,
               private readonly basesCtx?: BasesContext) {
   }
 

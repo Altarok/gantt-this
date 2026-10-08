@@ -11,7 +11,7 @@ import {
 } from '../const/types'
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
-import {createAxisDateDescription} from '../util/dates'
+import {createAxisDateDescription} from '../date-calculations/dates'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'

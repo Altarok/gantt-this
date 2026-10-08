@@ -1,8 +1,8 @@
 import {GanttItem} from '../const/types'
-import {FrontMatterUtil} from './frontmatter-reader'
+import {EventPropertyReader} from './event-property-reader'
 
 export function findPredecessorsAndSuccessors(items: GanttItem[],
-                                              frontMatterUtil: FrontMatterUtil) {
+                                              eventPropertyReader: EventPropertyReader) {
 
   const filteredEventFiles: Record<string, GanttItem[]> = {}
 
@@ -18,8 +18,8 @@ export function findPredecessorsAndSuccessors(items: GanttItem[],
     const {frontMatter} = item
     if (!frontMatter) return
 
-    const predecessors = frontMatterUtil.getPredecessors(frontMatter, item.file)
-    const successors = frontMatterUtil.getSuccessors(frontMatter, item.file)
+    const predecessors = eventPropertyReader.getPredecessors(frontMatter, item.file)
+    const successors = eventPropertyReader.getSuccessors(frontMatter, item.file)
     if (!predecessors && !successors) return
 
     if (predecessors) for (const p of predecessors) if (p) {

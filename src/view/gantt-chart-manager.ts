@@ -10,7 +10,7 @@ import TextWidthCache from './text-space-cache'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import BasesContext from '../util/bases-context'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
-import {FrontMatterUtil} from "../io/frontmatter-reader";
+import {EventPropertyReader} from '../io/event-property-reader'
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
@@ -19,21 +19,26 @@ export default class GanttRender {
   private readonly textWidthCache: TextWidthCache
 
   constructor(readonly plugin: FantasyGanttPlugin,
-              readonly filesFilteredByBase: TFile[] | null,
-              readonly basesCtx: BasesContext | null,
-              readonly frontMatterUtil: FrontMatterUtil) {
+              readonly eventPropertyReader: EventPropertyReader,
+              readonly filesFilteredByBase?: TFile[],
+              readonly basesCtx?: BasesContext) {
+
     this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
     this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
   }
 
+  private get settings() {
+    return this.plugin.settings
+  }
+
   private async getGanttItems(pluginSettings: PluginSettings,
                               codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
-    if (this.filesFilteredByBase !== null) {
-      return parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase, this.frontMatterUtil)
+    if (this.filesFilteredByBase) {
+      return parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase, this.eventPropertyReader)
     }
 
-    return getGanttDataFromFolder(this.plugin, this.frontMatterUtil, pluginSettings, codeBlockContent)
+    return getGanttDataFromFolder(this.plugin, this.eventPropertyReader, pluginSettings, codeBlockContent)
   }
 
   async renderGantt(el: HTMLElement,
@@ -70,6 +75,10 @@ export default class GanttRender {
     let chartContainer: HTMLDivElement
     let toolbarContainer: HTMLDivElement
 
+    /*
+    TODO create view with this
+     */
+
     if (pluginSettings.uxMoveToolbarBelowChart && pluginSettings.uxMakeToolbarSticky) {
       /* separate toolbar and chart, chart first */
       const mainWrapper = el.createDiv({cls: Css.wrapper})
@@ -97,7 +106,6 @@ export default class GanttRender {
     const tv = new ToolbarView(toolbarContainer, this.plugin, ganttChartModel, refreshChartCallback)
 
     /* Declare the renderEngine variable so the callback can reference its reference scope */
-    let renderEngine: GanttRenderEngine | null = null
     let updateTimeout: number | null = null
 
     /* Register the child lifecycle component synchronously before ANY 'await' */
@@ -108,11 +116,11 @@ export default class GanttRender {
     const data = await this.getGanttItems(pluginSettings, codeBlockContent)
 
     /* Instantiate the engine */
-    renderEngine = new GanttRenderEngine(chartContainer,
+    const renderEngine = new GanttRenderEngine(chartContainer,
       data,
       this.plugin,
       codeBlockContent,
-      this.basesCtx,
+      this.basesCtx ?? null,
       this.textWidthCache,
       ganttChartModel,
       this.svgDrawerUtil

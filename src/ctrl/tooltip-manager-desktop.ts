@@ -1,12 +1,12 @@
 import {HoverParent, HoverPopover} from 'obsidian'
 import {CalendarConfig, EventId, GanttItem, PluginSettings} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
-import {GanttConnectorDrawer} from '../ui/arrow-drawer'
+import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
 import {Css} from '../const/constants'
 import BasesContext from '../util/bases-context'
-import {createAxisDateDescription} from '../util/dates'
+import {createAxisDateDescription} from '../date-calculations/dates'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 

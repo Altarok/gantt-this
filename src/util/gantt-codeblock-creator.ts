@@ -4,7 +4,8 @@ import {CodeBlockContent, PluginSettings} from '../const/types'
 import {Consts} from '../const/constants'
 import GanttRender from '../view/gantt-chart-manager'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
-import {FrontMatterUtil} from "../io/frontmatter-reader";
+import {EventPropertyReader} from '../io/event-property-reader'
+import {SettingsContext} from "./settings-context";
 // import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 
 /*
@@ -12,7 +13,7 @@ import {FrontMatterUtil} from "../io/frontmatter-reader";
  * npm link @Altarok/obsidian-dev-utils
  */
 export class CodeBlockCreatorModal extends Modal {
-  constructor(public readonly app: App, public readonly plugin: FantasyGanttPlugin) {
+  constructor(app: App, private readonly plugin: FantasyGanttPlugin) {
     super(app)
   }
 
@@ -41,12 +42,14 @@ export class CodeBlockCreatorModal extends Modal {
       previewEl.empty()
 
       const globalSettings: Readonly<PluginSettings> = this.plugin.settings
-      const pluginSettings: PluginSettings = mergeSettings(globalSettings, output)
+      const localPluginSettings: PluginSettings = mergeSettings(globalSettings, output)
       const noCodeBlockContent: CodeBlockContent = {}
 
-      const render = new GanttRender(this.plugin, null, null, new FrontMatterUtil(this.plugin.settings))
+      const settings = new SettingsContext(this.plugin.settings, localPluginSettings)
 
-      void render.renderGantt(previewEl, pluginSettings, noCodeBlockContent)
+      const render = new GanttRender(this.plugin, new EventPropertyReader(settings))
+
+      void render.renderGantt(previewEl, localPluginSettings, noCodeBlockContent)
     }
 
     const modalInput: GenericModalInput = {
@@ -67,6 +70,7 @@ export class CodeBlockCreatorModal extends Modal {
 }
 
 /**
+ * Merge settings.
  * @param globalSettings - global plugin settings
  * @param localSettings - subset of plugin settings user chose to overwrite with code block creator
  */
