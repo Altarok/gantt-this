@@ -274,7 +274,7 @@ export default class TooltipManager implements HoverParent {
     line.upper.setAttribute('x2', xS)
     line.upper.setAttribute('y2', String(totalChartHeight))
 
-    const cal = this.engine.svgDrawerData.drawnCals[ganttItem.calendarType]
+    const cal = this.engine.viewModel.drawnCals[ganttItem.calendarType]
     if (cal) { /* should exist */
       line.lower.setAttribute('x1', xS)
       line.lower.setAttribute('y1', String(cal.y1))

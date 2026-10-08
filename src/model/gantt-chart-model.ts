@@ -1,5 +1,6 @@
 import FantasyGanttPlugin from '../main'
 import {Consts} from '../const/constants'
+import {GroupOrCalendarDrawerData, GroupOrCalendarSettings, PluginSettings} from "../const/types";
 
 type Margin = { top: number, bottom: number, left: number, right: number }
 
@@ -55,11 +56,26 @@ export class GanttChartViewModel {
   private currRenderWidth = -1
   private lastRenderWidth = -1
 
+
+  /**  Data updated on a redraw, not while panning or zooming */
+   mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = []
+   mappedCalConfigs: Record<string, GroupOrCalendarSettings> = []
+  // private drawnGroups: Record<string, GroupOrCalendarDrawerData> = []
+   drawnCals: Record<string, GroupOrCalendarDrawerData> = []
+
   constructor(plugin: FantasyGanttPlugin) {
     this.eventRowHeight = plugin.settings.viewEventRowHeight
     this.eventRowHeightHalf = this.eventRowHeight / 2
     this.eventShapeHeight = plugin.settings.viewEventShapeHeight
     this.eventIconHeight = plugin.settings.viewEventIconHeight
+    this.updateSvgDrawerData(plugin.settings)
+  }
+
+  updateSvgDrawerData(settings: PluginSettings) {
+    this.mappedGrpConfigs = Object.fromEntries(settings.groups.map(g => [g.id, g]))
+    this.mappedCalConfigs = Object.fromEntries(settings.calendars.map(c => [c.id, c]))
+    // this.drawnGroups = Object.fromEntries(settings.groups.map(g => [g.id, {y1: 0, y2: 0}]))
+    this.drawnCals = Object.fromEntries(settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
   }
 
   getCurrRenderWidth(): number {

@@ -305,13 +305,6 @@ export type GroupOrCalendarDrawerData = {
   y1: number
   y2: number
 }
-/**  Data updated on a redraw, not while panning or zooming */
-export type SvgDrawerData = {
-  mappedGrpConfigs: Record<string, GroupOrCalendarSettings>
-  mappedCalConfigs: Record<string, GroupOrCalendarSettings>
-  // drawnGroups: Record<string, GroupOrCalendarDrawerData>
-  drawnCals: Record<string, GroupOrCalendarDrawerData>
-}
 
 export const BaseKeys = {
   calPath: 'bk-calendar-path',

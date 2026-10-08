@@ -7,8 +7,7 @@ import {
   GanttItemDisplayType,
   isTimespan,
   isTimestamp,
-  NO_GROUP,
-  SvgDrawerData
+  NO_GROUP
 } from '../const/types'
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
@@ -26,12 +25,8 @@ export class GanttRenderEngine {
   private groups: GanttGroup[] = []
   private resizeObserver: ResizeObserver
 
-  svgDrawerData: SvgDrawerData
   view!: GanttChartView
-
   drawnData: GanttItem[] = []
-
-  // private resizeRafId: number | null = null
 
   constructor(public readonly container: HTMLElement,
               public rawData: GanttItem[],
@@ -44,7 +39,7 @@ export class GanttRenderEngine {
 
     this.viewModel.setRawContainerWidth(this.container.clientWidth)
 
-    this.svgDrawerData = this.updateSvgDrawerData()
+    this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
     this.view = this.redraw()
@@ -57,7 +52,7 @@ export class GanttRenderEngine {
 
   public updateData(newData: GanttItem[]) {
     this.viewModel.setRawContainerWidth(this.container.clientWidth)
-    this.svgDrawerData = this.updateSvgDrawerData()
+    this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
@@ -72,12 +67,7 @@ export class GanttRenderEngine {
   }
 
   private updateSvgDrawerData() {
-    return {
-      mappedGrpConfigs: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, g])),
-      mappedCalConfigs: Object.fromEntries(this.plugin.settings.calendars.map(c => [c.id, c])),
-      // drawnGroups: Object.fromEntries(this.plugin.settings.groups.map(g => [g.id, {y1: 0, y2: 0}])),
-      drawnCals: Object.fromEntries(this.plugin.settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
-    }
+    this.viewModel.updateSvgDrawerData(this.plugin.settings)
   }
 
   private calculateGlobalBounds() {
@@ -105,10 +95,10 @@ export class GanttRenderEngine {
 
     this.viewModel.activeCalendars = Array.from(new Set(activeItems.map(d => d.calendarType)))
 
-    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendars, this.svgDrawerData.mappedCalConfigs)
+    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendars, this.viewModel.mappedCalConfigs)
 
     const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.plugin.settings.defaultGroup)))
-    Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
+    Priorities.sortGroupAxisByPriority(groupNames, this.viewModel.mappedGrpConfigs)
 
     this.drawnData = expandRecurringEvents(this, activeItems, this.currRenderWidth)
 
@@ -154,7 +144,7 @@ export class GanttRenderEngine {
     }
 
     /* Before going on, we have to sort groups by their respective priority */
-    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.svgDrawerData.mappedGrpConfigs)
+    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.viewModel.mappedGrpConfigs)
 
     this.viewModel.calculateTotalHeight(currentYOffset)
   }
@@ -351,7 +341,7 @@ export class GanttRenderEngine {
       const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
       const showMoonPhases: boolean = this.plugin.settings.uxShowMoons && tickPixelSpacing >= 24
 
-      this.svgDrawerData.drawnCals[calType] = {
+      this.viewModel.drawnCals[calType] = {
         y1: currentAxisYStart,
         y2: currentAxisYStart + this.viewModel.calendarAxisRowHeight - 1
       }
@@ -364,7 +354,7 @@ export class GanttRenderEngine {
       if (!calendarConfig) return // continue to next axis
 
       const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
-      const axisColor = (this.plugin.settings.uxUseCalColorForCalAxis ? this.svgDrawerData.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
+      const axisColor = (this.plugin.settings.uxUseCalColorForCalAxis ? this.viewModel.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
 
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
@@ -637,13 +627,8 @@ export class GanttRenderEngine {
     return this.view.eventLayer.querySelector<T>(selector)
   }
 
-  // getRenderWidth(width?: number) {
-  //   const containerWidth = width ?? this.container.clientWidth
-  //   return Math.max(1, containerWidth - this.viewModel.margin.left - this.viewModel.margin.right)
-  // }
-
   filterActiveEventData(): GanttItem[] {
-    const {mappedGrpConfigs, mappedCalConfigs} = this.svgDrawerData
+    const {mappedGrpConfigs, mappedCalConfigs} = this.viewModel
 
     return this.rawData.filter(d => {
       const grp = mappedGrpConfigs[d.group]
