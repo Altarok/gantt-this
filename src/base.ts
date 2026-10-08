@@ -15,12 +15,16 @@ export const GanttBaseViewExampleName = 'example-view'
 export class GanttThisBasesView extends BasesView {
   readonly type = GanttBaseViewExampleName
   private readonly containerEl: HTMLElement
+  private readonly basesCtx: BasesContext
+  private readonly frontMatterUtil: FrontMatterUtil
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly controller: QueryController,
               parentEl: HTMLElement) {
     super(controller)
     this.containerEl = parentEl.createDiv('bases-example-view-container')
+    this.basesCtx = new BasesContext(this)
+    this.frontMatterUtil = new FrontMatterUtil(plugin.settings, this.basesCtx)
   }
 
   public onDataUpdated(): void {
@@ -37,9 +41,8 @@ export class GanttThisBasesView extends BasesView {
       calendar: this.calendarForBounds
     }
 
-    const basesCtx = new BasesContext(this)
 
-    const render = new GanttRender(this.plugin, files, basesCtx)
+    const render = new GanttRender(this.plugin, files, this.basesCtx, this.frontMatterUtil)
 
     try {
       void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent, undefined)
@@ -58,8 +61,8 @@ export class GanttThisBasesView extends BasesView {
       const frontmatter = cache?.frontmatter
       if (!frontmatter) return false
 
-      const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || FrontMatterUtil.hasStartDate(frontmatter, this.plugin.settings)
-      const hasValidMarker = isCheckboxMarkerOptional || FrontMatterUtil.isFileMarkedAsEvent(frontmatter, this.plugin.settings)
+      const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || this.frontMatterUtil.hasStartDate(frontmatter, file)
+      const hasValidMarker = isCheckboxMarkerOptional || this.frontMatterUtil.isFileMarkedAsEvent(frontmatter)
 
       // Check if note contains the required frontmatter properties
       return hasStartDate && hasValidMarker

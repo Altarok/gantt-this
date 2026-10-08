@@ -1,130 +1,154 @@
-import {FrontMatterCache} from 'obsidian'
+import {FrontMatterCache, TFile} from 'obsidian'
 import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP, PluginSettings} from '../const/types'
+import BasesContext from '../util/bases-context'
 
-/*
- * Default key: 'gantt-type-definition'
- */
-function isMatchingCalendarDefinition(frontMatter: FrontMatterCache, settings: PluginSettings, calendarId: string): boolean {
-  return frontMatter[settings.frontMatterProperty_calendar_name] === calendarId
-}
 
-/*
- * Default key: 'gantt-item'
- */
-function isFileMarkedAsEvent(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
-  return frontMatter[settings.frontMatterProperty_gantt_this] === true
-}
+export class FrontMatterUtil {
+  constructor(private readonly settings: PluginSettings,
+              private readonly basesCtx?: BasesContext) {
+  }
 
-/*
- * Default key: 'gantt-type'
- */
-function getEventCalendarName(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  return (frontMatter[settings.frontMatterProperty_event_calendar] as string ?? settings.defaultCalendar).trim()
-}
+  /**
+   * First thing to check on any event note.
+   * @param frontMatter
+   * @param file
+   * @return true if file needs to be sued in Gantt chart
+   */
+  hasStartDate(frontMatter: FrontMatterCache, file?: TFile): boolean {
+    return Boolean(this.getStartDate(frontMatter, file))
+  }
 
-/*
- * Default key: 'gantt-color'
- */
-function getEventColor(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_color] as string ?? undefined
-}
+  getStartDate(frontMatter: FrontMatterCache, file?: TFile): string | undefined {
+    const key = this.settings.frontMatterProperty_event_time_start
+    return frontMatter[key] as string
+      ?? (file && this.basesCtx?.readPropertyValue(file, key))
+      ?? undefined
+  }
 
-/*
- * Default key: 'gantt-group'
- */
-function getEventGroup(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  return (frontMatter[settings.frontMatterProperty_event_group] as string ?? NO_GROUP).trim()
-}
+  getEndDate(frontMatter: FrontMatterCache): string | undefined {
+    return frontMatter[this.settings.frontMatterProperty_event_time_end] as string ?? undefined
+  }
 
-/*
- * Default key: 'gantt-name'
- */
-function getEventName(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_name] as string ?? undefined
-}
 
-/*
- * Default key: 'gantt-displayIcon'
- */
-function getEventIconID(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_icon_name] as string ?? undefined
-}
+  /*
+   * Default keys: 'gantt-start' & 'gantt-end'
+   */
+  getEventTimestamps(frontMatter: FrontMatterCache):
+    { startDate?: string, endDate?: string } {
+    const startDate = this.getStartDate(frontMatter)
+    const endDate = this.getEndDate(frontMatter)
+    return {startDate, endDate}
+  }
 
-/*
- * Default key: 'gantt-displayIconColor'
- */
-function getEventIconColor(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_icon_color] as string ?? settings.fallbackColorForIcons ?? undefined
-}
+  /*
+   * Default key: 'gantt-type-definition'
+   */
+  isMatchingCalendarDefinition(frontMatter: FrontMatterCache, calendarId: string): boolean {
+    return frontMatter[this.settings.frontMatterProperty_calendar_name] === calendarId
+  }
 
-/*
- * Default key: 'gantt-symbol'
- * @param isTimeSpan true if event has two different timestamps
- */
-function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings, isTimeSpan: boolean): GanttItemDisplayType {
-  let value: string | undefined = frontMatter[settings.frontMatterProperty_event_symbol] as string ?? undefined
+  /*
+   * Default key: 'gantt-item'
+   */
+  isFileMarkedAsEvent(frontMatter: FrontMatterCache): boolean {
+    return frontMatter[this.settings.frontMatterProperty_gantt_this] === true
+  }
+
+  /*
+   * Default key: 'gantt-type'
+   */
+  getEventCalendarName(frontMatter: FrontMatterCache, file: TFile): string {
+    const key = this.settings.frontMatterProperty_event_calendar
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? this.settings.defaultCalendar
+  }
+
+  /*
+   * Default key: 'gantt-color'
+   */
+  getEventColor(frontMatter: FrontMatterCache, file: TFile): string | undefined {
+    const key = this.settings.frontMatterProperty_event_color
+    debugger
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? undefined
+  }
+
+  /*
+   * Default key: 'gantt-group'
+   */
+  getEventGroup(frontMatter: FrontMatterCache, file: TFile): string {
+    const key = this.settings.frontMatterProperty_event_group
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? NO_GROUP
+  }
+
+  /*
+   * Default key: 'gantt-name'
+   */
+  getEventName(frontMatter: FrontMatterCache, file: TFile): string {
+    const key = this.settings.frontMatterProperty_event_name
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? file.basename
+  }
+
+  /*
+   * Default key: 'gantt-displayIcon'
+   */
+  getEventIconID(frontMatter: FrontMatterCache, file: TFile): string | undefined {
+    const key = this.settings.frontMatterProperty_event_icon_name
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? undefined
+  }
+
+  /*
+   * Default key: 'gantt-displayIconColor'
+   */
+  getEventIconColor(frontMatter: FrontMatterCache, file: TFile): string | undefined {
+    const key = this.settings.frontMatterProperty_event_icon_color
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? this.settings.fallbackColorForIcons
+      ?? undefined
+  }
+
+  /*
+   * Default key: 'gantt-symbol'
+   * @param isTimeSpan true if event has two different timestamps
+   */
+  getEventSymbol(frontMatter: FrontMatterCache, isTimeSpan: boolean): GanttItemDisplayType {
+    let value: string | undefined = frontMatter[this.settings.frontMatterProperty_event_symbol] as string ?? undefined
 //  if (value && !isGanttItemDisplayType(value)) value = undefined
 
-  if (isTimeSpan) {
-    return isTimespan(value) ? value : settings.uxDefaultTimespanEventSymbol
-  } else {
-    return isTimestamp(value) ? value : settings.uxDefaultTimestampEventSymbol
+    if (isTimeSpan) {
+      return isTimespan(value) ? value : this.settings.uxDefaultTimespanEventSymbol
+    } else {
+      return isTimestamp(value) ? value : this.settings.uxDefaultTimestampEventSymbol
+    }
   }
-}
-
-function getStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_time_start] as string ?? undefined
-}
-
-function getEndDate(frontMatter: FrontMatterCache, settings: PluginSettings): string | undefined {
-  return frontMatter[settings.frontMatterProperty_event_time_end] as string ?? undefined
-}
-
-function hasStartDate(frontMatter: FrontMatterCache, settings: PluginSettings): boolean {
-  return Boolean(getStartDate(frontMatter, settings))
-}
-
-/*
- * Default keys: 'gantt-start' & 'gantt-end'
- */
-function getEventTimestamps(frontMatter: FrontMatterCache, settings: PluginSettings):
-  { startDate?: string, endDate?: string } {
-  const startDate = getStartDate(frontMatter, settings)
-  const endDate = getEndDate(frontMatter, settings)
-  return {startDate, endDate}
-}
-
-/*
- * Default key: 'gantt-linkToHeader'
- */
-function getHeaderToLinkTo(frontMatter: FrontMatterCache, settings: PluginSettings): string {
-  const value: string | undefined = frontMatter[settings.frontMatterProperty_note_header] as string
-  return (value ? `#${value}` : '')
-}
-
-function getPredecessors(frontMatter: FrontMatterCache, settings: PluginSettings): string[] {
-  return frontMatter[settings.frontMatterProperty_event_predecessors] as string[] ?? []
-}
-
-function getSuccessors(frontMatter: FrontMatterCache, settings: PluginSettings): string[] {
-  return frontMatter[settings.frontMatterProperty_event_successors] as string[] ?? []
-}
 
 
-export const FrontMatterUtil = {
-  isMatchingCalendarDefinition,
-  isFileMarkedAsEvent,
-  getEventCalendarName,
-  getEventColor,
-  getEventGroup,
-  getEventName,
-  getEventIconID,
-  getEventIconColor,
-  getEventSymbol,
-  hasStartDate,
-  getEventTimestamps,
-  getHeaderToLinkTo,
-  // readUnknownProperties,
-  getPredecessors,
-  getSuccessors
+  /*
+   * Default key: 'gantt-linkToHeader'
+   */
+  getHeaderToLinkTo(frontMatter: FrontMatterCache, file: TFile): string {
+    const key = this.settings.frontMatterProperty_note_header
+    const value: string | undefined = frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+    return (value ? `#${value.trim()}` : '')
+  }
+
+
+  getPredecessors(frontMatter: FrontMatterCache): string[] {
+    return frontMatter[this.settings.frontMatterProperty_event_predecessors] as string[] ?? []
+  }
+
+
+  getSuccessors(frontMatter: FrontMatterCache): string[] {
+    return frontMatter[this.settings.frontMatterProperty_event_successors] as string[] ?? []
+  }
 }

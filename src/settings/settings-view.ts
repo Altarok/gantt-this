@@ -5,8 +5,8 @@ import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_FALLBACK_GROUP, DEFAULT_SETTINGS} fro
 import {AddEntryModal} from './settings-cal-grp-creation'
 import {createFrontMatterSettingDefinitions} from './settings-subpage-frontmatter'
 import {createWorkspaceSettings} from './settings-subpage-workspace'
-import {createEventSettings} from "./settings-subpage-events";
-import {createAdvancedUxSettingDefinition} from "./settings-subpage-chart";
+import {createEventSettings} from './settings-subpage-events'
+import {createChartSettingDefinition} from './settings-subpage-chart'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
 const VISIBLE_ICON = 'eye' /* an open eye */
@@ -23,7 +23,9 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
   private openAddForm(target: 'groups' | 'calendars') {
 
-    const existingIds: string[] = (target === 'groups') ? this.settings.groups.map(g => g.id) : this.settings.calendars.map(c => c.id)
+    const existingIds: string[] = target === 'groups'
+      ? this.settings.groups.map(g => g.id)
+      : this.settings.calendars.map(c => c.id)
 
     new AddEntryModal(this.plugin, existingIds, (entry) => {
       const list = this.settings[target]
@@ -64,7 +66,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       },
 
       /* Advanced UX settings */
-      createAdvancedUxSettingDefinition(this.settings),
+      createChartSettingDefinition(this.settings),
       // /* Size of events, event rows, and icons */
       // createPixelMagicSettings(),
 
@@ -118,7 +120,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       emptyState: 'No calendar defined yet.',
       addItem: {name: 'Add calendar', action: () => this.openAddForm('calendars')},
       onReorder: (oldIndex: number, newIndex: number) => {
-        let [moved] = this.settings.calendars.splice(oldIndex, 1)
+        const [moved] = this.settings.calendars.splice(oldIndex, 1)
         if (moved) {
           this.settings.calendars.splice(newIndex, 0, moved)
           this.settings.calendars.forEach((cal, index) => cal.priority = index)
@@ -128,52 +130,10 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           })()
         }
       },
-      onDelete: (idx: number) => {
-        const calendar: GroupOrCalendarSettings | undefined = this.settings.calendars[idx]
-        if (!calendar) return
-        if (calendar.id === this.settings.defaultCalendar) {
-          new Notice(`Can't delete default calendar!`)
-          return
-        }
-        if (calendar.id === DEFAULT_FALLBACK_CALENDAR) {
-          new Notice(`Can't delete fallback calendar!`)
-          return
-        }
-        this.settings.calendars.splice(idx, 1)
-        void (async () => {
-          await this.plugin.saveSettings()
-          this.update()
-        })()
-      },
+      onDelete: (idx: number) => this.handleDelete(this.settings.calendars, idx, this.settings.defaultCalendar, DEFAULT_FALLBACK_CALENDAR, 'calendar'),
       items: this.settings.calendars.map((cal) => ({
         name: cal.id,
-        searchable: false,
-        render: (setting: Setting) => {
-          let cc: ColorComponent
-          setting
-          .addButton(btn => btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-            .onClick(async () => {
-              cal.visible = !cal.visible
-              void btn.setIcon(cal.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-              await this.plugin.saveSettings()
-            })
-          )
-          .addColorPicker(c => cc = c
-            .setValue(cal.color ?? this.settings.fallbackColor)
-            .onChange(async (value) => {
-                cal.color = value
-                await this.plugin.saveSettings()
-              }
-            )
-          )
-          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-            .onClick(async () => {
-              cc.setValue(this.settings.fallbackColor)
-              cal.color = this.settings.fallbackColor
-              await this.plugin.saveSettings()
-            })
-          )
-        },
+        render: (setting: Setting) => this.renderItemRow(setting, cal)
       }))
     }
   }
@@ -186,7 +146,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       emptyState: 'No group defined yet.',
       addItem: {name: 'Add group', action: () => this.openAddForm('groups')},
       onReorder: (oldIndex: number, newIndex: number) => {
-        let [moved] = this.settings.groups.splice(oldIndex, 1)
+        const [moved] = this.settings.groups.splice(oldIndex, 1)
         if (moved) {
           this.settings.groups.splice(newIndex, 0, moved)
           this.settings.groups.forEach((grp, index) => grp.priority = index)
@@ -196,64 +156,61 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
           })()
         }
       },
-      onDelete: (idx: number) => {
-        const group: GroupOrCalendarSettings | undefined = this.settings.groups[idx]
-        if (!group) return
-        if (group.id === this.settings.defaultGroup) {
-          new Notice(`Can't delete default group!`)
-          return
-        }
-        if (group.id === DEFAULT_FALLBACK_GROUP) {
-          new Notice(`Can't delete fallback group!`)
-          return
-        }
-        this.settings.groups.splice(idx, 1)
-        void (async () => {
-          await this.plugin.saveSettings()
-          this.update()
-        })()
-      },
+      onDelete: (idx: number) => this.handleDelete(this.settings.groups, idx, this.settings.defaultGroup, DEFAULT_FALLBACK_GROUP, 'group'),
       items: this.settings.groups.map((group) => ({
         name: group.id,
-        searchable: false,
-        render: (setting: Setting) => {
-          let cc: ColorComponent
-          setting
-          .addButton(btn => btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
-            .onClick(async () => {
-              group.visible = !group.visible
-              void btn.setIcon(group.visible ? VISIBLE_ICON : INVISIBLE_ICON)
-              await this.plugin.saveSettings()
-            })
-          )
-          .addColorPicker(c => cc = c
-            .setValue(group.color ?? this.settings.fallbackColor)
-            .onChange(async (value) => {
-                group.color = value
-                await this.plugin.saveSettings()
-              }
-            )
-          )
-          .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
-            .onClick(async () => {
-              cc.setValue(this.settings.fallbackColor)
-              group.color = this.settings.fallbackColor
-              await this.plugin.saveSettings()
-            })
-          )
-        },
+        render: (setting: Setting) => this.renderItemRow(setting, group)
       }))
     }
   }
 
+  private handleDelete(list: GroupOrCalendarSettings[],
+                       idx: number,
+                       defaultId: string,
+                       fallbackId: string,
+                       typeName: string): void {
+    const item = list[idx]
+    if (!item) return
+    if (item.id === defaultId) {
+      new Notice(`Can't delete default ${typeName}!`)
+      return
+    }
+    if (item.id === fallbackId) {
+      new Notice(`Can't delete fallback ${typeName}!`)
+      return
+    }
+    list.splice(idx, 1)
+    void (async () => {
+      await this.plugin.saveSettings()
+      this.update()
+    })()
+  }
+
+  private renderItemRow(setting: Setting, item: GroupOrCalendarSettings): void {
+    let cc: ColorComponent
+    setting
+    .addButton(btn => btn.setIcon(item.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
+      .onClick(async () => {
+        item.visible = !item.visible
+        void btn.setIcon(item.visible ? VISIBLE_ICON : INVISIBLE_ICON)
+        await this.plugin.saveSettings()
+      })
+    )
+    .addColorPicker(c => cc = c
+      .setValue(item.color ?? this.settings.fallbackColor)
+      .onChange(async (value) => {
+          item.color = value
+          await this.plugin.saveSettings()
+        }
+      )
+    )
+    .addButton(btn => btn.setIcon('rotate-ccw').setTooltip('Reset color', {delay: -1})
+      .onClick(async () => {
+        cc.setValue(this.settings.fallbackColor)
+        item.color = this.settings.fallbackColor
+        await this.plugin.saveSettings()
+      })
+    )
+  }
+
 }
-
-
-export function isKnownCalendar(value: string, calendars: GroupOrCalendarSettings[]): boolean {
-  if (!value || calendars?.length === 0) return false
-  for (const cal of calendars)
-    if (cal.id === value)
-      return true
-  return false
-}
-

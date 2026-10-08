@@ -13,7 +13,7 @@ import {FrontMatterUtil} from './frontmatter-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {Consts} from '../const/constants'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
-import {Dates} from '../util/dates'
+import {getGregorianTodayInAbsoluteDays} from '../util/dates'
 import {GregorianCalendar} from '../const/fallback-calendar'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
@@ -33,18 +33,20 @@ function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
 
   } else if (DEFAULT_FALLBACK_CALENDAR === newCalendarConfig.id.toLowerCase()) {
     /* Add the current date to gregorian calendar */
-    newCalendarConfig.today = Dates.getGregorianTodayInAbsoluteDays()
+    newCalendarConfig.today = getGregorianTodayInAbsoluteDays()
   }
 }
 
 /**
  * Reads folder contents and build calendar definitions.
  * @param plugin
+ * @param frontMatterUtil
  * @param calendarId name reference of calendar, must  match front-matter property
  * @param pluginSettings partial plugin settings
  * @param codeBlockContent
  */
 export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
+                                            frontMatterUtil: FrontMatterUtil,
                                             calendarId: string,
                                             pluginSettings: PluginSettings,
                                             codeBlockContent: CodeBlockContent): Promise<CalendarConfig | null> {
@@ -54,7 +56,7 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
 
   if (cachedCalendarConfig) return cachedCalendarConfig
 
-  let targetFile = getMatchingMarkdownFile(plugin, calendarId, pluginSettings, codeBlockContent)
+  const targetFile = getMatchingMarkdownFile(plugin, frontMatterUtil, calendarId, pluginSettings, codeBlockContent)
 
   if (!targetFile) return fallbackIfGregorian(calendarId, plugin)
 
@@ -62,7 +64,6 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
   const match = yamlRegex.exec(content)
 
   if (!match?.[1]) return null
-
 
   try {
     const newCalendarConfig = parseYaml(match[1]) as CalendarConfig
@@ -75,12 +76,12 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
     newCalendarConfig.endDay = newCalendarConfig.endDay ? runOffsetCalculations(newCalendarConfig.endDay) : undefined
 
     switch (newCalendarConfig.type) {
-      case "positional":
-        safetyCheckPositionalConfig(newCalendarConfig as PositionalCalendarConfig)
-        break;
-      case "rule-based":
-        safetyCheckRuleBasedConfig(newCalendarConfig as RuleBasedCalendarConfig)
-        break;
+      case 'positional':
+        safetyCheckPositionalConfig(newCalendarConfig)
+        break
+      case 'rule-based':
+        safetyCheckRuleBasedConfig(newCalendarConfig)
+        break
       default:
         new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarId}'`)
         return null
@@ -109,6 +110,7 @@ function fallbackIfGregorian(calendarId: string, plugin: FantasyGanttPlugin): Ca
  * Search for Markdown file defining the missing calendar config.
  */
 function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
+                                 frontMatterUtil: FrontMatterUtil,
                                  calendarId: string,
                                  pluginSettings: PluginSettings,
                                  codeBlockContent: CodeBlockContent): TFile | null {
@@ -118,18 +120,18 @@ function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
   /* Normalize root path reference */
   if (calendarSourcePath === Consts.ROOT_PATH) calendarSourcePath = Consts.ROOT_PATH_NORMALIZED
 
+  const isRecursive = codeBlockContent.calendarPathSearchRecursive ?? pluginSettings.calendarPathSearchRecursive
+
   const files: TFile[] = allFiles.filter(f => {
     const parentPath = f.parent?.path ?? ''
-
-    if (codeBlockContent.calendarPathSearchRecursive ?? pluginSettings.calendarPathSearchRecursive)
+    if (isRecursive)
       return calendarSourcePath === '' || parentPath === calendarSourcePath || parentPath.startsWith(calendarSourcePath + '/')
-    else
-      return parentPath === calendarSourcePath
+    else return parentPath === calendarSourcePath
   })
 
   for (const file of files) {
     const fileMetadata = plugin.app.metadataCache.getFileCache(file)
-    if (fileMetadata?.frontmatter && FrontMatterUtil.isMatchingCalendarDefinition(fileMetadata.frontmatter, pluginSettings, calendarId))
+    if (fileMetadata?.frontmatter && frontMatterUtil.isMatchingCalendarDefinition(fileMetadata.frontmatter, calendarId))
       return file
   }
   return null
@@ -137,19 +139,21 @@ function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
 
 function safetyCheckPositionalConfig(config: PositionalCalendarConfig) {
   if (config.positionalUnits?.length === 0) {
-    // TODO throw error #errorCache
+    /* TODO throw error #errorCache */
   }
 }
 
+/**
+ * Validates and populates default values for rule-based calendar configurations.
+ */
 function safetyCheckRuleBasedConfig(config: RuleBasedCalendarConfig) {
   const {ruleBasedDetails} = config
   config.offsetToDayZero = Number.isNaN(config.offsetToDayZero) ? 0 : config.offsetToDayZero
   ruleBasedDetails.format = ruleBasedDetails.format ?? DEFAULT_CAL_DATE_FORMAT
   ruleBasedDetails.outputFormat = ruleBasedDetails.outputFormat ?? ruleBasedDetails.format
   ruleBasedDetails.months = ruleBasedDetails.months ?? []
-  // if (ruleBasedDetails.leapYearRule && ruleBasedDetails.leapYearRule.ruleType !== 'none') {
-  //   ruleBasedDetails.leapYearRule.extraDays = Number.isNaN(ruleBasedDetails.leapYearRule.extraDays) ? 1 : ruleBasedDetails.leapYearRule.extraDays
-  // }
+  if (ruleBasedDetails.leapYearRule && ruleBasedDetails.leapYearRule.ruleType !== 'none') {
+    ruleBasedDetails.leapYearRule.extraDays =
+      Number.isNaN(ruleBasedDetails.leapYearRule.extraDays) ? 1 : ruleBasedDetails.leapYearRule.extraDays
+  }
 }
-
-

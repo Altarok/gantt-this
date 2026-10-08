@@ -2,7 +2,7 @@ import {SettingDefinitionItem} from 'obsidian'
 import {ControlKeyMapped, PluginSettings} from '../const/types'
 import {DEFAULT_SETTINGS} from '../const/default-values'
 
-export function createAdvancedUxSettingDefinition(settings: PluginSettings): SettingDefinitionItem {
+export function createChartSettingDefinition(settings: PluginSettings): SettingDefinitionItem {
 
   const items: SettingDefinitionItem[] = [
 
@@ -74,7 +74,7 @@ export function createAdvancedUxSettingDefinition(settings: PluginSettings): Set
           desc: 'Key to hold while scrolling to zoom in or out.',
           control: {
             type: 'dropdown', key: 'uxZoomButton', options: ControlKeyMapped,
-            validate: value => (value !== settings.uxPanButton) ? undefined : 'Must differ from pan key.',
+            validate: value => value !== settings.uxPanButton ? undefined : 'Must differ from pan key.',
             defaultValue: DEFAULT_SETTINGS.uxZoomButton
           }
         },
@@ -83,7 +83,7 @@ export function createAdvancedUxSettingDefinition(settings: PluginSettings): Set
           desc: 'Key to hold while scrolling to pan horizontally.',
           control: {
             type: 'dropdown', key: 'uxPanButton', options: ControlKeyMapped,
-            validate: value => (value !== settings.uxZoomButton) ? undefined : 'Must differ from zoom key.',
+            validate: value => value !== settings.uxZoomButton ? undefined : 'Must differ from zoom key.',
             defaultValue: DEFAULT_SETTINGS.uxPanButton
           }
         },

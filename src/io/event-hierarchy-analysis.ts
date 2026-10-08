@@ -1,8 +1,8 @@
-import {GanttItem, PluginSettings} from '../const/types'
+import {GanttItem} from '../const/types'
 import {FrontMatterUtil} from './frontmatter-reader'
 
 export function findPredecessorsAndSuccessors(items: GanttItem[],
-                                              pluginSettings: PluginSettings) {
+                                              frontMatterUtil: FrontMatterUtil) {
 
   const filteredEventFiles: Record<string, GanttItem[]> = {}
 
@@ -18,8 +18,8 @@ export function findPredecessorsAndSuccessors(items: GanttItem[],
     const {frontMatter} = item
     if (!frontMatter) return
 
-    const predecessors = FrontMatterUtil.getPredecessors(frontMatter, pluginSettings)
-    const successors = FrontMatterUtil.getSuccessors(frontMatter, pluginSettings)
+    const predecessors = frontMatterUtil.getPredecessors(frontMatter)
+    const successors = frontMatterUtil.getSuccessors(frontMatter)
     if (!predecessors && !successors) return
 
     if (predecessors) for (const p of predecessors) if (p) {

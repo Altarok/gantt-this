@@ -1,5 +1,5 @@
 import {SettingDefinitionItem} from 'obsidian'
-import {DEFAULT_SETTINGS} from 'const/default-values'
+import {DEFAULT_SETTINGS} from '../const/default-values'
 
 export function createWorkspaceSettings(): SettingDefinitionItem {
   return {
@@ -13,7 +13,7 @@ export function createWorkspaceSettings(): SettingDefinitionItem {
         control: {type: 'toggle', key: 'uxAddRibbonIcon', defaultValue: DEFAULT_SETTINGS.uxAddRibbonIcon}
       },
       {
-        name: 'Add menu option (mobile ony)',
+        name: 'Add menu option (mobile only)',
         desc: 'Adds a menu option to quickly open a live chart preview.',
         control: {
           type: 'toggle', key: 'uxAddRibbonIconMobile', defaultValue: DEFAULT_SETTINGS.uxAddRibbonIconMobile

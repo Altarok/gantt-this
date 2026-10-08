@@ -10,6 +10,7 @@ import TextWidthCache from './text-space-cache'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import BasesContext from '../util/bases-context'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {FrontMatterUtil} from "../io/frontmatter-reader";
 
 export default class GanttRender {
   private readonly rerenderCooldownMs: number
@@ -19,7 +20,8 @@ export default class GanttRender {
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly filesFilteredByBase: TFile[] | null,
-              readonly basesCtx: BasesContext | null) {
+              readonly basesCtx: BasesContext | null,
+              readonly frontMatterUtil: FrontMatterUtil) {
     this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
     this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
@@ -28,10 +30,10 @@ export default class GanttRender {
   private async getGanttItems(pluginSettings: PluginSettings,
                               codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
     if (this.filesFilteredByBase !== null) {
-      return parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase)
+      return parseFiles(this.plugin, pluginSettings, codeBlockContent, this.filesFilteredByBase, this.frontMatterUtil)
     }
 
-    return getGanttDataFromFolder(this.plugin, pluginSettings, codeBlockContent)
+    return getGanttDataFromFolder(this.plugin, this.frontMatterUtil, pluginSettings, codeBlockContent)
   }
 
   async renderGantt(el: HTMLElement,

@@ -78,12 +78,12 @@ export class GanttChartViewModel {
     this.lastRenderWidth = this.currRenderWidth
   }
 
-  get calenderCount() {
+  private get calendarCount() {
     return this.activeCalendars.length
   }
 
-  get combinedAxesHeight() {
-    return this.calenderCount * this.calendarAxisRowHeight
+  private get combinedAxesHeight() {
+    return this.calendarCount * this.calendarAxisRowHeight
   }
 
   get eventsAreaHeight() {
@@ -155,10 +155,5 @@ export class GanttChartViewModel {
     this.hideDays = tickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_DAYS
     this.hideMonths = tickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_MONTHS
   }
-
-  // /** TODO Returns variables, not constants. */
-  // toString() {
-  //   return `GanttChartModel: zoom ${this.zoomFactor}`
-  // }
 
 }

@@ -53,7 +53,7 @@ function fixGroupOrCalendarSettingsPrioritySetupIfBroken(grpOrCals: Record<strin
 
   Object.values(grpOrCals).forEach(cal => {
     count++
-    if (cal.priority === undefined || cal.priority === null || priorities.contains(cal.priority)) {
+    if (cal.priority === undefined || cal.priority === null || priorities.includes(cal.priority)) {
       valid = false
     } else {
       priorities.push(cal.priority)

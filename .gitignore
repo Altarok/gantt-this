@@ -7,6 +7,7 @@
 coverage/
 examples/
 # Plugin files
+archive/
 main.js
 data.json
 # dev junk

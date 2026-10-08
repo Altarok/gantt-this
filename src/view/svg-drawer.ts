@@ -16,7 +16,7 @@ import {createAxisDateDescription} from '../util/dates'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
-import {Recurring} from '../util/recurring-events'
+import {expandRecurringEvents} from '../util/recurring-events'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
 import BasesContext from '../util/bases-context'
@@ -110,7 +110,7 @@ export class GanttRenderEngine {
     const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.plugin.settings.defaultGroup)))
     Priorities.sortGroupAxisByPriority(groupNames, this.svgDrawerData.mappedGrpConfigs)
 
-    this.drawnData = Recurring.expandRecurringEvents(this, activeItems, this.currRenderWidth)
+    this.drawnData = expandRecurringEvents(this, activeItems, this.currRenderWidth)
 
     this.groups = []
     let currentYOffset = this.viewModel.margin.top

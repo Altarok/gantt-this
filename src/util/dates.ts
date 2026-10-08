@@ -3,16 +3,10 @@ import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBased
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
 
-const TODAY = 'today'
+export const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
 
-export const Dates = {
-  TODAY,
-  parseDescriptiveDateToValidInput,
-  getGregorianTodayInAbsoluteDays
-}
-
-function getGregorianTodayInAbsoluteDays(): number {
+export function getGregorianTodayInAbsoluteDays(): number {
   return Consts.DAYS_FROM_0_12_31_TO_1_1_1970 + Math.floor(Date.now() / (24 * 60 * 60 * 1000))
 }
 
@@ -20,7 +14,7 @@ function getGregorianTodayInAbsoluteDays(): number {
  * @param input starts with 'TODAY'
  * @param config
  */
-function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig) {
+export function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig): string {
   // calculate today absolute day count (since day 0)
   // TODO #errorCache move to error container
   if (!config.today) return `Calendar has no valid today value: ${config.id}`
@@ -161,7 +155,7 @@ function parseDaysToNonGregorianDateString(days: number,
   if (!hideMonths) {
     const isLeap = isCustomLeapYear(year, config, true)
 
-    if (details.months?.length > 0) {
+    if (details.months && details.months.length > 0) {
       for (let m = 0; m < details.months.length; m++) {
         const monthDef = details.months[m]
         if (!monthDef) break
@@ -184,7 +178,6 @@ function parseDaysToNonGregorianDateString(days: number,
       if (!hideDays) dayFinal = remainingDays
     }
   }
-
 
   return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
 }
@@ -226,12 +219,12 @@ export function createAxisDateDescription(days: number,
  */
 function formatYearValue(year: number): string {
   const absYear = Math.abs(year)
-
-  if (absYear >= 1_000_000_000) return `${(absYear / 1_000_000_000).toFixed(1)}B`
-  if (absYear >= 1_000_000) return `${(absYear / 1_000_000).toFixed(1)}M`
-  if (absYear >= 100_000) return `${(absYear / 1_000).toFixed(1)}K`
-  if (absYear >= 10_000) return absYear.toLocaleString('en-US')
-  return absYear.toString().padStart(4, '0')
+  const prefix = year < 0 ? '-' : ''
+  if (absYear >= 1_000_000_000) return `${prefix}${(absYear / 1_000_000_000).toFixed(1)}B`
+  if (absYear >= 1_000_000) return `${prefix}${(absYear / 1_000_000).toFixed(1)}M`
+  if (absYear >= 100_000) return `${prefix}${(absYear / 1_000).toFixed(1)}K`
+  if (absYear >= 10_000) return `${prefix}${absYear.toLocaleString('en-US')}`
+  return `${prefix}${absYear.toString().padStart(4, '0')}`
 }
 
 /** Construct date based on calConfig.ruleBasedDetails.format */
@@ -248,12 +241,9 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
     if (component === 'month' && (asInput || !hideMonths)) return month ?? ''
     if (component === 'day' && (asInput || !hideDays)) return day?.toString().padStart(2, '0') ?? ''
     return ''
-
   })
 
-  const prefix = displayedYear < 0 ? '-' : ''
-
-  return prefix + outputParts.filter(Boolean).join(calConfig.delimiter)
+  return outputParts.filter(Boolean).join(calConfig.delimiter)
     + getEpochSuffix(absDays, calConfig)
 }
 

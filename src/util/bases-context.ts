@@ -1,4 +1,4 @@
-import {BasesEntry, BasesPropertyId, BasesQueryResult, BasesView, BasesViewConfig, Value} from 'obsidian'
+import {BasesEntry, BasesPropertyId, BasesQueryResult, BasesView, BasesViewConfig, TFile, Value} from 'obsidian'
 import {GanttItem} from '../const/types'
 
 export default class BasesContext {
@@ -21,13 +21,15 @@ export default class BasesContext {
   readPropertyValues(item: GanttItem): { key: string, value: string }[] {
     if (!item || this.selectedPropertiesInOrder.length === 0) return []
 
+    const basesEntry: BasesEntry | undefined = this.getBasesEntryWithGanttItem(item)
+    if (!basesEntry) return []
+
     const results: { key: string, value: string }[] = []
 
-    const basesEntry: BasesEntry | undefined = this.getBasesEntry(item)
-
-    if (basesEntry) this.selectedPropertiesInOrder.forEach((propertyKey: BasesPropertyId) => {
+    this.selectedPropertiesInOrder.forEach((propertyKey: BasesPropertyId) => {
       const value: Value | null = basesEntry.getValue(propertyKey)
-      if (value?.isTruthy()) { // isTruthy() should remove non-null empty values
+      /* isTruthy() should remove non-null empty values */
+      if (value?.isTruthy()) {
         const key = this.trimPropertyKey(propertyKey)
         results.push({key, value: value.toString()})
       }
@@ -35,6 +37,22 @@ export default class BasesContext {
 
     return results
   }
+
+  readPropertyValue(file: TFile, key: string): string | null {
+    if (this.selectedPropertiesInOrder.length === 0) return null
+    const basesEntry: BasesEntry | undefined = this.getBasesEntryWithFile(file)
+    if (!basesEntry) return null
+
+    for (const propertyKey of this.selectedPropertiesInOrder) {
+      if (!propertyKey.endsWith(key)) continue
+      const value: Value | null = basesEntry.getValue(propertyKey)
+      /* isTruthy() should remove non-null empty values */
+      if (value?.isTruthy()) return value.toString()
+    }
+
+    return null
+  }
+
 
   /**
    * Removes common prefixes 'note', 'file', and 'formula'.
@@ -45,8 +63,12 @@ export default class BasesContext {
     return p.startsWith('formula.') ? `${p.slice(8)} (f)` : p.slice(5)
   }
 
-  private getBasesEntry(item: GanttItem): BasesEntry | undefined {
-    return this.basesEntries.filter(be => be.file === item.file).first()
+  private getBasesEntryWithGanttItem(item: GanttItem): BasesEntry | undefined {
+    return this.getBasesEntryWithFile(item.file)
+  }
+
+  private getBasesEntryWithFile(file: TFile): BasesEntry | undefined {
+    return this.basesEntries.find(be => be.file === file)
   }
 
   /** Complete Bases query result split into file-related objects */

@@ -1,7 +1,7 @@
 import {Modal, Notice, Setting} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {GroupOrCalendarSettings} from '../const/types'
-import {SettingsUtil} from './settings-util'
+import {getRandomHexColor} from './settings-util'
 
 const ID_REGEX = /^[\w -]+$/
 const DESCRIPTION = `Must be unique. Allowed: letters, numbers, spaces, '-' and '_'.`
@@ -21,35 +21,34 @@ export class AddEntryModal extends Modal {
   }
 
   onOpen() {
-    const result: Partial<GroupOrCalendarSettings> = {visible: true, color: SettingsUtil.getRandomHexColor()}
+    const result: Partial<GroupOrCalendarSettings> = {visible: true, color: getRandomHexColor()}
 
     const {contentEl} = this
     contentEl.empty()
     contentEl.createEl('h2', {text: 'Add new item'})
-    contentEl.createDiv({text: 'IDs are case-sensitive.', attr: {'margin': 10}})
+    contentEl.createDiv({text: 'IDs are case-sensitive.'})
 
     let addButton: HTMLButtonElement
 
     const idSetting = new Setting(contentEl).setName('ID')
     .setDesc(DESCRIPTION)
     .addText(text => {
-      text.onChange((value) => {
-        const trimmed = value.trim()
-        result.id = trimmed
+      text.onChange(value => {
+        result.id = value.trim()
 
         // Validation checks
-        const isValidFormat = ID_REGEX.test(trimmed)
-        const isUnique = !this.existingIds.has(trimmed)
-        const isValid = trimmed.length > 0 && isValidFormat && isUnique
+        const isValidFormat = ID_REGEX.test(result.id)
+        const isUnique = !this.existingIds.has(result.id)
+        const isValid = result.id.length > 0 && isValidFormat && isUnique
 
         // Toggle error UI feedback
-        idSetting.descEl.toggleClass('is-error', !isValid && trimmed.length > 0)
-        if (!isValidFormat && trimmed.length > 0) {
-          idSetting.setDesc(DESCRIPTION_INVALID)
+        idSetting.descEl.toggleClass('is-error', !isValid && result.id.length > 0)
+        if (!isValidFormat && result.id.length > 0) {
+          void idSetting.setDesc(DESCRIPTION_INVALID)
         } else if (!isUnique) {
-          idSetting.setDesc(DESCRIPTION_DUPLICATE)
+          void idSetting.setDesc(DESCRIPTION_DUPLICATE)
         } else {
-          idSetting.setDesc(DESCRIPTION)
+          void idSetting.setDesc(DESCRIPTION)
         }
 
         // Disable/Enable the submit button
@@ -65,7 +64,8 @@ export class AddEntryModal extends Modal {
       btn.setButtonText('Add')
       .setCta()
       .onClick(() => {
-        if (!result.id || !ID_REGEX.test(result.id) || this.existingIds.has(result.id)) {
+        // !ID_REGEX.test(result.id) || this.existingIds.has(result.id)
+        if (!result.id || addButton.disabled) {
           new Notice('Please enter a valid, unique ID.')
           return
         }
@@ -80,6 +80,10 @@ export class AddEntryModal extends Modal {
 
   }
 
+  /*
+   * Delete when clean that Obsidian does that for me
+   * https://docs.obsidian.md/Plugins/User+interface/Modals
+   */
   onClose() {
     const {contentEl} = this
     contentEl.empty()

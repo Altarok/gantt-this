@@ -7,8 +7,8 @@ import {
   RuleBasedDetails
 } from '../const/types'
 import {isCustomLeapYear} from './leap-year-calc'
-import {Dates} from '../util/dates'
-import {Recurring} from '../util/recurring-events'
+import {parseDescriptiveDateToValidInput, TODAY} from '../util/dates'
+import {createRepeatRule} from '../util/recurring-events'
 
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
@@ -17,21 +17,20 @@ export function parseEventDate(doCheckForRepetitions: boolean,
                                isStartDate: boolean,
                                input?: string,
                                config?: CalendarConfig | null): ParsedDate | null {
-
   if (!input || !config) return null
 
-  let repeatRule: RepeatRule | undefined = undefined
+  let repeatRule: RepeatRule | undefined
 
-  if (doCheckForRepetitions && input.contains(' repeat ')) {
+  if (doCheckForRepetitions && input.includes(' repeat ')) {
     const parts = input.split(' repeat ')
     input = parts[0] ?? ''
     const suffix = parts[1] ?? ''
-    if (suffix) repeatRule = Recurring.createRepeatRule(isStartDate, suffix.trim(), config)
+    if (suffix) repeatRule = createRepeatRule(isStartDate, suffix.trim(), config)
   }
 
   let cleanInput: string // e.g. 2026-08-13
-  if (input.startsWith(Dates.TODAY)) {
-    cleanInput = Dates.parseDescriptiveDateToValidInput(input, config)
+  if (input.startsWith(TODAY)) {
+    cleanInput = parseDescriptiveDateToValidInput(input, config)
   } else {
     cleanInput = input.toString().trim()
   }
@@ -46,9 +45,9 @@ export function parseEventDate(doCheckForRepetitions: boolean,
 export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
   switch (config.type) {
     case 'positional':
-      return parseEventDateWithPositionalConfig(cleanInput, config as PositionalCalendarConfig)
+      return parseEventDateWithPositionalConfig(cleanInput, config)
     case 'rule-based':
-      return parseEventDateWithRuleBasedConfig(cleanInput, config as RuleBasedCalendarConfig)
+      return parseEventDateWithRuleBasedConfig(cleanInput, config)
     default:
       return null
   }
@@ -60,21 +59,16 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 
   const segments = cleanInput.split(calendarConfig.delimiter).map(Number)
   let totalDays = 0
-  let valid = true
+  // let valid = true
 
   const units = calendarConfig.positionalUnits ?? []
   if (segments.length === 0 || units.length === 0 || segments.length !== units.length) return null
 
-  units.forEach((unit, idx) => {
+  for (let idx = 0; idx < units.length; idx++) {
     const val = segments[idx]
-    if (val !== undefined && !isNaN(val)) {
-      totalDays += val * unit.days
-    } else if (idx < segments.length) {
-      valid = false
-    }
-  })
-
-  if (!valid || segments.length !== units.length) return null
+    if (!val || Number.isNaN(val)) return null // #errorCache
+    totalDays += val * units[idx]!.days
+  }
 
   return {
     days: calendarConfig.offsetToDayZero + totalDays,
@@ -143,7 +137,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
 
     const days = daysFromYears + day + calendarConfig.offsetToDayZero
     return {
-      days: days === +0 ? 0 : days,
+      days, // : days === +0 ? 0 : days,
       display: `${year}${delimiter}${day}`
     }
   }
@@ -151,8 +145,9 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
   /* Handle Standard/Intercalary Month Dates */
   const months = details.months
 
-  const monthIndex = typeof (monthName) === 'number' ? monthName - 1 :
-    months.findIndex(m => m.name?.toLowerCase() === monthName.toLowerCase() || m.shortname?.toLowerCase() === monthName.toLowerCase())
+  const searchMonth = typeof monthName === 'string' ? monthName.toLowerCase() : ''
+  const monthIndex = typeof monthName === 'number' ? monthName - 1 :
+    months.findIndex(m => m.name?.toLowerCase() === searchMonth || m.shortname?.toLowerCase() === searchMonth)
   if (monthIndex === -1) return null
 
   let allowedDays = months[monthIndex]!.days
@@ -171,11 +166,9 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
   }
 
   const monthNameFinal = months[monthIndex]!.shortname ?? months[monthIndex]!.name ?? String(monthIndex + 1)
+  const days = daysFromYears + daysFromCurrentYearMonths + day + calendarConfig.offsetToDayZero
 
-  return {
-    days: daysFromYears + daysFromCurrentYearMonths + day + calendarConfig.offsetToDayZero,
-    display: `${year}${delimiter}${monthNameFinal}${delimiter}${day}`
-  }
+  return {days, display: `${year}${delimiter}${monthNameFinal}${delimiter}${day}`}
 }
 
 function calculateDaysForYears(upToYear: number, details: RuleBasedDetails): number {

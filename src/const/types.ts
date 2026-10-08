@@ -291,6 +291,9 @@ export type PluginSettings = GanttChartSources & {
 
   /*
    * Hideable setting pages. todo This is part of a future feature.
+   *
+   * Hidden settings disappear from the main settings into sub-pages.
+   * Not hidden would mean be present on the main settings page.
    */
   hideSettingsPageUx: boolean
   hideSettingsPageFrontmatterProperties: boolean

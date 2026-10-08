@@ -5,6 +5,7 @@ import {Consts} from '../const/constants'
 import {FrontMatterUtil} from './frontmatter-reader'
 
 export function getFilteredFiles(plugin: FantasyGanttPlugin,
+                                 frontMatterUtil: FrontMatterUtil,
                                  pluginSettings: PluginSettings,
                                  codeBlockContent: CodeBlockContent): TFile[] {
   const allFiles = plugin.app.vault.getMarkdownFiles()
@@ -13,10 +14,11 @@ export function getFilteredFiles(plugin: FantasyGanttPlugin,
   /* Normalize root path reference */
   if (eventSourcePath === Consts.ROOT_PATH) eventSourcePath = Consts.ROOT_PATH_NORMALIZED
 
+  const isRecursive = codeBlockContent.eventPathSearchRecursive ?? pluginSettings.eventPathSearchRecursive
+
   const filesInCorrectPath = allFiles.filter(f => {
     const parentPath = f.parent?.path ?? ''
-
-    if (codeBlockContent.eventPathSearchRecursive ?? pluginSettings.eventPathSearchRecursive)
+    if (isRecursive)
       return eventSourcePath === '' || parentPath === eventSourcePath || parentPath.startsWith(eventSourcePath + Consts.DIR_SEPARATOR)
     else
       return parentPath === eventSourcePath
@@ -30,9 +32,6 @@ export function getFilteredFiles(plugin: FantasyGanttPlugin,
 
     if (!frontMatter) return false
 
-    if (frontMatterProperty_gantt_this_optional)
-      return true
-    else
-      return FrontMatterUtil.isFileMarkedAsEvent(frontMatter, plugin.settings)
+    return frontMatterProperty_gantt_this_optional || frontMatterUtil.isFileMarkedAsEvent(frontMatter)
   })
 }

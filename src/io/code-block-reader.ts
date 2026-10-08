@@ -15,34 +15,29 @@ export function readCodeBlock(currentFolder: string,
 
   const codeBlockContent: CodeBlockContent = {calendar: calendarId}
 
-  const lines = source.split('\n').filter(Boolean)
+  const lines = source.split('\n')
 
   for (const line of lines) {
-    if (!line.contains(':')) continue
-    const {left: key, right: value} = splitOnce(line, ':')
+    if (!line.includes(':')) continue
+    const trimmed = line.trim()
+    if (!trimmed.includes(':')) continue
+
+    const {left: key, right: value} = splitOnce(trimmed, ':')
     if (!key || !value) continue
 
     switch (key) {
       case 'eventPath':
-        codeBlockContent.eventPath = resolvePath(value, currentFolder)
-        break
       case 'calendarPath':
-        codeBlockContent.calendarPath = resolvePath(value, currentFolder)
+        codeBlockContent[key] = resolvePath(value, currentFolder)
         break
       case 'eventPathSearchRecursive':
-        codeBlockContent.eventPathSearchRecursive = parseBoolean(value)
-        break
       case 'calendarPathSearchRecursive':
-        codeBlockContent.calendarPathSearchRecursive = parseBoolean(value)
+        codeBlockContent[key] = parseBoolean(value)
         break
       case 'lowerBoundDate':
-        codeBlockContent.lowerBoundDate = value
-        break
       case 'centerHereDate':
-        codeBlockContent.centerHereDate = value
-        break
       case 'upperBoundDate':
-        codeBlockContent.upperBoundDate = value
+        codeBlockContent[key] = value
         break
       case 'calendarForBounds':
         codeBlockContent.calendar = value

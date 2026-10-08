@@ -9,6 +9,7 @@ import GanttRender from './view/gantt-chart-manager'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'
+import {FrontMatterUtil} from "./io/frontmatter-reader";
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -96,7 +97,7 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const codeBlockContent = readCodeBlock(currentFile.parent.path, source, this.settings.defaultCalendar)
 
-    const render = new GanttRender(this, null, null)
+    const render = new GanttRender(this, null, null, new FrontMatterUtil(this.settings))
 
     await render.renderGantt(el, this.settings, codeBlockContent, ctx)
   }

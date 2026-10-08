@@ -1,11 +1,6 @@
-import {CalendarConfig, GanttItem, RepeatRule, RuleBasedCalendarConfig, Step} from '../const/types'
+import {CalendarConfig, GanttItem, RepeatRule, Step} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
-
-export const Recurring = {
-  createRepeatRule,
-  expandRecurringEvents
-}
 
 function toStep(input: string | undefined): Step | null {
   if (input === 'days' || input === 'day') return 'day'
@@ -46,7 +41,7 @@ function parseFirstPart(input?: string): { delta: number, step: Step } | null {
  * @param input - suffix of a date, what came after `' repeat '`
  * @param calendarConfig
  */
-function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
+export function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
 
   const parts: string[] = input.split(',').map(x => x.trim()).filter(Boolean)
 
@@ -103,7 +98,7 @@ function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: C
  * @param items
  * @param renderWidth
  */
-function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[], renderWidth: number): GanttItem[] {
+export function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[], renderWidth: number): GanttItem[] {
   const doubleIconSize = 2 * engine.plugin.settings.viewEventIconHeight
   const expanded: GanttItem[] = []
 
@@ -145,9 +140,8 @@ function duplicateEventWithYearDelta(item: GanttItem,
   const {delta} = item.repeatRule
 
   // 1. Resolve calendar config
-  const calConfig = renderEngine.plugin.calendarConfigsCache.get(item.calendarType)
-  if (calConfig?.type !== 'rule-based') return
-  const calendarConfig = calConfig as RuleBasedCalendarConfig
+  const calendarConfig = renderEngine.plugin.calendarConfigsCache.get(item.calendarType)
+  if (calendarConfig?.type !== 'rule-based') return
   if (!calendarConfig.ruleBasedDetails) return // continue loop in calling method
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0

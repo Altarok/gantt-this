@@ -12,14 +12,11 @@ import {EpochOffsetDefinition} from '../const/types'
  */
 export function runOffsetCalculations(offsetConfig?: EpochOffsetDefinition): number {
   if (typeof offsetConfig === 'number') return offsetConfig
-  else if (!offsetConfig || typeof offsetConfig !== 'object') return 0
-
+  if (!offsetConfig || typeof offsetConfig !== 'object') return 0
 
   const year = offsetConfig.year ?? 1 // keep zero if given
   const month = Math.max(1, offsetConfig.month ?? 1)
-  // (!offsetConfig.month || offsetConfig.month < 1) ? 1 : offsetConfig.month
   const day = Math.max(1, offsetConfig.day ?? 1)
-  // (!offsetConfig.day || offsetConfig.day < 1) ? 1 : offsetConfig.day
 
   // Date.UTC() correctly handles 0001-0099 without shifting to 1900s
   const utcDate = new Date('0001-01-01T00:00:00Z')
@@ -27,5 +24,4 @@ export function runOffsetCalculations(offsetConfig?: EpochOffsetDefinition): num
   const dateTime = utcDate.getTime()
   const offsetTo1_1_1970 = Math.round(dateTime / Consts.MILLIS_IN_1_DAY)
   return Consts.DAYS_FROM_0_12_31_TO_1_1_1970 + offsetTo1_1_1970
-
 }

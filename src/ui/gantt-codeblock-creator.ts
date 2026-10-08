@@ -4,6 +4,7 @@ import {CodeBlockContent, PluginSettings} from '../const/types'
 import {Consts} from '../const/constants'
 import GanttRender from '../view/gantt-chart-manager'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
+import {FrontMatterUtil} from "../io/frontmatter-reader";
 // import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 
 /*
@@ -43,7 +44,7 @@ export class CodeBlockCreatorModal extends Modal {
       const pluginSettings: PluginSettings = mergeSettings(globalSettings, output)
       const noCodeBlockContent: CodeBlockContent = {}
 
-      const render = new GanttRender(this.plugin, null, null)
+      const render = new GanttRender(this.plugin, null, null, new FrontMatterUtil(this.plugin.settings))
 
       void render.renderGantt(previewEl, pluginSettings, noCodeBlockContent)
     }

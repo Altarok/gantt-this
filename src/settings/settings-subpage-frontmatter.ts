@@ -1,7 +1,12 @@
 import {SettingDefinition, SettingDefinitionItem} from 'obsidian'
-import {DEFAULT_SETTINGS} from 'const/default-values'
-import {PluginSettings} from 'const/types'
+import {DEFAULT_SETTINGS} from '../const/default-values'
+import {PluginSettings} from '../const/types'
 
+/**
+ * Creates setting definitions for configuring frontmatter property keys.
+ * @param settings - Current plugin settings
+ * @returns Setting definition item representing either a sub-page or a settings group
+ */
 export function createFrontMatterSettingDefinitions(settings: PluginSettings): SettingDefinitionItem {
 
   const items: SettingDefinition[] = [
@@ -14,7 +19,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_gantt_this,
         disabled: () => settings.frontMatterProperty_gantt_this_optional,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -32,7 +37,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_calendar_name',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_calendar_name,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -42,7 +47,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_calendar',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_calendar,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -52,7 +57,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_name',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_name,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_name,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -62,7 +67,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_time_start',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_time_start,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -72,7 +77,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_time_end',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_time_end,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -82,7 +87,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_color',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_color,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_color,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -92,7 +97,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_group',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_group,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_group,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -102,7 +107,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_symbol',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_symbol,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -112,7 +117,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_icon_name',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_icon_name,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       },
     },
     {
@@ -122,7 +127,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_icon_color',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_icon_color,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       }
     },
     {
@@ -132,7 +137,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_note_header',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_note_header,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_note_header,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       }
     },
     {
@@ -142,7 +147,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_predecessors',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_predecessors,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       }
     },
     {
@@ -152,7 +157,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
         type: 'text', key: 'frontMatterProperty_event_successors',
         placeholder: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
         defaultValue: DEFAULT_SETTINGS.frontMatterProperty_event_successors,
-        validate: (value: string) => testFrontMatterInput(value)
+        validate: testFrontMatterInput
       }
     },
 

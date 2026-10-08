@@ -1,25 +1,25 @@
 import {SettingDefinitionItem} from 'obsidian'
 import {GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP, PluginSettings} from '../const/types'
 import {DEFAULT_SETTINGS} from '../const/default-values'
-import {SettingsUtil} from './settings-util'
+import {toRecord} from './settings-util'
 
 export function createEventSettings(settings: PluginSettings): SettingDefinitionItem {
   return {
     type: 'page',
     name: 'Event Visuals',
-    desc: 'Define how events and their tooltip renders.',
+    desc: 'Define how events and their tooltips render.',
     items: [
       {
         heading: 'Events',
         type: 'group',
-        desc: 'Select some default values',
+        desc: 'Default values for events',
         items: [
           {
             name: 'Symbol',
             desc: `Default symbol for timestamp events. Override with property: '${settings.frontMatterProperty_event_symbol}'`,
             control: {
               type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
-              options: SettingsUtil.toRecord(GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
+              options: toRecord(GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
               defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
             }
           },
@@ -28,7 +28,7 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
             desc: `Default calendar for events. Override with property: '${settings.frontMatterProperty_event_calendar}'`,
             control: {
               type: 'dropdown', key: 'defaultCalendar',
-              options: SettingsUtil.toRecord(settings.calendars.map(c => c.id)),
+              options: toRecord(settings.calendars.map(c => c.id)),
               defaultValue: DEFAULT_SETTINGS.defaultCalendar
             }
           },
@@ -37,7 +37,7 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
             desc: `Default group for events. Override with property: '${settings.frontMatterProperty_event_group}'`,
             control: {
               type: 'dropdown', key: 'defaultGroup',
-              options: SettingsUtil.toRecord(settings.groups.map(g => g.id)),
+              options: toRecord(settings.groups.map(g => g.id)),
               defaultValue: DEFAULT_SETTINGS.defaultGroup
             }
           },
