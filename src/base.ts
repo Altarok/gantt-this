@@ -62,7 +62,7 @@ export class GanttThisBasesView extends BasesView {
       if (!frontmatter) return false
 
       const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || this.frontMatterUtil.hasStartDate(frontmatter, file)
-      const hasValidMarker = isCheckboxMarkerOptional || this.frontMatterUtil.isFileMarkedAsEvent(frontmatter)
+      const hasValidMarker = isCheckboxMarkerOptional || this.frontMatterUtil.isFileMarkedAsEvent(frontmatter, file)
 
       // Check if note contains the required frontmatter properties
       return hasStartDate && hasValidMarker

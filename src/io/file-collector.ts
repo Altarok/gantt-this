@@ -32,6 +32,6 @@ export function getFilteredFiles(plugin: FantasyGanttPlugin,
 
     if (!frontMatter) return false
 
-    return frontMatterProperty_gantt_this_optional || frontMatterUtil.isFileMarkedAsEvent(frontMatter)
+    return frontMatterProperty_gantt_this_optional || frontMatterUtil.isFileMarkedAsEvent(frontMatter, f)
   })
 }

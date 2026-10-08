@@ -56,7 +56,8 @@ export class SvgDrawerUtil {
 
   createIconInDiv(d: GanttItem): HTMLDivElement {
     const iconContainerDiv = window.createDiv({cls: 'gt-item icon-container'})
-    if (d.displayIconColor) iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
+    // if (d.displayIconColor)
+    iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
     if (d.displayIcon) setIcon(iconContainerDiv, d.displayIcon)
     return iconContainerDiv
   }

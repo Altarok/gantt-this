@@ -18,8 +18,8 @@ export function findPredecessorsAndSuccessors(items: GanttItem[],
     const {frontMatter} = item
     if (!frontMatter) return
 
-    const predecessors = frontMatterUtil.getPredecessors(frontMatter)
-    const successors = frontMatterUtil.getSuccessors(frontMatter)
+    const predecessors = frontMatterUtil.getPredecessors(frontMatter, item.file)
+    const successors = frontMatterUtil.getSuccessors(frontMatter, item.file)
     if (!predecessors && !successors) return
 
     if (predecessors) for (const p of predecessors) if (p) {

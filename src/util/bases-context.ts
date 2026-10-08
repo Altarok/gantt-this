@@ -1,4 +1,14 @@
-import {BasesEntry, BasesPropertyId, BasesQueryResult, BasesView, BasesViewConfig, TFile, Value} from 'obsidian'
+import {
+  BasesEntry,
+  BasesPropertyId,
+  BasesQueryResult,
+  BasesView,
+  BasesViewConfig,
+  ListValue,
+  PrimitiveValue,
+  TFile,
+  Value
+} from 'obsidian'
 import {GanttItem} from '../const/types'
 
 export default class BasesContext {
@@ -38,7 +48,7 @@ export default class BasesContext {
     return results
   }
 
-  readPropertyValue(file: TFile, key: string): string | null {
+  readPropertyValue(file: TFile, key: string): string[] | string | null {
     if (this.selectedPropertiesInOrder.length === 0) return null
     const basesEntry: BasesEntry | undefined = this.getBasesEntryWithFile(file)
     if (!basesEntry) return null
@@ -47,7 +57,22 @@ export default class BasesContext {
       if (!propertyKey.endsWith(key)) continue
       const value: Value | null = basesEntry.getValue(propertyKey)
       /* isTruthy() should remove non-null empty values */
-      if (value?.isTruthy()) return value.toString()
+      /*
+       * TODO make other types possible (not only string)
+       */
+      if (value?.isTruthy()) {
+        if (value instanceof PrimitiveValue)
+          return value.toString()
+        if (value instanceof ListValue) {
+          const strings: string[] = []
+          for (let i = 0; i < value.length(); i++) {
+            const valueI = value.get(i)
+            strings.push(valueI.toString())
+          }
+          return strings
+        }
+        return null
+      }
     }
 
     return null

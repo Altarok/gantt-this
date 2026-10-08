@@ -146,7 +146,7 @@ export type GanttItem = {
   group: string
   displayType: GanttItemDisplayType
   displayIcon?: string /* SVG icon ID */
-  displayIconColor?: string
+  displayIconColor: string
   calendarType: string
   color?: string
   link?: string

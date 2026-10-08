@@ -55,7 +55,7 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
     if (!frontMatter) continue
 
-    let {startDate, endDate} = frontMatterUtil.getEventTimestamps(frontMatter)
+    let {startDate, endDate} = frontMatterUtil.getEventTimestamps(frontMatter, file)
 
     if (startDate === undefined || startDate === null || startDate === '') {
       if (plugin.settings.useFilenameAsFallbackStartDate) startDate = file.basename
@@ -132,10 +132,10 @@ function createItem(plugin: FantasyGanttPlugin,
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
 
-  let displayType: GanttItemDisplayType = frontMatterUtil.getEventSymbol(frontMatter, isTimeSpan)
+  let displayType: GanttItemDisplayType = frontMatterUtil.getEventSymbol(frontMatter, file, isTimeSpan)
 
   const group = frontMatterUtil.getEventGroup(frontMatter, file)
-  const color = getItemColor(frontMatterUtil, frontMatter, plugin.settings, group, calendarId, file)
+  const color = frontMatterUtil.getEventColor(frontMatter, file, group, calendarId)
 
   const item: GanttItem = {
     id: id,
@@ -167,25 +167,4 @@ function createItem(plugin: FantasyGanttPlugin,
   delete startRes.repeatRule
 
   return item
-}
-
-
-/**
- * Returns event item color. In priority, if given, returns ...
- * * color read from file's FrontMatter or ...
- * * color defined for event group or ...
- * * color
- * * global fallback color
- * @param frontMatterUtil
- * @param frontMatter
- * @param settings this plugin's settings
- * @param group name of group, e.g. 'historic'
- * @param calendar name of calendar, e.g. 'mayan'
- * @param file
- */
-function getItemColor(frontMatterUtil: FrontMatterUtil, frontMatter: FrontMatterCache, settings: PluginSettings, group: string, calendar: string, file: TFile) {
-  return frontMatterUtil.getEventColor(frontMatter, file) ??
-    settings.groups.filter((value) => value.id === group)?.[0]?.color ??
-    settings.calendars.filter((value) => value.id === calendar)?.[0]?.color ??
-    settings.fallbackColor
 }
