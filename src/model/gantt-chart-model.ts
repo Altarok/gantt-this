@@ -56,12 +56,11 @@ export class GanttChartViewModel {
   private currRenderWidth = -1
   private lastRenderWidth = -1
 
-
   /**  Data updated on a redraw, not while panning or zooming */
-   mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = []
-   mappedCalConfigs: Record<string, GroupOrCalendarSettings> = []
-  // private drawnGroups: Record<string, GroupOrCalendarDrawerData> = []
-   drawnCals: Record<string, GroupOrCalendarDrawerData> = []
+  mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = {}
+  mappedCalConfigs: Record<string, GroupOrCalendarSettings> = {}
+  // drawnGroups: Record<string, GroupOrCalendarDrawerData> = {}
+  drawnCals: Record<string, GroupOrCalendarDrawerData> = {}
 
   constructor(plugin: FantasyGanttPlugin) {
     this.eventRowHeight = plugin.settings.viewEventRowHeight
