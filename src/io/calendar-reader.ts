@@ -131,7 +131,7 @@ function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
 
   for (const file of files) {
     const fileMetadata = plugin.app.metadataCache.getFileCache(file)
-    if (fileMetadata?.frontmatter && frontMatterUtil.isMatchingCalendarDefinition(fileMetadata.frontmatter, calendarId))
+    if (fileMetadata?.frontmatter && frontMatterUtil.isMatchingCalendarDefinition(fileMetadata.frontmatter, file, calendarId))
       return file
   }
   return null

@@ -57,22 +57,22 @@ export default class BasesContext {
       if (!propertyKey.endsWith(key)) continue
       const value: Value | null = basesEntry.getValue(propertyKey)
       /* isTruthy() should remove non-null empty values */
+      if (!value?.isTruthy()) return null
       /*
        * TODO make other types possible (not only string)
        */
-      if (value?.isTruthy()) {
-        if (value instanceof PrimitiveValue)
-          return value.toString()
-        if (value instanceof ListValue) {
-          const strings: string[] = []
-          for (let i = 0; i < value.length(); i++) {
-            const valueI = value.get(i)
-            strings.push(valueI.toString())
-          }
-          return strings
+      if (value instanceof PrimitiveValue) /* includes string and boolean */
+        return value.toString()
+      if (value instanceof ListValue) {
+        const strings: string[] = []
+        for (let i = 0; i < value.length(); i++) {
+          const valueI = value.get(i)
+          strings.push(valueI.toString())
         }
-        return null
+        return strings
       }
+      return null
+
     }
 
     return null
