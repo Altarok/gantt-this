@@ -2,9 +2,9 @@ import {DateFormatComponent, DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP, PluginSettings
 
 export const DEFAULT_FALLBACK_CALENDAR = 'gregorian'
 export const DEFAULT_FALLBACK_GROUP = 'general'
-export const DEFAULT_CAL_DATE_FORMAT: DateFormatComponent[] = ['year', 'month', 'day']
+export const DEFAULT_CAL_DATE_FORMAT: DateFormatComponent[] = ['year', 'month', 'day'] as const
 
-export const DEFAULT_SETTINGS: PluginSettings = {
+export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
   eventPath: '/',
   eventPathSearchRecursive: false,
   calendarPath: '/',
@@ -27,17 +27,12 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   mouseOverEventShowBox: true,
   mouseOverEventShowVerticalLine: false,
   showButtonsToHideGroups: false,
-  uxVerticalLineEventWidth: 3,
   uxVerticalOverlayColor: '#ff0000',
   uxShowMoons: true,
   autoRestrictZoom: true,
-  // uxOverrideNoteScrollInCalendar: true,
-  // uxSwitchZoomAndPan: false,
   uxPanButton: 'shift',
   uxZoomButton: 'ctrl',
   showPanAndZoomButtonsInToolbar: true,
-  // customTooltipButton: 'none',
-  // nativeTooltipButton: 'ctrl',
   uxUseCalColorForCalAxis: false,
   uxTooltipOpacity: 1,
   uxAddDaySuffixToTooltipTitle: false,
@@ -69,6 +64,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 
   hideSettingsPageUx: true,
   hideSettingsPageFrontmatterProperties: true,
+
+  uxVerticalLineEventWidth: 3,
   viewEventRowHeight: 24,
   viewEventShapeHeight: 16,
   viewEventIconHeight: 16

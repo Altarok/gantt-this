@@ -1,4 +1,4 @@
-import {CalendarConfig, LeapYearRule, RuleBasedCalendarConfig} from '../const/types'
+import {CalendarConfig} from '../const/types'
 
 export function isGregorianLeapYear(year: number): boolean {
   const absYear = Math.abs(year)
@@ -6,11 +6,10 @@ export function isGregorianLeapYear(year: number): boolean {
 }
 
 /** Checks whether a target year is a leap year according to rules */
-export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, yearWasAlreadyShifted = false): boolean {
-  if (year === null || calendarConfig.type !== 'rule-based') return false
-  const config = calendarConfig as RuleBasedCalendarConfig
+export function isCustomLeapYear(year: number, calConfig: CalendarConfig, yearWasAlreadyShifted = false): boolean {
+  if (calConfig?.type !== 'rule-based') return false
 
-  const leapYearRule: LeapYearRule | undefined = config.ruleBasedDetails.leapYearRule
+  const leapYearRule = calConfig.ruleBasedDetails.leapYearRule
 
   /* No rule means there never is a leap year. */
   if (!leapYearRule || leapYearRule.ruleType === 'none') return false
@@ -18,12 +17,11 @@ export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, y
   // Apply noYearZero offset once upfront if active on negative years
   let targetYear = year
   if (!yearWasAlreadyShifted) {
-    const noYearZero = config.ruleBasedDetails.noYearZero
-    targetYear = (noYearZero === true && year < 0) ? year + 1 : year
+    targetYear = (calConfig.ruleBasedDetails.noYearZero && year < 0) ? year + 1 : year
   }
 
   if (leapYearRule.ruleType === 'gregorian') {
-    if (typeof config.sharedOffset === 'object') {
+    if (typeof calConfig.sharedOffset === 'object') {
       /*
        * WORKAROUND - <b>Use with care!</b>
        *
@@ -37,7 +35,7 @@ export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, y
        * This means the SciFi calendar's year 3 would be a leap year because
        * it mimics Gregorian year 2424.
        */
-      const epochYear = config.sharedOffset.year
+      const epochYear = calConfig.sharedOffset.year
       const targetGregorianYear = epochYear + (targetYear - 1)
       return isGregorianLeapYear(targetGregorianYear)
     }
@@ -49,7 +47,7 @@ export function isCustomLeapYear(year: number, calendarConfig: CalendarConfig, y
     const interval = leapYearRule.intervalYears
     if (!interval || interval <= 0) return false
 
-    return Math.abs(targetYear) % interval === 0
+    return targetYear % interval === 0
   }
 
   return false

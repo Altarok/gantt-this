@@ -3,7 +3,6 @@ import {Css} from '../const/constants'
 import {ManualSvg} from '../view/manual-svg-icons'
 import {GanttChartViewModel} from '../model/gantt-chart-model'
 import TextWidthCache from '../view/text-space-cache'
-import {createSvg} from "../view/svg-drawer-util";
 
 export class GanttChartView {
   svg: SVGElement
@@ -122,17 +121,35 @@ export class GanttChartView {
     return g
   }
 
-  drawCalAxisBaseline(group: SVGGElement, x1: number, x2: number, axisColor: string) {
-    group.createSvg('line', {
-      cls: Css.axis.baseline,
-      attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
+  drawCalAxisBaseline(calGroup: SVGGElement, x1: number, x2: number, axisColor: string): void {
+    calGroup.createSvg('line', {
+      cls: Css.axis.baseline, attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
     })
   }
 
-  drawCalAxisCap(group: SVGGElement, x: number, axisColor: string) {
-    group.createSvg('line', {
-      cls: 'calendar-cap-marker',
-      attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke: axisColor}
+  drawCalAxisCap(calGroup: SVGGElement, x: number, axisColor: string): void {
+    calGroup.createSvg('line', {
+      cls: 'calendar-cap-marker', attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke: axisColor}
+    })
+  }
+
+  drawCalAxisTick(calGroup: SVGGElement, xPos: number): void {
+    calGroup.createSvg('line', {
+      cls: Css.axis.tick, attr: {x1: xPos, y1: 0, x2: xPos, y2: 5}
+    })
+  }
+
+  drawCalAxisDate(calGroup: SVGGElement, xPos: number, date: string): void {
+    const textSvg = calGroup.createSvg('text', {
+      cls: Css.axis.text, attr: {x: xPos, y: 20}
+    })
+    textSvg.textContent = date
+  }
+
+  /** Draw vertical gridlines into dedicated grid container. */
+  drawVerticalGridlineBehindEvents(xPos: number, itemsAreaHeight: number): void {
+    this.gridLayer.createSvg('line', {
+      cls: Css.axis.gridline, attr: {x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight}
     })
   }
 
@@ -140,29 +157,25 @@ export class GanttChartView {
   drawCalendarBadge(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
     const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
 
-    const badge = createSvg('rect', Css.axis.labelBadge, {
-      x: 8, y: currentAxisYStart + 7, width: badgeWidth
+    const badge = this.staticCalendarLayer.createSvg('rect', {
+      cls: Css.axis.labelBadge, attr: {x: 8, y: currentAxisYStart + 7, width: badgeWidth}
     })
 
-    const label = createSvg('text', Css.axis.label, {
-      x: 14, y: currentAxisYStart + 19
+    const label = this.staticCalendarLayer.createSvg('text', {
+      cls: Css.axis.label, attr: {x: 14, y: currentAxisYStart + 19}
     })
     label.textContent = calBadgeTextContent
 
     if (sourceFilePath) {
-      this.plugin.registerDomEvent(badge as unknown as HTMLElement, 'click',
-        () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
+      this.plugin.registerDomEvent(badge as unknown as HTMLElement,
+        'click', () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
       )
     }
-
-    this.staticCalendarLayer.appendChild(badge)
-    this.staticCalendarLayer.appendChild(label)
   }
 
   setWidth(width: number) {
     this.clipRect.setAttribute('width', width.toString())
   }
-
 
   private get clientWidth() {
     return this.container.clientWidth

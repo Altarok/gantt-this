@@ -1,4 +1,4 @@
-import {Notice} from 'obsidian'
+// import {Notice} from 'obsidian'
 import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from '../date-calculations/leap-year-calc'
 import {Consts} from '../const/constants'
@@ -30,7 +30,7 @@ function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig)
   if (input.length > TODAY.length) {
     const suffix = input.slice(TODAY.length).trim()
     if (TODAY_SUFFIX_PATTERN.test(suffix)) absoluteDay += Number(suffix)
-    else new Notice(`Failed to parse descriptive date '${input}'.'`)
+    // else TODO #errorCache new Notice(`Failed to parse descriptive date '${input}'.'`)
   }
 
   // pass calculated day count into description generator
@@ -211,11 +211,11 @@ export function createAxisDateDescription(days: number,
   switch (calendarConfig.type) {
     case 'rule-based':
       if (calendarConfig.id === 'gregorian')
-        return parseDaysToGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, hideDays, hideMonths)
+        return parseDaysToGregorianDateString(days, calendarConfig, asInput, hideDays, hideMonths)
       else
-        return parseDaysToNonGregorianDateString(days, calendarConfig as RuleBasedCalendarConfig, asInput, hideDays, hideMonths)
+        return parseDaysToNonGregorianDateString(days, calendarConfig, asInput, hideDays, hideMonths)
     case 'positional':
-      return parseDaysToPositionalDateString(days, calendarConfig as PositionalCalendarConfig)
+      return parseDaysToPositionalDateString(days, calendarConfig)
     default:
       return 'n/a'
   }

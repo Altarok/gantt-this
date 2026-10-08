@@ -1,15 +1,18 @@
 import {RuleBasedCalendarConfig} from './types'
 
-export const GregorianCalendar: RuleBasedCalendarConfig = {
+/**
+ * Fallback calendar for lazy users.
+ * Optional parameters omitted where not necessary.
+ */
+export const GregorianCalendar: Readonly<RuleBasedCalendarConfig> = {
   id: 'gregorian',
   name: 'Gregorian Calendar',
-  displayName: 'Gregorian',
+  displayName: 'Date',
   sharedOffset: 0,
   offsetToDayZero: 0,
   type: 'rule-based',
   delimiter: '-',
   ruleBasedDetails: {
-    noYearZero: false, // == default value
     daysInStandardYear: 365,
     leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 1},
     format: ['year', 'month', 'day'],
@@ -29,7 +32,7 @@ export const GregorianCalendar: RuleBasedCalendarConfig = {
       {shortname: 'Dec', name: 'December', days: 31}
     ]
   },
-  moons: [{offset: 18.2, cycle: 29.53059, color: "orange"}],
+  moons: [{offset: 18.2, cycle: 29.53059, color: 'orange'}],
   bcSuffix: 'BCE',
   adSuffix: 'CE',
   link: '' // falsy mock file path

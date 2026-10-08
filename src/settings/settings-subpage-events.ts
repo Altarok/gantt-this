@@ -1,5 +1,5 @@
 import {SettingDefinitionItem} from 'obsidian'
-import {GanttItemDisplayTypes, PluginSettings} from '../const/types'
+import {GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP, PluginSettings} from '../const/types'
 import {DEFAULT_SETTINGS} from '../const/default-values'
 import {SettingsUtil} from './settings-util'
 
@@ -19,7 +19,7 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
             desc: `Default symbol for timestamp events. Override with property: '${settings.frontMatterProperty_event_symbol}'`,
             control: {
               type: 'dropdown', key: 'uxDefaultTimestampEventSymbol',
-              options: SettingsUtil.toRecord(GanttItemDisplayTypes.GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
+              options: SettingsUtil.toRecord(GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP),
               defaultValue: DEFAULT_SETTINGS.uxDefaultTimestampEventSymbol
             }
           },

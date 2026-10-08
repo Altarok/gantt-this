@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest'
 import {isCustomLeapYear, isGregorianLeapYear} from '../src/date-calculations/leap-year-calc'
 import {gregorianConfig, mayanConfig, MockCalendarConfig, shireConfig} from './test-configs'
-import {RuleBasedCalendarConfig} from '../src/const/types'
+import {CalendarConfig, RuleBasedCalendarConfig} from '../src/const/types'
 
 
-const bullshitCalendarConfig: RuleBasedCalendarConfig = {
+const bullshitCalendarConfig: CalendarConfig = {
   ...MockCalendarConfig,
   id: 'id',
   sharedOffset: 0,
@@ -21,7 +21,8 @@ const bullshitCalendarConfig: RuleBasedCalendarConfig = {
      * For '1420-Afterlithe-21', format is ['year', 'month', 'day']
      * For '195-2026' (Ordinal), format is ['day', 'year']
      */
-    format: ['year', 'month', 'day']
+    format: ['year', 'month', 'day'],
+    outputFormat: ['year', 'month', 'day']
   }
 }
 
@@ -140,7 +141,8 @@ describe('Sci-Fi Gregorian workaround with negative years', () => {
       noYearZero: true,
       leapYearRule: {ruleType: 'gregorian'},
       months: [],
-      format: ['year', 'month', 'day']
+      format: ['year', 'month', 'day'],
+      outputFormat: ['year', 'month', 'day']
     }
   }
 

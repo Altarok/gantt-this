@@ -35,7 +35,6 @@ export class GanttThisBasesView extends BasesView {
       lowerBoundDate: this.lowerBoundDate,
       upperBoundDate: this.upperBoundDate,
       calendar: this.calendarForBounds
-
     }
 
     const basesCtx = new BasesContext(this)

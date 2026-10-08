@@ -5,15 +5,15 @@ import {
   GanttGroup,
   GanttItem,
   GanttItemDisplayType,
-  GanttItemDisplayTypes,
+  isTimespan,
+  isTimestamp,
   NO_GROUP,
   SvgDrawerData
 } from '../const/types'
-import {Css} from '../const/constants'
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../util/dates'
-import {createSvg, SvgDrawerUtil} from './svg-drawer-util'
+import {SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
 import {Recurring} from '../util/recurring-events'
@@ -204,8 +204,6 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    // console.log('handleResize', includeViewReset, width, this.viewModel.panTranslateX)
-
     if (fullReset &&
       /* Re-evaluate predefined bounds now that we have the true container width */
       (this.codeBlockContent.lowerBoundDateParsed || this.codeBlockContent.upperBoundDateParsed || this.codeBlockContent.centerHereDateParsed)) {
@@ -255,13 +253,6 @@ export class GanttRenderEngine {
   }
 
   renderData() {
-    // console.log('renderData', {
-    //   containerClientWidth: this.container.clientWidth,
-    //   renderWidth: this.getRenderWidth(width),
-    //   panTranslateX: this.viewModel.panTranslateX,
-    //   sampleX: this.getXPosition(this.viewModel.minDays, width)
-    // })
-
     this.view.clearEventLayer()
 
     const halfRowHeight = this.viewModel.eventRowHeightHalf
@@ -297,7 +288,7 @@ export class GanttRenderEngine {
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
         const svgLayer = d.isRecurringInstance ? this.view.repeaterEventLayer : this.view.eventLayer
 
-        if (GanttItemDisplayTypes.isTimespan(displayType)) switch (displayType) {
+        if (isTimespan(displayType)) switch (displayType) {
           case 'bar':
             return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight, svgLayer)
           case 'era': {
@@ -307,7 +298,7 @@ export class GanttRenderEngine {
             return this.svgDrawerUtil.drawEra(d, x1, x2, y, height, this.view.eraLayer)
           }
 
-        } else if (GanttItemDisplayTypes.isTimestamp(displayType)) switch (displayType) {
+        } else if (isTimestamp(displayType)) switch (displayType) {
           case 'point':
             return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
           case 'box':
@@ -422,22 +413,14 @@ export class GanttRenderEngine {
         const xPos = this.getXPosition(currDays)
         if (xPos < 0 || xPos > this.currRenderWidth) continue
 
-        /* Draw vertical gridlines into dedicated grid container */
-        if (index === 0) {
-          const gridLine = createSvg('line', Css.axis.gridline, {
-            x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight
-          })
-          this.view.gridLayer.appendChild(gridLine)
+        if (index === 0 /* -> first calendar */) {
+          this.view.drawVerticalGridlineBehindEvents(xPos, itemsAreaHeight)
         }
 
-        const tick = createSvg('line', Css.axis.tick, {x1: xPos, y1: 0, x2: xPos, y2: 5})
-        ticksG.appendChild(tick)
+        this.view.drawCalAxisTick(ticksG, xPos)
 
         if (xPos - lastTextX > 80) {
-          const text = createSvg('text', Css.axis.text, {x: xPos, y: 20})
-          text.textContent = createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths)
-
-          ticksG.appendChild(text)
+          this.view.drawCalAxisDate(ticksG, xPos, createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths))
           lastTextX = xPos
         }
       }
@@ -669,12 +652,12 @@ export class GanttRenderEngine {
       /* Undefined groups or calendars are accepted! */
       if (grp?.visible === false || cal?.visible === false) return false
 
-      if (GanttItemDisplayTypes.isTimespan(d.displayType)) switch (d.displayType) {
+      if (isTimespan(d.displayType)) switch (d.displayType) {
         case "bar":
           return this.viewModel.showBars
         case "era":
           return this.viewModel.showEras
-      } else if (GanttItemDisplayTypes.isTimestamp(d.displayType)) return this.viewModel.showPoints
+      } else if (isTimestamp(d.displayType)) return this.viewModel.showPoints
       else return false
     })
   }

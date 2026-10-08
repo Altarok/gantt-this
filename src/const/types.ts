@@ -44,11 +44,10 @@ export type RuleBasedDetails = {
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
-
 /**
  * This one has to be implemented by the user inside a Markdown note.
  */
-export type CalendarConfig = {
+type BaseCalendarConfig = {
   /** Mandatory, unique, and case-sensitive identifier. */
   id: string
   name?: string
@@ -59,8 +58,6 @@ export type CalendarConfig = {
   endDay?: EpochOffsetDefinition
   /** Not defined by user, calculated based on shared offset */
   offsetToDayZero: number /* offset to 1 AD January 1, calculated by plugin, not defined in Markdown */
-  /** Calendar type */
-  type: 'positional' | 'rule-based'
   delimiter: string
   bcSuffix?: string
   adSuffix?: string
@@ -72,17 +69,17 @@ export type CalendarConfig = {
 }
 
 /* e.g. Mayan */
-export type PositionalCalendarConfig = CalendarConfig & {
+export type PositionalCalendarConfig = BaseCalendarConfig & {
   type: 'positional',
   positionalUnits: { name: string, days: number }[]
 }
 
 /* e.g. Gregorian */
-export type RuleBasedCalendarConfig = CalendarConfig & {
+export type RuleBasedCalendarConfig = BaseCalendarConfig & {
   type: 'rule-based',
   ruleBasedDetails: RuleBasedDetails
 }
-
+export type CalendarConfig = PositionalCalendarConfig | RuleBasedCalendarConfig
 
 export const DEFAULT_TIMESPAN = 'bar'
 export const DEFAULT_TIMESTAMP = 'point'
@@ -92,26 +89,28 @@ const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS = [DEFAULT_TIMESPAN, 'era'] as const
 type GanttItemDisplayTypeTimespans = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)[number]
 
 /** Timespans only have a start date */
-const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP,
-  'triangle', 'box', 'diamond', 'pentagon', 'hexagon',
-  'octagon', 'star', 'vertical-line'] as const
+export const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP,
+  'triangle',
+  'box',
+  'diamond',
+  'pentagon',
+  'hexagon',
+  'octagon',
+  'star',
+  'vertical-line'] as const
 export type GanttItemDisplayTypeTimestamp = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP)[number]
 
 export type GanttItemDisplayType = GanttItemDisplayTypeTimespans | GanttItemDisplayTypeTimestamp
 
-function isGanttItemDisplayTypeTimespan(value: string): value is GanttItemDisplayTypeTimespans {
-  return GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS.includes(value as GanttItemDisplayTypeTimespans)
+const TIMESPAN_SHAPE_SET = new Set<string>(GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)
+const TIMESTAMP_SHAPE_SET = new Set<string>(GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP)
+
+export function isTimespan(value: string): value is GanttItemDisplayTypeTimespans {
+  return TIMESPAN_SHAPE_SET.has(value)
 }
 
-function isGanttItemDisplayTypeTimestamp(value: string): value is GanttItemDisplayTypeTimestamp {
-  return GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP.includes(value as GanttItemDisplayTypeTimestamp)
-}
-
-/** Calendar event display types */
-export const GanttItemDisplayTypes = {
-  GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP,
-  isTimespan: isGanttItemDisplayTypeTimespan,
-  isTimestamp: isGanttItemDisplayTypeTimestamp
+export function isTimestamp(value: string): value is GanttItemDisplayTypeTimestamp {
+  return TIMESTAMP_SHAPE_SET.has(value)
 }
 
 export type Step = 'day' /* always works */
@@ -189,11 +188,11 @@ export type GroupOrCalendarSettings = {
 
 export type GanttChartDateBound = string | number
 
-export type GanttChartSources = {
-  eventPath: string,
-  eventPathSearchRecursive: boolean,
-  calendarPath: string,
-  calendarPathSearchRecursive: boolean,
+type GanttChartSources = {
+  eventPath: string
+  eventPathSearchRecursive: boolean
+  calendarPath: string
+  calendarPathSearchRecursive: boolean
 }
 
 export type CodeBlockContent = Partial<GanttChartSources> & {
@@ -225,36 +224,6 @@ export const ControlKeyMapped = {
   'alt': 'alt / option',
   'ctrl': 'ctrl / cmd',
   'shift': 'shift'
-}
-// export type OptionalControlKey = ControlKey | 'none'
-// export const OptionalControlKeyMapped = {
-//   'none': 'none', ...ControlKeyMapped
-// }
-
-/**
- * Front-matter property names configurable by user
- */
-export type ConfigurableFrontmatterPropertyNames = {
-  frontMatterProperty_calendar_name: string
-  frontMatterProperty_gantt_this: string
-  frontMatterProperty_gantt_this_optional: boolean /* activate to save 1 front-matter property */
-  frontMatterProperty_event_time_start: string
-  frontMatterProperty_event_time_end: string
-  frontMatterProperty_event_name: string
-  frontMatterProperty_event_calendar: string
-  frontMatterProperty_event_group: string
-  frontMatterProperty_event_symbol: string
-  frontMatterProperty_event_color: string
-  frontMatterProperty_event_icon_name: string
-  frontMatterProperty_event_icon_color: string
-  frontMatterProperty_note_header: string
-  frontMatterProperty_event_predecessors: string
-  frontMatterProperty_event_successors: string
-}
-
-export type HideableSettingPages = {
-  hideSettingsPageUx: boolean
-  hideSettingsPageFrontmatterProperties: boolean
 }
 
 export type PluginSettings = GanttChartSources & {
@@ -300,7 +269,32 @@ export type PluginSettings = GanttChartSources & {
   viewEventRowHeight: number
   viewEventShapeHeight: number
   viewEventIconHeight: number
-} & ConfigurableFrontmatterPropertyNames & HideableSettingPages
+
+  /*
+   * Front-matter property names configurable by user
+   */
+  frontMatterProperty_calendar_name: string
+  frontMatterProperty_gantt_this: string
+  frontMatterProperty_gantt_this_optional: boolean /* activate to save 1 front-matter property */
+  frontMatterProperty_event_time_start: string
+  frontMatterProperty_event_time_end: string
+  frontMatterProperty_event_name: string
+  frontMatterProperty_event_calendar: string
+  frontMatterProperty_event_group: string
+  frontMatterProperty_event_symbol: string
+  frontMatterProperty_event_color: string
+  frontMatterProperty_event_icon_name: string
+  frontMatterProperty_event_icon_color: string
+  frontMatterProperty_note_header: string
+  frontMatterProperty_event_predecessors: string
+  frontMatterProperty_event_successors: string
+
+  /*
+   * Hideable setting pages. todo This is part of a future feature.
+   */
+  hideSettingsPageUx: boolean
+  hideSettingsPageFrontmatterProperties: boolean
+}
 
 
 /**  Data updated on a redraw, not while panning or zooming */

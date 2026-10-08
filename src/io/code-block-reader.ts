@@ -1,5 +1,5 @@
 import {CodeBlockContent} from '../const/types'
-import {StringUtils} from '../const/constants'
+import {splitOnce} from '../const/constants'
 
 /**
  * Reads given code block content and returns values in a new copy of the plugin's settings.
@@ -19,7 +19,7 @@ export function readCodeBlock(currentFolder: string,
 
   for (const line of lines) {
     if (!line.contains(':')) continue
-    const {left: key, right: value} = StringUtils.splitOnce(line, ':')
+    const {left: key, right: value} = splitOnce(line, ':')
     if (!key || !value) continue
 
     switch (key) {

@@ -20,7 +20,7 @@ describe('Parsing event dates fails for', () => {
   })
 
   it('wrong config type', () => {
-    const incompleteConfig: Partial<CalendarConfig> = {type: 'gregorian'}
+    const incompleteConfig: Partial<CalendarConfig> = {type: 'rule-based'}
     expect(parseDate('1-2-3', incompleteConfig as CalendarConfig)).toBeNull()
   })
 

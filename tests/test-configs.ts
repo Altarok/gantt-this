@@ -71,6 +71,7 @@ export const gregorianWithoutMonthsConfig: RuleBasedCalendarConfig = {
     daysInStandardYear: 365,
     leapYearRule: {ruleType: 'gregorian'},
     format: ['year', 'day'],
+    outputFormat: ['year', 'day'],
     months: []
   }
 }
@@ -92,6 +93,7 @@ export const shireConfig: RuleBasedCalendarConfig = {
       applyToMonthIndex: 8
     },
     format: formatYMD,
+    outputFormat: formatYMD,
     months: [
       {name: '2. Yule', days: 1, isIntercalary: true},
       {name: 'Afteryule', days: 30},
@@ -142,6 +144,7 @@ export const frenchRevolutionConfig: RuleBasedCalendarConfig = {
     daysInStandardYear: 365,
     leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 12},
     format: formatYMD,
+    outputFormat: formatYMD,
     months: [
       {name: 'Vendémiaire', days: 30},
       {name: 'Brumaire', days: 30},

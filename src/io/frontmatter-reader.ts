@@ -1,5 +1,5 @@
 import {FrontMatterCache} from 'obsidian'
-import {GanttItemDisplayType, GanttItemDisplayTypes, NO_GROUP, PluginSettings} from '../const/types'
+import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP, PluginSettings} from '../const/types'
 
 /*
  * Default key: 'gantt-type-definition'
@@ -66,9 +66,9 @@ function getEventSymbol(frontMatter: FrontMatterCache, settings: PluginSettings,
 //  if (value && !isGanttItemDisplayType(value)) value = undefined
 
   if (isTimeSpan) {
-    return GanttItemDisplayTypes.isTimespan(value) ? value : settings.uxDefaultTimespanEventSymbol
+    return isTimespan(value) ? value : settings.uxDefaultTimespanEventSymbol
   } else {
-    return GanttItemDisplayTypes.isTimestamp(value) ? value : settings.uxDefaultTimestampEventSymbol
+    return isTimestamp(value) ? value : settings.uxDefaultTimestampEventSymbol
   }
 }
 
