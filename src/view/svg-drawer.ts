@@ -1,7 +1,6 @@
 import FantasyGanttPlugin from '../main'
 import {
   CalendarConfig,
-  CodeBlockContent,
   GanttGroup,
   GanttItem,
   GanttItemDisplayType,
@@ -16,28 +15,28 @@ import {SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import TextWidthCache from './text-space-cache'
 import {expandRecurringEvents} from '../util/recurring-events'
-import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
-import BasesContext from '../util/bases-context'
+import BasesContext from '../model/bases-context'
+import {SettingsContext} from '../model/settings-context'
 
 export class GanttRenderEngine {
   private eventManager?: GanttEventManager
   private groups: GanttGroup[] = []
   private resizeObserver: ResizeObserver
 
-  view!: GanttChartView
+  view: GanttChartView
   drawnData: GanttItem[] = []
 
-  constructor(public readonly container: HTMLElement,
+  constructor(view: GanttChartView,
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
-              private readonly codeBlockContent: CodeBlockContent,
+              private readonly settingsContext: SettingsContext,
               private readonly basesCtx: BasesContext | null,
               private readonly textCache: TextWidthCache,
-              readonly viewModel: GanttChartViewModel,
+              readonly viewModel: GanttChartModel,
               private readonly svgDrawerUtil: SvgDrawerUtil) {
-
-    this.viewModel.setRawContainerWidth(this.container.clientWidth)
+    this.view = view
 
     this.updateSvgDrawerData()
     this.calculateGlobalBounds()
@@ -47,11 +46,11 @@ export class GanttRenderEngine {
     this.handleResize(true)
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize())
-    this.resizeObserver.observe(this.container)
+    this.resizeObserver.observe(this.view.chartContainer)
   }
 
   public updateData(newData: GanttItem[]) {
-    this.viewModel.setRawContainerWidth(this.container.clientWidth)
+    this.viewModel.setRawContainerWidth(this.view.clientWidth)
     this.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
@@ -63,7 +62,9 @@ export class GanttRenderEngine {
 
   redraw() {
     // if (this.view) this.view.destroy()
-    return new GanttChartView(this.plugin, this.container, this.viewModel, this.textCache)
+    const container = this.view.container
+    // this.view.destroy()
+    return new GanttChartView(this.plugin, container, this.viewModel, this.textCache)
   }
 
   private updateSvgDrawerData() {
@@ -167,7 +168,7 @@ export class GanttRenderEngine {
 
   handleResize(fullReset = false) {
 
-    this.viewModel.setRawContainerWidth(this.container.clientWidth)
+    this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
     const currRenderWidth = this.viewModel.getCurrRenderWidth()
     const lastRenderWidth = this.viewModel.getLastRenderWidth()
@@ -194,9 +195,8 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    if (fullReset &&
+    if (fullReset && this.settingsContext.hasDateBounds) {
       /* Re-evaluate predefined bounds now that we have the true container width */
-      (this.codeBlockContent.lowerBoundDateParsed || this.codeBlockContent.upperBoundDateParsed || this.codeBlockContent.centerHereDateParsed)) {
       this.transitionToPredefinedBounds()
     }
 
@@ -509,9 +509,9 @@ export class GanttRenderEngine {
 
   private transitionToPredefinedBounds(): void {
 
-    const lower = this.codeBlockContent.lowerBoundDateParsed?.days
-    const upper = this.codeBlockContent.upperBoundDateParsed?.days
-    const center = this.codeBlockContent.centerHereDateParsed?.days
+    const lower = this.settingsContext.lowerBoundDateParsed?.days
+    const upper = this.settingsContext.upperBoundDateParsed?.days
+    const center = this.settingsContext.centerHereDateParsed?.days
 
     const totalRange = this.viewModel.totalDaysSpan
     if (totalRange <= 0) {

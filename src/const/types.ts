@@ -86,7 +86,7 @@ export const DEFAULT_TIMESTAMP = 'point'
 
 /** Timespans go from a start date to an end date */
 const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS = [DEFAULT_TIMESPAN, 'era'] as const
-type GanttItemDisplayTypeTimespans = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)[number]
+export type GanttItemDisplayTypeTimespans = (typeof GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESPANS)[number]
 
 /** Timespans only have a start date */
 export const GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP = [DEFAULT_TIMESTAMP,
@@ -188,23 +188,6 @@ export type GroupOrCalendarSettings = {
 
 export type GanttChartDateBound = string | number
 
-type GanttChartSources = {
-  eventPath: string
-  eventPathSearchRecursive: boolean
-  calendarPath: string
-  calendarPathSearchRecursive: boolean
-}
-
-export type CodeBlockContent = Partial<GanttChartSources> & {
-  lowerBoundDate?: GanttChartDateBound
-  centerHereDate?: GanttChartDateBound
-  upperBoundDate?: GanttChartDateBound
-  lowerBoundDateParsed?: ParsedDate
-  centerHereDateParsed?: ParsedDate
-  upperBoundDateParsed?: ParsedDate
-  calendar?: string
-}
-
 export type ControlKey = 'ctrl' | 'alt' | 'shift'
 export const ControlKeyMapped = {
   'alt': 'alt / option',
@@ -212,14 +195,43 @@ export const ControlKeyMapped = {
   'shift': 'shift'
 }
 
-/**
- * Global, unique settings
- */
-export type PluginSettings = GanttChartSources & {
-  defaultCalendar: string
-  defaultGroup: string
+export type ChartVisualSettings = {
+  viewEventRowHeight: number
+  viewEventShapeHeight: number
+  viewEventIconHeight: number
   fallbackColor: string
   fallbackColorForIcons: string
+}
+
+export type GanttChartSources = {
+  eventPath: string
+  eventPathSearchRecursive: boolean
+  calendarPath: string /* part of bases configuration */
+  calendarPathSearchRecursive: boolean /* part of bases configuration */
+}
+
+/**
+ * Local chart-specific settings
+ */
+export type LocalChartSettings = Partial<GanttChartSources> & Partial<ChartVisualSettings> & {
+  lowerBoundDateParsed?: ParsedDate
+  centerHereDateParsed?: ParsedDate
+  upperBoundDateParsed?: ParsedDate
+  calendarForBounds?: string
+}
+
+export type RawChartInput = Partial<GanttChartSources> & /* Partial<ChartVisualSettings> & */ {
+  calendar?: string /* part of bases configuration */
+  lowerBoundDate?: GanttChartDateBound  /* part of bases configuration */
+  centerHereDate?: GanttChartDateBound
+  upperBoundDate?: GanttChartDateBound  /* part of bases configuration */
+}
+/**
+ * Global plugin settings inheriting chart settings and adding global UX/app options
+ */
+export type PluginSettings = ChartVisualSettings & GanttChartSources & {
+  defaultCalendar: string
+  defaultGroup: string
   calendars: GroupOrCalendarSettings[]
   groups: GroupOrCalendarSettings[]
 
@@ -254,10 +266,6 @@ export type PluginSettings = GanttChartSources & {
   uxConnectRelatedEvents: boolean // connect predecessors and successors
   uxMoveToolbarBelowChart: boolean
   uxMakeToolbarSticky: boolean
-
-  viewEventRowHeight: number
-  viewEventShapeHeight: number
-  viewEventIconHeight: number
 
   /*
    * Front-matter property names configurable by user
@@ -302,5 +310,4 @@ export const BaseKeys = {
   ubd: 'bk-upper-bound-date',
   cal: 'bk-calendar-for-bounds'
 } as const
-export type BaseKey = (typeof BaseKeys)[keyof typeof BaseKeys]
-
+// export type BaseKey = (typeof BaseKeys)[keyof typeof BaseKeys]

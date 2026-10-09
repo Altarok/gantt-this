@@ -1,7 +1,7 @@
 import {Platform, setIcon, setTooltip} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
-import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {GanttChartModel} from '../model/gantt-chart-model'
 
 const isMobile = Platform.isMobile
 
@@ -53,7 +53,7 @@ export class ToolbarView {
    */
   constructor(container: HTMLDivElement,
               readonly plugin: FantasyGanttPlugin,
-              readonly viewModel: GanttChartViewModel,
+              readonly viewModel: GanttChartModel,
               refreshChartCallback: () => void) {
     const {showPanAndZoomButtonsInToolbar} = plugin.settings
 

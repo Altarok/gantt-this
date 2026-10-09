@@ -1,32 +1,26 @@
 import {TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {CodeBlockContent, PluginSettings} from '../const/types'
-import {Consts} from '../const/constants'
 import {EventPropertyReader} from './event-property-reader'
+import {getEventFiles} from './io-util'
+import {GanttChartSources} from '../const/types'
 
+
+/**
+ * Search and filter files, then parse to {@link GanttItem}s.
+ * Call from outside Obsidian's Bases.
+ * @param plugin
+ * @param eventPropertyReader
+ * @param settingsContext
+ */
 export function getFilteredFiles(plugin: FantasyGanttPlugin,
                                  eventPropertyReader: EventPropertyReader,
-                                 pluginSettings: PluginSettings,
-                                 codeBlockContent: CodeBlockContent): TFile[] {
-  const allFiles = plugin.app.vault.getMarkdownFiles()
+                                 settingsContext: GanttChartSources): TFile[] {
 
-  let eventSourcePath = codeBlockContent.eventPath ?? pluginSettings.eventPath
-  /* Normalize root path reference */
-  if (eventSourcePath === Consts.ROOT_PATH) eventSourcePath = Consts.ROOT_PATH_NORMALIZED
-
-  const isRecursive = codeBlockContent.eventPathSearchRecursive ?? pluginSettings.eventPathSearchRecursive
-
-  const filesInCorrectPath = allFiles.filter(f => {
-    const parentPath = f.parent?.path ?? ''
-    if (isRecursive)
-      return eventSourcePath === '' || parentPath === eventSourcePath || parentPath.startsWith(eventSourcePath + Consts.DIR_SEPARATOR)
-    else
-      return parentPath === eventSourcePath
-  })
+  const allFiles = getEventFiles(plugin, settingsContext)
 
   const {frontMatterProperty_gantt_this_optional} = plugin.settings
 
-  return filesInCorrectPath.filter(f => {
+  return allFiles.filter(f => {
     const cache = plugin.app.metadataCache.getFileCache(f)
     const frontMatter = cache?.frontmatter
 

@@ -1,10 +1,10 @@
 import FantasyGanttPlugin from '../main'
 import {Consts} from '../const/constants'
-import {GroupOrCalendarDrawerData, GroupOrCalendarSettings, PluginSettings} from "../const/types";
+import {GroupOrCalendarDrawerData, GroupOrCalendarSettings, PluginSettings} from '../const/types'
 
 type Margin = { top: number, bottom: number, left: number, right: number }
 
-export class GanttChartViewModel {
+export class GanttChartModel {
   /** Will hide eras if false, default: true */
   private isShowEras = true
   /** Will hide bars if false, default: true */

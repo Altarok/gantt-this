@@ -5,7 +5,7 @@ import {GanttDesktopEventManager} from './event-manager-desktop'
 import {PluginSettings} from '../const/types'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import TooltipManager from './tooltip-manager-desktop'
-import BasesContext from '../util/bases-context'
+import BasesContext from '../model/bases-context'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */

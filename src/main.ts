@@ -1,16 +1,14 @@
 import {MarkdownPostProcessorContext, Platform, Plugin} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings/settings-view'
-import {BaseKeys, CalendarConfig, PluginSettings} from './const/types'
+import {BaseKeys, CalendarConfig, PluginSettings, RawChartInput} from './const/types'
 import {DEFAULT_SETTINGS} from './const/default-values'
 import {readCodeBlock} from './io/codeblock-reader'
 import {CodeBlockCreatorModal} from './util/gantt-codeblock-creator'
 import {Consts} from './const/constants'
-import GanttRender from './view/gantt-chart-manager'
+import ChartManager from './ctrl/gantt-chart-manager'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'
-import {EventPropertyReader} from './io/event-property-reader'
-import {SettingsContext} from "./util/settings-context";
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -84,6 +82,14 @@ export default class FantasyGanttPlugin extends Plugin {
     this.app.metadataCache.trigger('resolved')
   }
 
+  /**
+   * Register Markdown codeblock postprocessor.
+   *
+   * @param source
+   * @param el
+   * @param ctx
+   * @private
+   */
   private async registerCalendar(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
     const currentFile = this.app.workspace.getActiveFile()
     if (!currentFile?.parent) {
@@ -91,13 +97,11 @@ export default class FantasyGanttPlugin extends Plugin {
       return
     }
 
-    const codeBlockContent = readCodeBlock(currentFile.parent.path, source, this.settings.defaultCalendar)
+    const rawChartInput: RawChartInput = readCodeBlock(currentFile.parent.path, source)
 
-    const settings = new SettingsContext(this.settings, codeBlockContent)
+    const render = new ChartManager(this, el, rawChartInput, null, ctx)
 
-    const render = new GanttRender(this, new EventPropertyReader(settings))
-
-    await render.renderGantt(el, this.settings, codeBlockContent, ctx)
+    await render.renderGantt()
   }
 
 }

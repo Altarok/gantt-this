@@ -1,13 +1,10 @@
 import {FrontMatterCache, TFile} from 'obsidian'
 import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../const/types'
-import BasesContext from '../util/bases-context'
-import {SettingsContext} from '../util/settings-context'
+import BasesContext from '../model/bases-context'
+import {SettingsContext} from '../model/settings-context'
 
 
 export class EventPropertyReader {
-  // constructor(private readonly settings: PluginSettings,
-  //             private readonly basesCtx?: BasesContext) {
-  // }
   constructor(private readonly settings: SettingsContext,
               private readonly basesCtx?: BasesContext) {
   }
@@ -47,11 +44,12 @@ export class EventPropertyReader {
   }
 
   /*
-   * Default key: 'gantt-type-definition'
+   * Default key: 'gantt-calendar-definition'
    */
-  isMatchingCalendarDefinition(frontMatter: FrontMatterCache, file: TFile, calendarId: string): boolean {
+  getCalendarId(frontMatter: FrontMatterCache, file: TFile): string {
     const key = this.settings.frontMatterProperty_calendar_name
-    return frontMatter[key] === calendarId || this.basesCtx?.readPropertyValue(file, key) === calendarId
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
   }
 
   /*
@@ -63,7 +61,7 @@ export class EventPropertyReader {
   }
 
   /*
-   * Default key: 'gantt-type'
+   * Default key: 'gantt-calendar'
    */
   getEventCalendarName(frontMatter: FrontMatterCache, file: TFile): string {
     const key = this.settings.frontMatterProperty_event_calendar

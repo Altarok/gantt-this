@@ -1,10 +1,8 @@
 import {BasesView, Notice, QueryController} from 'obsidian'
-import GanttRender from './view/gantt-chart-manager'
-import {BaseKeys, CodeBlockContent} from './const/types'
+import ChartManager from './ctrl/gantt-chart-manager'
+import {BaseKeys, RawChartInput} from './const/types'
 import FantasyGanttPlugin from './main'
-import {EventPropertyReader} from './io/event-property-reader'
-import BasesContext from './util/bases-context'
-import {SettingsContext} from "./util/settings-context";
+import BasesContext from './model/bases-context'
 
 /*
  * TODO #v2: change to 'gantt-this-view'
@@ -23,7 +21,7 @@ export class GanttThisBasesView extends BasesView {
               parentEl: HTMLElement) {
     super(controller)
     this.containerEl = parentEl.createDiv('bases-example-view-container')
-    this.basesCtx = new BasesContext(this)
+    this.basesCtx = new BasesContext(this.plugin, this)
   }
 
   public onDataUpdated(): void {
@@ -31,7 +29,7 @@ export class GanttThisBasesView extends BasesView {
     this.containerEl.empty()
 
     /* Omit event path stuff - use base filters instead! */
-    const codeBlockContent: CodeBlockContent = {
+    const rawChartInput: RawChartInput = {
       calendarPath: this.calendarPath,
       calendarPathSearchRecursive: this.calendarPathSearchRecursive,
       lowerBoundDate: this.lowerBoundDate,
@@ -39,45 +37,16 @@ export class GanttThisBasesView extends BasesView {
       calendar: this.calendarForBounds
     }
 
-    const settings = new SettingsContext(this.plugin.settings, codeBlockContent)
-
-    const eventPropertyReader = new EventPropertyReader(settings, this.basesCtx)
-
-    const files = this.preFilterFiles(eventPropertyReader)
-
-    const render = new GanttRender(this.plugin, eventPropertyReader, files, this.basesCtx)
+    const render = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx, null)
 
     try {
-      void render.renderGantt(this.containerEl, this.plugin.settings, codeBlockContent)
+      void render.renderGantt()
     } catch {
+      // TODO #errorCache
       new Notice('Failed to render Gantt chart base!')
     }
   }
 
-  private preFilterFiles(eventPropertyReader: EventPropertyReader) {
-    const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
-
-    /* Pre-filter files */
-    return this.data.data.map(entry => entry.file).filter(file => {
-      const cache = this.plugin.app.metadataCache.getFileCache(file)
-      const frontmatter = cache?.frontmatter
-      if (!frontmatter) return false
-
-      const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || eventPropertyReader.hasStartDate(frontmatter, file)
-      const hasValidMarker = isCheckboxMarkerOptional || eventPropertyReader.isFileMarkedAsEvent(frontmatter, file)
-
-      // Check if note contains the required frontmatter properties
-      return hasStartDate && hasValidMarker
-    })
-  }
-
-  private getStringValue(key: string): string | undefined {
-    return this.config.get(key) ? String(this.config.get(key)) : undefined
-  }
-
-  private getBoolValue(key: string): boolean | undefined {
-    return this.config.get(key) ? this.config.get(key) === true : undefined
-  }
 
   private get calendarPath(): string {
     return this.getStringValue(BaseKeys.calPath) ?? this.plugin.settings.calendarPath
@@ -97,6 +66,14 @@ export class GanttThisBasesView extends BasesView {
 
   private get calendarForBounds(): string | undefined {
     return this.getStringValue(BaseKeys.cal)
+  }
+
+  private getStringValue(key: string): string | undefined {
+    return this.config.get(key) ? String(this.config.get(key)) : undefined
+  }
+
+  private getBoolValue(key: string): boolean | undefined {
+    return this.config.get(key) ? this.config.get(key) === true : undefined
   }
 
   /*

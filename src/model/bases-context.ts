@@ -9,10 +9,13 @@ import {
   TFile,
   Value
 } from 'obsidian'
+import FantasyGanttPlugin from '../main'
 import {GanttItem} from '../const/types'
+import {EventPropertyReader} from '../io/event-property-reader'
 
 export default class BasesContext {
-  constructor(private readonly base: BasesView) {
+  constructor(private readonly plugin: FantasyGanttPlugin,
+              private readonly base: BasesView) {
   }
 
   /**
@@ -48,13 +51,17 @@ export default class BasesContext {
     return results
   }
 
+  /**
+   * Reads a single property value for a file from the base query results.
+   * @return The value as a string, an array of strings, or null if not found/empty.
+   */
   readPropertyValue(file: TFile, key: string): string[] | string | null {
     if (this.selectedPropertiesInOrder.length === 0) return null
     const basesEntry: BasesEntry | undefined = this.getBasesEntryWithFile(file)
     if (!basesEntry) return null
 
     for (const propertyKey of this.selectedPropertiesInOrder) {
-      if (!propertyKey.endsWith(key)) continue
+      if (!propertyKey.endsWith(`.${key}`)) continue
       const value: Value | null = basesEntry.getValue(propertyKey)
       /* isTruthy() should remove non-null empty values */
       if (!value?.isTruthy()) return null
@@ -78,6 +85,22 @@ export default class BasesContext {
     return null
   }
 
+  /** Filter base's query results by start date and checkbox */
+  filterQueryResults(eventPropertyReader: EventPropertyReader) {
+    const isCheckboxMarkerOptional = this.plugin.settings.frontMatterProperty_gantt_this_optional
+
+    return this.queryResults.filter(entry => {
+      const cache = this.plugin.app.metadataCache.getFileCache(entry.file)
+      const frontmatter = cache?.frontmatter
+      if (!frontmatter) return false
+
+      const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || eventPropertyReader.hasStartDate(frontmatter, entry.file)
+      const hasValidMarker = isCheckboxMarkerOptional || eventPropertyReader.isFileMarkedAsEvent(frontmatter, entry.file)
+
+      // Check if note contains the required frontmatter properties
+      return hasStartDate && hasValidMarker
+    }).map(entry => entry.file)
+  }
 
   /**
    * Removes common prefixes 'note', 'file', and 'formula'.
@@ -89,15 +112,16 @@ export default class BasesContext {
   }
 
   private getBasesEntryWithGanttItem(item: GanttItem): BasesEntry | undefined {
+    if (!item?.file) return undefined
     return this.getBasesEntryWithFile(item.file)
   }
 
   private getBasesEntryWithFile(file: TFile): BasesEntry | undefined {
-    return this.basesEntries.find(be => be.file === file)
+    return this.queryResults.find(be => be.file === file)
   }
 
   /** Complete Bases query result split into file-related objects */
-  private get basesEntries(): BasesEntry[] {
+  private get queryResults(): BasesEntry[] {
     return this.queryResult.data
   }
 

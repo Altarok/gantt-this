@@ -1,20 +1,19 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
 import {
   CalendarConfig,
-  CodeBlockContent,
+  GanttChartSources,
   ParsedDate,
-  PluginSettings,
   PositionalCalendarConfig,
   RuleBasedCalendarConfig,
 } from '../const/types'
-import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR, DEFAULT_SETTINGS} from '../const/default-values'
+import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR} from '../const/default-values'
 import FantasyGanttPlugin from '../main'
 import {EventPropertyReader} from './event-property-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
-import {Consts} from '../const/constants'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {getGregorianTodayInAbsoluteDays} from '../date-calculations/dates'
 import {GregorianCalendar} from '../const/fallback-calendar'
+import {getCalendarFiles} from './io-util'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -37,38 +36,61 @@ function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
   }
 }
 
-/**
- * Reads folder contents and build calendar definitions.
- * @param plugin
- * @param eventPropertyReader
- * @param calendarId name reference of calendar, must  match front-matter property
- * @param pluginSettings partial plugin settings
- * @param codeBlockContent
- */
-export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
+export async function getCalendarDefinition(calendarID: string,
+                                            plugin: FantasyGanttPlugin,
                                             eventPropertyReader: EventPropertyReader,
-                                            calendarId: string,
-                                            pluginSettings: PluginSettings,
-                                            codeBlockContent: CodeBlockContent): Promise<CalendarConfig | null> {
-  if (!calendarId || !pluginSettings) return null
+                                            settingsContext: GanttChartSources): Promise<CalendarConfig | null> {
 
-  const cachedCalendarConfig: CalendarConfig | undefined = plugin.calendarConfigsCache.get(calendarId)
-
+  const cachedCalendarConfig: CalendarConfig | undefined = plugin.calendarConfigsCache.get(calendarID)
   if (cachedCalendarConfig) return cachedCalendarConfig
 
-  const targetFile = getMatchingMarkdownFile(plugin, eventPropertyReader, calendarId, pluginSettings, codeBlockContent)
+  await getCalendarDefinitions([calendarID], plugin, eventPropertyReader, settingsContext)
 
-  if (!targetFile) return fallbackIfGregorian(calendarId, plugin)
+  return plugin.calendarConfigsCache.get(calendarID) ?? null
+}
 
-  const content = await plugin.app.vault.read(targetFile)
+/**
+ * Reads folder contents and build calendar definitions.
+ * @param calendarIDs name reference of calendar, must  match front-matter property
+ * @param plugin
+ * @param eventPropertyReader
+ * @param settingsContext {@link SettingsContext} used as  {@link GanttChartSources}
+ */
+export async function getCalendarDefinitions(calendarIDs: string[],
+                                             plugin: FantasyGanttPlugin,
+                                             eventPropertyReader: EventPropertyReader,
+                                             settingsContext: GanttChartSources): Promise<void> {
+  if (!calendarIDs || calendarIDs.length < 1 || !settingsContext) return
+
+  const calendarsToLoad: string[] = filterNonExistentCalendars(plugin, calendarIDs)
+
+  const allFiles: TFile[] = getCalendarFiles(plugin, settingsContext)
+
+  const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(plugin, allFiles, eventPropertyReader, calendarsToLoad)
+
+  for (const calendarID of Object.keys(mappedFiles)) {
+    await loadCalendar(plugin, calendarID, mappedFiles[calendarID])
+  }
+}
+
+function filterNonExistentCalendars(plugin: FantasyGanttPlugin, calendarIDs: string[]) {
+  return calendarIDs.filter(c => !plugin.calendarConfigsCache.get(c))
+}
+
+async function loadCalendar(plugin: FantasyGanttPlugin, calendarID: string, file?: TFile): Promise<void> {
+
+  if (!calendarID) return
+  if (!file) return fallbackIfGregorian(calendarID, plugin)
+
+  const content = await plugin.app.vault.read(file)
   const match = yamlRegex.exec(content)
 
-  if (!match?.[1]) return null
+  if (!match?.[1]) return
 
   try {
     const newCalendarConfig = parseYaml(match[1]) as CalendarConfig
 
-    newCalendarConfig.link = targetFile.path
+    newCalendarConfig.link = file.path
 
     /* Calculate offset once! */
     newCalendarConfig.offsetToDayZero = runOffsetCalculations(newCalendarConfig.sharedOffset)
@@ -83,59 +105,46 @@ export async function getCalendarDefinition(plugin: FantasyGanttPlugin,
         safetyCheckRuleBasedConfig(newCalendarConfig)
         break
       default:
-        new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarId}'`)
-        return null
+        new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarID}'`)
+        return
     }
 
     addTodayDateAsAbsoluteDay(newCalendarConfig)
 
     /* Cache calendar */
-    plugin.calendarConfigsCache.set(calendarId, newCalendarConfig)
-    return newCalendarConfig
+    plugin.calendarConfigsCache.set(calendarID, newCalendarConfig)
   } catch {
-    new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarId}'`)
-    return null
+    new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarID}'`)
   }
-}
-
-function fallbackIfGregorian(calendarId: string, plugin: FantasyGanttPlugin): CalendarConfig | null {
-  if (calendarId === DEFAULT_SETTINGS.defaultCalendar) {
-    new Notice('Failed to load Gregorian calendar. Will use pre-set fallback.')
-    plugin.calendarConfigsCache.set(calendarId, GregorianCalendar)
-    return GregorianCalendar
-  } else return null
 }
 
 /**
  * Search for Markdown file defining the missing calendar config.
  */
-function getMatchingMarkdownFile(plugin: FantasyGanttPlugin,
-                                 eventPropertyReader: EventPropertyReader,
-                                 calendarId: string,
-                                 pluginSettings: PluginSettings,
-                                 codeBlockContent: CodeBlockContent): TFile | null {
-  const allFiles: TFile[] = plugin.app.vault.getMarkdownFiles()
+function filterMatchingCalendarFiles(plugin: FantasyGanttPlugin,
+                                     files: TFile[],
+                                     eventPropertyReader: EventPropertyReader,
+                                     calendarsToLoad: string[]): Record<string, TFile> {
 
-  let calendarSourcePath = codeBlockContent.calendarPath ?? pluginSettings.calendarPath
-  /* Normalize root path reference */
-  if (calendarSourcePath === Consts.ROOT_PATH) calendarSourcePath = Consts.ROOT_PATH_NORMALIZED
-
-  const isRecursive = codeBlockContent.calendarPathSearchRecursive ?? pluginSettings.calendarPathSearchRecursive
-
-  const files: TFile[] = allFiles.filter(f => {
-    const parentPath = f.parent?.path ?? ''
-    if (isRecursive)
-      return calendarSourcePath === '' || parentPath === calendarSourcePath || parentPath.startsWith(calendarSourcePath + '/')
-    else return parentPath === calendarSourcePath
-  })
+  const mappedFiles: Record<string, TFile> = {}
 
   for (const file of files) {
     const fileMetadata = plugin.app.metadataCache.getFileCache(file)
     if (!fileMetadata?.frontmatter) continue
-    if (eventPropertyReader.isMatchingCalendarDefinition(fileMetadata.frontmatter, file, calendarId)) return file
+    const calendarID = eventPropertyReader.getCalendarId(fileMetadata.frontmatter, file)
+    if (!calendarID || !calendarsToLoad.includes(calendarID)) continue
+    mappedFiles[calendarID] = file
   }
-  return null
+  return mappedFiles
 }
+
+function fallbackIfGregorian(calendarId: string, plugin: FantasyGanttPlugin): void {
+  if (calendarId === DEFAULT_FALLBACK_CALENDAR) {
+    new Notice(`Failed to load 'gregorian' calendar. Will use pre-set fallback.`)
+    plugin.calendarConfigsCache.set(calendarId, GregorianCalendar)
+  }
+}
+
 
 function safetyCheckPositionalConfig(config: PositionalCalendarConfig) {
   if (config.positionalUnits?.length === 0) {

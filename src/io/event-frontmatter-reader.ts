@@ -1,48 +1,27 @@
 import {
   CalendarConfig,
-  CodeBlockContent,
   EventId,
+  GanttChartSources,
   GanttItem,
   GanttItemDisplayType,
   GroupOrCalendarSettings,
-  ParsedDate,
-  PluginSettings
+  ParsedDate
 } from '../const/types'
-import {getCalendarDefinition} from './calendar-reader'
 import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, Notice, TFile} from 'obsidian'
 import {EventPropertyReader} from './event-property-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
-import {createAxisDateDescription} from '../date-calculations/dates'
-import {getFilteredFiles} from './file-collector'
 import {findPredecessorsAndSuccessors} from './event-hierarchy-analysis'
-
-/**
- * Search and filter files, then parse to {@link GanttItem}s.
- * Call from outside Obsidian's Bases.
- * @param plugin
- * @param eventPropertyReader
- * @param partialPluginSettings partial plugin settings
- * @param codeBlockContent user input in Markdown block
- */
-export async function getGanttDataFromFolder(plugin: FantasyGanttPlugin,
-                                             eventPropertyReader: EventPropertyReader,
-                                             partialPluginSettings: PluginSettings,
-                                             codeBlockContent: CodeBlockContent): Promise<GanttItem[]> {
-
-  const files: TFile[] = getFilteredFiles(plugin, eventPropertyReader, partialPluginSettings, codeBlockContent)
-  return parseFiles(plugin, partialPluginSettings, codeBlockContent, files, eventPropertyReader)
-}
+import {getCalendarDefinition} from './calendar-reader'
 
 /**
  * Parse given files to {@link GanttItem}s.
  * Call from outside Obsidian's Bases.
  */
-export async function parseFiles(plugin: FantasyGanttPlugin,
-                                 partialPluginSettings: PluginSettings,
-                                 codeBlockContent: CodeBlockContent,
-                                 files: TFile[],
-                                 eventPropertyReader: EventPropertyReader): Promise<GanttItem[]> {
+export async function parseFiles(files: TFile[],
+                                 plugin: FantasyGanttPlugin,
+                                 eventPropertyReader: EventPropertyReader,
+                                 settingsContext: GanttChartSources): Promise<GanttItem[]> {
   const items: GanttItem[] = []
   let incrementalId = 0
 
@@ -66,38 +45,21 @@ export async function parseFiles(plugin: FantasyGanttPlugin,
 
     if (!calendarId || !mappedCalendarConfigs[calendarId]?.visible) continue
 
-    const calendarConfig = await getCalendarDefinition(plugin, eventPropertyReader, calendarId, partialPluginSettings, codeBlockContent)
+    const calendarConfig = await getCalendarDefinition(calendarId, plugin, eventPropertyReader, settingsContext)
 
     const ganttItem: GanttItem | null = createItem(plugin, eventPropertyReader, startDate, endDate, calendarId, calendarConfig, file, frontMatter, `${++incrementalId}`)
     if (!ganttItem) continue
     items.push(ganttItem)
   }
 
-  parseCodeBlockContent(plugin, codeBlockContent)
+  // const localChartSettings =
+  // parseCodeBlockContent(plugin, rawChartInput)
 
   if (plugin.settings.uxHighlightRelatedEvents) findPredecessorsAndSuccessors(items, eventPropertyReader)
 
   return items
 }
 
-function parseCodeBlockContent(plugin: FantasyGanttPlugin, codeBlockContent?: CodeBlockContent) {
-
-  if (!codeBlockContent) return
-  const calendarConfig = plugin.calendarConfigsCache.get(codeBlockContent.calendar ?? plugin.settings.defaultCalendar)
-  if (!calendarConfig) return
-
-  if (codeBlockContent.lowerBoundDate) codeBlockContent.lowerBoundDateParsed = parseCodeBlockDate(codeBlockContent.lowerBoundDate, calendarConfig)
-  if (codeBlockContent.centerHereDate) codeBlockContent.centerHereDateParsed = parseCodeBlockDate(codeBlockContent.centerHereDate, calendarConfig)
-  if (codeBlockContent.upperBoundDate) codeBlockContent.upperBoundDateParsed = parseCodeBlockDate(codeBlockContent.upperBoundDate, calendarConfig)
-}
-
-function parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
-
-  if (typeof date === 'string')
-    return parseEventDate(false, false /* not important in this case */, date, calendarConfig) ?? undefined
-  else
-    return {days: date, display: createAxisDateDescription(date, calendarConfig)}
-}
 
 function createItem(plugin: FantasyGanttPlugin,
                     eventPropertyReader: EventPropertyReader,

@@ -1,4 +1,4 @@
-import {CodeBlockContent} from '../const/types'
+import {RawChartInput} from '../const/types'
 import {splitOnce} from '../const/constants'
 
 /**
@@ -7,13 +7,11 @@ import {splitOnce} from '../const/constants'
  *
  * @param currentFolder set to setting values 'eventPath' and 'calendarPath' if their respective value equals 'local'
  * @param source code block content
- * @param calendarId plugin's default calendar ID
  */
 export function readCodeBlock(currentFolder: string,
-                              source: string,
-                              calendarId: string): CodeBlockContent {
+                              source: string): RawChartInput {
 
-  const codeBlockContent: CodeBlockContent = {calendar: calendarId}
+  const codeBlockContent: RawChartInput = {}
 
   const lines = source.split('\n')
 

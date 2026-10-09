@@ -1,6 +1,6 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
-import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {GanttChartModel} from '../model/gantt-chart-model'
 
 export class GanttMobileEventManager implements GanttEventManager {
   public isDragging = false
@@ -21,7 +21,7 @@ export class GanttMobileEventManager implements GanttEventManager {
   private readonly boundSvgTouchStart: (e: TouchEvent) => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  private readonly viewModel: GanttChartViewModel
+  private readonly viewModel: GanttChartModel
 
   constructor(private engine: GanttRenderEngine) {
     this.viewModel = engine.viewModel

@@ -2,7 +2,7 @@ import {ControlKey} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'
-import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {GanttChartModel} from '../model/gantt-chart-model'
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -21,7 +21,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   private readonly boundSvgMouseMove: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  viewModel: GanttChartViewModel
+  viewModel: GanttChartModel
 
   constructor(readonly engine: GanttRenderEngine,
               readonly tooltipManager: TooltipManager) {

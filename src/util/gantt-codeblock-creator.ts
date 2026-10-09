@@ -1,11 +1,9 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {CodeBlockContent, PluginSettings} from '../const/types'
+import {PluginSettings, RawChartInput} from '../const/types'
 import {Consts} from '../const/constants'
-import GanttRender from '../view/gantt-chart-manager'
+import ChartManager from '../ctrl/gantt-chart-manager'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'
-import {EventPropertyReader} from '../io/event-property-reader'
-import {SettingsContext} from "./settings-context";
 // import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/utils'
 
 /*
@@ -41,15 +39,16 @@ export class CodeBlockCreatorModal extends Modal {
     const onUpdatePreview = (previewEl: HTMLElement): void => {
       previewEl.empty()
 
-      const globalSettings: Readonly<PluginSettings> = this.plugin.settings
-      const localPluginSettings: PluginSettings = mergeSettings(globalSettings, output)
-      const noCodeBlockContent: CodeBlockContent = {}
+      const rawChartInput: RawChartInput = {
+        eventPath: output.eventPath as string ?? undefined,
+        eventPathSearchRecursive: output.eventPathSearchRecursive as boolean ?? undefined,
+        calendarPath: output.calendarPath as string ?? undefined,
+        calendarPathSearchRecursive: output.calendarPathSearchRecursive as boolean ?? undefined
+      }
 
-      const settings = new SettingsContext(this.plugin.settings, localPluginSettings)
+      const renderer = new ChartManager(this.plugin, previewEl, rawChartInput, null, null)
 
-      const render = new GanttRender(this.plugin, new EventPropertyReader(settings))
-
-      void render.renderGantt(previewEl, localPluginSettings, noCodeBlockContent)
+      void renderer.renderGantt()
     }
 
     const modalInput: GenericModalInput = {
@@ -69,33 +68,33 @@ export class CodeBlockCreatorModal extends Modal {
   }
 }
 
-/**
- * Merge settings.
- * @param globalSettings - global plugin settings
- * @param localSettings - subset of plugin settings user chose to overwrite with code block creator
- */
-function mergeSettings(globalSettings: Readonly<PluginSettings>, localSettings: Record<string, string | boolean | number | undefined>) {
-
-  const mergedSettings: PluginSettings = Object.assign({}, globalSettings)
-
-  const setSettingProperty = <K extends keyof PluginSettings>(key: K, val: PluginSettings[K]) => {
-    /* AI written helper method for type compliance */
-    mergedSettings[key] = val
-  }
-
-  for (const key of Object.keys(globalSettings) as (keyof PluginSettings)[]) {
-    const localValue = localSettings[key]
-    if (localValue === undefined) continue
-
-    const globalValue = globalSettings[key]
-
-    if (globalValue !== localValue && typeof globalValue === typeof localValue) {
-      setSettingProperty(key, localValue)
-    }
-  }
-
-  return mergedSettings
-}
+// /**
+//  * Merge settings.
+//  * @param globalSettings - global plugin settings
+//  * @param localSettings - subset of plugin settings user chose to overwrite with code block creator
+//  */
+// function mergeSettings(globalSettings: Readonly<PluginSettings>, localSettings: Record<string, string | boolean | number | undefined>) {
+//
+//   const mergedSettings: PluginSettings = Object.assign({}, globalSettings)
+//
+//   const setSettingProperty = <K extends keyof PluginSettings>(key: K, val: PluginSettings[K]) => {
+//     /* AI written helper method for type compliance */
+//     mergedSettings[key] = val
+//   }
+//
+//   for (const key of Object.keys(globalSettings) as (keyof PluginSettings)[]) {
+//     const localValue = localSettings[key]
+//     if (localValue === undefined) continue
+//
+//     const globalValue = globalSettings[key]
+//
+//     if (globalValue !== localValue && typeof globalValue === typeof localValue) {
+//       setSettingProperty(key, localValue)
+//     }
+//   }
+//
+//   return mergedSettings
+// }
 
 function defineInput(pluginSettings: PluginSettings): UserInput[] {
   return [

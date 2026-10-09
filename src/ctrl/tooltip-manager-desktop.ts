@@ -5,7 +5,7 @@ import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
 import {Css} from '../const/constants'
-import BasesContext from '../util/bases-context'
+import BasesContext from '../model/bases-context'
 import {createAxisDateDescription} from '../date-calculations/dates'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
@@ -35,7 +35,7 @@ export default class TooltipManager implements HoverParent {
 
   private setupDelegatedHover() {
     // Single listener on the parent container using mouseover/mouseout for bubble up support
-    this.engine.container.addEventListener('mouseover', (evt: MouseEvent) => {
+    this.engine.view.container.addEventListener('mouseover', (evt: MouseEvent) => {
 
       let hoverData: { target: HTMLElement, ganttItem: GanttItem } | null = this.getTargetAndMatchingEvent(evt)
       if (!hoverData) {
@@ -182,7 +182,7 @@ export default class TooltipManager implements HoverParent {
     if (!linktext) return
 
     this.engine.plugin.app.workspace.trigger('hover-link', {
-      event, targetEl, linktext, source: 'gantt-this', hoverParent: this.engine.container,
+      event, targetEl, linktext, source: 'gantt-this', hoverParent: this.engine.view.container,
     })
   }
 

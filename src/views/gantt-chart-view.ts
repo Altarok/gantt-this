@@ -1,10 +1,13 @@
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {ManualSvg} from '../view/manual-svg-icons'
-import {GanttChartViewModel} from '../model/gantt-chart-model'
+import {GanttChartModel} from '../model/gantt-chart-model'
 import TextWidthCache from '../view/text-space-cache'
 
 export class GanttChartView {
+  chartContainer: HTMLDivElement
+  toolbarContainer: HTMLDivElement
+
   svg: SVGElement
   /** Group background colors + group badges   */
   private readonly backgroundLayer: SVGElement
@@ -31,19 +34,44 @@ export class GanttChartView {
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly container: HTMLElement,
-              readonly viewModel: GanttChartViewModel,
+              readonly viewModel: GanttChartModel,
               readonly textCache: TextWidthCache) {
 
     this.container.empty()
 
+    const {settings} = plugin
+
+    if (settings.uxMoveToolbarBelowChart && settings.uxMakeToolbarSticky) {
+      /* separate toolbar and chart, chart first */
+      const mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
+    } else if (settings.uxMoveToolbarBelowChart) {
+      /* join toolbar and chart, chart first  */
+      const mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
+    } else if (settings.uxMakeToolbarSticky) {
+      /* separate toolbar and chart, toolbar first */
+      this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
+      const mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+    } else {
+      /* join toolbar and chart, toolbar first */
+      const mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
+      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+    }
+
+
     /*
-     * cursor: grab;
-     * display: block;
-     * width: 100%;
+     * cursor: grab
+     * display: block
+     * width: 100%
      *
-     * :active -> cursor: grabbing;
+     * :active -> cursor: grabbing
      */
-    this.svg = this.container.createSvg('svg', {
+    this.svg = this.chartContainer.createSvg('svg', {
       cls: Css.svg.canvas,
       attr: {height: this.viewModel.totalHeight.toString()}
     })
@@ -73,6 +101,10 @@ export class GanttChartView {
     this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
     this.eventLayer = this.dataLayer.createSvg('g')
     this.upperHoverLayer = this.dataLayer.createSvg('g')
+  }
+
+  get clientWidth() {
+    return this.container.clientWidth
   }
 
   clearEventLayer() {
@@ -177,8 +209,5 @@ export class GanttChartView {
     this.clipRect.setAttribute('width', width.toString())
   }
 
-  private get clientWidth() {
-    return this.container.clientWidth
-  }
 }
 

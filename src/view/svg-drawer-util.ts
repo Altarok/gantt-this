@@ -3,7 +3,7 @@ import {GanttItem, PluginSettings} from '../const/types'
 import {Css} from "const/constants"
 import {ManualSvg} from './manual-svg-icons'
 import TextWidthCache from './text-space-cache'
-import {GanttEventManager} from "../ctrl/event-manager";
+import {GanttEventManager} from '../ctrl/event-manager'
 
 const textLeftPadding = 3
 
@@ -37,7 +37,7 @@ export class SvgDrawerUtil {
   private readonly shapeRadius: number // 8
   private readonly iconSize: number // 16
   private readonly iconRadius: number // 8
-  private readonly dotPrefixWidth: number
+  // private readonly dotPrefixWidth: number
 
   private eventManager?: GanttEventManager
 
@@ -47,7 +47,7 @@ export class SvgDrawerUtil {
     this.shapeRadius = this.shapeSize / 2
     this.iconSize = settings.viewEventIconHeight
     this.iconRadius = this.iconSize / 2
-    this.dotPrefixWidth = textWidthCache.getWidth('...')
+    // this.dotPrefixWidth = textWidthCache.getWidth('...')
   }
 
   setEventManager(em: GanttEventManager) {
