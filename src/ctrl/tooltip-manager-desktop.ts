@@ -26,7 +26,7 @@ export default class TooltipManager implements HoverParent {
   constructor(private readonly engine: GanttRenderEngine,
               private readonly pluginSettings: PluginSettings,
               private readonly svgDrawerUtil: SvgDrawerUtil,
-              private readonly basesCtx: BasesContext | null) {
+              private readonly basesCtx?: BasesContext) {
     this.searchForRelatedEventsOnHover = pluginSettings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && pluginSettings.uxConnectRelatedEvents
 

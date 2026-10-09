@@ -1,4 +1,4 @@
-import {MarkdownPostProcessorContext, Notice} from 'obsidian'
+import {Notice} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {RawChartInput} from '../const/types'
 import {setToolbarReactions} from './toolbar-controller'
@@ -7,17 +7,15 @@ import BasesContext from '../model/bases-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {EventPropertyReader} from '../io/event-property-reader'
 import {SettingsContext} from '../model/settings-context'
-import {getCalendarDefinitions} from '../io/calendar-reader'
-import {ToolbarView} from '../views/toolbar-view'
+import {cacheKnownCalendars} from '../io/calendar-reader'
 import {ChartDataLoader} from '../io/chart-data-loader'
 import {ChartUiManager} from './chart-ui-manager'
-import {ChartLifecycleComponent} from './codeblock-chart-updater'
+import {GanttRenderEngine} from '../view/svg-drawer'
 
 export default class ChartManager {
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
   private readonly textWidthCache: TextWidthCache
-  // private readonly svgDrawerUtil: SvgDrawerUtil
   private readonly dataLoader: ChartDataLoader
   private readonly uiManager: ChartUiManager
 
@@ -27,67 +25,62 @@ export default class ChartManager {
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly container: HTMLElement,
               readonly rawChartInput: RawChartInput,
-              readonly basesCtx: BasesContext | null,
-              readonly codeBlockCtx: MarkdownPostProcessorContext | null) {
+              readonly basesCtx?: BasesContext) {
     this.settingsContext = new SettingsContext(plugin.settings, rawChartInput)
-    this.eventPropertyReader = new EventPropertyReader(this.settingsContext, this.basesCtx ?? undefined)
+    this.eventPropertyReader = new EventPropertyReader(this.settingsContext, basesCtx)
     this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000
-    // this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
 
-    this.dataLoader = new ChartDataLoader(plugin, basesCtx, this.eventPropertyReader, this.settingsContext)
-    this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache,/*  this.svgDrawerUtil, */ this.settingsContext, basesCtx)
+    this.dataLoader = new ChartDataLoader(plugin, this.eventPropertyReader, this.settingsContext, basesCtx)
+    this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache, this.settingsContext, basesCtx)
   }
 
   private async prepare() {
-    await this.prepareCalendars()
+    await cacheKnownCalendars(this.plugin, this.eventPropertyReader, this.settingsContext, this.rawChartInput.calendar)
     this.settingsContext.parseRawChartInput(this.plugin)
   }
 
-  private async prepareCalendars() {
-    const calendarIDs: string[] = this.plugin.settings.calendars.map(c => c.id)
-    if (this.rawChartInput.calendar) calendarIDs.push(this.rawChartInput.calendar)
-
-    await getCalendarDefinitions(calendarIDs, this.plugin, this.eventPropertyReader, this.settingsContext)
-  }
-
-  async renderGantt() {
-    await this.prepare()
-
-    let updateTimeout: number | null = null
-
-    const refreshChartCallback = () => {
+  private createRefreshCallback(renderEngine: GanttRenderEngine, updateTimeoutHolder: { timeout: number | null }) {
+    return () => {
       if (!renderEngine) return
-      if (updateTimeout) window.clearTimeout(updateTimeout)
+      if (updateTimeoutHolder.timeout) {
+        window.clearTimeout(updateTimeoutHolder.timeout)
+      }
 
-      const now = Date.now()
-      const elapsed = now - this.lastRenderTimestamp
+      const elapsed = Date.now() - this.lastRenderTimestamp
       const remainingCooldown = Math.max(500, this.rerenderCooldownMs - elapsed)
 
-      updateTimeout = window.setTimeout(() => {
+      updateTimeoutHolder.timeout = window.setTimeout(() => {
         this.lastRenderTimestamp = Date.now()
 
         this.dataLoader.getGanttItems().then(updatedData => {
-          renderEngine?.updateData(updatedData)
+          renderEngine.updateData(updatedData)
         }).catch(() =>
           new Notice('Failed to reload Gantt.')
         )
       }, remainingCooldown)
     }
+  }
 
-    const chartModel = new GanttChartModel(this.plugin)
+  async renderGantt() {
+    await this.prepare()
+
+    const chartModel = new GanttChartModel(this.settingsContext)
     const chartView = this.uiManager.createChartView(chartModel)
 
     chartModel.setRawContainerWidth(chartView.chartContainer.clientWidth)
 
-    const tv = new ToolbarView(chartView.toolbarContainer, this.plugin, chartModel, refreshChartCallback)
-
-    this.codeBlockCtx?.addChild(new ChartLifecycleComponent(this.container, this.plugin, refreshChartCallback))
+    const timeoutHolder: { timeout: number | null } = {timeout: null}
 
     this.plugin.calendarConfigsCache.clear()
     const data = await this.dataLoader.getGanttItems()
 
     const renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
+    const refreshChartCallback = this.createRefreshCallback(renderEngine, timeoutHolder)
+
+    const tv = this.uiManager.createToolbarView(chartModel, chartView, refreshChartCallback)
+
+    // this.codeBlockCtx?.addChild(new ChartLifecycleComponent(this.container, this.plugin, refreshChartCallback))
 
     setToolbarReactions(tv, renderEngine, refreshChartCallback)
   }

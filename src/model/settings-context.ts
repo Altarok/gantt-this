@@ -157,6 +157,38 @@ export class SettingsContext implements GanttChartSources {
     return this.global.calendars
   }
 
+  get viewEventRowHeight(): number {
+    return /* TODO implement this.local.viewEventRowHeight ?? */ this.global.viewEventRowHeight
+  }
+
+  get viewEventShapeHeight(): number {
+    return /* TODO implement this.local.viewEventShapeHeight ?? */ this.global.viewEventShapeHeight
+  }
+
+  get viewEventIconHeight(): number {
+    return /* TODO implement this.local.viewEventIconHeight ?? */ this.global.viewEventIconHeight
+  }
+
+  get uxVerticalLineEventWidth(): number {
+    return /* TODO implement this.local.uxVerticalLineEventWidth ?? */ this.global.uxVerticalLineEventWidth
+  }
+
+  get showPanAndZoomButtonsInToolbar(): boolean {
+    return /* TODO implement this.local.showPanAndZoomButtonsInToolbar ?? */ this.global.showPanAndZoomButtonsInToolbar
+  }
+
+  get showButtonsToHideGroups(): boolean {
+    return /* TODO implement this.local.showButtonsToHideGroups ?? */ this.global.showButtonsToHideGroups
+  }
+
+  get uxMoveToolbarBelowChart(): boolean {
+    return /* TODO implement this.local.uxMoveToolbarBelowChart ?? */ this.global.uxMoveToolbarBelowChart
+  }
+
+  get uxMakeToolbarSticky(): boolean {
+    return /* TODO implement this.local.uxMakeToolbarSticky ?? */ this.global.uxMakeToolbarSticky
+  }
+
   /**
    * Call this AFTER parsing calendars!
    * @param plugin

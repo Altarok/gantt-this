@@ -32,10 +32,10 @@ export class GanttRenderEngine {
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
               private readonly settingsContext: SettingsContext,
-              private readonly basesCtx: BasesContext | null,
               private readonly textCache: TextWidthCache,
               readonly viewModel: GanttChartModel,
-              private readonly svgDrawerUtil: SvgDrawerUtil) {
+              private readonly svgDrawerUtil: SvgDrawerUtil,
+              private readonly basesCtx?: BasesContext) {
     this.view = view
 
     this.updateSvgDrawerData()
@@ -64,11 +64,11 @@ export class GanttRenderEngine {
     // if (this.view) this.view.destroy()
     const container = this.view.container
     // this.view.destroy()
-    return new GanttChartView(this.plugin, container, this.viewModel, this.textCache)
+    return new GanttChartView(this.plugin, this.settingsContext, container, this.viewModel, this.textCache)
   }
 
   private updateSvgDrawerData() {
-    this.viewModel.updateSvgDrawerData(this.plugin.settings)
+    this.viewModel.updateSvgDrawerData(this.settingsContext)
   }
 
   private calculateGlobalBounds() {

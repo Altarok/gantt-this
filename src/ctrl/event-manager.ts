@@ -21,7 +21,7 @@ const isMobile = Platform.isMobile
 export function createGanttEventManager(renderEngine: GanttRenderEngine,
                                         pluginSettings: PluginSettings,
                                         svgDrawerUtil: SvgDrawerUtil,
-                                        basesCtx: BasesContext | null): GanttEventManager {
+                                        basesCtx?: BasesContext): GanttEventManager {
 
   // console.log('Creating event manager. Is mobile?', isMobile)
   if (isMobile) {

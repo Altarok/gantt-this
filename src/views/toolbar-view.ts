@@ -2,6 +2,7 @@ import {Platform, setIcon, setTooltip} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {GanttChartModel} from '../model/gantt-chart-model'
+import {SettingsContext} from "../model/settings-context";
 
 const isMobile = Platform.isMobile
 
@@ -49,13 +50,15 @@ export class ToolbarView {
    * @param container HTML div destined to contains the Gantt chart's toolbar
    * @param plugin
    * @param viewModel
+   * @param settingsContext
    * @param refreshChartCallback
    */
   constructor(container: HTMLDivElement,
               readonly plugin: FantasyGanttPlugin,
               readonly viewModel: GanttChartModel,
-              refreshChartCallback: () => void) {
-    const {showPanAndZoomButtonsInToolbar} = plugin.settings
+              private readonly settingsContext: SettingsContext,
+              readonly refreshChartCallback: () => void) {
+    const {showPanAndZoomButtonsInToolbar} = settingsContext
 
     this.reloadButton = createButton(container, 'refresh-cw', 'Reload data')
 
@@ -85,11 +88,11 @@ export class ToolbarView {
     this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
     this.debugInfoButton = createButton(g3, 'info', 'Debug info')
 
-    if (plugin.settings.showButtonsToHideGroups) {
+    if (settingsContext.showButtonsToHideGroups) {
       const g4 = createGroup(container)
 
       /* Create buttons to hide groups */
-      const groups = plugin.settings.groups
+      const groups = settingsContext.groups
       for (const group of groups) {
         let isVisible: boolean = group?.visible ?? false
         const button = createButton(g4, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
@@ -99,7 +102,7 @@ export class ToolbarView {
             isVisible = !isVisible
             group.visible = isVisible
             setIcon(button, isVisible ? 'eye' : 'eye-off')
-            void plugin.saveSettings()
+            void plugin.saveSettings() /* TODO is this necessary? */
             refreshChartCallback()
           }
         })

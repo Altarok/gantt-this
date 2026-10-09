@@ -1,9 +1,10 @@
 import {setIcon} from "obsidian"
-import {GanttItem, PluginSettings} from '../const/types'
+import {GanttItem} from '../const/types'
 import {Css} from "const/constants"
 import {ManualSvg} from './manual-svg-icons'
 import TextWidthCache from './text-space-cache'
 import {GanttEventManager} from '../ctrl/event-manager'
+import {SettingsContext} from "../model/settings-context";
 
 const textLeftPadding = 3
 
@@ -41,7 +42,7 @@ export class SvgDrawerUtil {
 
   private eventManager?: GanttEventManager
 
-  constructor(private readonly settings: PluginSettings,
+  constructor(private readonly settings: SettingsContext,
               private readonly textWidthCache: TextWidthCache) {
     this.shapeSize = settings.viewEventShapeHeight
     this.shapeRadius = this.shapeSize / 2

@@ -1,8 +1,9 @@
-import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {ManualSvg} from '../view/manual-svg-icons'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import TextWidthCache from '../view/text-space-cache'
+import {SettingsContext} from '../model/settings-context'
+import FantasyGanttPlugin from "../main";
 
 export class GanttChartView {
   chartContainer: HTMLDivElement
@@ -32,26 +33,25 @@ export class GanttChartView {
   /** Prevent overflow rectangle */
   private readonly clipRect: SVGElement
 
-  constructor(readonly plugin: FantasyGanttPlugin,
+  constructor(private readonly plugin: FantasyGanttPlugin,
+              settingsContext: SettingsContext,
               readonly container: HTMLElement,
-              readonly viewModel: GanttChartModel,
-              readonly textCache: TextWidthCache) {
+              private readonly viewModel: GanttChartModel,
+              private readonly textCache: TextWidthCache) {
 
     this.container.empty()
 
-    const {settings} = plugin
-
-    if (settings.uxMoveToolbarBelowChart && settings.uxMakeToolbarSticky) {
+    if (settingsContext.uxMoveToolbarBelowChart && settingsContext.uxMakeToolbarSticky) {
       /* separate toolbar and chart, chart first */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
-    } else if (settings.uxMoveToolbarBelowChart) {
+    } else if (settingsContext.uxMoveToolbarBelowChart) {
       /* join toolbar and chart, chart first  */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
-    } else if (settings.uxMakeToolbarSticky) {
+    } else if (settingsContext.uxMakeToolbarSticky) {
       /* separate toolbar and chart, toolbar first */
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       const mainWrapper = container.createDiv({cls: Css.wrapper})

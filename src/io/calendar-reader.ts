@@ -17,6 +17,17 @@ import {getCalendarFiles} from './io-util'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
+
+export async function cacheKnownCalendars(plugin: FantasyGanttPlugin,
+                                          eventPropertyReader: EventPropertyReader,
+                                          settingsContext: GanttChartSources,
+                                          rawChartInputCalendar?: string) {
+  const calendarIDs: string[] = plugin.settings.calendars.map(c => c.id)
+  if (rawChartInputCalendar) calendarIDs.push(rawChartInputCalendar)
+
+  await getCalendarDefinitions(calendarIDs, plugin, eventPropertyReader, settingsContext)
+}
+
 function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
   const {today} = newCalendarConfig
 

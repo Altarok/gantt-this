@@ -9,6 +9,7 @@ import ChartManager from './ctrl/gantt-chart-manager'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'
+import {ChartLifecycleComponent} from "./ctrl/codeblock-chart-updater";
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -99,9 +100,12 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const rawChartInput: RawChartInput = readCodeBlock(currentFile.parent.path, source)
 
-    const render = new ChartManager(this, el, rawChartInput, null, ctx)
+    const render = new ChartManager(this, el, rawChartInput)
 
     await render.renderGantt()
+
+    /* Register the child lifecycle component synchronously before any further 'await' */
+    ctx.addChild(new ChartLifecycleComponent(el, this, () => render.refreshChartCallback()))
   }
 
 }

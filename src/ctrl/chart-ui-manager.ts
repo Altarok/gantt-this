@@ -7,35 +7,37 @@ import BasesContext from '../model/bases-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {SettingsContext} from '../model/settings-context'
 import {GanttChartView} from '../views/gantt-chart-view'
+import {ToolbarView} from '../views/toolbar-view'
 
 export class ChartUiManager {
-  svgDrawerUtil: SvgDrawerUtil
+  private readonly svgDrawerUtil: SvgDrawerUtil
 
   constructor(private readonly plugin: FantasyGanttPlugin,
               private readonly container: HTMLElement,
               private readonly textWidthCache: TextWidthCache,
-              // private readonly svgDrawerUtil: SvgDrawerUtil,
               private readonly settingsContext: SettingsContext,
-              private readonly basesCtx: BasesContext | null) {
-    this.svgDrawerUtil = new SvgDrawerUtil(plugin.settings, textWidthCache)
+              private readonly basesCtx?: BasesContext) {
+    this.svgDrawerUtil = new SvgDrawerUtil(settingsContext, textWidthCache)
   }
 
+  /**
+   * Instantiates the main Gantt chart view container.
+   */
   public createChartView(chartModel: GanttChartModel): GanttChartView {
-    return new GanttChartView(this.plugin, this.container, chartModel, this.textWidthCache)
+    return new GanttChartView(this.plugin, this.settingsContext, this.container, chartModel, this.textWidthCache)
   }
 
-  public createRenderEngine(data: GanttItem[],
-                            chartView: GanttChartView,
-                            chartModel: GanttChartModel): GanttRenderEngine {
-    return new GanttRenderEngine(
-      chartView,
-      data,
-      this.plugin,
-      this.settingsContext,
-      this.basesCtx ?? null,
-      this.textWidthCache,
-      chartModel,
-      this.svgDrawerUtil
-    )
+  /**
+   * Constructs the core rendering engine for the chart.
+   */
+  public createRenderEngine(data: GanttItem[], chartView: GanttChartView, chartModel: GanttChartModel): GanttRenderEngine {
+    return new GanttRenderEngine(chartView, data, this.plugin, this.settingsContext, this.textWidthCache, chartModel, this.svgDrawerUtil, this.basesCtx)
+  }
+
+  /**
+   * Instantiates the toolbar view for the chart.
+   */
+  public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: () => void): ToolbarView {
+    return new ToolbarView(chartView.toolbarContainer, this.plugin, chartModel, this.settingsContext, refreshCallback)
   }
 }

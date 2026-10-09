@@ -46,7 +46,7 @@ export class CodeBlockCreatorModal extends Modal {
         calendarPathSearchRecursive: output.calendarPathSearchRecursive as boolean ?? undefined
       }
 
-      const renderer = new ChartManager(this.plugin, previewEl, rawChartInput, null, null)
+      const renderer = new ChartManager(this.plugin, previewEl, rawChartInput)
 
       void renderer.renderGantt()
     }

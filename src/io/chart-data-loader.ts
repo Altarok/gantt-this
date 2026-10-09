@@ -9,11 +9,14 @@ import {SettingsContext} from '../model/settings-context'
 
 export class ChartDataLoader {
   constructor(private readonly plugin: FantasyGanttPlugin,
-              private readonly basesCtx: BasesContext | null,
               private readonly eventPropertyReader: EventPropertyReader,
-              private readonly settingsContext: SettingsContext) {
+              private readonly settingsContext: SettingsContext,
+              private readonly basesCtx?: BasesContext) {
   }
 
+  /**
+   * Fetches and parses Gantt items from Bases query results or fallback file collections.
+   */
   async getGanttItems(): Promise<GanttItem[]> {
     let files: TFile[]
     if (this.basesCtx) {

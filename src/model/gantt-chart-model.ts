@@ -1,6 +1,6 @@
-import FantasyGanttPlugin from '../main'
 import {Consts} from '../const/constants'
-import {GroupOrCalendarDrawerData, GroupOrCalendarSettings, PluginSettings} from '../const/types'
+import {GroupOrCalendarDrawerData, GroupOrCalendarSettings} from '../const/types'
+import {SettingsContext} from "./settings-context";
 
 type Margin = { top: number, bottom: number, left: number, right: number }
 
@@ -62,15 +62,15 @@ export class GanttChartModel {
   // drawnGroups: Record<string, GroupOrCalendarDrawerData> = {}
   drawnCals: Record<string, GroupOrCalendarDrawerData> = {}
 
-  constructor(plugin: FantasyGanttPlugin) {
-    this.eventRowHeight = plugin.settings.viewEventRowHeight
+  constructor(private readonly settings: SettingsContext) {
+    this.eventRowHeight = settings.viewEventRowHeight
     this.eventRowHeightHalf = this.eventRowHeight / 2
-    this.eventShapeHeight = plugin.settings.viewEventShapeHeight
-    this.eventIconHeight = plugin.settings.viewEventIconHeight
-    this.updateSvgDrawerData(plugin.settings)
+    this.eventShapeHeight = settings.viewEventShapeHeight
+    this.eventIconHeight = settings.viewEventIconHeight
+    this.updateSvgDrawerData(settings)
   }
 
-  updateSvgDrawerData(settings: PluginSettings) {
+  updateSvgDrawerData(settings: SettingsContext) {
     this.mappedGrpConfigs = Object.fromEntries(settings.groups.map(g => [g.id, g]))
     this.mappedCalConfigs = Object.fromEntries(settings.calendars.map(c => [c.id, c]))
     // this.drawnGroups = Object.fromEntries(settings.groups.map(g => [g.id, {y1: 0, y2: 0}]))

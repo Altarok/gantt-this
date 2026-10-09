@@ -37,7 +37,7 @@ export class GanttThisBasesView extends BasesView {
       calendar: this.calendarForBounds
     }
 
-    const render = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx, null)
+    const render = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
 
     try {
       void render.renderGantt()
