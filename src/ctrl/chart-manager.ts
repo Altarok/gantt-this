@@ -3,7 +3,6 @@ import FantasyGanttPlugin from '../main'
 import {RawChartInput} from '../const/types'
 import {setToolbarReactions} from './toolbar-controller'
 import TextWidthCache from '../view/text-space-cache'
-import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import BasesContext from '../model/bases-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {EventPropertyReader} from '../io/event-property-reader'
@@ -11,14 +10,14 @@ import {SettingsContext} from '../model/settings-context'
 import {getCalendarDefinitions} from '../io/calendar-reader'
 import {ToolbarView} from '../views/toolbar-view'
 import {ChartDataLoader} from '../io/chart-data-loader'
-import {ChartUiManager} from './chart-ui-mngr'
+import {ChartUiManager} from './chart-ui-manager'
 import {ChartLifecycleComponent} from './codeblock-chart-updater'
 
 export default class ChartManager {
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
   private readonly textWidthCache: TextWidthCache
-  private readonly svgDrawerUtil: SvgDrawerUtil
+  // private readonly svgDrawerUtil: SvgDrawerUtil
   private readonly dataLoader: ChartDataLoader
   private readonly uiManager: ChartUiManager
 
@@ -34,10 +33,10 @@ export default class ChartManager {
     this.eventPropertyReader = new EventPropertyReader(this.settingsContext, this.basesCtx ?? undefined)
     this.textWidthCache = new TextWidthCache()
     this.rerenderCooldownMs = 1000
-    this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
+    // this.svgDrawerUtil = new SvgDrawerUtil(this.plugin.settings, this.textWidthCache)
 
     this.dataLoader = new ChartDataLoader(plugin, basesCtx, this.eventPropertyReader, this.settingsContext)
-    this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache, this.svgDrawerUtil, this.settingsContext, basesCtx)
+    this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache,/*  this.svgDrawerUtil, */ this.settingsContext, basesCtx)
   }
 
   private async prepare() {

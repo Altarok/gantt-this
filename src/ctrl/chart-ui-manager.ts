@@ -9,12 +9,15 @@ import {SettingsContext} from '../model/settings-context'
 import {GanttChartView} from '../views/gantt-chart-view'
 
 export class ChartUiManager {
+  svgDrawerUtil: SvgDrawerUtil
+
   constructor(private readonly plugin: FantasyGanttPlugin,
               private readonly container: HTMLElement,
               private readonly textWidthCache: TextWidthCache,
-              private readonly svgDrawerUtil: SvgDrawerUtil,
+              // private readonly svgDrawerUtil: SvgDrawerUtil,
               private readonly settingsContext: SettingsContext,
               private readonly basesCtx: BasesContext | null) {
+    this.svgDrawerUtil = new SvgDrawerUtil(plugin.settings, textWidthCache)
   }
 
   public createChartView(chartModel: GanttChartModel): GanttChartView {
