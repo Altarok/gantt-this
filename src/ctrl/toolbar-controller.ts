@@ -34,4 +34,7 @@ export function setToolbarReactions(toolbar: ToolbarView,
   toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRelative(panRight))
   toolbar.settingsButton.addEventListener('click', () => toolbar.handleSettingsButtonClick())
 
+  toolbar.foldButton.addEventListener('click', () => toolbar.fold())
+  toolbar.unfoldButton.addEventListener('click', () => toolbar.unfold())
+
 }

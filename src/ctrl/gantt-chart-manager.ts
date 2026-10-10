@@ -4,7 +4,6 @@ import {RawChartInput} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {setToolbarReactions} from './toolbar-controller'
 import TextWidthCache from '../view/text-space-cache'
-import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import BasesContext from '../model/bases-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {EventPropertyReader} from '../io/event-property-reader'
@@ -17,7 +16,7 @@ export default class ChartManager {
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
   private readonly textWidthCache: TextWidthCache
-  private readonly svgDrawerUtil: SvgDrawerUtil
+  // private readonly svgDrawerUtil: SvgDrawerUtil
   private readonly dataLoader: ChartDataLoader
   private readonly uiManager: ChartUiManager
 
@@ -36,10 +35,10 @@ export default class ChartManager {
     this.settingsContext = new SettingsContext(plugin.settings, rawChartInput)
     this.eventPropertyReader = new EventPropertyReader(this.settingsContext, basesCtx)
     this.textWidthCache = new TextWidthCache()
-    this.svgDrawerUtil = new SvgDrawerUtil(this.settingsContext, this.textWidthCache)
+    // this.svgDrawerUtil = new SvgDrawerUtil(this.settingsContext, this.textWidthCache)
     this.dataLoader = new ChartDataLoader(plugin, this.eventPropertyReader, this.settingsContext, basesCtx)
     this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache, this.settingsContext, basesCtx)
-    this.rerenderCooldownMs = 1000 * plugin.settings.uxRerenderCooldownSeconds
+    this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
   }
 
   /** Do not change order of calls in this!! */
@@ -88,11 +87,11 @@ export default class ChartManager {
     // this.codeBlockCtx?.addChild(new ChartLifecycleComponent(this.container, this.plugin, () => this.refreshChartCallback()))
 
     /* Perform data load in async way */
-    this.plugin.calendarConfigsCache.clear()
+    // this.plugin.calendarConfigsCache.clear()
     const data = await this.dataLoader.getGanttItems()
 
     /* Instantiate the engine */
-    this.renderEngine = new GanttRenderEngine(chartView, data, this.plugin, this.settingsContext, this.textWidthCache, chartModel, this.svgDrawerUtil, this.basesCtx ?? undefined)
+    this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
     setToolbarReactions(tv, this.renderEngine, () => this.refreshChartCallback())
   }

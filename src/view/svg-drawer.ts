@@ -13,7 +13,6 @@ import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
-import TextWidthCache from './text-space-cache'
 import {expandRecurringEvents} from '../util/recurring-events'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
@@ -25,23 +24,19 @@ export class GanttRenderEngine {
   private groups: GanttGroup[] = []
   private resizeObserver: ResizeObserver
 
-  view: GanttChartView
   drawnData: GanttItem[] = []
 
-  constructor(view: GanttChartView,
+  constructor(public readonly view: GanttChartView,
               public rawData: GanttItem[],
               public readonly plugin: FantasyGanttPlugin,
               private readonly settingsContext: SettingsContext,
-              private readonly textCache: TextWidthCache,
               readonly viewModel: GanttChartModel,
               private readonly svgDrawerUtil: SvgDrawerUtil,
               private readonly basesCtx?: BasesContext) {
-    this.view = view
-
-    this.updateSvgDrawerData()
+    // this.updateSvgDrawerData()
     this.calculateGlobalBounds()
     this.initLayout()
-    this.view = this.redraw()
+    this.redraw()
     this.initEventListener()
     this.handleResize(true)
 
@@ -51,24 +46,17 @@ export class GanttRenderEngine {
 
   public updateData(newData: GanttItem[]) {
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
-    this.updateSvgDrawerData()
+    this.viewModel.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    this.view = this.redraw()
+    this.redraw()
     this.initEventListener()
     this.handleResize(true)
   }
 
   redraw() {
-    // if (this.view) this.view.destroy()
-    const container = this.view.container
-    // this.view.destroy()
-    return new GanttChartView(this.plugin, this.settingsContext, container, this.viewModel, this.textCache)
-  }
-
-  private updateSvgDrawerData() {
-    this.viewModel.updateSvgDrawerData(this.settingsContext)
+    this.view.redrawChart()
   }
 
   private calculateGlobalBounds() {
@@ -497,7 +485,7 @@ export class GanttRenderEngine {
 
   updateViewAfterToggle() {
     this.initLayout()
-    this.view = this.redraw()
+    this.redraw()
     this.initEventListener()
     this.handleResize(false)
   }

@@ -67,14 +67,14 @@ export class GanttChartModel {
     this.eventRowHeightHalf = this.eventRowHeight / 2
     this.eventShapeHeight = settings.viewEventShapeHeight
     this.eventIconHeight = settings.viewEventIconHeight
-    this.updateSvgDrawerData(settings)
+    this.updateSvgDrawerData()
   }
 
-  updateSvgDrawerData(settings: SettingsContext) {
-    this.mappedGrpConfigs = Object.fromEntries(settings.groups.map(g => [g.id, g]))
-    this.mappedCalConfigs = Object.fromEntries(settings.calendars.map(c => [c.id, c]))
-    // this.drawnGroups = Object.fromEntries(settings.groups.map(g => [g.id, {y1: 0, y2: 0}]))
-    this.drawnCals = Object.fromEntries(settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
+  updateSvgDrawerData() {
+    this.mappedGrpConfigs = Object.fromEntries(this.settings.groups.map(g => [g.id, g]))
+    this.mappedCalConfigs = Object.fromEntries(this.settings.calendars.map(c => [c.id, c]))
+    // this.drawnGroups = Object.fromEntries(this.settings.groups.map(g => [g.id, {y1: 0, y2: 0}]))
+    this.drawnCals = Object.fromEntries(this.settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
   }
 
   getCurrRenderWidth(): number {

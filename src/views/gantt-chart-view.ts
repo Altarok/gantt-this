@@ -9,29 +9,29 @@ export class GanttChartView {
   chartContainer: HTMLDivElement
   toolbarContainer: HTMLDivElement
 
-  svg: SVGElement
+  svg!: SVGElement
   /** Group background colors + group badges   */
-  private readonly backgroundLayer: SVGElement
+  private backgroundLayer!: SVGElement
   /** Foreground. Everything else */
-  private readonly foregroundLayer: SVGElement
+  private foregroundLayer!: SVGElement
   /** Inside foregroundLayer: background grid elements */
-  gridLayer: SVGElement
+  gridLayer!: SVGElement
   /** Inside foregroundLayer: data events */
-  private readonly dataLayer: SVGElement
+  private dataLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : era layer used for eras and vertical-line events */
-  eraLayer: SVGElement
+  eraLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : layer used for mouse overlay */
-  lowerHoverLayer: SVGElement
-  repeaterEventLayer: SVGElement
+  lowerHoverLayer!: SVGElement
+  repeaterEventLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : event layer used for other events */
-  eventLayer: SVGElement
-  upperHoverLayer: SVGElement
+  eventLayer!: SVGElement
+  upperHoverLayer!: SVGElement
 
   /** Inside foregroundLayer: calendars */
-  dynamicCalendarLayer: SVGElement
-  staticCalendarLayer: SVGElement
+  dynamicCalendarLayer!: SVGElement
+  staticCalendarLayer!: SVGElement
   /** Prevent overflow rectangle */
-  private readonly clipRect: SVGElement
+  private clipRect!: SVGElement
 
   constructor(private readonly plugin: FantasyGanttPlugin,
               settingsContext: SettingsContext,
@@ -63,7 +63,16 @@ export class GanttChartView {
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
+    this.initiateChartContainerSubContainers()
+  }
 
+  /** Clear chart, not toolbar, and re-fill it with life */
+  public redrawChart() {
+    this.chartContainer.empty()
+    this.initiateChartContainerSubContainers()
+  }
+
+  initiateChartContainerSubContainers() {
     /*
      * cursor: grab
      * display: block
@@ -102,6 +111,7 @@ export class GanttChartView {
     this.eventLayer = this.dataLayer.createSvg('g')
     this.upperHoverLayer = this.dataLayer.createSvg('g')
   }
+
 
   get clientWidth() {
     return this.container.clientWidth

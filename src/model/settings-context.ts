@@ -189,6 +189,10 @@ export class SettingsContext implements GanttChartSources {
     return /* TODO implement this.local.uxMakeToolbarSticky ?? */ this.global.uxMakeToolbarSticky
   }
 
+  get uxRerenderCooldownSeconds(): number {
+    return /* TODO implement this.local.uxRerenderCooldownSeconds ?? */ this.global.uxRerenderCooldownSeconds
+  }
+
   /**
    * Call this AFTER parsing calendars!
    * @param plugin

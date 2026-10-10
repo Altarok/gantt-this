@@ -6,12 +6,6 @@ import {SettingsContext} from "../model/settings-context";
 
 const isMobile = Platform.isMobile
 
-// type ToggleStates = {
-//   bars: boolean
-//   timestamps: boolean
-//   grouping: boolean
-// }
-
 /* See https://lucide.dev for free icon examples */
 function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
   const btn = parentEl.createEl('button', {cls: Css.toolbar.button})
@@ -29,10 +23,10 @@ function createGroup(container: HTMLDivElement) {
 }
 
 export class ToolbarView {
-  // private toggleStates: ToggleStates
+  private foldableToolbarEl: HTMLDivElement
 
   /*
-   * Toolbar buttons in order (LTR)
+   * Toolbar buttons in order (LTR) - optional buttons may be null
    */
   reloadButton: HTMLButtonElement
   toggleBarsButton: HTMLButtonElement
@@ -45,6 +39,8 @@ export class ToolbarView {
   panRightButton: HTMLButtonElement | null = null
   settingsButton: HTMLButtonElement
   debugInfoButton: HTMLButtonElement | null = null
+  foldButton: HTMLButtonElement
+  unfoldButton: HTMLButtonElement
 
   /**
    * @param container HTML div destined to contains the Gantt chart's toolbar
@@ -56,21 +52,23 @@ export class ToolbarView {
   constructor(container: HTMLDivElement,
               readonly plugin: FantasyGanttPlugin,
               readonly viewModel: GanttChartModel,
-              private readonly settingsContext: SettingsContext,
+              settingsContext: SettingsContext,
               readonly refreshChartCallback: () => void) {
     const {showPanAndZoomButtonsInToolbar} = settingsContext
 
-    this.reloadButton = createButton(container, 'refresh-cw', 'Reload data')
+    this.foldableToolbarEl = container.createDiv({cls: Css.toolbar.container})
 
-    addSeparator(container)
-    const g1 = createGroup(container)
+    this.reloadButton = createButton(this.foldableToolbarEl, 'refresh-cw', 'Reload data')
+
+    addSeparator(this.foldableToolbarEl)
+    const g1 = createGroup(this.foldableToolbarEl)
 
     this.toggleBarsButton = createButton(g1, 'chart-bar-big', 'Toggle bar visibility')
     this.toggleTimestampButton = createButton(g1, 'customScatterChart', 'Toggle timestamp event visibility')
     this.toggleEventGroupingButton = createButton(g1, 'group', 'Toggle event grouping')
 
-    addSeparator(container)
-    const g2 = createGroup(container)
+    addSeparator(this.foldableToolbarEl)
+    const g2 = createGroup(this.foldableToolbarEl)
 
     if (showPanAndZoomButtonsInToolbar) {
       this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
@@ -82,14 +80,14 @@ export class ToolbarView {
       this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')
     }
 
-    addSeparator(container)
-    const g3 = createGroup(container)
+    addSeparator(this.foldableToolbarEl)
+    const g3 = createGroup(this.foldableToolbarEl)
 
     this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
     this.debugInfoButton = createButton(g3, 'info', 'Debug info')
 
     if (settingsContext.showButtonsToHideGroups) {
-      const g4 = createGroup(container)
+      const g4 = createGroup(this.foldableToolbarEl)
 
       /* Create buttons to hide groups */
       const groups = settingsContext.groups
@@ -108,8 +106,17 @@ export class ToolbarView {
         })
       }
     }
-  }
 
+    /*
+     * These 2 must be the last buttons!
+     */
+    this.foldButton = createButton(this.foldableToolbarEl, 'fold-horizontal', 'Hide Toolbar')
+
+    this.unfoldButton = createButton(container, 'unfold-horizontal', 'Show Toolbar')
+    this.unfoldButton.toggleVisibility(false)
+    this.unfoldButton.addClass('gt-minimized-btn')
+
+  }
 
   handleToggleBarsButtonClick(): void {
     setIcon(this.toggleBarsButton, this.viewModel.toggleShowBars() ? 'chart-bar-big' : 'customBarChartCrossed')
@@ -121,6 +128,16 @@ export class ToolbarView {
 
   handleToggleGroupingButtonClick(): void {
     setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping() ? 'group' : 'customGroupCrossed')
+  }
+
+  fold() {
+    this.foldableToolbarEl.addClass('minimized')
+    this.unfoldButton.addClass('visible')
+  }
+
+  unfold() {
+    this.foldableToolbarEl.removeClass('minimized')
+    this.unfoldButton.removeClass('visible')
   }
 
   /**

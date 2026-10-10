@@ -30,14 +30,18 @@ export class ChartUiManager {
   /**
    * Constructs the core rendering engine for the chart.
    */
-  public createRenderEngine(data: GanttItem[], chartView: GanttChartView, chartModel: GanttChartModel): GanttRenderEngine {
-    return new GanttRenderEngine(chartView, data, this.plugin, this.settingsContext, this.textWidthCache, chartModel, this.svgDrawerUtil, this.basesCtx)
+  public createRenderEngine(data: GanttItem[],
+                            chartView: GanttChartView,
+                            chartModel: GanttChartModel): GanttRenderEngine {
+    return new GanttRenderEngine(chartView, data, this.plugin, this.settingsContext, chartModel, this.svgDrawerUtil, this.basesCtx)
   }
 
   /**
    * Instantiates the toolbar view for the chart.
    */
-  public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: () => void): ToolbarView {
+  public createToolbarView(chartModel: GanttChartModel,
+                           chartView: GanttChartView,
+                           refreshCallback: () => void): ToolbarView {
     return new ToolbarView(chartView.toolbarContainer, this.plugin, chartModel, this.settingsContext, refreshCallback)
   }
 }
