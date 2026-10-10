@@ -2,6 +2,7 @@ export const Css = {
   wrapper: 'gt-main-container',
   toolbar: {
     container: 'gt-toolbar-container',
+    minimized: 'gt-toolbar-minimized',
     buttonGroup: 'gt-toolbar-buttongroup', /* Reduces horizontal space between buttons */
     button: 'gt-toolbar-button', /* Button and SVG sizes */
     separator: 'gt-toolbar-separator', /* Separates button groups */

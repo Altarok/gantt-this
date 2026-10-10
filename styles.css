@@ -24,6 +24,7 @@
   overflow: hidden;
   padding: 0; /* Ensures zero internal space around the chart */
   margin: 0;
+  position: relative;
 }
 
 .gt-layers-eras {
@@ -59,15 +60,41 @@
   gap: 12px;
   padding: 4px;
   margin: 0;
-}
 
-/* Toolbar collapse / expand transition styles */
-.gt-toolbar-container {
+  /* transition to disappear */
   transition: opacity 0.4s ease, transform 0.4s ease, max-height 0.4s ease, padding 0.4s ease;
   opacity: 1;
   transform: scale(1);
   max-height: 200px;
   overflow: hidden;
+}
+
+/* The floating top-right header wrapper for the single unfold button */
+.gt-toolbar-minimized {
+  top: 0;
+  display: none;
+  position: absolute;
+  padding: 4px;
+  right: 5px;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.1s;
+  pointer-events: none;
+}
+
+.gt-minimized-btn {
+  /* Nutzt das normale Button-Styling, keine absolute Positionierung mehr nötig */
+}
+
+/* When the main container is minimized, hide the toolbar and show this header */
+.gt-main-container.is-toolbar-minimized .gt-toolbar-container {
+  display: none;
+}
+
+.gt-main-container.is-toolbar-minimized .gt-toolbar-minimized {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .gt-toolbar-container.minimized {
@@ -79,22 +106,6 @@
   pointer-events: none;
   border: none;
 }
-
-.gt-minimized-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease 0.1s;
-  z-index: 15;
-}
-
-.gt-minimized-btn.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 
 /* Reduces horizontal space between buttons */
 .gt-toolbar-buttongroup {
@@ -320,7 +331,6 @@
   width: 100%;
   touch-action: none;
   user-select: none;
-  -webkit-user-select: none;
 }
 
 .gt-svg-canvas:active {

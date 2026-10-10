@@ -42,6 +42,6 @@ export class ChartUiManager {
   public createToolbarView(chartModel: GanttChartModel,
                            chartView: GanttChartView,
                            refreshCallback: () => void): ToolbarView {
-    return new ToolbarView(chartView.toolbarContainer, this.plugin, chartModel, this.settingsContext, refreshCallback)
+    return new ToolbarView(chartView, this.plugin, chartModel, this.settingsContext, refreshCallback)
   }
 }

@@ -2,7 +2,8 @@ import {Platform, setIcon, setTooltip} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {GanttChartModel} from '../model/gantt-chart-model'
-import {SettingsContext} from "../model/settings-context";
+import {SettingsContext} from '../model/settings-context'
+import {GanttChartView} from './gantt-chart-view'
 
 const isMobile = Platform.isMobile
 
@@ -23,8 +24,7 @@ function createGroup(container: HTMLDivElement) {
 }
 
 export class ToolbarView {
-  private foldableToolbarEl: HTMLDivElement
-
+  private readonly container: HTMLDivElement
   /*
    * Toolbar buttons in order (LTR) - optional buttons may be null
    */
@@ -43,32 +43,33 @@ export class ToolbarView {
   unfoldButton: HTMLButtonElement
 
   /**
-   * @param container HTML div destined to contains the Gantt chart's toolbar
+   * @param chartView HTML div destined to contains the Gantt chart's toolbar
    * @param plugin
    * @param viewModel
    * @param settingsContext
    * @param refreshChartCallback
    */
-  constructor(container: HTMLDivElement,
-              readonly plugin: FantasyGanttPlugin,
-              readonly viewModel: GanttChartModel,
+  constructor(private readonly chartView: GanttChartView,
+              private readonly plugin: FantasyGanttPlugin,
+              private readonly viewModel: GanttChartModel,
               settingsContext: SettingsContext,
-              readonly refreshChartCallback: () => void) {
+              refreshChartCallback: () => void) {
+
+    this.container = chartView.toolbarContainer
+
     const {showPanAndZoomButtonsInToolbar} = settingsContext
 
-    this.foldableToolbarEl = container.createDiv({cls: Css.toolbar.container})
+    this.reloadButton = createButton(this.container, 'refresh-cw', 'Reload data')
 
-    this.reloadButton = createButton(this.foldableToolbarEl, 'refresh-cw', 'Reload data')
-
-    addSeparator(this.foldableToolbarEl)
-    const g1 = createGroup(this.foldableToolbarEl)
+    addSeparator(this.container)
+    const g1 = createGroup(this.container)
 
     this.toggleBarsButton = createButton(g1, 'chart-bar-big', 'Toggle bar visibility')
     this.toggleTimestampButton = createButton(g1, 'customScatterChart', 'Toggle timestamp event visibility')
     this.toggleEventGroupingButton = createButton(g1, 'group', 'Toggle event grouping')
 
-    addSeparator(this.foldableToolbarEl)
-    const g2 = createGroup(this.foldableToolbarEl)
+    addSeparator(this.container)
+    const g2 = createGroup(this.container)
 
     if (showPanAndZoomButtonsInToolbar) {
       this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
@@ -80,14 +81,14 @@ export class ToolbarView {
       this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')
     }
 
-    addSeparator(this.foldableToolbarEl)
-    const g3 = createGroup(this.foldableToolbarEl)
+    addSeparator(this.container)
+    const g3 = createGroup(this.container)
 
     this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
     this.debugInfoButton = createButton(g3, 'info', 'Debug info')
 
     if (settingsContext.showButtonsToHideGroups) {
-      const g4 = createGroup(this.foldableToolbarEl)
+      const g4 = createGroup(this.container)
 
       /* Create buttons to hide groups */
       const groups = settingsContext.groups
@@ -110,12 +111,13 @@ export class ToolbarView {
     /*
      * These 2 must be the last buttons!
      */
-    this.foldButton = createButton(this.foldableToolbarEl, 'fold-horizontal', 'Hide Toolbar')
-
-    this.unfoldButton = createButton(container, 'unfold-horizontal', 'Show Toolbar')
-    this.unfoldButton.toggleVisibility(false)
+    this.foldButton = createButton(this.container, 'fold-horizontal', 'Hide Toolbar')
+    // const con = this.container.parentElement
+    // const con = chartView.chartContainer
+    const con = chartView.minimizedToolbarContainer
+    this.unfoldButton = createButton(con, 'unfold-horizontal', 'Show Toolbar')
     this.unfoldButton.addClass('gt-minimized-btn')
-
+    this.unfold()
   }
 
   handleToggleBarsButtonClick(): void {
@@ -131,13 +133,15 @@ export class ToolbarView {
   }
 
   fold() {
-    this.foldableToolbarEl.addClass('minimized')
+    this.container.addClass('minimized')
     this.unfoldButton.addClass('visible')
+    this.chartView.container.addClass('is-toolbar-minimized')
   }
 
   unfold() {
-    this.foldableToolbarEl.removeClass('minimized')
+    this.container.removeClass('minimized')
     this.unfoldButton.removeClass('visible')
+    this.chartView.container.removeClass('is-toolbar-minimized')
   }
 
   /**

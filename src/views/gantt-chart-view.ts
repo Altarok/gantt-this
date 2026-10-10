@@ -8,6 +8,7 @@ import FantasyGanttPlugin from "../main";
 export class GanttChartView {
   chartContainer: HTMLDivElement
   toolbarContainer: HTMLDivElement
+  minimizedToolbarContainer: HTMLDivElement
 
   svg!: SVGElement
   /** Group background colors + group badges   */
@@ -40,26 +41,32 @@ export class GanttChartView {
               private readonly textCache: TextWidthCache) {
 
     this.container.empty()
+    this.container.addClass(Css.wrapper)
+    // debugger
 
     if (settingsContext.uxMoveToolbarBelowChart && settingsContext.uxMakeToolbarSticky) {
       /* separate toolbar and chart, chart first */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
     } else if (settingsContext.uxMoveToolbarBelowChart) {
       /* join toolbar and chart, chart first  */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.minimized})
     } else if (settingsContext.uxMakeToolbarSticky) {
       /* separate toolbar and chart, toolbar first */
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     } else {
       /* join toolbar and chart, toolbar first */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.minimized})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
