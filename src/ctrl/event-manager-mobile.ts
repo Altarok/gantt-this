@@ -64,7 +64,6 @@ export class GanttMobileEventManager implements GanttEventManager {
     }
   }
 
-
   private handleTouchMove(e: TouchEvent) {
     if (e.touches.length === 1 && this.isDragging) {
       // Prevent default scroll / panel drag behavior
@@ -139,7 +138,10 @@ export class GanttMobileEventManager implements GanttEventManager {
   }
 
   private handleTouchEnd(/*e: TouchEvent*/) {
-    this.isDragging = false
+    if (this.isDragging) {
+      this.isDragging = false
+      this.engine.panDiff(0)
+    }
     this.isPinching = false
     this.pinchDistance = null
     this.touchStartPos = null
