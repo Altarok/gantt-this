@@ -51,8 +51,11 @@ export default class ChartManager {
     } catch (err) {
       if (err instanceof GanttError) this.statisticsContext.addErr(err)
     }
-
-    this.settingsContext.parseRawChartInput(this.plugin)
+    try {
+      this.settingsContext.parseRawChartInput(this.plugin)
+    } catch (err) {
+      if (err instanceof GanttError) this.statisticsContext.addErr(err)
+    }
   }
 
   refreshChartCallback(): void {

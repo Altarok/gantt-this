@@ -9,6 +9,7 @@ import {
 import {isCustomLeapYear} from './leap-year-calc'
 import {parseDescriptiveDateToValidInput, TODAY} from './dates'
 import {createRepeatRule} from '../util/recurring-events'
+import {GanttError} from '../model/gantt-error'
 
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
@@ -80,6 +81,7 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */
+  // debugger
 
   /*
    * The delimiter often is '-'. Since this also stands for a negative year value, we need a workaround here.
@@ -133,7 +135,10 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
   /* Handle Ordinal Dates (No month block in the format) */
   if (!monthName) {
     const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
-    if (day < 1 || day > maxDays) return null
+    if (day < 1 || day > maxDays) {
+      // debugger
+      throw new GanttError('warn', `Can't parse date '${input}'. Illegal day value for year.`, 'date')
+    }
 
     const days = daysFromYears + day + calendarConfig.offsetToDayZero
     return {
@@ -155,7 +160,10 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
     allowedDays += (details.leapYearRule.extraDays ?? 1)
   }
 
-  if (day < 1 || day > allowedDays) return null
+  if (day < 1 || day > allowedDays) {
+    // debugger
+    throw new GanttError('warn', `Can't parse date '${input}'. Illegal day value for month.`, 'date')
+  }
 
   let daysFromCurrentYearMonths = 0
   for (let i = 0; i < monthIndex; i++) {

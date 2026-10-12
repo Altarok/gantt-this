@@ -13,6 +13,7 @@ import FantasyGanttPlugin from '../main'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import ChartManager from '../ctrl/gantt-chart-manager'
+import {GanttError} from './gantt-error'
 
 export class SettingsContext implements GanttChartSources {
 
@@ -203,10 +204,13 @@ export class SettingsContext implements GanttChartSources {
   parseRawChartInput(plugin: FantasyGanttPlugin): void {
 
     const {local, rawChartInput} = this
+    if (!rawChartInput.lowerBoundDate && !rawChartInput.centerHereDate && !rawChartInput.upperBoundDate) return
 
-    const calendarConfig = plugin.calendarConfigsCache.get(rawChartInput.calendar ?? this.global.defaultCalendar)
+    const calendarID = rawChartInput.calendar ?? this.global.defaultCalendar
+    const calendarConfig = plugin.calendarConfigsCache.get(calendarID)
 
-    if (!calendarConfig) return
+    if (!calendarConfig)
+      throw new GanttError('warn', `Can't parse bounds. No calendar matches your chart's bounds calendar id '${calendarID}'.`, 'calendar')
 
     if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
     if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(rawChartInput.centerHereDate, calendarConfig, 'center here')
@@ -214,6 +218,7 @@ export class SettingsContext implements GanttChartSources {
   }
 
   parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig, description: string): ParsedDate | undefined {
+    // debugger
     if (typeof date === 'string') return parseEventDate(false, false, date, calendarConfig) ?? undefined
     if (typeof date === 'number') return {days: date, display: createAxisDateDescription(date, calendarConfig)}
 

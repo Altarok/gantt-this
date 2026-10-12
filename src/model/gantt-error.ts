@@ -5,4 +5,6 @@ export class GanttError extends Error {
     super(message)
     this.name = 'GanttError'
   }
+
 }
+
