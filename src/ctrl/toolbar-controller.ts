@@ -1,13 +1,18 @@
 import {Platform} from 'obsidian'
 import {ToolbarView} from '../views/toolbar-view'
 import {GanttRenderEngine} from '../view/svg-drawer'
+import {ChartStatisticsModal} from '../views/chart-statistics-modal'
+import FantasyGanttPlugin from '../main'
+import ChartManager from './gantt-chart-manager'
 
 const panRight = Platform.isMobile ? 0.4 : 0.25
 const panLeft = -1 * panRight
 const zoomOut = 0.8
 const zoomIn = 1.25
 
-export function setToolbarReactions(toolbar: ToolbarView,
+export function setToolbarReactions(plugin: FantasyGanttPlugin,
+                                    manager: ChartManager,
+                                    toolbar: ToolbarView,
                                     renderEngine: GanttRenderEngine,
                                     refreshChartCallback: () => void) {
 
@@ -33,6 +38,8 @@ export function setToolbarReactions(toolbar: ToolbarView,
   toolbar.zoomInButton?.addEventListener('click', () => renderEngine.zoom(zoomIn))
   toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRelative(panRight))
   toolbar.settingsButton.addEventListener('click', () => toolbar.handleSettingsButtonClick())
+
+  toolbar.debugInfoButton?.addEventListener('click', () => new ChartStatisticsModal(plugin.app, manager.statisticsContext.getStatistics()).open())
 
   toolbar.foldButton.addEventListener('click', () => toolbar.fold())
   toolbar.unfoldButton.addEventListener('click', () => toolbar.unfold())

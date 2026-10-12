@@ -14,6 +14,7 @@ import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {getGregorianTodayInAbsoluteDays} from '../date-calculations/dates'
 import {GregorianCalendar} from '../const/fallback-calendar'
 import {getCalendarFiles} from './io-util'
+import {GanttError} from '../model/gantt-error'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -23,6 +24,10 @@ export async function cacheKnownCalendars(plugin: FantasyGanttPlugin,
                                           settingsContext: GanttChartSources,
                                           rawChartInputCalendar?: string) {
   const calendarIDs: string[] = plugin.settings.calendars.map(c => c.id)
+
+  if (calendarIDs?.length === 0)
+    throw new GanttError('warn', `There is no calendar registered in the plugin's settings. The only usable calendar will be 'gregorian'.`, 'calendar')
+
   if (rawChartInputCalendar) calendarIDs.push(rawChartInputCalendar)
 
   await getCalendarDefinitions(calendarIDs, plugin, eventPropertyReader, settingsContext)
@@ -67,10 +72,10 @@ export async function getCalendarDefinition(calendarID: string,
  * @param eventPropertyReader
  * @param settingsContext {@link SettingsContext} used as  {@link GanttChartSources}
  */
-export async function getCalendarDefinitions(calendarIDs: string[],
-                                             plugin: FantasyGanttPlugin,
-                                             eventPropertyReader: EventPropertyReader,
-                                             settingsContext: GanttChartSources): Promise<void> {
+async function getCalendarDefinitions(calendarIDs: string[],
+                                      plugin: FantasyGanttPlugin,
+                                      eventPropertyReader: EventPropertyReader,
+                                      settingsContext: GanttChartSources): Promise<void> {
   if (!calendarIDs || calendarIDs.length < 1 || !settingsContext) return
 
   const calendarsToLoad: string[] = filterNonExistentCalendars(plugin, calendarIDs)

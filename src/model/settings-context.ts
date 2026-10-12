@@ -12,6 +12,7 @@ import {
 import FantasyGanttPlugin from '../main'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
+import ChartManager from '../ctrl/gantt-chart-manager'
 
 export class SettingsContext implements GanttChartSources {
 
@@ -21,10 +22,12 @@ export class SettingsContext implements GanttChartSources {
   local: LocalChartSettings
 
   /**
+   * @param manager
    * @param global plugin-wide global settings
    * @param rawChartInput chart-related user input
    */
-  constructor(private readonly global: PluginSettings,
+  constructor(private readonly manager: ChartManager,
+              private readonly global: PluginSettings,
               private readonly rawChartInput: RawChartInput) {
     this.local = {
       /* I/O sources */
@@ -205,15 +208,19 @@ export class SettingsContext implements GanttChartSources {
 
     if (!calendarConfig) return
 
-    if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(rawChartInput.lowerBoundDate, calendarConfig)
-    if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(rawChartInput.centerHereDate, calendarConfig)
-    if (rawChartInput.upperBoundDate) local.upperBoundDateParsed = this.parseCodeBlockDate(rawChartInput.upperBoundDate, calendarConfig)
+    if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
+    if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(rawChartInput.centerHereDate, calendarConfig, 'center here')
+    if (rawChartInput.upperBoundDate) local.upperBoundDateParsed = this.parseCodeBlockDate(rawChartInput.upperBoundDate, calendarConfig, 'upper bound')
   }
 
-  parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig): ParsedDate | undefined {
-    // TODO #errorCache
+  parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig, description: string): ParsedDate | undefined {
     if (typeof date === 'string') return parseEventDate(false, false, date, calendarConfig) ?? undefined
     if (typeof date === 'number') return {days: date, display: createAxisDateDescription(date, calendarConfig)}
+
+    /*
+     * #errorCache: Reaching this point is a problem, dates should be numbers or objects containing dates
+     */
+    this.manager.statisticsContext.warn(`Could not parse chart's ${description} date: '${String(date)}'`)
     return undefined
   }
 

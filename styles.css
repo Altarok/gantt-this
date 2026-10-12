@@ -634,3 +634,73 @@
   max-width: fit-content;
   box-sizing: border-box;
 }
+
+/* ----------- stats modal ----------- */
+
+.gt-stats-log-container {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 8px;
+  background-color: var(--background-secondary);
+}
+
+.gt-stats-row {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--font-ui-smaller);
+}
+
+.gt-stats-error-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--font-ui-smaller);
+
+  /* font-family: var(--font-monospace); */
+}
+
+.gt-stats-error-list li {
+  padding: 4px 8px;
+  border-radius: 3px;
+  border-left: 4px solid transparent;
+}
+
+/* Log level variants */
+.gt-log-info {
+  /* background-color: var(--background-primary); */
+  
+  /* border-left-color: var(--text-normal); */
+  color: var(--text-normal);
+}
+
+.gt-log-warn {
+  /* border-left-color: var(--text-warning, #e9b32e); */
+  color: var(--text-warning, #e9b32e);
+  background-color: rgb(233 179 46 / 10%);
+}
+
+.gt-log-error {
+  /* background-color: rgb(224 108 117 / 10%); */
+
+  /* border-left-color: var(--text-error, #e06c75); */
+  color: orange; /* var(--text-error, #e06c75); */
+  font-weight: bold;
+}
+
+.gt-log-fatal {
+  /* background-color: #d12424; */
+
+  /* border-left-color: #ff3b3b; */
+  color: red; /* #fff; */
+  font-weight: bold;
+}
+

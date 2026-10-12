@@ -85,7 +85,7 @@ export class ToolbarView {
     const g3 = createGroup(this.container)
 
     this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
-    this.debugInfoButton = createButton(g3, 'info', 'Debug info')
+    this.debugInfoButton = createButton(g3, 'info', 'Setup Problems & Chart Statistics')
 
     if (settingsContext.showButtonsToHideGroups) {
       const g4 = createGroup(this.container)

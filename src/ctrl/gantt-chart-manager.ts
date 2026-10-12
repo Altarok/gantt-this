@@ -11,16 +11,19 @@ import {SettingsContext} from '../model/settings-context'
 import {cacheKnownCalendars} from '../io/calendar-reader'
 import {ChartDataLoader} from '../io/chart-data-loader'
 import {ChartUiManager} from './chart-ui-manager'
+import {StatisticsContext} from '../model/statistics-context'
+import {GanttError} from '../model/gantt-error'
 
+/**
+ * Each chart should have one of these.
+ */
 export default class ChartManager {
+  readonly statisticsContext: StatisticsContext
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
   private readonly textWidthCache: TextWidthCache
-  // private readonly svgDrawerUtil: SvgDrawerUtil
   private readonly dataLoader: ChartDataLoader
   private readonly uiManager: ChartUiManager
-
-
   private readonly rerenderCooldownMs: number
   private lastRenderTimestamp = 0
   private updateTimeout: number | null = null
@@ -31,28 +34,30 @@ export default class ChartManager {
               readonly container: HTMLElement,
               readonly rawChartInput: RawChartInput,
               readonly basesCtx?: BasesContext) {
-    // debugger
-    this.settingsContext = new SettingsContext(plugin.settings, rawChartInput)
+    this.statisticsContext = new StatisticsContext()
+    this.settingsContext = new SettingsContext(this, plugin.settings, rawChartInput)
     this.eventPropertyReader = new EventPropertyReader(this.settingsContext, basesCtx)
     this.textWidthCache = new TextWidthCache()
-    // this.svgDrawerUtil = new SvgDrawerUtil(this.settingsContext, this.textWidthCache)
+    this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
     this.dataLoader = new ChartDataLoader(plugin, this.eventPropertyReader, this.settingsContext, basesCtx)
     this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache, this.settingsContext, basesCtx)
-    this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
   }
 
   /** Do not change order of calls in this!! */
   private async prepare() {
-    await cacheKnownCalendars(this.plugin, this.eventPropertyReader, this.settingsContext, this.rawChartInput.calendar)
+
+    try {
+      await cacheKnownCalendars(this.plugin, this.eventPropertyReader, this.settingsContext, this.rawChartInput.calendar)
+    } catch (err) {
+      if (err instanceof GanttError) this.statisticsContext.addErr(err)
+    }
+
     this.settingsContext.parseRawChartInput(this.plugin)
   }
 
-
-  /* Define the callback synchronously */
   refreshChartCallback(): void {
     if (!this.renderEngine) return
     if (this.updateTimeout) window.clearTimeout(this.updateTimeout)
-
 
     const now = Date.now()
     const elapsed = now - this.lastRenderTimestamp
@@ -60,9 +65,7 @@ export default class ChartManager {
 
     /* debounce to let Obsidian's internal indexing finish completely */
     this.updateTimeout = window.setTimeout(() => {
-      this.lastRenderTimestamp = Date.now()
-      // this.plugin.calendarConfigsCache.clear()
-      // new Notice('Re-rendering Gantt...')
+      this.lastRenderTimestamp = now
 
       this.dataLoader.getGanttItems().then(updatedData => {
         this.renderEngine?.updateData(updatedData)
@@ -74,25 +77,18 @@ export default class ChartManager {
 
   async renderGantt() {
     await this.prepare()
-    // debugger
 
     const chartModel = new GanttChartModel(this.settingsContext)
-
     const chartView = this.uiManager.createChartView(chartModel)
 
     chartModel.setRawContainerWidth(chartView.chartContainer.clientWidth)
 
     const tv = this.uiManager.createToolbarView(chartModel, chartView, () => this.refreshChartCallback())
 
-    // this.codeBlockCtx?.addChild(new ChartLifecycleComponent(this.container, this.plugin, () => this.refreshChartCallback()))
-
-    /* Perform data load in async way */
-    // this.plugin.calendarConfigsCache.clear()
     const data = await this.dataLoader.getGanttItems()
 
-    /* Instantiate the engine */
     this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
-    setToolbarReactions(tv, this.renderEngine, () => this.refreshChartCallback())
+    setToolbarReactions(this.plugin, this, tv, this.renderEngine, () => this.refreshChartCallback())
   }
 }

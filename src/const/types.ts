@@ -296,12 +296,8 @@ export type PluginSettings = ChartVisualSettings & GanttChartSources & {
   hideSettingsPageFrontmatterProperties: boolean
 }
 
-
 /**  Data updated on a redraw, not while panning or zooming */
-export type GroupOrCalendarDrawerData = {
-  y1: number
-  y2: number
-}
+export type GroupOrCalendarDrawerData = { y1: number, y2: number }
 
 export const BaseKeys = {
   calPath: 'bk-calendar-path',
@@ -310,4 +306,16 @@ export const BaseKeys = {
   ubd: 'bk-upper-bound-date',
   cal: 'bk-calendar-for-bounds'
 } as const
-// export type BaseKey = (typeof BaseKeys)[keyof typeof BaseKeys]
+
+/* ------------- Statistics and errors ------------- */
+export type LogLevel = 'info' | 'warn' | 'error' | 'fatal'
+export type LogType = 'calendar'
+export type LogEntry = { level: LogLevel, message: string, type?: LogType }
+export type ChartDiagnostics = {
+  totalCalendars: number
+  loadedCalendars: number
+  failedCalendars: number
+  contextFilesCount: number
+  contextEventsCount: number
+}
+export type ChartStatistics = { diagnostics: ChartDiagnostics, logs: LogEntry[], logTypes: LogType[] }
