@@ -1,42 +1,55 @@
-import {DiagnosticsModel} from './diagnostics-model'
-import {ChartDiagnostics, LogEntry, LogLevel, LogType} from '../const/types'
-import {GanttError} from './gantt-error'
+import {formatErrorMessage, GanttError} from './gantt-error'
+import {ChartDiagnostics, ErrorEntry, ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../const/error-types'
 
-const severity: Record<LogLevel, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
+const severity: Record<ErrorSeverity, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
 
-function sortLogsBySeverity(logs: LogEntry[]) {
+function sortLogsBySeverity(logs: ErrorEntry[]) {
   return logs.sort((a, b) => severity[a.level] - severity[b.level])
 }
 
-export class DiagnosticsContext {
-  diagnostics: DiagnosticsModel
+export class DiagnosticsContext implements ChartDiagnostics {
+  totalCalendars = 0
+  loadedCalendars = 0
+  contextFilesCount = 0
+  contextEventCount = 0
+  logs: ErrorEntry[] = []
+  logTypes: ErrorType[] = []
 
-  constructor() {
-    this.diagnostics = new DiagnosticsModel()
+  sortLogs(): void {
+    this.logs = sortLogsBySeverity(this.logs)
   }
 
-  getStatistics(): ChartDiagnostics {
-    this.diagnostics.logs = sortLogsBySeverity(this.diagnostics.logs)
-    return this.diagnostics
+  private add(level: ErrorSeverity, type: ErrorType, message: string, filepath?: string) {
+    this.logs.push({level, type, message, filepath})
+    if (!this.logTypes.includes(type)) this.logTypes.push(type)
   }
 
-  info(msg: string, type?: LogType) {
-    this.diagnostics.addLog('info', msg, type ?? 'general')
+  addInfo(msg: string, type?: ErrorType, filepath?: string) {
+    this.add('info', type ?? 'unknown', msg, filepath)
   }
 
-  warn(msg: string, type?: LogType) {
-    this.diagnostics.addLog('warn', msg, type ?? 'general')
+  addWarn(msg: string, type?: ErrorType, filepath?: string) {
+    this.add('warn', type ?? 'general', msg, filepath)
   }
 
-  error(msg: string, type?: LogType) {
-    this.diagnostics.addLog('error', msg, type ?? 'general')
+  addError(msg: string, type?: ErrorType, filepath?: string) {
+    this.add('error', type ?? 'general', msg, filepath)
   }
 
-  fatal(msg: string, type?: LogType) {
-    this.diagnostics.addLog('fatal', msg, type ?? 'general')
+  addFatal(msg: string, type?: ErrorType, filepath?: string) {
+    this.add('fatal', type ?? 'general', msg, filepath)
   }
 
   addErr(err: GanttError) {
-    this.diagnostics.addLog(err.logLevel, err.message, err.type, err.filepath)
+    this.add(err.logLevel, err.type, err.message, err.filepath)
   }
+
+  addLog(id: ErrorId, params?: Record<string, string | number>, filepath?: string): void {
+    const errorDef = knownErrors[id]
+    if (!errorDef) return this.add('fatal', 'unknown', 'Unknown error')
+
+    const finalMessage = formatErrorMessage(errorDef.messageTemplate, params)
+    this.add(errorDef.level, errorDef.type, finalMessage, filepath)
+  }
+
 }

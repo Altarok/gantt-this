@@ -3,11 +3,15 @@ import {Consts} from '../const/constants'
 import {ChartContext} from '../model/chart-context'
 
 export function getEventFiles(chartCtx: ChartContext): TFile[] {
-  return readFilesFromFolder(chartCtx.allMarkdownFiles, chartCtx.settings.eventPath, chartCtx.settings.eventPathSearchRecursive)
+  const files = readFilesFromFolder(chartCtx.allMarkdownFiles, chartCtx.settings.eventPath, chartCtx.settings.eventPathSearchRecursive);
+  if (files?.length === 0) chartCtx.diagnostics.addLog('eventDirEmpty', {dir: chartCtx.settings.eventPath})
+  return files
 }
 
 export function getCalendarFiles(chartCtx: ChartContext): TFile[] {
-  return readFilesFromFolder(chartCtx.allMarkdownFiles, chartCtx.settings.calendarPath, chartCtx.settings.calendarPathSearchRecursive)
+  const files = readFilesFromFolder(chartCtx.allMarkdownFiles, chartCtx.settings.calendarPath, chartCtx.settings.calendarPathSearchRecursive);
+  if (files?.length === 0) chartCtx.diagnostics.addLog('calendarDirEmpty', {dir: chartCtx.settings.calendarPath})
+  return files
 }
 
 /**
@@ -26,7 +30,6 @@ function readFilesFromFolder(allFiles: TFile[], path: string, isRecursive: boole
       return parentPath === pathToSearchIn
   })
 }
-
 
 function normalizeRootPathReference(path: string): string {
   return path === Consts.ROOT_PATH ? Consts.ROOT_PATH_NORMALIZED : path

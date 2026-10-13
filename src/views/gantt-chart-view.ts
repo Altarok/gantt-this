@@ -35,10 +35,8 @@ export class GanttChartView {
   constructor(private readonly chartCtx: ChartContext,
               readonly container: HTMLElement,
               private readonly viewModel: GanttChartModel) {
-
     this.container.empty()
     this.container.addClass(Css.wrapper)
-    // debugger
 
     if (chartCtx.settings.uxMoveToolbarBelowChart && chartCtx.settings.uxMakeToolbarSticky) {
       /* separate toolbar and chart, chart first */

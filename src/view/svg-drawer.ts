@@ -136,7 +136,6 @@ export class GanttRenderEngine {
   }
 
   initEventListener(): void {
-    // debugger
     if (this.eventManager) this.eventManager.destroy()
     this.eventManager = createGanttEventManager(this.chartCtx, this, this.svgDrawerUtil)
     this.svgDrawerUtil.setEventManager(this.eventManager)
@@ -592,8 +591,6 @@ export class GanttRenderEngine {
     // })
 
     if (this.viewModel.maxDays <= this.viewModel.minDays) {
-      // console.log('WTF')
-      // debugger
       return this.viewModel.panTranslateX
     } // fail-safe
 

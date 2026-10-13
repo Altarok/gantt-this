@@ -81,7 +81,6 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */
-  // debugger
 
   /*
    * The delimiter often is '-'. Since this also stands for a negative year value, we need a workaround here.

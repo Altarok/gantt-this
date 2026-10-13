@@ -63,11 +63,11 @@ async function getCalendarDefinitions(calendarIDs: string[],
                                       chartCtx: ChartContext): Promise<void> {
   if (!calendarIDs || calendarIDs.length < 1 || !chartCtx.settings) return
 
-  const calendarsToLoad: string[] = filterNonExistentCalendars(chartCtx, calendarIDs)
+  const calendarsNotAlreadyLoaded: string[] = filterNonExistentCalendars(chartCtx, calendarIDs)
 
   const allFiles: TFile[] = getCalendarFiles(chartCtx)
 
-  const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(allFiles, calendarsToLoad, chartCtx)
+  const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(allFiles, calendarsNotAlreadyLoaded, chartCtx)
 
   for (const calendarID of Object.keys(mappedFiles)) {
     await loadCalendar(chartCtx, calendarID, mappedFiles[calendarID])

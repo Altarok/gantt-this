@@ -164,9 +164,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
     // if (event) this.logTouchEvent('handleSvgClick', event)
     const target = event.target as HTMLElement
 
-    // console.log(`handleSvgClick`, target)
-    // debugger
-
     if (target?.hasAttribute('data-id')) {
       const id = target.getAttribute('data-id')
       if (id === null) return

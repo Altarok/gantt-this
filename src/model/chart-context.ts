@@ -7,8 +7,8 @@ import BasesContext from './bases-context'
 import TextWidthCache from '../view/text-space-cache'
 import {CalendarConfig} from '../const/types'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
-import {GanttError} from "./gantt-error";
-import {DiagnosticsModel} from "./diagnostics-model";
+import {GanttError} from './gantt-error'
+import {ChartDiagnostics} from '../const/error-types'
 
 /**
  * Each chart has 1 of these
@@ -37,12 +37,8 @@ export class ChartContext {
     return this.textWidthCache
   }
 
-  get diagnosticsCtx() {
+  get diagnostics(): DiagnosticsContext {
     return this.diagnosticsContext
-  }
-
-  get diagnostics() {
-    return this.diagnosticsContext.diagnostics
   }
 
   get hasBasesContext(): boolean {
@@ -88,8 +84,9 @@ export class ChartContext {
     this.diagnosticsContext.addErr(error)
   }
 
-  getUdpatedDiagnostics(): DiagnosticsModel {
-    const diagnostics: DiagnosticsModel = this.diagnostics
+  getUpdatedDiagnostics(): ChartDiagnostics {
+    const diagnostics: DiagnosticsContext = this.diagnostics
+    diagnostics.sortLogs()
     diagnostics.loadedCalendars = this.calendarCache.size
     return diagnostics
   }

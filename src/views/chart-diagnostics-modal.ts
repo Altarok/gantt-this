@@ -1,7 +1,7 @@
 import {Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {ChartContext} from '../model/chart-context'
-import {DiagnosticsModel} from '../model/diagnostics-model'
+import {ChartDiagnostics} from "../const/error-types";
 
 export class ChartDiagnosticsModal extends Modal {
   constructor(private readonly plugin: FantasyGanttPlugin,
@@ -33,8 +33,7 @@ export class ChartDiagnosticsModal extends Modal {
     contentEl.empty()
     contentEl.addClass('gt-stats-modal')
 
-    const diagnostics: DiagnosticsModel = this.chartCtx.getUdpatedDiagnostics()
-
+    const diagnostics: ChartDiagnostics = this.chartCtx.getUpdatedDiagnostics()
 
     this.showProblems(contentEl, diagnostics)
     this.showStatistics(contentEl, diagnostics)
@@ -44,7 +43,7 @@ export class ChartDiagnosticsModal extends Modal {
     this.contentEl.empty()
   }
 
-  private showProblems(contentEl: HTMLElement, diagnostics: DiagnosticsModel) {
+  private showProblems(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
     const {logs/* , logTypes */} = diagnostics
     if (logs?.length === 0) return
 
@@ -91,7 +90,7 @@ export class ChartDiagnosticsModal extends Modal {
 
   }
 
-  private showStatistics(contentEl: HTMLElement, diagnostics: DiagnosticsModel) {
+  private showStatistics(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
     contentEl.createEl('h3', {text: 'Statistics'})
 
     const g = contentEl.createDiv({cls: 'gt-stats-group'})

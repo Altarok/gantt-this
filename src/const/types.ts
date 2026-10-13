@@ -306,16 +306,3 @@ export const BaseKeys = {
   ubd: 'bk-upper-bound-date',
   cal: 'bk-calendar-for-bounds'
 } as const
-
-/* ------------- Statistics and errors ------------- */
-export type LogLevel = 'info' | 'warn' | 'error' | 'fatal'
-export type LogType = 'general' | 'calendar' | 'date' | 'bound' | 'unknown'
-export type LogEntry = { level: LogLevel, message: string, type: LogType, filepath?: string }
-export type ChartDiagnostics = {
-  totalCalendars: number
-  loadedCalendars: number
-  contextFilesCount: number
-  contextEventCount: number
-  logs: LogEntry[],
-  logTypes: LogType[]
-}

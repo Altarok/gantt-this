@@ -276,7 +276,6 @@ export class SettingsContext implements GanttChartSources {
   }
 
   parseCodeBlockDate(chartCtx: ChartContext, date: string | number, calendarConfig: CalendarConfig, description: string): ParsedDate | undefined {
-    // debugger
     if (typeof date === 'string') return parseEventDate(false, false, date, calendarConfig) ?? undefined
     if (typeof date === 'number') return {days: date, display: createAxisDateDescription(date, calendarConfig)}
 
@@ -284,7 +283,7 @@ export class SettingsContext implements GanttChartSources {
      * #errorCache: Reaching this point is a problem, dates should be numbers or objects containing dates
      */
     // TODO remove direct diag access
-    chartCtx.diagnosticsCtx.warn(`Could not parse chart's ${description} date: '${String(date)}'`, 'bound')
+    chartCtx.diagnostics.addWarn(`Could not parse chart's ${description} date: '${String(date)}'`, 'bound')
     return undefined
   }
 
