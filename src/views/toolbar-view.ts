@@ -1,9 +1,9 @@
 import {Platform, setIcon, setTooltip} from 'obsidian'
-import FantasyGanttPlugin from '../main'
 import {Css} from '../const/constants'
 import {GanttChartModel} from '../model/gantt-chart-model'
-import {SettingsContext} from '../model/settings-context'
 import {GanttChartView} from './gantt-chart-view'
+import {ChartContext} from '../model/chart-context'
+import {SettingsContext} from '../model/settings-context'
 
 const isMobile = Platform.isMobile
 
@@ -43,21 +43,20 @@ export class ToolbarView {
   unfoldButton: HTMLButtonElement
 
   /**
-   * @param chartView HTML div destined to contains the Gantt chart's toolbar
-   * @param plugin
+   * @param chartCtx
+   * @param  chartView HTML div destined to contains the Gantt chart's toolbar
    * @param viewModel
-   * @param settingsContext
    * @param refreshChartCallback
    */
-  constructor(private readonly chartView: GanttChartView,
-              private readonly plugin: FantasyGanttPlugin,
+  constructor(private readonly chartCtx: ChartContext,
+              private readonly chartView: GanttChartView,
               private readonly viewModel: GanttChartModel,
-              settingsContext: SettingsContext,
               refreshChartCallback: () => void) {
+    const settings: SettingsContext = chartCtx.settings
 
     this.container = chartView.toolbarContainer
 
-    const {showPanAndZoomButtonsInToolbar} = settingsContext
+    const {showPanAndZoomButtonsInToolbar} = settings
 
     this.reloadButton = createButton(this.container, 'refresh-cw', 'Reload data')
 
@@ -87,11 +86,11 @@ export class ToolbarView {
     this.settingsButton = createButton(g3, 'settings', 'Plugin settings')
     this.debugInfoButton = createButton(g3, 'info', 'Setup Problems & Chart Statistics')
 
-    if (settingsContext.showButtonsToHideGroups) {
+    if (settings.showButtonsToHideGroups) {
       const g4 = createGroup(this.container)
 
       /* Create buttons to hide groups */
-      const groups = settingsContext.groups
+      const groups = settings.groups
       for (const group of groups) {
         let isVisible: boolean = group?.visible ?? false
         const button = createButton(g4, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
@@ -101,7 +100,7 @@ export class ToolbarView {
             isVisible = !isVisible
             group.visible = isVisible
             setIcon(button, isVisible ? 'eye' : 'eye-off')
-            void plugin.saveSettings() /* TODO is this necessary? */
+            void this.chartCtx.plugin.saveSettings() /* TODO is this necessary? */
             refreshChartCallback()
           }
         })
@@ -148,7 +147,8 @@ export class ToolbarView {
    * Open plugin's settings in native Obsidian modal.
    */
   handleSettingsButtonClick() {
-    const settingApi = (this.plugin.app as unknown as {
+    const plugin = this.chartCtx.plugin
+    const settingApi = (plugin.app as unknown as {
       setting: {
         open(): void
         openTabById(id: string): void
@@ -157,7 +157,7 @@ export class ToolbarView {
 
     if (settingApi) {
       settingApi.open()
-      settingApi.openTabById(this.plugin.manifest.id)
+      settingApi.openTabById(plugin.manifest.id)
     }
   }
 }

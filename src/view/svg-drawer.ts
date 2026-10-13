@@ -1,4 +1,3 @@
-import FantasyGanttPlugin from '../main'
 import {
   CalendarConfig,
   GanttGroup,
@@ -11,29 +10,26 @@ import {
 import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../date-calculations/dates'
-import {SvgDrawerUtil} from './svg-drawer-util'
 import {drawMoons} from './moon-drawer'
 import {expandRecurringEvents} from '../util/recurring-events'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
-import BasesContext from '../model/bases-context'
-import {SettingsContext} from '../model/settings-context'
+import {ChartContext} from '../model/chart-context'
+import {SvgDrawerUtil} from './svg-drawer-util'
 
 export class GanttRenderEngine {
+  private readonly svgDrawerUtil: SvgDrawerUtil
   private eventManager?: GanttEventManager
   private groups: GanttGroup[] = []
   private resizeObserver: ResizeObserver
 
   drawnData: GanttItem[] = []
 
-  constructor(public readonly view: GanttChartView,
+  constructor(private readonly chartCtx: ChartContext,
+              public readonly view: GanttChartView,
               public rawData: GanttItem[],
-              public readonly plugin: FantasyGanttPlugin,
-              private readonly settingsContext: SettingsContext,
-              readonly viewModel: GanttChartModel,
-              private readonly svgDrawerUtil: SvgDrawerUtil,
-              private readonly basesCtx?: BasesContext) {
-    // this.updateSvgDrawerData()
+              readonly viewModel: GanttChartModel) {
+    this.svgDrawerUtil = chartCtx.svgDrawerUtil
     this.calculateGlobalBounds()
     this.initLayout()
     this.redraw()
@@ -61,7 +57,8 @@ export class GanttRenderEngine {
 
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
-      const defaultCalendarConfig = this.plugin.calendarConfigsCache.get(this.plugin.settings.defaultCalendar)
+      // TODO merge next line
+      const defaultCalendarConfig = this.chartCtx.calendarCache.get(this.chartCtx.settings.defaultCalendar)
       const todayDays = defaultCalendarConfig?.today ?? 0
       this.viewModel.setDayRange(todayDays - 15, todayDays + 15)
       return
@@ -86,10 +83,10 @@ export class GanttRenderEngine {
 
     Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendars, this.viewModel.mappedCalConfigs)
 
-    const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.plugin.settings.defaultGroup)))
+    const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.settings.defaultGroup)))
     Priorities.sortGroupAxisByPriority(groupNames, this.viewModel.mappedGrpConfigs)
 
-    this.drawnData = expandRecurringEvents(this, activeItems, this.currRenderWidth)
+    this.drawnData = expandRecurringEvents(this.chartCtx, this, activeItems, this.currRenderWidth)
 
     this.groups = []
     let currentYOffset = this.viewModel.margin.top
@@ -100,7 +97,7 @@ export class GanttRenderEngine {
         groupedMap.set(name, [])
       }
       this.drawnData.forEach(item => {
-        const gName = item.group || this.plugin.settings.defaultGroup
+        const gName = item.group || this.settings.defaultGroup
         if (!groupedMap.has(gName)) groupedMap.set(gName, [])
         groupedMap.get(gName)?.push(item)
       })
@@ -141,7 +138,7 @@ export class GanttRenderEngine {
   initEventListener(): void {
     // debugger
     if (this.eventManager) this.eventManager.destroy()
-    this.eventManager = createGanttEventManager(this, this.plugin.settings, this.svgDrawerUtil, this.basesCtx)
+    this.eventManager = createGanttEventManager(this.chartCtx, this, this.svgDrawerUtil)
     this.svgDrawerUtil.setEventManager(this.eventManager)
   }
 
@@ -183,7 +180,7 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    if (fullReset && this.settingsContext.hasDateBounds) {
+    if (fullReset && this.settings.hasDateBounds) {
       /* Re-evaluate predefined bounds now that we have the true container width */
       this.transitionToPredefinedBounds()
     }
@@ -197,10 +194,10 @@ export class GanttRenderEngine {
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
-    //   console.error("Error drawing axes:", error.message)
+    //   console.error('Error drawing axes:', error.message)
     //   console.error(error.stack)
     // } else {
-    //   console.error("An unexpected error occurred:", error)
+    //   console.error('An unexpected error occurred:', error)
     // }
     // }
   }
@@ -285,7 +282,7 @@ export class GanttRenderEngine {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
             const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height, this.plugin.settings.uxVerticalLineEventWidth, this.view.eraLayer)
+            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height, this.settings.uxVerticalLineEventWidth, this.view.eraLayer)
           }
           case 'diamond':
             return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
@@ -327,7 +324,7 @@ export class GanttRenderEngine {
 
       const currentAxisYStart = itemsAreaHeight + (index * this.viewModel.calendarAxisRowHeight)
       const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
-      const showMoonPhases: boolean = this.plugin.settings.uxShowMoons && tickPixelSpacing >= 24
+      const showMoonPhases: boolean = this.settings.uxShowMoons && tickPixelSpacing >= 24
 
       this.viewModel.drawnCals[calType] = {
         y1: currentAxisYStart,
@@ -338,11 +335,11 @@ export class GanttRenderEngine {
       const ticksG = this.view.createCalAxisGroup(currentAxisYStart)
 
       let lastTextX = -999
-      const calendarConfig: CalendarConfig | undefined = this.plugin.calendarConfigsCache.get(calType)
+      const calendarConfig: CalendarConfig | undefined = this.chartCtx.calendarCache.get(calType)
       if (!calendarConfig) return // continue to next axis
 
       const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
-      const axisColor = (this.plugin.settings.uxUseCalColorForCalAxis ? this.viewModel.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
+      const axisColor = (this.settings.uxUseCalColorForCalAxis ? this.viewModel.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
 
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
@@ -431,7 +428,7 @@ export class GanttRenderEngine {
 
     const renderWidth = this.currRenderWidth
     if (this.eventManager?.isDragging || renderWidth <= 1) return
-    if (this.plugin.settings.autoRestrictZoom) {
+    if (this.settings.autoRestrictZoom) {
       if (factor < 1 && this.viewModel.zoomFactor < 0.5) /* No zoom-out when already min */
         return
       else if (factor > 1) { /* No zoom-in when already max */
@@ -444,7 +441,7 @@ export class GanttRenderEngine {
 
     const oldScale = this.viewModel.zoomFactor
     let newScale = oldScale * factor
-    if (this.plugin.settings.autoRestrictZoom) {
+    if (this.settings.autoRestrictZoom) {
       if (newScale < 0.5) newScale = 0.5  /* Prevent further zoom-out when already min */
     }
 
@@ -497,9 +494,9 @@ export class GanttRenderEngine {
 
   private transitionToPredefinedBounds(): void {
 
-    const lower = this.settingsContext.lowerBoundDateParsed?.days
-    const upper = this.settingsContext.upperBoundDateParsed?.days
-    const center = this.settingsContext.centerHereDateParsed?.days
+    const lower = this.settings.lowerBoundDateParsed?.days
+    const upper = this.settings.upperBoundDateParsed?.days
+    const center = this.settings.centerHereDateParsed?.days
 
     const totalRange = this.viewModel.totalDaysSpan
     if (totalRange <= 0) {
@@ -626,9 +623,9 @@ export class GanttRenderEngine {
       if (grp?.visible === false || cal?.visible === false) return false
 
       if (isTimespan(d.displayType)) switch (d.displayType) {
-        case "bar":
+        case 'bar':
           return this.viewModel.showBars
-        case "era":
+        case 'era':
           return this.viewModel.showEras
       } else if (isTimestamp(d.displayType)) return this.viewModel.showPoints
       else return false
@@ -643,4 +640,7 @@ export class GanttRenderEngine {
     return this.viewModel.getCurrRenderWidth()
   }
 
+  private get settings() {
+    return this.chartCtx.settings
+  }
 }

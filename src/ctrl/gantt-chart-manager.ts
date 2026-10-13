@@ -11,20 +11,22 @@ import {SettingsContext} from '../model/settings-context'
 import {cacheKnownCalendars} from '../io/calendar-reader'
 import {ChartDataLoader} from '../io/chart-data-loader'
 import {ChartUiManager} from './chart-ui-manager'
-import {StatisticsContext} from '../model/statistics-context'
+import {DiagnosticsContext} from '../model/diagnostics-context'
 import {GanttError} from '../model/gantt-error'
+import {ChartContext} from '../model/chart-context'
 
 /**
  * Each chart should have one of these.
  */
 export default class ChartManager {
-  readonly statisticsContext: StatisticsContext
+  private readonly statisticsContext: DiagnosticsContext
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
-  private readonly textWidthCache: TextWidthCache
+  private readonly chartContext: ChartContext
   private readonly dataLoader: ChartDataLoader
   private readonly uiManager: ChartUiManager
   private readonly rerenderCooldownMs: number
+
   private lastRenderTimestamp = 0
   private updateTimeout: number | null = null
 
@@ -34,25 +36,28 @@ export default class ChartManager {
               readonly container: HTMLElement,
               readonly rawChartInput: RawChartInput,
               readonly basesCtx?: BasesContext) {
-    this.statisticsContext = new StatisticsContext()
+    this.statisticsContext = new DiagnosticsContext()
     this.settingsContext = new SettingsContext(this, plugin.settings, rawChartInput)
     this.eventPropertyReader = new EventPropertyReader(this.settingsContext, basesCtx)
-    this.textWidthCache = new TextWidthCache()
+
+    this.chartContext = new ChartContext(plugin, this.statisticsContext, this.settingsContext,
+      this.eventPropertyReader, new TextWidthCache(), basesCtx)
+
     this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
-    this.dataLoader = new ChartDataLoader(plugin, this.eventPropertyReader, this.settingsContext, basesCtx)
-    this.uiManager = new ChartUiManager(plugin, container, this.textWidthCache, this.settingsContext, basesCtx)
+    this.dataLoader = new ChartDataLoader(this.chartContext)
+    this.uiManager = new ChartUiManager(this.chartContext, container)
   }
 
   /** Do not change order of calls in this!! */
   private async prepare() {
 
     try {
-      await cacheKnownCalendars(this.plugin, this.eventPropertyReader, this.settingsContext, this.rawChartInput.calendar)
+      await cacheKnownCalendars(this.chartContext, this.rawChartInput.calendar)
     } catch (err) {
       if (err instanceof GanttError) this.statisticsContext.addErr(err)
     }
     try {
-      this.settingsContext.parseRawChartInput(this.plugin)
+      this.chartContext.parseRawChartInput()
     } catch (err) {
       if (err instanceof GanttError) this.statisticsContext.addErr(err)
     }
@@ -92,6 +97,6 @@ export default class ChartManager {
 
     this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
-    setToolbarReactions(this.plugin, this, tv, this.renderEngine, () => this.refreshChartCallback())
+    setToolbarReactions(this.plugin, this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback())
   }
 }

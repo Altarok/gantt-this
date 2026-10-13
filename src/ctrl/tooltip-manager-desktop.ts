@@ -1,12 +1,13 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {CalendarConfig, EventId, GanttItem, PluginSettings} from '../const/types'
+import {CalendarConfig, EventId, GanttItem} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {createSvg, SvgDrawerUtil} from '../view/svg-drawer-util'
 import {Css} from '../const/constants'
-import BasesContext from '../model/bases-context'
 import {createAxisDateDescription} from '../date-calculations/dates'
+import {ChartContext} from '../model/chart-context'
+import {SettingsContext} from '../model/settings-context'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 
@@ -23,12 +24,11 @@ export default class TooltipManager implements HoverParent {
   private lastHoverTarget: HTMLElement | null = null
   private connectorDrawer = new GanttConnectorDrawer()
 
-  constructor(private readonly engine: GanttRenderEngine,
-              private readonly pluginSettings: PluginSettings,
-              private readonly svgDrawerUtil: SvgDrawerUtil,
-              private readonly basesCtx?: BasesContext) {
-    this.searchForRelatedEventsOnHover = pluginSettings.uxHighlightRelatedEvents
-    this.isDrawArrows = this.searchForRelatedEventsOnHover && pluginSettings.uxConnectRelatedEvents
+  constructor(private readonly chartCtx: ChartContext,
+              private readonly engine: GanttRenderEngine,
+              private readonly svgDrawerUtil: SvgDrawerUtil) {
+    this.searchForRelatedEventsOnHover = chartCtx.settings.uxHighlightRelatedEvents
+    this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.uxConnectRelatedEvents
 
     this.setupDelegatedHover()
   }
@@ -128,7 +128,7 @@ export default class TooltipManager implements HoverParent {
 
   private addRepeaterEventSuffix(g: HTMLDivElement, d: GanttItem) {
 
-    const calendarConfig = this.engine.plugin.calendarConfigsCache.get(d.calendarType)
+    const calendarConfig = this.chartCtx.calendarCache.get(d.calendarType)
     if (!calendarConfig) return
 
     const datesContainer = g.createDiv({cls: Css.tooltip.repeaterSuffix})
@@ -158,13 +158,14 @@ export default class TooltipManager implements HoverParent {
   }
 
   private get hasSelectedBaseProperties(): boolean {
-    return this.basesCtx?.hasSelectedProperties() ?? false
+    return this.chartCtx.bases?.hasSelectedProperties() ?? false
   }
 
   private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem): boolean {
-    if (!this.basesCtx) return false
+    const basesCtx = this.chartCtx.bases
+    if (!basesCtx) return false
 
-    const propertyKeyValues: { key: string, value: string }[] = this.basesCtx.readPropertyValues(d)
+    const propertyKeyValues: { key: string, value: string }[] = basesCtx.readPropertyValues(d)
     if (propertyKeyValues.length === 0) return false
 
     for (const p of propertyKeyValues) {
@@ -181,7 +182,7 @@ export default class TooltipManager implements HoverParent {
   private showNativePreview(event: MouseEvent, targetEl: HTMLElement, linktext?: string) {
     if (!linktext) return
 
-    this.engine.plugin.app.workspace.trigger('hover-link', {
+    this.chartCtx.workspace.trigger('hover-link', {
       event, targetEl, linktext, source: 'gantt-this', hoverParent: this.engine.view.container,
     })
   }
@@ -191,7 +192,7 @@ export default class TooltipManager implements HoverParent {
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
-    if (!this.pluginSettings.mouseOverEventShowVerticalLine) return
+    if (!this.settings.mouseOverEventShowVerticalLine) return
     if (ganttItem.displayType === 'era') return
 
     const svg = target.closest('svg')
@@ -317,7 +318,7 @@ export default class TooltipManager implements HoverParent {
 
   /** Show box around hovered element. */
   private showHighlightAroundElement(target: HTMLElement, ganttItem: GanttItem) {
-    if (!this.pluginSettings.mouseOverEventShowBox) return
+    if (!this.settings.mouseOverEventShowBox) return
 
     if (this.lastHoveredTarget && this.lastHoveredTarget !== target) {
       this.hideHighlightAroundElement()
@@ -441,8 +442,8 @@ export default class TooltipManager implements HoverParent {
     return this.engine.view
   }
 
-  get settings(): PluginSettings {
-    return this.engine.plugin.settings
+  get settings(): SettingsContext {
+    return this.chartCtx.settings
   }
 
   get overlayColor(): string {

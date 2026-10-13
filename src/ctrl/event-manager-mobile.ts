@@ -1,6 +1,7 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import {GanttChartModel} from '../model/gantt-chart-model'
+import {ChartContext} from '../model/chart-context'
 
 export class GanttMobileEventManager implements GanttEventManager {
   public isDragging = false
@@ -23,7 +24,8 @@ export class GanttMobileEventManager implements GanttEventManager {
 
   private readonly viewModel: GanttChartModel
 
-  constructor(private engine: GanttRenderEngine) {
+  constructor(private readonly chartCtx: ChartContext,
+              private readonly engine: GanttRenderEngine) {
     this.viewModel = engine.viewModel
 
     this.boundWindowTouchMove = this.handleTouchMove.bind(this)
@@ -113,7 +115,7 @@ export class GanttMobileEventManager implements GanttEventManager {
     if (id === null || id === undefined) return
     const link = this.engine.rawData.find(d => d.id === id)?.link
     if (link) {
-      void this.engine.plugin.app.workspace.openLinkText(link, '', true)
+      void this.chartCtx.workspace.openLinkText(link, '', true)
     }
   }
 

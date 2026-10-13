@@ -1,9 +1,7 @@
 import {Css} from '../const/constants'
 import {ManualSvg} from '../view/manual-svg-icons'
 import {GanttChartModel} from '../model/gantt-chart-model'
-import TextWidthCache from '../view/text-space-cache'
-import {SettingsContext} from '../model/settings-context'
-import FantasyGanttPlugin from "../main";
+import {ChartContext} from '../model/chart-context'
 
 export class GanttChartView {
   chartContainer: HTMLDivElement
@@ -34,29 +32,27 @@ export class GanttChartView {
   /** Prevent overflow rectangle */
   private clipRect!: SVGElement
 
-  constructor(private readonly plugin: FantasyGanttPlugin,
-              settingsContext: SettingsContext,
+  constructor(private readonly chartCtx: ChartContext,
               readonly container: HTMLElement,
-              private readonly viewModel: GanttChartModel,
-              private readonly textCache: TextWidthCache) {
+              private readonly viewModel: GanttChartModel) {
 
     this.container.empty()
     this.container.addClass(Css.wrapper)
     // debugger
 
-    if (settingsContext.uxMoveToolbarBelowChart && settingsContext.uxMakeToolbarSticky) {
+    if (chartCtx.settings.uxMoveToolbarBelowChart && chartCtx.settings.uxMakeToolbarSticky) {
       /* separate toolbar and chart, chart first */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
-    } else if (settingsContext.uxMoveToolbarBelowChart) {
+    } else if (chartCtx.settings.uxMoveToolbarBelowChart) {
       /* join toolbar and chart, chart first  */
       const mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.minimized})
-    } else if (settingsContext.uxMakeToolbarSticky) {
+    } else if (chartCtx.settings.uxMakeToolbarSticky) {
       /* separate toolbar and chart, toolbar first */
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
@@ -160,7 +156,7 @@ export class GanttChartView {
     const label = groupG.createSvg('text', {cls: Css.group.text, attr: {x: 20, y: 17}})
 
     label.textContent = name.toUpperCase()
-    const badgeWidth = this.textCache.getSvgWidth(label, name)
+    const badgeWidth = this.chartCtx.textCache.getSvgWidth(label, name)
     badge.setAttribute('width', String(badgeWidth))
   }
 
@@ -204,7 +200,7 @@ export class GanttChartView {
 
 
   drawCalendarBadge(calBadgeTextContent: string, sourceFilePath: string, currentAxisYStart: number) {
-    const badgeWidth = this.textCache.getWidth(calBadgeTextContent).toFixed(1)
+    const badgeWidth = this.chartCtx.textCache.getWidth(calBadgeTextContent).toFixed(1)
 
     const badge = this.staticCalendarLayer.createSvg('rect', {
       cls: Css.axis.labelBadge, attr: {x: 8, y: currentAxisYStart + 7, width: badgeWidth}
@@ -216,8 +212,8 @@ export class GanttChartView {
     label.textContent = calBadgeTextContent
 
     if (sourceFilePath) {
-      this.plugin.registerDomEvent(badge as unknown as HTMLElement,
-        'click', () => void this.plugin.app.workspace.openLinkText(sourceFilePath, '', true)
+      this.chartCtx.plugin.registerDomEvent(badge as unknown as HTMLElement,
+        'click', () => void this.chartCtx.workspace.openLinkText(sourceFilePath, '', true)
       )
     }
   }

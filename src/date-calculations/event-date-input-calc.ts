@@ -9,7 +9,7 @@ import {
 import {isCustomLeapYear} from './leap-year-calc'
 import {parseDescriptiveDateToValidInput, TODAY} from './dates'
 import {createRepeatRule} from '../util/recurring-events'
-import {GanttError} from '../model/gantt-error'
+import {throwGanttError} from '../model/gantt-error'
 
 /**
  * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
@@ -78,7 +78,7 @@ function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: 
 }
 
 /** Parse _rule-based_ event date. */
-function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
+function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */
   // debugger
@@ -87,6 +87,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
    * The delimiter often is '-'. Since this also stands for a negative year value, we need a workaround here.
    */
   let yearMultiplicator = 1
+  let input = date
   if (delimiter === '-' && input.startsWith(delimiter)) {
     input = input.slice(1)
     yearMultiplicator = -1
@@ -135,16 +136,10 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
   /* Handle Ordinal Dates (No month block in the format) */
   if (!monthName) {
     const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
-    if (day < 1 || day > maxDays) {
-      // debugger
-      throw new GanttError('warn', `Can't parse date '${input}'. Illegal day value for year.`, 'date')
-    }
+    if (day < 1 || day > maxDays) throwGanttError('illegalDay4Year', {date, day, year})
 
     const days = daysFromYears + day + calendarConfig.offsetToDayZero
-    return {
-      days, // : days === +0 ? 0 : days,
-      display: `${year}${delimiter}${day}`
-    }
+    return {days, display: `${year}${delimiter}${day}`}
   }
 
   /* Handle Standard/Intercalary Month Dates */
@@ -160,10 +155,7 @@ function parseEventDateWithRuleBasedConfig(input: string, calendarConfig: RuleBa
     allowedDays += (details.leapYearRule.extraDays ?? 1)
   }
 
-  if (day < 1 || day > allowedDays) {
-    // debugger
-    throw new GanttError('warn', `Can't parse date '${input}'. Illegal day value for month.`, 'date')
-  }
+  if (day < 1 || day > allowedDays) throwGanttError('illegalDay4Month', {date, day, month: monthIndex})
 
   let daysFromCurrentYearMonths = 0
   for (let i = 0; i < monthIndex; i++) {

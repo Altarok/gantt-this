@@ -1,17 +1,11 @@
 import {TFile} from 'obsidian'
-import FantasyGanttPlugin from '../main'
 import {GanttItem} from '../const/types'
 import {parseFiles} from './event-frontmatter-reader'
 import {getFilteredFiles} from './file-collector'
-import BasesContext from '../model/bases-context'
-import {EventPropertyReader} from './event-property-reader'
-import {SettingsContext} from '../model/settings-context'
+import {ChartContext} from '../model/chart-context'
 
 export class ChartDataLoader {
-  constructor(private readonly plugin: FantasyGanttPlugin,
-              private readonly eventPropertyReader: EventPropertyReader,
-              private readonly settingsContext: SettingsContext,
-              private readonly basesCtx?: BasesContext) {
+  constructor(private readonly chartCtx: ChartContext) {
   }
 
   /**
@@ -19,11 +13,17 @@ export class ChartDataLoader {
    */
   async getGanttItems(): Promise<GanttItem[]> {
     let files: TFile[]
-    if (this.basesCtx) {
-      files = this.basesCtx.filterQueryResults(this.eventPropertyReader)
+    if (this.chartCtx.hasBasesContext) {
+      files = this.chartCtx.getFilesFilteredByBase
     } else {
-      files = getFilteredFiles(this.plugin, this.eventPropertyReader, this.settingsContext)
+      files = getFilteredFiles(this.chartCtx)
     }
-    return parseFiles(files, this.plugin, this.eventPropertyReader, this.settingsContext)
+
+    const events = await parseFiles(files, this.chartCtx)
+
+    this.chartCtx.diagnostics.contextFilesCount = files.length
+    this.chartCtx.diagnostics.contextEventCount = events.length
+    
+    return events
   }
 }

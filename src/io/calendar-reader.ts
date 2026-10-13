@@ -1,36 +1,27 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {
-  CalendarConfig,
-  GanttChartSources,
-  ParsedDate,
-  PositionalCalendarConfig,
-  RuleBasedCalendarConfig,
-} from '../const/types'
+import {CalendarConfig, ParsedDate, PositionalCalendarConfig, RuleBasedCalendarConfig,} from '../const/types'
 import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR} from '../const/default-values'
-import FantasyGanttPlugin from '../main'
-import {EventPropertyReader} from './event-property-reader'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {getGregorianTodayInAbsoluteDays} from '../date-calculations/dates'
 import {GregorianCalendar} from '../const/fallback-calendar'
 import {getCalendarFiles} from './io-util'
-import {GanttError} from '../model/gantt-error'
+import {throwGanttError} from '../model/gantt-error'
+import {ChartContext} from '../model/chart-context'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
 
-export async function cacheKnownCalendars(plugin: FantasyGanttPlugin,
-                                          eventPropertyReader: EventPropertyReader,
-                                          settingsContext: GanttChartSources,
+export async function cacheKnownCalendars(chartCtx: ChartContext,
                                           rawChartInputCalendar?: string) {
-  const calendarIDs: string[] = plugin.settings.calendars.map(c => c.id)
+  const calendarIDs: string[] = chartCtx.settings.calendars.map(c => c.id)
 
-  if (calendarIDs?.length === 0)
-    throw new GanttError('warn', `There is no calendar registered in the plugin's settings. The only usable calendar will be 'gregorian'.`, 'calendar')
+  if (calendarIDs?.length === 0) throwGanttError('noRegisteredCalendar')
+  else chartCtx.diagnostics.totalCalendars = calendarIDs.length
 
   if (rawChartInputCalendar) calendarIDs.push(rawChartInputCalendar)
 
-  await getCalendarDefinitions(calendarIDs, plugin, eventPropertyReader, settingsContext)
+  await getCalendarDefinitions(calendarIDs, chartCtx)
 }
 
 function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
@@ -53,52 +44,46 @@ function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
 }
 
 export async function getCalendarDefinition(calendarID: string,
-                                            plugin: FantasyGanttPlugin,
-                                            eventPropertyReader: EventPropertyReader,
-                                            settingsContext: GanttChartSources): Promise<CalendarConfig | null> {
+                                            chartCtx: ChartContext): Promise<CalendarConfig | null> {
 
-  const cachedCalendarConfig: CalendarConfig | undefined = plugin.calendarConfigsCache.get(calendarID)
+  const cachedCalendarConfig: CalendarConfig | undefined = chartCtx.calendarCache.get(calendarID)
   if (cachedCalendarConfig) return cachedCalendarConfig
 
-  await getCalendarDefinitions([calendarID], plugin, eventPropertyReader, settingsContext)
+  await getCalendarDefinitions([calendarID], chartCtx)
 
-  return plugin.calendarConfigsCache.get(calendarID) ?? null
+  return chartCtx.calendarCache.get(calendarID) ?? null
 }
 
 /**
  * Reads folder contents and build calendar definitions.
  * @param calendarIDs name reference of calendar, must  match front-matter property
- * @param plugin
- * @param eventPropertyReader
- * @param settingsContext {@link SettingsContext} used as  {@link GanttChartSources}
+ * @param chartCtx
  */
 async function getCalendarDefinitions(calendarIDs: string[],
-                                      plugin: FantasyGanttPlugin,
-                                      eventPropertyReader: EventPropertyReader,
-                                      settingsContext: GanttChartSources): Promise<void> {
-  if (!calendarIDs || calendarIDs.length < 1 || !settingsContext) return
+                                      chartCtx: ChartContext): Promise<void> {
+  if (!calendarIDs || calendarIDs.length < 1 || !chartCtx.settings) return
 
-  const calendarsToLoad: string[] = filterNonExistentCalendars(plugin, calendarIDs)
+  const calendarsToLoad: string[] = filterNonExistentCalendars(chartCtx, calendarIDs)
 
-  const allFiles: TFile[] = getCalendarFiles(plugin, settingsContext)
+  const allFiles: TFile[] = getCalendarFiles(chartCtx)
 
-  const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(plugin, allFiles, eventPropertyReader, calendarsToLoad)
+  const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(allFiles, calendarsToLoad, chartCtx)
 
   for (const calendarID of Object.keys(mappedFiles)) {
-    await loadCalendar(plugin, calendarID, mappedFiles[calendarID])
+    await loadCalendar(chartCtx, calendarID, mappedFiles[calendarID])
   }
 }
 
-function filterNonExistentCalendars(plugin: FantasyGanttPlugin, calendarIDs: string[]) {
-  return calendarIDs.filter(c => !plugin.calendarConfigsCache.get(c))
+function filterNonExistentCalendars(chartCtx: ChartContext, calendarIDs: string[]) {
+  return calendarIDs.filter(c => !chartCtx.calendarCache.get(c))
 }
 
-async function loadCalendar(plugin: FantasyGanttPlugin, calendarID: string, file?: TFile): Promise<void> {
+async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: TFile): Promise<void> {
 
   if (!calendarID) return
-  if (!file) return fallbackIfGregorian(calendarID, plugin)
+  if (!file) return fallbackIfGregorian(calendarID, chartCtx)
 
-  const content = await plugin.app.vault.read(file)
+  const content = await chartCtx.vault.read(file)
   const match = yamlRegex.exec(content)
 
   if (!match?.[1]) return
@@ -128,36 +113,34 @@ async function loadCalendar(plugin: FantasyGanttPlugin, calendarID: string, file
     addTodayDateAsAbsoluteDay(newCalendarConfig)
 
     /* Cache calendar */
-    plugin.calendarConfigsCache.set(calendarID, newCalendarConfig)
+    chartCtx.calendarCache.set(calendarID, newCalendarConfig)
   } catch {
-    new Notice(`Gantt Plugin: Failed to parse YAML for calendar '${calendarID}'`)
+    throwGanttError('yamlCalendarParseFail', {calendarID}, file)
   }
 }
 
 /**
  * Search for Markdown file defining the missing calendar config.
  */
-function filterMatchingCalendarFiles(plugin: FantasyGanttPlugin,
-                                     files: TFile[],
-                                     eventPropertyReader: EventPropertyReader,
-                                     calendarsToLoad: string[]): Record<string, TFile> {
-
+function filterMatchingCalendarFiles(files: TFile[],
+                                     calendarsToLoad: string[],
+                                     chartCtx: ChartContext): Record<string, TFile> {
   const mappedFiles: Record<string, TFile> = {}
 
   for (const file of files) {
-    const fileMetadata = plugin.app.metadataCache.getFileCache(file)
+    const fileMetadata = chartCtx.metadataCache.getFileCache(file)
     if (!fileMetadata?.frontmatter) continue
-    const calendarID = eventPropertyReader.getCalendarId(fileMetadata.frontmatter, file)
+    const calendarID = chartCtx.propertyReader.getCalendarId(fileMetadata.frontmatter, file)
     if (!calendarID || !calendarsToLoad.includes(calendarID)) continue
     mappedFiles[calendarID] = file
   }
   return mappedFiles
 }
 
-function fallbackIfGregorian(calendarId: string, plugin: FantasyGanttPlugin): void {
+function fallbackIfGregorian(calendarId: string, chartCtx: ChartContext,): void {
   if (calendarId === DEFAULT_FALLBACK_CALENDAR) {
     new Notice(`Failed to load 'gregorian' calendar. Will use pre-set fallback.`)
-    plugin.calendarConfigsCache.set(calendarId, GregorianCalendar)
+    chartCtx.calendarCache.set(calendarId, GregorianCalendar)
   }
 }
 

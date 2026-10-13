@@ -1,5 +1,6 @@
 import {
   CalendarConfig,
+  ControlKey,
   GanttChartSources,
   GanttItemDisplayTypeTimespans,
   GanttItemDisplayTypeTimestamp,
@@ -9,11 +10,11 @@ import {
   PluginSettings,
   RawChartInput
 } from '../const/types'
-import FantasyGanttPlugin from '../main'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import ChartManager from '../ctrl/gantt-chart-manager'
 import {GanttError} from './gantt-error'
+import {ChartContext} from './chart-context'
 
 export class SettingsContext implements GanttChartSources {
 
@@ -77,6 +78,10 @@ export class SettingsContext implements GanttChartSources {
     return this.local.calendarPathSearchRecursive ?? this.global.calendarPathSearchRecursive
   }
 
+  get frontMatterProperty_gantt_this_optional(): boolean {
+    return this.global.frontMatterProperty_gantt_this_optional
+  }
+
   get frontMatterProperty_event_time_start(): string {
     return this.global.frontMatterProperty_event_time_start
   }
@@ -137,6 +142,10 @@ export class SettingsContext implements GanttChartSources {
     return this.global.defaultCalendar
   }
 
+  get defaultGroup(): string {
+    return this.global.defaultGroup
+  }
+
   get uxDefaultTimespanEventSymbol(): GanttItemDisplayTypeTimespans {
     return this.global.uxDefaultTimespanEventSymbol
   }
@@ -189,35 +198,84 @@ export class SettingsContext implements GanttChartSources {
     return /* TODO implement this.local.uxMoveToolbarBelowChart ?? */ this.global.uxMoveToolbarBelowChart
   }
 
+  get mouseOverEventShowVerticalLine(): boolean {
+    return /* TODO implement this.local.mouseOverEventShowVerticalLine ?? */ this.global.mouseOverEventShowVerticalLine
+  }
+
+  get mouseOverEventShowBox(): boolean {
+    return /* TODO implement this.local.mouseOverEventShowBox ?? */ this.global.mouseOverEventShowBox
+  }
+
+  get uxVerticalOverlayColor(): string {
+    return /* TODO implement this.local.uxVerticalOverlayColor ?? */ this.global.uxVerticalOverlayColor
+  }
+
+  get uxAddDaySuffixToTooltipTitle(): boolean {
+    return /* TODO implement this.local.uxAddDaySuffixToTooltipTitle ?? */ this.global.uxAddDaySuffixToTooltipTitle
+  }
+
   get uxMakeToolbarSticky(): boolean {
     return /* TODO implement this.local.uxMakeToolbarSticky ?? */ this.global.uxMakeToolbarSticky
+  }
+
+  get uxShowMoons(): boolean {
+    return /* TODO implement this.local.uxShowMoons ?? */ this.global.uxShowMoons
+  }
+
+  get uxUseCalColorForCalAxis(): boolean {
+    return /* TODO implement this.local.uxUseCalColorForCalAxis ?? */ this.global.uxUseCalColorForCalAxis
+  }
+
+  get uxHighlightRelatedEvents(): boolean {
+    return /* TODO implement this.local.uxHighlightRelatedEvents ?? */ this.global.uxHighlightRelatedEvents
+  }
+
+  get uxConnectRelatedEvents(): boolean {
+    return /* TODO implement this.local.uxConnectRelatedEvents ?? */ this.global.uxConnectRelatedEvents
   }
 
   get uxRerenderCooldownSeconds(): number {
     return /* TODO implement this.local.uxRerenderCooldownSeconds ?? */ this.global.uxRerenderCooldownSeconds
   }
 
+  get useFilenameAsFallbackStartDate(): boolean {
+    return /* TODO implement this.local.useFilenameAsFallbackStartDate ?? */ this.global.useFilenameAsFallbackStartDate
+  }
+
+  get autoRestrictZoom(): boolean {
+    return /* TODO implement this.local.autoRestrictZoom ?? */ this.global.autoRestrictZoom
+  }
+
+  get uxZoomButton(): ControlKey {
+    return this.global.uxZoomButton
+  }
+
+  get uxPanButton(): ControlKey {
+    return this.global.uxPanButton
+  }
+
+
   /**
    * Call this AFTER parsing calendars!
-   * @param plugin
+   * @param  chartCtx
    */
-  parseRawChartInput(plugin: FantasyGanttPlugin): void {
+  parseRawChartInput(chartCtx: ChartContext): void {
 
     const {local, rawChartInput} = this
     if (!rawChartInput.lowerBoundDate && !rawChartInput.centerHereDate && !rawChartInput.upperBoundDate) return
 
     const calendarID = rawChartInput.calendar ?? this.global.defaultCalendar
-    const calendarConfig = plugin.calendarConfigsCache.get(calendarID)
+    const calendarConfig = chartCtx.calendarCache.get(calendarID)
 
     if (!calendarConfig)
-      throw new GanttError('warn', `Can't parse bounds. No calendar matches your chart's bounds calendar id '${calendarID}'.`, 'calendar')
+      throw new GanttError('warn', `Can't parse bounds. No calendar matches your chart's bounds calendar id: '${calendarID}'`, 'calendar')
 
-    if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
-    if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(rawChartInput.centerHereDate, calendarConfig, 'center here')
-    if (rawChartInput.upperBoundDate) local.upperBoundDateParsed = this.parseCodeBlockDate(rawChartInput.upperBoundDate, calendarConfig, 'upper bound')
+    if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
+    if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.centerHereDate, calendarConfig, 'center here')
+    if (rawChartInput.upperBoundDate) local.upperBoundDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.upperBoundDate, calendarConfig, 'upper bound')
   }
 
-  parseCodeBlockDate(date: string | number, calendarConfig: CalendarConfig, description: string): ParsedDate | undefined {
+  parseCodeBlockDate(chartCtx: ChartContext, date: string | number, calendarConfig: CalendarConfig, description: string): ParsedDate | undefined {
     // debugger
     if (typeof date === 'string') return parseEventDate(false, false, date, calendarConfig) ?? undefined
     if (typeof date === 'number') return {days: date, display: createAxisDateDescription(date, calendarConfig)}
@@ -225,7 +283,8 @@ export class SettingsContext implements GanttChartSources {
     /*
      * #errorCache: Reaching this point is a problem, dates should be numbers or objects containing dates
      */
-    this.manager.statisticsContext.warn(`Could not parse chart's ${description} date: '${String(date)}'`)
+    // TODO remove direct diag access
+    chartCtx.diagnosticsCtx.warn(`Could not parse chart's ${description} date: '${String(date)}'`, 'bound')
     return undefined
   }
 

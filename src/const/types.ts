@@ -309,13 +309,13 @@ export const BaseKeys = {
 
 /* ------------- Statistics and errors ------------- */
 export type LogLevel = 'info' | 'warn' | 'error' | 'fatal'
-export type LogType = 'calendar' | 'date'
-export type LogEntry = { level: LogLevel, message: string, type?: LogType }
+export type LogType = 'general' | 'calendar' | 'date' | 'bound' | 'unknown'
+export type LogEntry = { level: LogLevel, message: string, type: LogType, filepath?: string }
 export type ChartDiagnostics = {
   totalCalendars: number
   loadedCalendars: number
-  failedCalendars: number
   contextFilesCount: number
-  contextEventsCount: number
+  contextEventCount: number
+  logs: LogEntry[],
+  logTypes: LogType[]
 }
-export type ChartStatistics = { diagnostics: ChartDiagnostics, logs: LogEntry[], logTypes: LogType[] }

@@ -1,68 +1,65 @@
 import {
   CalendarConfig,
   EventId,
-  GanttChartSources,
   GanttItem,
   GanttItemDisplayType,
   GroupOrCalendarSettings,
   ParsedDate
 } from '../const/types'
-import FantasyGanttPlugin from '../main'
 import {FrontMatterCache, Notice, TFile} from 'obsidian'
 import {EventPropertyReader} from './event-property-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {findPredecessorsAndSuccessors} from './event-hierarchy-analysis'
 import {getCalendarDefinition} from './calendar-reader'
+import {GanttError, throwGanttError} from '../model/gantt-error'
+import {ChartContext} from '../model/chart-context'
 
 /**
  * Parse given files to {@link GanttItem}s.
  * Call from outside Obsidian's Bases.
  */
 export async function parseFiles(files: TFile[],
-                                 plugin: FantasyGanttPlugin,
-                                 eventPropertyReader: EventPropertyReader,
-                                 settingsContext: GanttChartSources): Promise<GanttItem[]> {
+                                 chartCtx: ChartContext): Promise<GanttItem[]> {
   const items: GanttItem[] = []
   let incrementalId = 0
 
   const mappedCalendarConfigs: Record<string, GroupOrCalendarSettings>
-    = Object.fromEntries(plugin.settings.calendars.map((c) => [c.id, c]))
+    = Object.fromEntries(chartCtx.settings.calendars.map((c) => [c.id, c]))
 
-  for (const file of files) {
-    const cache = plugin.app.metadataCache.getFileCache(file)
+  for (const file of files) try {
+    const cache = chartCtx.metadataCache.getFileCache(file)
     const frontMatter = cache?.frontmatter
 
     if (!frontMatter) continue
 
-    let {startDate, endDate} = eventPropertyReader.getEventTimestamps(frontMatter, file)
+    let {startDate, endDate} = chartCtx.propertyReader.getEventTimestamps(frontMatter, file)
 
     if (startDate === undefined || startDate === null || startDate === '') {
-      if (plugin.settings.useFilenameAsFallbackStartDate) startDate = file.basename
+      if (chartCtx.settings.useFilenameAsFallbackStartDate) startDate = file.basename
       else continue
     }
 
-    const calendarId: string = eventPropertyReader.getEventCalendarName(frontMatter, file)
+    const calendarId: string = chartCtx.propertyReader.getEventCalendarName(frontMatter, file)
 
     if (!calendarId || !mappedCalendarConfigs[calendarId]?.visible) continue
 
-    const calendarConfig = await getCalendarDefinition(calendarId, plugin, eventPropertyReader, settingsContext)
+    const calendarConfig = await getCalendarDefinition(calendarId, chartCtx)
 
-    const ganttItem: GanttItem | null = createItem(plugin, eventPropertyReader, startDate, endDate, calendarId, calendarConfig, file, frontMatter, `${++incrementalId}`)
+    const ganttItem: GanttItem | null = createItem(chartCtx.propertyReader, startDate, endDate, calendarId,
+      calendarConfig, file, frontMatter, `${++incrementalId}`)
     if (!ganttItem) continue
     items.push(ganttItem)
+  } catch (err) {
+    if (err instanceof GanttError) chartCtx.addErr(err)
   }
 
-  // const localChartSettings =
-  // parseCodeBlockContent(plugin, rawChartInput)
 
-  if (plugin.settings.uxHighlightRelatedEvents) findPredecessorsAndSuccessors(items, eventPropertyReader)
+  if (chartCtx.settings.uxHighlightRelatedEvents) findPredecessorsAndSuccessors(items, chartCtx.propertyReader)
 
   return items
 }
 
-
-function createItem(plugin: FantasyGanttPlugin,
-                    eventPropertyReader: EventPropertyReader,
+function createItem(eventPropertyReader: EventPropertyReader,
                     startDate: string,
                     endDate: string | undefined,
                     /** Calendar to use for event */
@@ -78,7 +75,7 @@ function createItem(plugin: FantasyGanttPlugin,
   try {
     startRes = parseEventDate(true, true, startDate, calendarConfig)
   } catch {
-    new Notice(`Failed to parse event date: ${startDate} in file ${file.name}`)
+    throwGanttError('eventDateParseFail', {dateStr: startDate, filename: file.name}, file)
   }
 
   if (!startRes) return null

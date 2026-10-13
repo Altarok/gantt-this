@@ -1,6 +1,7 @@
 import {CalendarConfig, GanttItem, RepeatRule, Step} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
+import {ChartContext} from '../model/chart-context'
 
 function toStep(input: string | undefined): Step | null {
   if (input === 'days' || input === 'day') return 'day'
@@ -94,12 +95,13 @@ export function createRepeatRule(isStartDate: boolean, input: string, calendarCo
  * Expand list of actively shown data on chart with repeating events.
  * Method creates duplicates for repeating events.
  *
+ * @param chartCtx
  * @param engine
  * @param items
  * @param renderWidth
  */
-export function expandRecurringEvents(engine: GanttRenderEngine, items: GanttItem[], renderWidth: number): GanttItem[] {
-  const doubleIconSize = 2 * engine.plugin.settings.viewEventIconHeight
+export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRenderEngine, items: GanttItem[], renderWidth: number): GanttItem[] {
+  const doubleIconSize = 2 * chartCtx.settings.viewEventIconHeight
   const expanded: GanttItem[] = []
 
   const totalDaysSpan = engine.viewModel.totalDaysSpan
@@ -118,10 +120,11 @@ export function expandRecurringEvents(engine: GanttRenderEngine, items: GanttIte
 
     if (!item.repeatRule?.delta) continue
 
-    if (item.repeatRule.step === 'day') {
-      duplicateEventWithDayDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
-    } else if (item.repeatRule.step === 'year') {
-      duplicateEventWithYearDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
+    try {
+      if (item.repeatRule.step === 'day') duplicateEventWithDayDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
+      else if (item.repeatRule.step === 'year') duplicateEventWithYearDelta(chartCtx, item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
+    } catch {
+      // TODO
     }
 
   }
@@ -129,7 +132,8 @@ export function expandRecurringEvents(engine: GanttRenderEngine, items: GanttIte
   return expanded
 }
 
-function duplicateEventWithYearDelta(item: GanttItem,
+function duplicateEventWithYearDelta(chartCtx: ChartContext,
+                                     item: GanttItem,
                                      expanded: GanttItem[],
                                      renderEngine: GanttRenderEngine,
                                      pixelsPerDay: number,
@@ -140,7 +144,7 @@ function duplicateEventWithYearDelta(item: GanttItem,
   const {delta} = item.repeatRule
 
   // 1. Resolve calendar config
-  const calendarConfig = renderEngine.plugin.calendarConfigsCache.get(item.calendarType)
+  const calendarConfig = chartCtx.calendarCache.get(item.calendarType)
   if (calendarConfig?.type !== 'rule-based') return
   if (!calendarConfig.ruleBasedDetails) return // continue loop in calling method
 

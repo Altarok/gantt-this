@@ -1,10 +1,9 @@
-import {setIcon} from "obsidian"
+import {setIcon} from 'obsidian'
 import {GanttItem} from '../const/types'
-import {Css} from "const/constants"
+import {Css} from 'const/constants'
 import {ManualSvg} from './manual-svg-icons'
-import TextWidthCache from './text-space-cache'
 import {GanttEventManager} from '../ctrl/event-manager'
-import {SettingsContext} from "../model/settings-context";
+import {ChartContext} from '../model/chart-context'
 
 const textLeftPadding = 3
 
@@ -38,17 +37,14 @@ export class SvgDrawerUtil {
   private readonly shapeRadius: number // 8
   private readonly iconSize: number // 16
   private readonly iconRadius: number // 8
-  // private readonly dotPrefixWidth: number
 
   private eventManager?: GanttEventManager
 
-  constructor(private readonly settings: SettingsContext,
-              private readonly textWidthCache: TextWidthCache) {
-    this.shapeSize = settings.viewEventShapeHeight
+  constructor(private readonly chartCtx: ChartContext) {
+    this.shapeSize = chartCtx.settings.viewEventShapeHeight
     this.shapeRadius = this.shapeSize / 2
-    this.iconSize = settings.viewEventIconHeight
+    this.iconSize = chartCtx.settings.viewEventIconHeight
     this.iconRadius = this.iconSize / 2
-    // this.dotPrefixWidth = textWidthCache.getWidth('...')
   }
 
   setEventManager(em: GanttEventManager) {
@@ -203,7 +199,7 @@ export class SvgDrawerUtil {
    * @param cssClass
    */
   private drawSmallShape(d: GanttItem,
-                         shape: "circle" | "polygon" | "rect",
+                         shape: 'circle' | 'polygon' | 'rect',
                          attrs: Record<string, string | number>,
                          x: number,
                          y: number,
@@ -331,7 +327,7 @@ export class SvgDrawerUtil {
    */
   drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number, svgContainer: SVGElement): void {
     const line = createSvg('line', Css.item.timestamp, {
-      x1, x2: x1, y1, y2, 'stroke-width': this.settings.uxVerticalLineEventWidth, 'data-id': d.id
+      x1, x2: x1, y1, y2, 'stroke-width': this.chartCtx.settings.uxVerticalLineEventWidth, 'data-id': d.id
     })
     if (d.color) line.setAttribute('stroke', d.color)
     svgContainer.appendChild(line)

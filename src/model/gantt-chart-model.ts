@@ -1,6 +1,6 @@
 import {Consts} from '../const/constants'
 import {GroupOrCalendarDrawerData, GroupOrCalendarSettings} from '../const/types'
-import {SettingsContext} from "./settings-context";
+import {SettingsContext} from './settings-context'
 
 type Margin = { top: number, bottom: number, left: number, right: number }
 

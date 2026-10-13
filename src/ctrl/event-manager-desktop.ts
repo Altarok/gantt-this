@@ -3,6 +3,7 @@ import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManager} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'
 import {GanttChartModel} from '../model/gantt-chart-model'
+import {ChartContext} from '../model/chart-context'
 
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
@@ -23,8 +24,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
   viewModel: GanttChartModel
 
-  constructor(readonly engine: GanttRenderEngine,
-              readonly tooltipManager: TooltipManager) {
+  constructor(private readonly chartCtx: ChartContext,
+              private readonly engine: GanttRenderEngine,
+              private readonly tooltipManager: TooltipManager) {
     this.viewModel = engine.viewModel
 
     /* Bind all handlers _once_ */
@@ -52,7 +54,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (!this.svg) return
 
     this.activeWindow = this.svg.ownerDocument.defaultView ?? window
-    const plugin = this.engine.plugin
+    const plugin = this.chartCtx.plugin
 
     plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
     plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
@@ -169,7 +171,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const id = target.getAttribute('data-id')
       if (id === null) return
       const link = this.engine.rawData.find(d => d.id === id)?.link
-      if (link) void this.engine.plugin.app.workspace.openLinkText(link, '', true)
+      if (link) void this.chartCtx.workspace.openLinkText(link, '', true)
     }
 
   }
@@ -203,7 +205,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private get settings() {
-    return this.engine.plugin.settings
+    return this.chartCtx.settings
   }
 
   // private logTouchEvent(type: string, e: MouseEvent) {
