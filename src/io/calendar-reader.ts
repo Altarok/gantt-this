@@ -122,6 +122,8 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
   if (!calendarID) return
   if (!file) return fallbackIfGregorian(calendarID, chartCtx)
 
+  debugger
+
   const content = await chartCtx.vault.read(file)
   const match = yamlRegex.exec(content)
 
@@ -183,5 +185,12 @@ function safetyCheckRuleBasedConfig(config: RuleBasedCalendarConfig) {
   if (ruleBasedDetails.leapYearRule && ruleBasedDetails.leapYearRule.ruleType !== 'none') {
     ruleBasedDetails.leapYearRule.extraDays =
       Number.isNaN(ruleBasedDetails.leapYearRule.extraDays) ? 1 : ruleBasedDetails.leapYearRule.extraDays
+  }
+
+  if (ruleBasedDetails.months.length > 0) {
+    let expectedDaysInYear = 0
+    ruleBasedDetails.months.forEach(month => expectedDaysInYear += month.days)
+    if (expectedDaysInYear !== ruleBasedDetails.daysInStandardYear) throwGanttError('calendarDaysInStandardMismatch',
+      {calendarID: config.id, daysInStandardYear: ruleBasedDetails.daysInStandardYear})
   }
 }

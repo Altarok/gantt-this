@@ -33,6 +33,11 @@ export const knownErrors: Record<string, ErrorDef> = {
     type: 'calendar',
     messageTemplate: `No calendar registered in settings. Fallback '{fallback}' will be used.`
   },
+  calendarDaysInStandardMismatch: {
+    level: 'error',
+    type: 'calendar',
+    messageTemplate: `Days in standard year ({daysInStandardYear}) does not match sum of days of months for calendar: '{calendarID}'`
+  },
   boundsCalendarNotFound: {
     level: 'warn',
     type: 'calendar',
@@ -62,6 +67,31 @@ export const knownErrors: Record<string, ErrorDef> = {
     level: 'warn',
     type: 'calendar',
     messageTemplate: `There is no calendar registered in the plugin's settings. The only usable calendar ID will be 'gregorian'.`
+  },
+  illegalYear0InNoY0Cal: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}'. Year 0 invalid when 'noYearZero = true'.`
+  },
+  illegalDateOutOfBounds: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}'. Values out of bounds.`
+  },
+  illegalNegativeMonth: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}'. Month has a negative value.`
+  },
+  illegalNegativeDay: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}'. Day has a negative value.`
+  },
+  illegalMonth4Year: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}'. Month {month} is out of range for year {year}.`
   },
   illegalDay4Year: {
     level: 'warn',
@@ -105,8 +135,13 @@ export const knownErrors: Record<string, ErrorDef> = {
   },
   positionalCalendarMissingSegments: {
     level: 'fatal',
-    type: 'date',
+    type: 'calendar',
     messageTemplate: `Can't parse positional calendar '{id}', missing date segments.`
+  },
+  ruleBasedCalendarMissingDetails: {
+    level: 'fatal',
+    type: 'calendar',
+    messageTemplate: `Can't parse rule-based calendar '{id}', missing details.`
   },
   unknownCalendarType: {
     level: 'error',

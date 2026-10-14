@@ -20,7 +20,7 @@ import {throwGanttError} from '../model/gantt-error'
 export function parseEventDate(doCheckForRepetitions: boolean,
                                isStartDate: boolean,
                                date: string,
-                               config?: CalendarConfig | null): ParsedDate | null {
+                               config?: CalendarConfig | null): ParsedDate {
   if (!date) throwGanttError('unparseableDate', {date})
   if (!config) throwGanttError('missingCalConfigForDate', {date})
 
@@ -48,7 +48,7 @@ export function parseEventDate(doCheckForRepetitions: boolean,
  *
  * @throws GanttError on fail - 4/4 checked
  */
-export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
+export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate {
   const {type} = config
   switch (type) {
     case 'positional':
@@ -92,9 +92,9 @@ function parseEventDateWithPositionalConfig(date: string, calendarConfig: Positi
  *
  * @throws GanttError - if date has invalid segment, delimiter, or length
  */
-function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
+function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
-  if (!details) return null /* Should not happen, this method handles exactly that */
+  if (!details) throwGanttError('ruleBasedCalendarMissingDetails', {id: calendarConfig.id}) /* Should not happen, this method handles exactly that */
 
   /*
    * The delimiter often is '-'. Since this also stands for a negative year value, we need a workaround here.
@@ -134,13 +134,14 @@ function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBas
 
   const noYearZero = calendarConfig.ruleBasedDetails?.noYearZero
   if (noYearZero === true) {
-    if (year === 0) return null // TODO #errorCache
+    if (year === 0) throwGanttError('illegalYear0InNoY0Cal', {date})
     if (year < 0) year = year + 1
   }
 
   /* Reject invalid input! */
-  const isInvalid: boolean = isNaN(year) || isNaN(day) || day < 1 || (typeof monthName === 'number' && monthName < 1)
-  if (isInvalid) return null
+  if (day < 1) throwGanttError('illegalNegativeDay', {date})
+  const isInvalid: boolean = isNaN(year) || isNaN(day) || (typeof monthName === 'number' && monthName < 1)
+  if (isInvalid) throwGanttError('illegalDateOutOfBounds', {date})
 
   /* Calculate days from previous years */
   const daysFromYears = calculateDaysForYears(year - 1, details)
@@ -161,7 +162,8 @@ function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBas
   const searchMonth = typeof monthName === 'string' ? monthName.toLowerCase() : ''
   const monthIndex = typeof monthName === 'number' ? monthName - 1 :
     months.findIndex(m => m.name?.toLowerCase() === searchMonth || m.shortname?.toLowerCase() === searchMonth)
-  if (monthIndex === -1) return null
+  if (monthIndex === -1) throwGanttError('illegalNegativeMonth', {date})
+  if (monthIndex >= months.length) throwGanttError('illegalMonth4Year', {date, month: (monthIndex + 1), year})
 
   let allowedDays = months[monthIndex]!.days
   if (isLeap && details.leapYearRule?.applyToMonthIndex === monthIndex) {

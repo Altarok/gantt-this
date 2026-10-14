@@ -41,7 +41,7 @@ export async function parseFiles(files: TFile[],
 
     const calendarId: string = chartCtx.propertyReader.getEventCalendarName(frontMatter, file)
 
-    if (!calendarId || !mappedCalendarConfigs[calendarId]?.visible) continue
+    if (!calendarId || (mappedCalendarConfigs[calendarId] && !mappedCalendarConfigs[calendarId].visible)) continue
 
     const calendarConfig = await getCalendarDefinition(calendarId, chartCtx)
 
@@ -71,6 +71,8 @@ function createItem(chartCtx: ChartContext,
   const eventPropertyReader: EventPropertyReader = chartCtx.propertyReader
   let startRes: ParsedDate | null
   let endRes: ParsedDate | null
+
+  debugger
 
   try {
     startRes = parseEventDate(true, true, startDate, calendarConfig)
