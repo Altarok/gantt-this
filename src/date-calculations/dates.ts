@@ -2,6 +2,7 @@
 import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
 import {isCustomLeapYear, isGregorianLeapYear} from './leap-year-calc'
 import {Consts} from '../const/constants'
+import {throwGanttError} from '../model/gantt-error'
 
 export const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -11,13 +12,12 @@ export function getGregorianTodayInAbsoluteDays(): number {
 }
 
 /**
+ * Calculate 'today' as absolute integer value (days since DayZero)
  * @param input starts with 'TODAY'
  * @param config
  */
 export function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig): string {
-  // calculate today absolute day count (since day 0)
-  // TODO #errorCache move to error container
-  if (!config.today) return `Calendar has no valid today value: ${config.id}`
+  if (!config.today) throwGanttError('missingTodayDate', {id: config.id})
 
   let absoluteDay = config.today
 
@@ -27,7 +27,7 @@ export function parseDescriptiveDateToValidInput(input: string, config: Calendar
     // else TODO #errorCache new Notice(`Failed to parse descriptive date '${input}'.'`)
   }
 
-  // pass calculated day count into description generator
+  /* pass calculated day count into description generator */
   return createAxisDateDescription(absoluteDay, config, true)
 }
 

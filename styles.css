@@ -638,7 +638,8 @@
 /* ----------- stats modal ----------- */
 
 .gt-stats-log-container {
-  max-height: 250px;
+  width: auto;
+  height: auto;
   overflow-y: auto;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
@@ -693,18 +694,16 @@
 }
 
 .gt-log-error {
-  /* background-color: rgb(224 108 117 / 10%); */
-
   /* border-left-color: var(--text-error, #e06c75); */
   color: orange; /* var(--text-error, #e06c75); */
+  background-color: rgb(224 108 117 / 10%);
   font-weight: bold;
 }
 
 .gt-log-fatal {
-  /* background-color: #d12424; */
-
   /* border-left-color: #ff3b3b; */
-  color: red; /* #fff; */
+  color: #fff;
+  background-color: #d12424;
   font-weight: bold;
 }
 

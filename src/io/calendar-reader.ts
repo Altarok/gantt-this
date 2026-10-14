@@ -62,25 +62,60 @@ async function getCalendarDefinitions(calendarIDs: string[],
                                       chartCtx: ChartContext): Promise<void> {
   if (!calendarIDs || calendarIDs.length < 1 || !chartCtx.settings) return
 
-  const calendarsNotAlreadyLoaded: string[] = filterNonExistentCalendars(chartCtx, calendarIDs)
+  const allKnownCalendarIDs: string[] = chartCtx.settings.calendars.map(c => c.id)
+  const calendarCache = chartCtx.calendarCache
+
+  // const calendarsNotAlreadyLoaded: string[] = filterNonExistentCalendars(chartCtx, calendarIDs)
 
   const allFiles: TFile[] = getCalendarFiles(chartCtx)
 
-  const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(allFiles, calendarsNotAlreadyLoaded, chartCtx)
-
-  for (const calendarID of Object.keys(mappedFiles)) {
-    const file = mappedFiles[calendarID]
+  // const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(allFiles, calendarsNotAlreadyLoaded, chartCtx)
+  //   > !chartCtx.calendarCache.get(c))
+// }
+  for (const file of allFiles) {
+    const fileMetadata = chartCtx.metadataCache.getFileCache(file)
+    if (!fileMetadata?.frontmatter) continue
+    const calendarID = chartCtx.propertyReader.getCalendarId(fileMetadata.frontmatter, file)
+    if (!calendarID) continue /* nothing to load */
+    if (calendarCache.get(calendarID)) continue /* already loaded*/
+    if (!allKnownCalendarIDs.includes(calendarID)) chartCtx.diagnostics.addLog('unregisteredCalendar', {calendarID})
     try {
       await loadCalendar(chartCtx, calendarID, file)
     } catch (err) {
       if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
     }
   }
+
+  // for (const calendarID of Object.keys(mappedFiles)) {
+  //   const file = mappedFiles[calendarID]
+  //   try {
+  //     await loadCalendar(chartCtx, calendarID, file)
+  //   } catch (err) {
+  //     if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+  //   }
+  // }
 }
 
-function filterNonExistentCalendars(chartCtx: ChartContext, calendarIDs: string[]) {
-  return calendarIDs.filter(c => !chartCtx.calendarCache.get(c))
-}
+// /**
+//  * Search for Markdown file defining the missing calendar config.
+//  */
+// function filterMatchingCalendarFiles(files: TFile[],
+//                                      calendarsToLoad: string[],
+//                                      chartCtx: ChartContext): Record<string, TFile> {
+//   const mappedFiles: Record<string, TFile> = {}
+//
+//   for (const file of files) {
+//     const fileMetadata = chartCtx.metadataCache.getFileCache(file)
+//     if (!fileMetadata?.frontmatter) continue
+//     const calendarID = chartCtx.propertyReader.getCalendarId(fileMetadata.frontmatter, file)
+//     if (!calendarID || !calendarsToLoad.includes(calendarID)) continue
+//     mappedFiles[calendarID] = file
+//   }
+//   return mappedFiles
+// }
+// function filterNonExistentCalendars(chartCtx: ChartContext, calendarIDs: string[]) {
+//   return calendarIDs.filter(c => !chartCtx.calendarCache.get(c))
+// }
 
 async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: TFile): Promise<void> {
 
@@ -120,29 +155,7 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
     chartCtx.calendarCache.set(calendarID, newCalendarConfig)
   } catch (err) {
     if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
-    /*
-     * TODO remove
-     */
-    throwGanttError('yamlCalendarParseFail', {calendarID}, file)
   }
-}
-
-/**
- * Search for Markdown file defining the missing calendar config.
- */
-function filterMatchingCalendarFiles(files: TFile[],
-                                     calendarsToLoad: string[],
-                                     chartCtx: ChartContext): Record<string, TFile> {
-  const mappedFiles: Record<string, TFile> = {}
-
-  for (const file of files) {
-    const fileMetadata = chartCtx.metadataCache.getFileCache(file)
-    if (!fileMetadata?.frontmatter) continue
-    const calendarID = chartCtx.propertyReader.getCalendarId(fileMetadata.frontmatter, file)
-    if (!calendarID || !calendarsToLoad.includes(calendarID)) continue
-    mappedFiles[calendarID] = file
-  }
-  return mappedFiles
 }
 
 function fallbackIfGregorian(calendarId: string, chartCtx: ChartContext,): void {
@@ -152,10 +165,9 @@ function fallbackIfGregorian(calendarId: string, chartCtx: ChartContext,): void 
   }
 }
 
-
 function safetyCheckPositionalConfig(config: PositionalCalendarConfig) {
   if (config.positionalUnits?.length === 0) {
-    /* TODO throw error #errorCache */
+    throwGanttError('positionalCalendarMissingSegments', {id: config.id})
   }
 }
 

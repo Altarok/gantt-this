@@ -91,7 +91,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const targetTranslateX = this.startTranslateX + deltaX
 
       // console.log('handleWindowMouseMove > targetTranslateX', targetTranslateX)
-
       // console.info(e.clientX, deltaX)
 
       this.rafId ??= window.requestAnimationFrame(() => {

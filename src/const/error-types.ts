@@ -48,7 +48,6 @@ export const knownErrors: Record<string, ErrorDef> = {
     type: 'calendar',
     messageTemplate: `Failed to parse YAML for calendar '{calendarId}'.`
   },
-
   eventDateParseFail: {
     level: 'warn',
     type: 'date',
@@ -104,10 +103,25 @@ export const knownErrors: Record<string, ErrorDef> = {
     type: 'date',
     messageTemplate: `Can't parse positional date '{date}', illegal segment: '{segment}'.`
   },
+  positionalCalendarMissingSegments: {
+    level: 'fatal',
+    type: 'date',
+    messageTemplate: `Can't parse positional calendar '{id}', missing date segments.`
+  },
   unknownCalendarType: {
     level: 'error',
     type: 'calendar',
     messageTemplate: `Unknown calendar type: {type}`
+  },
+  unregisteredCalendar: {
+    level: 'warn',
+    type: 'calendar',
+    messageTemplate: `Calendar {calendarID} is not registered. Can't guarantee consistent order of calendars.`
+  },
+  missingTodayDate: {
+    level: 'warn',
+    type: 'calendar',
+    messageTemplate: `Calendar {id} has no today date.`
   }
 
 } as const // = immutable

@@ -42,7 +42,6 @@ export class GanttThisBasesView extends BasesView {
     try {
       void render.renderGantt()
     } catch {
-      // TODO #errorCache
       new Notice('Failed to render Gantt chart base!')
     }
   }
