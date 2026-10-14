@@ -6,12 +6,12 @@ import {
   GroupOrCalendarSettings,
   ParsedDate
 } from '../const/types'
-import {FrontMatterCache, Notice, TFile} from 'obsidian'
+import {FrontMatterCache, TFile} from 'obsidian'
 import {EventPropertyReader} from './event-property-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {findPredecessorsAndSuccessors} from './event-hierarchy-analysis'
 import {getCalendarDefinition} from './calendar-reader'
-import {GanttError, throwGanttError} from '../model/gantt-error'
+import {GanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
 
 /**
@@ -45,7 +45,7 @@ export async function parseFiles(files: TFile[],
 
     const calendarConfig = await getCalendarDefinition(calendarId, chartCtx)
 
-    const ganttItem: GanttItem | null = createItem(chartCtx.propertyReader, startDate, endDate, calendarId,
+    const ganttItem: GanttItem | null = createItem(chartCtx, startDate, endDate, calendarId,
       calendarConfig, file, frontMatter, `${++incrementalId}`)
     if (!ganttItem) continue
     items.push(ganttItem)
@@ -53,13 +53,12 @@ export async function parseFiles(files: TFile[],
     if (err instanceof GanttError) chartCtx.addErr(err)
   }
 
-
   if (chartCtx.settings.uxHighlightRelatedEvents) findPredecessorsAndSuccessors(items, chartCtx.propertyReader)
 
   return items
 }
 
-function createItem(eventPropertyReader: EventPropertyReader,
+function createItem(chartCtx: ChartContext,
                     startDate: string,
                     endDate: string | undefined,
                     /** Calendar to use for event */
@@ -69,25 +68,23 @@ function createItem(eventPropertyReader: EventPropertyReader,
                     frontMatter: FrontMatterCache,
                     id: EventId): GanttItem | null {
 
-  let startRes: ParsedDate | null = null
-  let endRes: ParsedDate | null = null
+  const eventPropertyReader: EventPropertyReader = chartCtx.propertyReader
+  let startRes: ParsedDate | null
+  let endRes: ParsedDate | null
 
   try {
     startRes = parseEventDate(true, true, startDate, calendarConfig)
-  } catch {
-    throwGanttError('eventDateParseFail', {dateStr: startDate, filename: file.name}, file)
-  }
+    if (!startRes) return null
 
-  if (!startRes) return null
-
-  try {
     endRes = endDate ? parseEventDate(true, false, endDate, calendarConfig) :
       {days: startRes.days, display: startRes.display} // ParsedDate
-  } catch {
-    new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
+    if (!endRes) return null
+  } catch (err) {
+    // new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
+    if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+    return null
   }
 
-  if (!endRes) return null
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
 

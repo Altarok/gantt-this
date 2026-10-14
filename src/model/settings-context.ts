@@ -12,9 +12,8 @@ import {
 } from '../const/types'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
-import ChartManager from '../ctrl/gantt-chart-manager'
-import {GanttError} from './gantt-error'
 import {ChartContext} from './chart-context'
+import {GanttError} from "./gantt-error";
 
 export class SettingsContext implements GanttChartSources {
 
@@ -24,12 +23,10 @@ export class SettingsContext implements GanttChartSources {
   local: LocalChartSettings
 
   /**
-   * @param manager
    * @param global plugin-wide global settings
    * @param rawChartInput chart-related user input
    */
-  constructor(private readonly manager: ChartManager,
-              private readonly global: PluginSettings,
+  constructor(private readonly global: PluginSettings,
               private readonly rawChartInput: RawChartInput) {
     this.local = {
       /* I/O sources */
@@ -267,8 +264,7 @@ export class SettingsContext implements GanttChartSources {
     const calendarID = rawChartInput.calendar ?? this.global.defaultCalendar
     const calendarConfig = chartCtx.calendarCache.get(calendarID)
 
-    if (!calendarConfig)
-      throw new GanttError('warn', `Can't parse bounds. No calendar matches your chart's bounds calendar id: '${calendarID}'`, 'calendar')
+    if (!calendarConfig) return chartCtx.diagnostics.addLog('noCalForChartBounds', {calendarID})
 
     if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
     if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.centerHereDate, calendarConfig, 'center here')
@@ -276,14 +272,19 @@ export class SettingsContext implements GanttChartSources {
   }
 
   parseCodeBlockDate(chartCtx: ChartContext, date: string | number, calendarConfig: CalendarConfig, description: string): ParsedDate | undefined {
-    if (typeof date === 'string') return parseEventDate(false, false, date, calendarConfig) ?? undefined
-    if (typeof date === 'number') return {days: date, display: createAxisDateDescription(date, calendarConfig)}
+    try {
+      if (typeof date === 'string') return parseEventDate(false, false, date, calendarConfig) ?? undefined
+      if (typeof date === 'number') return {days: date, display: createAxisDateDescription(date, calendarConfig)}
+    } catch (err) {
+      if (err instanceof GanttError) {
+        err.message = `Invalid ${description}. ${err.message}`
+        chartCtx.diagnostics.addErr(err)
+      }
+      return undefined
+    }
 
-    /*
-     * #errorCache: Reaching this point is a problem, dates should be numbers or objects containing dates
-     */
-    // TODO remove direct diag access
-    chartCtx.diagnostics.addWarn(`Could not parse chart's ${description} date: '${String(date)}'`, 'bound')
+    /* Do not throw error, the other bounds may still work */
+    chartCtx.diagnostics.addLog('illegalChartBoundFormat', {bound: description, date: String(date)})
     return undefined
   }
 

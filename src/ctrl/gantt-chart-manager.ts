@@ -37,7 +37,7 @@ export default class ChartManager {
               readonly rawChartInput: RawChartInput,
               readonly basesCtx?: BasesContext) {
     this.statisticsContext = new DiagnosticsContext()
-    this.settingsContext = new SettingsContext(this, plugin.settings, rawChartInput)
+    this.settingsContext = new SettingsContext(plugin.settings, rawChartInput)
     this.eventPropertyReader = new EventPropertyReader(this.settingsContext, basesCtx)
 
     this.chartContext = new ChartContext(plugin, this.statisticsContext, this.settingsContext,
@@ -74,6 +74,8 @@ export default class ChartManager {
     /* debounce to let Obsidian's internal indexing finish completely */
     this.updateTimeout = window.setTimeout(() => {
       this.lastRenderTimestamp = now
+
+      this.chartContext.resetCaches()
 
       this.dataLoader.getGanttItems().then(updatedData => {
         this.renderEngine?.updateData(updatedData)

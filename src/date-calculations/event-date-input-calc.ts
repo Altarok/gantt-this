@@ -12,29 +12,28 @@ import {createRepeatRule} from '../util/recurring-events'
 import {throwGanttError} from '../model/gantt-error'
 
 /**
- * Parse event data to {@link ParsedDate}. Done once per loaded  event, ___not during runtime___.
+ * Parse event data to {@link ParsedDate}.
+ * Done once per loaded  event, ___not during runtime___.
+ *
+ * @throws GanttError on fail - 3/3 checked!
  */
 export function parseEventDate(doCheckForRepetitions: boolean,
                                isStartDate: boolean,
-                               input?: string,
+                               date: string,
                                config?: CalendarConfig | null): ParsedDate | null {
-  if (!input || !config) return null
+  if (!date) throwGanttError('unparseableDate', {date})
+  if (!config) throwGanttError('missingCalConfigForDate', {date})
 
   let repeatRule: RepeatRule | undefined
 
-  if (doCheckForRepetitions && input.includes(' repeat ')) {
-    const parts = input.split(' repeat ')
-    input = parts[0] ?? ''
+  if (doCheckForRepetitions && date.includes(' repeat ')) {
+    const parts = date.split(' repeat ')
+    date = parts[0] ?? ''
     const suffix = parts[1] ?? ''
     if (suffix) repeatRule = createRepeatRule(isStartDate, suffix.trim(), config)
   }
 
-  let cleanInput: string // e.g. 2026-08-13
-  if (input.startsWith(TODAY)) {
-    cleanInput = parseDescriptiveDateToValidInput(input, config)
-  } else {
-    cleanInput = input.toString().trim()
-  }
+  let cleanInput: string = date.startsWith(TODAY) ? parseDescriptiveDateToValidInput(date, config) : date.trim()
 
   const parsedDate = createParsedDate(cleanInput, config)
 
@@ -43,41 +42,56 @@ export function parseEventDate(doCheckForRepetitions: boolean,
   return parsedDate
 }
 
+/**
+ * User
+ * - parseEventDate (see above) - OK
+ *
+ * @throws GanttError on fail - 4/4 checked
+ */
 export function createParsedDate(cleanInput: string, config: CalendarConfig): ParsedDate | null {
-  switch (config.type) {
+  const {type} = config
+  switch (type) {
     case 'positional':
       return parseEventDateWithPositionalConfig(cleanInput, config)
     case 'rule-based':
       return parseEventDateWithRuleBasedConfig(cleanInput, config)
     default:
-      return null
+      throwGanttError('unknownCalendarType', {type})
   }
 }
 
-/** Parse _positional_ event date. */
-function parseEventDateWithPositionalConfig(cleanInput: string, calendarConfig: PositionalCalendarConfig): ParsedDate | null {
-  if (!cleanInput.includes(calendarConfig.delimiter)) return null
+/**
+ * Parse _positional_ event date.
+ *
+ * @throws GanttError - if date has invalid segment, delimiter, or length
+ */
+function parseEventDateWithPositionalConfig(date: string, calendarConfig: PositionalCalendarConfig): ParsedDate {
+  if (!date.includes(calendarConfig.delimiter))
+    throwGanttError('positionalDateWithoutDelimiter', {date, delimiter: calendarConfig.delimiter})
 
-  const segments = cleanInput.split(calendarConfig.delimiter).map(Number)
+  const segments: string[] = date.split(calendarConfig.delimiter)
   let totalDays = 0
-  // let valid = true
 
   const units = calendarConfig.positionalUnits ?? []
-  if (segments.length === 0 || units.length === 0 || segments.length !== units.length) return null
+  if (segments.length === 0 || units.length === 0 || segments.length !== units.length)
+    throwGanttError('positionalDateWithInvalidLength', {date, unitLength: units.length})
+
 
   for (let idx = 0; idx < units.length; idx++) {
-    const val = segments[idx]
-    if (!val || Number.isNaN(val)) return null // #errorCache
-    totalDays += val * units[idx]!.days
+    const segment = segments[idx]
+    if (!segment || Number.isNaN(Number(segment)))
+      throwGanttError('positionalDateWithInvalidSegment', {date, segment: String(segment)})
+    totalDays += Number(segment) * units[idx]!.days
   }
 
-  return {
-    days: calendarConfig.offsetToDayZero + totalDays,
-    display: cleanInput
-  }
+  return {days: calendarConfig.offsetToDayZero + totalDays, display: date}
 }
 
-/** Parse _rule-based_ event date. */
+/**
+ * Parse _rule-based_ event date.
+ *
+ * @throws GanttError - if date has invalid segment, delimiter, or length
+ */
 function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate | null {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) return null /* Should not happen, this method handles exactly that */

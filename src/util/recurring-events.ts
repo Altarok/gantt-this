@@ -2,6 +2,7 @@ import {CalendarConfig, GanttItem, RepeatRule, Step} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {ChartContext} from '../model/chart-context'
+import {GanttError} from "../model/gantt-error";
 
 function toStep(input: string | undefined): Step | null {
   if (input === 'days' || input === 'day') return 'day'
@@ -123,8 +124,9 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
     try {
       if (item.repeatRule.step === 'day') duplicateEventWithDayDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
       else if (item.repeatRule.step === 'year') duplicateEventWithYearDelta(chartCtx, item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
-    } catch {
-      // TODO
+    } catch (err) {
+      if (err instanceof GanttError) chartCtx.diagnostics.addErr(err) // TODO add msg 'failed to create duplicates'
+      // continue
     }
 
   }

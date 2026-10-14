@@ -12,19 +12,14 @@ export class ChartDiagnosticsModal extends Modal {
   private createStatRow = (div: HTMLDivElement, label: string, value?: string | HTMLElement) => {
 
     const row = div.createDiv({cls: 'gt-stats-row'})
-    // if (value) row.createSpan({text: `${label}: ${String(value)}`})
-    // else row.createSpan({text: label})
 
     if (!value) {
       row.createSpan({text: label})
+    } else if (typeof value === 'string') {
+      row.createSpan({text: `${label}: ${String(value)}`})
     } else {
-      if (typeof value === 'string') {
-        row.createSpan({text: `${label}: ${String(value)}`})
-      } else {
-        row.createSpan({text: label})
-        row.appendChild(value)
-      }
-
+      row.createSpan({text: label})
+      row.appendChild(value)
     }
   }
 
@@ -94,8 +89,7 @@ export class ChartDiagnosticsModal extends Modal {
 
     const g = contentEl.createDiv({cls: 'gt-stats-group'})
     this.createStatRow(g, `Calendars loaded: ${diagnostics.loadedCalendars} of ${diagnostics.totalCalendars}`)
-    this.createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files in current filter`)
-    // this.createStatRow(g, `Groups`, '6/25 (5 visible)') // TODO
+    this.createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files (in folder '${this.chartCtx.settings.eventPath}')`)
   }
 
 }

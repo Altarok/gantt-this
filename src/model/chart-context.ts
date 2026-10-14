@@ -25,6 +25,10 @@ export class ChartContext {
     this.svgDrawerUtil = new SvgDrawerUtil(this)
   }
 
+  resetCaches(): void {
+    this.diagnosticsContext.resetCache()
+  }
+
   get settings(): SettingsContext {
     return this.settingsContext
   }

@@ -7,32 +7,26 @@ export type ErrorDef = {
   messageTemplate: string // z.B. Invalid day '{day}' for year '{year}'.
 }
 
-export type ErrorEntry = {
-  level: ErrorSeverity,
-  type: ErrorType,
-  message: string,
-  filepath?: string
-}
-
-export type ChartDiagnostics = {
-  totalCalendars: number
-  loadedCalendars: number
-  contextFilesCount: number
-  contextEventCount: number
-  logs: ErrorEntry[],
-  logTypes: ErrorType[]
-}
-
 export const knownErrors: Record<string, ErrorDef> = {
   eventDirEmpty: {
-    level: 'info',
+    level: 'warn',
     type: 'event',
-    messageTemplate: `No files found in event directory '{dir}'.`
+    messageTemplate: `No event files found in directory: '{dir}'`
   },
   calendarDirEmpty: {
-    level: 'info',
+    level: 'warn',
     type: 'calendar',
-    messageTemplate: `No files found in calendar directory '{dir}'.`
+    messageTemplate: `No calendar files found in directory: '{dir}'`
+  },
+  illegalChartBoundFormat: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Illegal format for chart's {bound} date: '{date}'`
+  },
+  noCalForChartBounds: {
+    level: 'warn',
+    type: 'calendar',
+    messageTemplate: `Can't parse chart's bounds. No calendar matches your chart's bounds calendar id: '{calendarID}'`
   },
   calendarNotRegistered: {
     level: 'warn',
@@ -54,6 +48,7 @@ export const knownErrors: Record<string, ErrorDef> = {
     type: 'calendar',
     messageTemplate: `Failed to parse YAML for calendar '{calendarId}'.`
   },
+
   eventDateParseFail: {
     level: 'warn',
     type: 'date',
@@ -72,13 +67,65 @@ export const knownErrors: Record<string, ErrorDef> = {
   illegalDay4Year: {
     level: 'warn',
     type: 'date',
-    messageTemplate: `Can't parse date {date}. Day {day} is out of range for year {year}.`
+    messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for year {year}.`
   },
   illegalDay4Month: {
     level: 'warn',
     type: 'date',
-    messageTemplate: `Can't parse date {date}. Day {day} is out of range for month {month}.`
+    messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for month {month}.`
+  },
+  unparseableDate: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date: '{date}'`
+  },
+  missingCalConfigForDate: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}' without calendar config.`
+  },
+  incompleteCalendar: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse date '{date}' without calendar config.`
+  },
+  positionalDateWithoutDelimiter: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse positional date '{date}' without delimiter ('{delimiter}').`
+  },
+  positionalDateWithInvalidLength: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse positional date '{date}', should have {unitLength} units.`
+  },
+  positionalDateWithInvalidSegment: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse positional date '{date}', illegal segment: '{segment}'.`
+  },
+  unknownCalendarType: {
+    level: 'error',
+    type: 'calendar',
+    messageTemplate: `Unknown calendar type: {type}`
   }
+
 } as const // = immutable
 
 export type ErrorId = keyof typeof knownErrors
+
+export type ErrorEntry = {
+  id: ErrorId
+  level: ErrorSeverity
+  type: ErrorType
+  message: string
+  filepath?: string
+}
+
+export type ChartDiagnostics = {
+  totalCalendars: number
+  loadedCalendars: number
+  contextFilesCount: number
+  contextEventCount: number
+  logs: ErrorEntry[]
+}

@@ -13,16 +13,17 @@ export function formatErrorMessage(template: string, params?: Record<string, str
  */
 export function throwGanttError(id: ErrorId,
                                 params?: Record<string, string | number>,
-                                file?: TFile): void {
+                                file?: TFile): never /* never -> method never returns normally */ {
   const errorDef = knownErrors[id]
-  if (!errorDef) throw new GanttError('error', 'Unknown error', 'unknown')
+  if (!errorDef) throw new GanttError(id, 'error', 'Unknown error', 'unknown')
 
   const finalMessage = formatErrorMessage(errorDef.messageTemplate, params)
-  throw new GanttError(errorDef.level, finalMessage, errorDef.type, file?.path)
+  throw new GanttError(id, errorDef.level, finalMessage, errorDef.type, file?.path)
 }
 
 export class GanttError extends Error {
-  constructor(readonly logLevel: ErrorSeverity,
+  constructor(readonly id: ErrorId,
+              readonly logLevel: ErrorSeverity,
               message: string,
               readonly type: ErrorType,
               readonly filepath?: string) {

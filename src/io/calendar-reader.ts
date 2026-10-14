@@ -6,11 +6,10 @@ import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {getGregorianTodayInAbsoluteDays} from '../date-calculations/dates'
 import {GregorianCalendar} from '../const/fallback-calendar'
 import {getCalendarFiles} from './io-util'
-import {throwGanttError} from '../model/gantt-error'
+import {GanttError, throwGanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
-
 
 export async function cacheKnownCalendars(chartCtx: ChartContext,
                                           rawChartInputCalendar?: string) {
@@ -70,7 +69,12 @@ async function getCalendarDefinitions(calendarIDs: string[],
   const mappedFiles: Record<string, TFile> = filterMatchingCalendarFiles(allFiles, calendarsNotAlreadyLoaded, chartCtx)
 
   for (const calendarID of Object.keys(mappedFiles)) {
-    await loadCalendar(chartCtx, calendarID, mappedFiles[calendarID])
+    const file = mappedFiles[calendarID]
+    try {
+      await loadCalendar(chartCtx, calendarID, file)
+    } catch (err) {
+      if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+    }
   }
 }
 
@@ -114,7 +118,11 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
 
     /* Cache calendar */
     chartCtx.calendarCache.set(calendarID, newCalendarConfig)
-  } catch {
+  } catch (err) {
+    if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+    /*
+     * TODO remove
+     */
     throwGanttError('yamlCalendarParseFail', {calendarID}, file)
   }
 }
