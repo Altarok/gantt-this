@@ -72,8 +72,6 @@ function createItem(chartCtx: ChartContext,
   let startRes: ParsedDate | null
   let endRes: ParsedDate | null
 
-  debugger
-
   try {
     startRes = parseEventDate(true, true, startDate, calendarConfig)
     if (!startRes) return null

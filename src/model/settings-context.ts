@@ -266,8 +266,6 @@ export class SettingsContext implements GanttChartSources {
 
     if (!calendarConfig) return chartCtx.diagnostics.addLog('noCalForChartBounds', {calendarID})
 
-    debugger
-
     if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
     if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.centerHereDate, calendarConfig, 'center here')
     if (rawChartInput.upperBoundDate) local.upperBoundDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.upperBoundDate, calendarConfig, 'upper bound')
