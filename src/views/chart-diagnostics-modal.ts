@@ -59,7 +59,6 @@ export class ChartDiagnosticsModal extends Modal {
       if (filepath) {
         li.createSpan({text: ' '})
         const link = li.createEl('a', {text: 'Open file', cls: 'gt-stats-open-file-link'})
-        link.style.marginLeft = '8px'
 
         this.plugin.registerDomEvent(link as HTMLElement, 'click', (e) => {
           e.preventDefault()

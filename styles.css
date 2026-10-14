@@ -656,6 +656,10 @@
   font-size: var(--font-ui-smaller);
 }
 
+.gt-stats-open-file-link {
+  margin-left: 8px;
+}
+
 .gt-stats-error-list {
   list-style: none;
   padding: 0;
@@ -677,7 +681,7 @@
 /* Log level variants */
 .gt-log-info {
   /* background-color: var(--background-primary); */
-  
+
   /* border-left-color: var(--text-normal); */
   color: var(--text-normal);
 }
