@@ -2,7 +2,6 @@ import {Platform} from 'obsidian'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttMobileEventManager} from './event-manager-mobile'
 import {GanttDesktopEventManager} from './event-manager-desktop'
-import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import TooltipManager from './tooltip-manager-desktop'
 import {ChartContext} from '../model/chart-context'
 
