@@ -5,6 +5,7 @@ import {TFile} from "obsidian";
 const severity: Record<ErrorSeverity, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
 
 function sortLogsBySeverity(logs: ErrorEntry[]): ErrorEntry[] {
+  // TODO ? [...logs]
   return logs.sort((a, b) => severity[a.level] - severity[b.level])
 }
 

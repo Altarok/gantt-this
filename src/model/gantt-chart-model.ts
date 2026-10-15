@@ -48,6 +48,7 @@ export class GanttChartModel {
   zoomFactor = 1
   /** Horizontal shift of chart */
   panTranslateX = 0
+  panTranslateY = 0
   /** Day diff between 2 axis ticks. Must be positive. */
   stepDays = 1
   /* Default = 400 */
@@ -117,13 +118,16 @@ export class GanttChartModel {
     return this.totalDaysSpan / this.zoomFactor
   }
 
-  setPanAndZoom(p: number, z: number) {
-    this.panTranslateX = p
+  setPanAndZoom(pX: number, pY: number, z: number) {
+    this.panTranslateX = pX
+    this.panTranslateY = pY
     this.zoomFactor = z
   }
 
   resetPanAndZoom() {
-    this.setPanAndZoom(0, 1)
+    this.panTranslateX = 0
+    this.panTranslateY = 0
+    this.zoomFactor = 1
   }
 
   setDayRange(min: number, max: number) {

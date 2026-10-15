@@ -4,6 +4,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 
 export class GanttChartView {
+  mainWrapper: HTMLDivElement
   chartContainer: HTMLDivElement
   toolbarContainer: HTMLDivElement
   minimizedToolbarContainer: HTMLDivElement
@@ -29,6 +30,8 @@ export class GanttChartView {
   /** Inside foregroundLayer: calendars */
   dynamicCalendarLayer!: SVGElement
   staticCalendarLayer!: SVGElement
+
+  readonly clipId = `gantt-clip-${Math.random().toString(36).substring(2, 9)}`
   /** Prevent overflow rectangle */
   private clipRect!: SVGElement
 
@@ -40,28 +43,28 @@ export class GanttChartView {
 
     if (chartCtx.settings.uxMoveToolbarBelowChart && chartCtx.settings.uxMakeToolbarSticky) {
       /* separate toolbar and chart, chart first */
-      const mainWrapper = container.createDiv({cls: Css.wrapper})
-      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      this.mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
     } else if (chartCtx.settings.uxMoveToolbarBelowChart) {
       /* join toolbar and chart, chart first  */
-      const mainWrapper = container.createDiv({cls: Css.wrapper})
-      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
-      this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.minimized})
+      this.mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
+      this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
     } else if (chartCtx.settings.uxMakeToolbarSticky) {
       /* separate toolbar and chart, toolbar first */
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
-      const mainWrapper = container.createDiv({cls: Css.wrapper})
-      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      this.mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
     } else {
       /* join toolbar and chart, toolbar first */
-      const mainWrapper = container.createDiv({cls: Css.wrapper})
-      this.toolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = mainWrapper.createDiv({cls: Css.toolbar.minimized})
-      this.chartContainer = mainWrapper.createDiv({cls: Css.chartContainer})
+      this.mainWrapper = container.createDiv({cls: Css.wrapper})
+      this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
+      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
     this.initiateChartContainerSubContainers()
@@ -96,12 +99,14 @@ export class GanttChartView {
     /*
      * TODO create a chart specific ID (e.g. gantt-clip-UUID)
      */
-    const clipPath = defs.createSvg('clipPath', {attr: {id: 'gantt-clip'}})
+    // const clipPath = defs.createSvg('clipPath', {attr: {id: 'gantt-clip'}})
+    const clipPath = defs.createSvg('clipPath', {attr: {id: this.clipId}})
     const eventsAreaHeight = this.viewModel.eventsAreaHeight
     this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
     this.gridLayer = this.foregroundLayer.createSvg('g')
-    this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': 'url(#gantt-clip)'}})
+    // this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': 'url(#gantt-clip)'}})
+    this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': `url(#${this.clipId})`}})
 
     this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
     this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
@@ -215,6 +220,10 @@ export class GanttChartView {
       )
     }
   }
+
+  // setPanAndZoom(x: number, y: number) {
+  //   this.svg.setAttribute('transform', `translate(${x}, ${y})`)
+  // }
 
   setWidth(width: number) {
     this.clipRect.setAttribute('width', width.toString())

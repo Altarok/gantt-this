@@ -137,11 +137,13 @@ export class GanttRenderEngine {
 
   initEventListener(): void {
     if (this.eventManager) this.eventManager.destroy()
-    this.eventManager = createGanttEventManager(this.chartCtx, this, this.svgDrawerUtil)
+    this.eventManager = createGanttEventManager(this.chartCtx, this)
     this.svgDrawerUtil.setEventManager(this.eventManager)
   }
 
   handlePanOrZoom() {
+    // this.view.foregroundLayer.setAttribute('transform', `translate(${this.viewModel.panTranslateX}, 0)`)
+    // this.view.setPanAndZoom(0, this.viewModel.panTranslateY)
     this.initLayout() /* -> Re-calculate repeating events */
     this.handleResize(false)
   }
@@ -447,7 +449,8 @@ export class GanttRenderEngine {
     this.updateWhichDateElementsToHide()
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
-    this.viewModel.setPanAndZoom(centerX - (centerX - this.viewModel.panTranslateX) * (newScale / oldScale), newScale)
+    const pX = centerX - (centerX - this.viewModel.panTranslateX) * (newScale / oldScale);
+    this.viewModel.setPanAndZoom(pX, 0, newScale)
     this.handlePanOrZoom()
   }
 
@@ -473,11 +476,15 @@ export class GanttRenderEngine {
     this.handlePanOrZoom()
   }
 
-  panAbsolute(value: number) {
-    // console.log('panAbsolute > value', value)
+  panAbsoluteX(value: number) {
     this.viewModel.panTranslateX = value
     this.handlePanOrZoom()
   }
+
+  // panAbsoluteY(value: number) {
+  //   this.viewModel.panTranslateY = value
+  //   this.handlePanOrZoom()
+  // }
 
   updateViewAfterToggle() {
     this.initLayout()

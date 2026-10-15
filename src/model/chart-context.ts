@@ -80,11 +80,11 @@ export class ChartContext {
     return this.plugin.calendarConfigsCache
   }
 
-  parseRawChartInput() {
+  parseRawChartInput(): void {
     this.settingsContext.parseRawChartInput(this)
   }
 
-  addErr(error: GanttError) {
+  addErr(error: GanttError): void {
     this.diagnosticsContext.addErr(error)
   }
 

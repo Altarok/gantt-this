@@ -9,7 +9,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
 
   private startX = 0
+  private startY = 0
   private startTranslateX = 0
+  private startTranslateY = 0
   private rafId: number | null = null
   private svg: SVGElement | null = null
   private activeWindow: Window | null = null
@@ -88,13 +90,21 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (this.isDragging) {
 
       const deltaX = e.clientX - this.startX
+      const deltaY = e.clientY - this.startY
       const targetTranslateX = this.startTranslateX + deltaX
+      // const targetTranslateY = this.startTranslateY + deltaY
+      const targetScrollY = this.startTranslateY - deltaY
+
+      // console.log('targetScrollY', targetScrollY)
 
       // console.log('handleWindowMouseMove > targetTranslateX', targetTranslateX)
       // console.info(e.clientX, deltaX)
 
       this.rafId ??= window.requestAnimationFrame(() => {
-        this.engine.panAbsolute(targetTranslateX)
+        if (this.engine.view.container.parentElement)
+          this.engine.view.container.parentElement.scrollTop = targetScrollY
+        this.engine.panAbsoluteX(targetTranslateX)
+        // this.engine.panAbsoluteY(targetTranslateY)
         this.rafId = null
       })
     }
@@ -109,7 +119,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     this.isDragging = true
     this.startX = e.clientX
+    this.startY = e.clientY
     this.startTranslateX = this.viewModel.panTranslateX
+    this.startTranslateY = this.viewModel.panTranslateY
   }
 
   private isModifierActive(e: MouseEvent, key: ControlKey): boolean {
@@ -129,14 +141,14 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     if (this.isModifierActive(e, this.settings.uxZoomButton)) {
       e.preventDefault()
-      this.zoom(e)
+      this.mouseWheelZoom(e)
     } else if (this.isModifierActive(e, this.settings.uxPanButton)) {
       e.preventDefault()
-      this.pan(e)
+      this.mouseWheelPan(e)
     }
   }
 
-  private pan(e: WheelEvent) {
+  private mouseWheelPan(e: WheelEvent) {
     const deltaX = -Math.floor(e.deltaY / 2)
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
@@ -146,7 +158,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     })
   }
 
-  private zoom(e: WheelEvent) {
+  private mouseWheelZoom(e: WheelEvent) {
     if (!this.svg) return
 
     // Determine direction: positive factor zooms in (> 1), negative factor zooms out (< 1)
@@ -169,7 +181,6 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const link = this.engine.rawData.find(d => d.id === id)?.link
       if (link) void this.chartCtx.workspace.openLinkText(link, '', true)
     }
-
   }
 
   private handleWindowMouseUp() {

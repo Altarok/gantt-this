@@ -18,14 +18,13 @@ export type GanttEventManager = {
 const isMobile = Platform.isMobile
 
 export function createGanttEventManager(chartCtx: ChartContext,
-                                        renderEngine: GanttRenderEngine,
-                                        svgDrawerUtil: SvgDrawerUtil): GanttEventManager {
+                                        renderEngine: GanttRenderEngine): GanttEventManager {
 
   // console.log('Creating event manager. Is mobile?', isMobile)
   if (isMobile) {
     return new GanttMobileEventManager(chartCtx, renderEngine)
   } else {
-    const tooltipManager = new TooltipManager(chartCtx, renderEngine, svgDrawerUtil)
+    const tooltipManager = new TooltipManager(chartCtx, renderEngine)
     return new GanttDesktopEventManager(chartCtx, renderEngine, tooltipManager)
   }
 }

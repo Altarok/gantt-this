@@ -25,8 +25,7 @@ export default class TooltipManager implements HoverParent {
   private connectorDrawer = new GanttConnectorDrawer()
 
   constructor(private readonly chartCtx: ChartContext,
-              private readonly engine: GanttRenderEngine,
-              private readonly svgDrawerUtil: SvgDrawerUtil) {
+              private readonly engine: GanttRenderEngine) {
     this.searchForRelatedEventsOnHover = chartCtx.settings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.uxConnectRelatedEvents
 
@@ -397,6 +396,10 @@ export default class TooltipManager implements HoverParent {
       highlightElement.appendChild(shape)
     }
 
+  }
+
+  private get svgDrawerUtil(){
+    return this.chartCtx.svgDrawerUtil
   }
 
   private calculatePolygonPointsForOverlay(x: number, y: number, symbol: 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'octagon' | 'star') {

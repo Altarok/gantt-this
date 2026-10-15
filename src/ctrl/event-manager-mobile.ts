@@ -7,7 +7,9 @@ export class GanttMobileEventManager implements GanttEventManager {
   public isDragging = false
 
   private startX = 0
+  private startY = 0
   private startTranslateX = 0
+  private startTranslateY = 0
   private pinchDistance: number | null = null
   private rafId: number | null = null
   private svg: SVGElement | null = null
@@ -75,7 +77,7 @@ export class GanttMobileEventManager implements GanttEventManager {
       const deltaX = e.touches[0]!.clientX - this.startX
       const targetTranslateX = this.startTranslateX + deltaX
       this.rafId ??= window.requestAnimationFrame(() => {
-        this.engine.panAbsolute(targetTranslateX)
+        this.engine.panAbsoluteX(targetTranslateX)
         this.rafId = null
       })
     } else if (e.touches.length === 2 && this.pinchDistance) {
@@ -93,7 +95,9 @@ export class GanttMobileEventManager implements GanttEventManager {
       this.isDragging = true
       this.isPinching = false
       this.startX = touch.clientX
+      this.startY = touch.clientY
       this.startTranslateX = this.viewModel.panTranslateX
+      this.startTranslateY = this.viewModel.panTranslateY
       this.touchStartPos = {x: touch.clientX, y: touch.clientY}
     } else if (e.touches.length === 2) {
       this.isDragging = false
