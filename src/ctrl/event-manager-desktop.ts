@@ -6,12 +6,6 @@ import {ChartContext} from '../model/chart-context'
 
 export class GanttDesktopEventManager extends GanttEventManagerBase {
 
-  /**
-   * Desktop only. Pointer to HTML element providing us with the scroll bar.
-   * Only necessary when window is popped out.
-   */
-  private readonly scrollTopElement: HTMLElement | null = null
-
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
   private readonly boundWindowMouseUp: (e: MouseEvent) => void
@@ -25,12 +19,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
               private readonly tooltipManager: TooltipManager) {
     super(chartCtx, engine)
 
-    const isPopout = window.document.body.classList.contains('is-popout-window')
-    if (isPopout)
-      this.scrollTopElement = this.engine.view.chartContainer
-    else
-      this.scrollTopElement = this.engine.view.container.parentElement
-
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -43,6 +31,9 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       this.attachSvgListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
+  protected getScrollableContainer(): HTMLElement | null {
+    return  this.engine.view.getScrollableContainer()
+  }
 
   public attachSvgListeners(svgEl: HTMLElement,
                             activeWindow: Window) {
@@ -85,8 +76,8 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       const targetTranslateX = this.startTranslateX + deltaX
 
       this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
-        if (this.scrollTopElement) {
-          this.scrollTopElement.scrollTop = this.startDragScrollTop - deltaY
+        if (this.scrollableContainer) {
+          this.scrollableContainer.scrollTop = this.startDragScrollTop - deltaY
         }
 
         this.engine.panAbsoluteX(targetTranslateX)
@@ -96,18 +87,14 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   private handleSvgMouseDown(e: MouseEvent) {
-    // if (e) this.logTouchEvent('handleSvgMouseDown', e)
-    // console.log(`handleSvgMouseDown`, e.target)
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
-
-    // console.log(e.clientX)
 
     this.isDragging = true
     this.startX = e.clientX
 
-    if (this.scrollTopElement) {
+    if (this.scrollableContainer) {
       this.startDragMouseY = e.clientY
-      this.startDragScrollTop = this.scrollTopElement.scrollTop
+      this.startDragScrollTop = this.scrollableContainer.scrollTop
     }
 
 

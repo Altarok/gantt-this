@@ -26,6 +26,10 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       this.attachSvgListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
+  protected getScrollableContainer(): HTMLElement | null {
+    return this.engine.view.container.parentElement
+  }
+
   public attachSvgListeners(svgEl: HTMLElement,
                             activeWindow: Window) {
 

@@ -35,13 +35,21 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected readonly viewModel: GanttChartModel
   protected svg: SVGElement | null
   protected activeWindow: Window | null
+  /**
+   * Pointer to HTML element owning the scroll bar.
+   * When window is popped out, this differs from the normale container.
+   */
+  protected readonly scrollableContainer: HTMLElement | null
 
   protected constructor(protected readonly chartCtx: ChartContext,
                         protected readonly engine: GanttRenderEngine) {
     this.viewModel = engine.viewModel
     this.svg = this.engine.view.svg
     this.activeWindow = this.svg.ownerDocument.defaultView ?? window
+    this.scrollableContainer = this.getScrollableContainer()
   }
+
+  protected abstract getScrollableContainer(): HTMLElement | null
 
   /** Attaches or re-binds SVG event listeners */
   protected abstract attachSvgListeners(svg: HTMLElement,
