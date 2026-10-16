@@ -49,5 +49,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   /** Unbinds all window and SVG listeners and cleans up pending animation frames */
   abstract destroy(): void
 
-
+  protected get settings() {
+    return this.chartCtx.settings
+  }
 }

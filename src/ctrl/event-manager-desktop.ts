@@ -207,13 +207,5 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private handleSvgMouseMove(): void {
     /* needs to exist for drag events */
   }
-
-  private get settings() {
-    return this.chartCtx.settings
-  }
-
-  // private get window(): Window {
-  //   return this.activeWindow ?? window
-  // }
-
+  
 }
