@@ -6,10 +6,14 @@ import {ChartContext} from '../model/chart-context'
 export class GanttMobileEventManager implements GanttEventManager {
   public isDragging = false
 
+  /** Absolute X-coordinate of mouse pointer at start of drag */
   private startX = 0
-  private startY = 0
   private startTranslateX = 0
-  private startTranslateY = 0
+  /** Absolute Y-coordinate of mouse pointer at start of drag */
+  private startDragMouseY = 0
+  /** Absolute Scroll-bar position at start of drag */
+  private startDragScrollTop = 0
+
   private pinchDistance: number | null = null
   private rafId: number | null = null
   private svg: SVGElement | null = null
@@ -75,8 +79,14 @@ export class GanttMobileEventManager implements GanttEventManager {
       e.stopPropagation()
 
       const deltaX = e.touches[0]!.clientX - this.startX
+      const deltaY = e.touches[0]!.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
+      
       this.rafId ??= window.requestAnimationFrame(() => {
+        if (this.engine.view.container.parentElement) {
+          this.engine.view.container.parentElement.scrollTop = this.startDragScrollTop - deltaY
+        }
+
         this.engine.panAbsoluteX(targetTranslateX)
         this.rafId = null
       })
@@ -95,9 +105,15 @@ export class GanttMobileEventManager implements GanttEventManager {
       this.isDragging = true
       this.isPinching = false
       this.startX = touch.clientX
-      this.startY = touch.clientY
+      // this.startY = touch.clientY
       this.startTranslateX = this.viewModel.panTranslateX
-      this.startTranslateY = this.viewModel.panTranslateY
+      // this.startTranslateY = this.viewModel.panTranslateY
+
+      if (this.engine.view.container.parentElement) {
+        this.startDragMouseY = touch.clientY
+        this.startDragScrollTop = this.engine.view.container.parentElement.scrollTop
+      }
+
       this.touchStartPos = {x: touch.clientX, y: touch.clientY}
     } else if (e.touches.length === 2) {
       this.isDragging = false

@@ -8,10 +8,14 @@ import {ChartContext} from '../model/chart-context'
 export class GanttDesktopEventManager implements GanttEventManager {
   public isDragging = false
 
+  /** Absolute X-coordinate of mouse pointer at start of drag */
   private startX = 0
-  private startY = 0
   private startTranslateX = 0
-  private startTranslateY = 0
+  /** Absolute Y-coordinate of mouse pointer at start of drag */
+  private startDragMouseY = 0
+  /** Absolute Scroll-bar position at start of drag */
+  private startDragScrollTop = 0
+
   private rafId: number | null = null
   private svg: SVGElement | null = null
   private activeWindow: Window | null = null
@@ -90,21 +94,15 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (this.isDragging) {
 
       const deltaX = e.clientX - this.startX
-      const deltaY = e.clientY - this.startY
+      const deltaY = e.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
-      // const targetTranslateY = this.startTranslateY + deltaY
-      const targetScrollY = this.startTranslateY - deltaY
-
-      // console.log('targetScrollY', targetScrollY)
-
-      // console.log('handleWindowMouseMove > targetTranslateX', targetTranslateX)
-      // console.info(e.clientX, deltaX)
 
       this.rafId ??= window.requestAnimationFrame(() => {
-        if (this.engine.view.container.parentElement)
-          this.engine.view.container.parentElement.scrollTop = targetScrollY
+        if (this.engine.view.container.parentElement) {
+          this.engine.view.container.parentElement.scrollTop = this.startDragScrollTop - deltaY
+        }
+
         this.engine.panAbsoluteX(targetTranslateX)
-        // this.engine.panAbsoluteY(targetTranslateY)
         this.rafId = null
       })
     }
@@ -119,9 +117,15 @@ export class GanttDesktopEventManager implements GanttEventManager {
 
     this.isDragging = true
     this.startX = e.clientX
-    this.startY = e.clientY
+
+    if (this.engine.view.container.parentElement) {
+      this.startDragMouseY = e.clientY
+      this.startDragScrollTop = this.engine.view.container.parentElement.scrollTop
+    }
+
+
     this.startTranslateX = this.viewModel.panTranslateX
-    this.startTranslateY = this.viewModel.panTranslateY
+    // this.startTranslateY = this.viewModel.panTranslateY
   }
 
   private isModifierActive(e: MouseEvent, key: ControlKey): boolean {
@@ -188,7 +192,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     if (this.isDragging) {
       this.isDragging = false
       /*
-       * TODO Doing a final 0-diff pan re-draws event text and icons
+       * Doing a final 0-diff pan re-draws event text and icons
        * (which do not get drawn while panning)
        */
       this.engine.panDiff(0)

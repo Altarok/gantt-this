@@ -57,9 +57,7 @@ export class GanttRenderEngine {
 
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
-      // TODO merge next line
-      const defaultCalendarConfig = this.chartCtx.calendarCache.get(this.chartCtx.settings.defaultCalendar)
-      const todayDays = defaultCalendarConfig?.today ?? 0
+      const todayDays = this.chartCtx.calendarCache.get(this.chartCtx.settings.defaultCalendar)?.today ?? 0
       this.viewModel.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
@@ -521,16 +519,15 @@ export class GanttRenderEngine {
 
       if (targetRange > 0) {
         this.viewModel.zoomFactor = totalRange / targetRange
-        // Pixel position of targetMin at scale 1:
+        /* Pixel position of targetMin at scale 1: */
         const minXAtScale1 = ((targetMin - this.viewModel.minDays) / totalRange) * renderWidth
-        // Shift targetMin to pixel X = 0 under the new zoomScale:
+        /* Shift targetMin to pixel X = 0 under the new zoomScale: */
         this.viewModel.panTranslateX = -(minXAtScale1 * this.viewModel.zoomFactor)
-        // console.log('transitionToPredefinedBounds > panTranslateX', this.viewModel.panTranslateX)
         return
       }
     }
 
-    // Case B: Single center point specified
+    /* Case B: Single center point specified */
     if (center !== undefined) {
       const currentScale = this.viewModel.zoomFactor > 0 ? this.viewModel.zoomFactor : 1
       this.viewModel.zoomFactor = currentScale
@@ -538,12 +535,12 @@ export class GanttRenderEngine {
       const centerXAtScale1 = ((center - this.viewModel.minDays) / totalRange) * renderWidth
       const centerXZoomed = centerXAtScale1 * currentScale
 
-      // Center the target day in the middle of renderWidth:
+      /* Center the target day in the middle of renderWidth: */
       this.viewModel.panTranslateX = (renderWidth / 2) - centerXZoomed
       return
     }
 
-    // Default: Full view reset
+    /* Default: Full view reset */
     this.viewModel.resetPanAndZoom()
   }
 
