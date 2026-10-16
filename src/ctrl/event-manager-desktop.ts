@@ -200,6 +200,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   private stopAnimation() {
+    // TODO remove checks:  if (this.activeWindow
     if (this.activeWindow && this.rafId) this.activeWindow.cancelAnimationFrame(this.rafId)
     this.rafId = null
   }
@@ -207,5 +208,5 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private handleSvgMouseMove(): void {
     /* needs to exist for drag events */
   }
-  
+
 }
