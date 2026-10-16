@@ -10,6 +10,8 @@ examples/
 archive/
 main.js
 data.json
+data-Backup.json
+data-HG.json
 # dev junk
 .env
 *.log
