@@ -7,7 +7,8 @@ import {
   isTimestamp,
   NO_GROUP
 } from '../const/types'
-import {createGanttEventManager, GanttEventManager} from '../ctrl/event-manager'
+import {GanttEventManager} from '../ctrl/event-manager'
+import {createGanttEventManager} from '../ctrl/event-manager-creator'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {drawMoons} from './moon-drawer'

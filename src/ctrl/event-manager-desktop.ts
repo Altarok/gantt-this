@@ -1,12 +1,11 @@
 import {ControlKey} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
-import {GanttEventManager} from './event-manager'
+import {GanttEventManagerBase} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 
-export class GanttDesktopEventManager implements GanttEventManager {
-  public isDragging = false
+export class GanttDesktopEventManager extends GanttEventManagerBase {
 
   /** Absolute X-coordinate of mouse pointer at start of drag */
   private startX = 0
@@ -16,9 +15,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
   /** Absolute Scroll-bar position at start of drag */
   private startDragScrollTop = 0
 
-  private rafId: number | null = null
-  private svg: SVGElement | null = null
   private activeWindow: Window | null = null
+  private scrollTopElement: HTMLElement | null = null
+
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -33,7 +32,18 @@ export class GanttDesktopEventManager implements GanttEventManager {
   constructor(private readonly chartCtx: ChartContext,
               private readonly engine: GanttRenderEngine,
               private readonly tooltipManager: TooltipManager) {
+    super()
     this.viewModel = engine.viewModel
+
+    this.svg = this.engine.view.svg
+    this.activeWindow = this.svg.ownerDocument.defaultView
+
+    const isPopout = this.window.document.body.classList.contains('is-popout-window')
+    if (isPopout)
+      this.scrollTopElement = this.engine.view.chartContainer
+    else
+      this.scrollTopElement = this.engine.view.container.parentElement
+
 
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
@@ -43,31 +53,29 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.boundSvgMouseMove = this.handleSvgMouseMove.bind(this)
     this.boundSvgClick = this.handleSvgClick.bind(this)
 
-    this.initGlobalListeners()
     this.attachSvgListeners()
   }
 
-  private initGlobalListeners() {
-    window.addEventListener('mousemove', this.boundWindowMouseMove)
-    window.addEventListener('mouseup', this.boundWindowMouseUp)
-  }
 
   public attachSvgListeners() {
+    if (!this.svg) return
 
     this.detachListeners()
 
     this.svg = this.engine.view.svg
     if (!this.svg) return
+    this.activeWindow = this.svg.ownerDocument.defaultView
 
-    this.activeWindow = this.svg.ownerDocument.defaultView ?? window
     const plugin = this.chartCtx.plugin
 
-    plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
-    plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(this.activeWindow, 'blur', () => this.tooltipManager.hideTooltip('blur'))
+    /* Placed on window for events to be able to end outside the chart */
+    plugin.registerDomEvent(this.window, 'mousemove', this.boundWindowMouseMove)
+    plugin.registerDomEvent(this.window, 'mouseup', this.boundWindowMouseUp)
+    plugin.registerDomEvent(this.window, 'blur', () => this.tooltipManager.hideTooltip('blur'))
 
     const svgEl = this.svg as unknown as HTMLElement
 
+    /* Placed on chart for events to start inside the chart */
     plugin.registerDomEvent(svgEl, 'mousedown', this.boundSvgMouseDown)
     plugin.registerDomEvent(svgEl, 'wheel', this.boundSvgWheel, {passive: false})
     plugin.registerDomEvent(svgEl, 'mousemove', this.boundSvgMouseMove)
@@ -97,9 +105,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
       const deltaY = e.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
 
-      this.rafId ??= window.requestAnimationFrame(() => {
-        if (this.engine.view.container.parentElement) {
-          this.engine.view.container.parentElement.scrollTop = this.startDragScrollTop - deltaY
+      this.rafId ??= this.window.requestAnimationFrame(() => {
+        if (this.scrollTopElement) {
+          this.scrollTopElement.scrollTop = this.startDragScrollTop - deltaY
         }
 
         this.engine.panAbsoluteX(targetTranslateX)
@@ -118,9 +126,9 @@ export class GanttDesktopEventManager implements GanttEventManager {
     this.isDragging = true
     this.startX = e.clientX
 
-    if (this.engine.view.container.parentElement) {
+    if (this.scrollTopElement) {
       this.startDragMouseY = e.clientY
-      this.startDragScrollTop = this.engine.view.container.parentElement.scrollTop
+      this.startDragScrollTop = this.scrollTopElement.scrollTop
     }
 
 
@@ -156,7 +164,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
     const deltaX = -Math.floor(e.deltaY / 2)
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
-    this.rafId ??= window.requestAnimationFrame(() => {
+    this.rafId ??= this.window.requestAnimationFrame(() => {
       this.engine.panDiff(deltaX)
       this.rafId = null
     })
@@ -207,7 +215,7 @@ export class GanttDesktopEventManager implements GanttEventManager {
   }
 
   private stopAnimation() {
-    if (this.rafId) window.cancelAnimationFrame(this.rafId)
+    if (this.rafId) this.window.cancelAnimationFrame(this.rafId)
     this.rafId = null
   }
 
@@ -219,24 +227,8 @@ export class GanttDesktopEventManager implements GanttEventManager {
     return this.chartCtx.settings
   }
 
-  // private logTouchEvent(type: string, e: MouseEvent) {
-  //   const formatTouches = (list: TouchList) =>
-  //     Array.from(list).map(t => ({
-  //       id: t.identifier,
-  //       clientX: Math.round(t.clientX),
-  //       clientY: Math.round(t.clientY),
-  //       target: (t.target as HTMLElement)?.tagName ?? 'unknown'
-  //     }))
-  //
-  //   console.log(`[Touch Debug: ${type}]`, {
-  //     cancelable: e.cancelable,
-  //     defaultPrevented: e.defaultPrevented,
-  //     // touchesCount: e.touches.length,
-  //     // targetTouchesCount: e.targetTouches.length,
-  //     // changedTouchesCount: e.changedTouches.length,
-  //     // touches: formatTouches(e.touches),
-  //     // changedTouches: formatTouches(e.changedTouches)
-  //   })
-  // }
+  private get window(): Window {
+    return this.activeWindow ?? window
+  }
 
 }

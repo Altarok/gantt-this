@@ -1,10 +1,9 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
-import {GanttEventManager} from './event-manager'
+import {GanttEventManagerBase} from './event-manager'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 
-export class GanttMobileEventManager implements GanttEventManager {
-  public isDragging = false
+export class GanttMobileEventManager extends GanttEventManagerBase {
 
   /** Absolute X-coordinate of mouse pointer at start of drag */
   private startX = 0
@@ -15,8 +14,6 @@ export class GanttMobileEventManager implements GanttEventManager {
   private startDragScrollTop = 0
 
   private pinchDistance: number | null = null
-  private rafId: number | null = null
-  private svg: SVGElement | null = null
 
   private touchStartPos: { x: number; y: number } | null = null
   private isPinching = false
@@ -32,6 +29,7 @@ export class GanttMobileEventManager implements GanttEventManager {
 
   constructor(private readonly chartCtx: ChartContext,
               private readonly engine: GanttRenderEngine) {
+    super()
     this.viewModel = engine.viewModel
 
     this.boundWindowTouchMove = this.handleTouchMove.bind(this)
@@ -81,7 +79,7 @@ export class GanttMobileEventManager implements GanttEventManager {
       const deltaX = e.touches[0]!.clientX - this.startX
       const deltaY = e.touches[0]!.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
-      
+
       this.rafId ??= window.requestAnimationFrame(() => {
         if (this.engine.view.container.parentElement) {
           this.engine.view.container.parentElement.scrollTop = this.startDragScrollTop - deltaY
@@ -176,10 +174,9 @@ export class GanttMobileEventManager implements GanttEventManager {
   }
 
   private destroyAnimation() {
-    if (this.rafId !== null) {
-      window.cancelAnimationFrame(this.rafId)
-      this.rafId = null
-    }
+    if (this.rafId !== null) window.cancelAnimationFrame(this.rafId)
+    this.rafId = null
+
   }
 
   private getTouchDistance(t1: Touch, t2: Touch): number {

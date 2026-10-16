@@ -1,3 +1,4 @@
+/* Outer-most gantt chart container */
 .gt-main-container {
   position: relative;
   background-color: var(--background-primary);
@@ -6,8 +7,14 @@
   padding: 0;
   margin: 0;
   overflow: hidden;
-  width: 100%; /* span 100% of the active note area */
+  width: 100%;
   box-sizing: border-box;
+}
+
+body.is-popout-window .gt-main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 /* ! * Fixes spacing inside the editor's live preview mode wrappers if applicable * !
@@ -25,6 +32,11 @@
   padding: 0; /* Ensures zero internal space around the chart */
   margin: 0;
   position: relative;
+}
+
+body.is-popout-window .gt-chart-container {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .gt-layers-eras {
@@ -335,6 +347,10 @@
 
 .gt-svg-canvas:active {
   cursor: grabbing;
+}
+
+body.is-popout-window svg.gt-svg-canvas {
+  min-height: 100%;
 }
 
 /* Group Headers and Capsules */

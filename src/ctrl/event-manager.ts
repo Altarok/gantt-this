@@ -1,10 +1,3 @@
-import {Platform} from 'obsidian'
-import {GanttRenderEngine} from '../view/svg-drawer'
-import {GanttMobileEventManager} from './event-manager-mobile'
-import {GanttDesktopEventManager} from './event-manager-desktop'
-import TooltipManager from './tooltip-manager-desktop'
-import {ChartContext} from '../model/chart-context'
-
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
   isDragging: boolean
@@ -14,16 +7,28 @@ export type GanttEventManager = {
   destroy(): void
 }
 
-const isMobile = Platform.isMobile
+/**
+ * Event manager for panning, zooming, scrolling and so on.
+ * Will be implemented by either a mobile version or a desktop version.
+ * Shared code to be placed in here
+ */
+export abstract class GanttEventManagerBase implements GanttEventManager {
+  /** Whether a drag or gesture interaction is currently in progress */
+  public isDragging = false
 
-export function createGanttEventManager(chartCtx: ChartContext,
-                                        renderEngine: GanttRenderEngine): GanttEventManager {
+  /** Reference to current */
+  protected rafId: number | null = null
+  protected svg: SVGElement | null = null
 
-  // console.log('Creating event manager. Is mobile?', isMobile)
-  if (isMobile) {
-    return new GanttMobileEventManager(chartCtx, renderEngine)
-  } else {
-    const tooltipManager = new TooltipManager(chartCtx, renderEngine)
-    return new GanttDesktopEventManager(chartCtx, renderEngine, tooltipManager)
+  constructor() {
+    // do sth
   }
+
+  /** Attaches or re-binds SVG event listeners */
+  abstract attachSvgListeners(): void
+
+  /** Unbinds all window and SVG listeners and cleans up pending animation frames */
+  abstract destroy(): void
+
+
 }
