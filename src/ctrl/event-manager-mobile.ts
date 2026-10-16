@@ -1,23 +1,12 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManagerBase} from './event-manager'
-import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 
 export class GanttMobileEventManager extends GanttEventManagerBase {
 
-  /** Absolute X-coordinate of mouse pointer at start of drag */
-  private startX = 0
-  private startTranslateX = 0
-  /** Absolute Y-coordinate of mouse pointer at start of drag */
-  private startDragMouseY = 0
-  /** Absolute Scroll-bar position at start of drag */
-  private startDragScrollTop = 0
-
-  private pinchDistance: number | null = null
-
-  private touchStartPos: { x: number; y: number } | null = null
   private isPinching = false
-  private activeWindow: Window | null = null
+  private pinchDistance: number | null = null
+  private touchStartPos: { x: number; y: number } | null = null
 
   /* Bound handler references for clean removal */
   private readonly boundWindowTouchMove: (e: TouchEvent) => void
@@ -25,12 +14,8 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   private readonly boundSvgTouchStart: (e: TouchEvent) => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  private readonly viewModel: GanttChartModel
-
-  constructor(private readonly chartCtx: ChartContext,
-              private readonly engine: GanttRenderEngine) {
-    super()
-    this.viewModel = engine.viewModel
+  constructor(chartCtx: ChartContext, engine: GanttRenderEngine) {
+    super(chartCtx, engine)
 
     this.boundWindowTouchMove = this.handleTouchMove.bind(this)
     this.boundWindowTouchEnd = this.handleTouchEnd.bind(this)
@@ -43,13 +28,13 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   public attachSvgListeners() {
     this.detachListeners()
 
-    this.svg = this.engine.view.svg
+    // this.svg = this.engine.view.svg
     if (!this.svg) return
 
-    this.activeWindow = this.svg.ownerDocument.defaultView ?? window
-    this.activeWindow.addEventListener('touchmove', this.boundWindowTouchMove, {passive: false})
-    this.activeWindow.addEventListener('touchend', this.boundWindowTouchEnd)
-    this.activeWindow.addEventListener('touchcancel', this.boundWindowTouchEnd)
+    // this.activeWindow = this.svg.ownerDocument.defaultView ?? window
+    this.activeWindow?.addEventListener('touchmove', this.boundWindowTouchMove, {passive: false})
+    this.activeWindow?.addEventListener('touchend', this.boundWindowTouchEnd)
+    this.activeWindow?.addEventListener('touchcancel', this.boundWindowTouchEnd)
 
     this.svg.addEventListener('touchstart', this.boundSvgTouchStart, {passive: false})
     this.svg.addEventListener('click', this.boundSvgClick)
@@ -60,13 +45,13 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       this.activeWindow.removeEventListener('touchmove', this.boundWindowTouchMove)
       this.activeWindow.removeEventListener('touchend', this.boundWindowTouchEnd)
       this.activeWindow.removeEventListener('touchcancel', this.boundWindowTouchEnd)
-      this.activeWindow = null
+      // this.activeWindow = null
     }
 
     if (this.svg) {
       this.svg.removeEventListener('touchstart', this.boundSvgTouchStart)
       this.svg.removeEventListener('click', this.boundSvgClick)
-      this.svg = null
+      // this.svg = null
     }
   }
 

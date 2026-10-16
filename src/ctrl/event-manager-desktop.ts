@@ -2,22 +2,15 @@ import {ControlKey} from '../const/types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManagerBase} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'
-import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 
 export class GanttDesktopEventManager extends GanttEventManagerBase {
 
-  /** Absolute X-coordinate of mouse pointer at start of drag */
-  private startX = 0
-  private startTranslateX = 0
-  /** Absolute Y-coordinate of mouse pointer at start of drag */
-  private startDragMouseY = 0
-  /** Absolute Scroll-bar position at start of drag */
-  private startDragScrollTop = 0
-
-  private activeWindow: Window | null = null
-  private scrollTopElement: HTMLElement | null = null
-
+  /**
+   * Desktop only. Pointer to HTML element providing us with the scroll bar.
+   * Only necessary when window is popped out.
+   */
+  private readonly scrollTopElement: HTMLElement | null = null
 
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
@@ -27,18 +20,12 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private readonly boundSvgMouseMove: () => void
   private readonly boundSvgClick: (e: MouseEvent) => void
 
-  viewModel: GanttChartModel
 
-  constructor(private readonly chartCtx: ChartContext,
-              private readonly engine: GanttRenderEngine,
+  constructor(chartCtx: ChartContext, engine: GanttRenderEngine,
               private readonly tooltipManager: TooltipManager) {
-    super()
-    this.viewModel = engine.viewModel
+    super(chartCtx, engine)
 
-    this.svg = this.engine.view.svg
-    this.activeWindow = this.svg.ownerDocument.defaultView
-
-    const isPopout = this.window.document.body.classList.contains('is-popout-window')
+    const isPopout = window.document.body.classList.contains('is-popout-window')
     if (isPopout)
       this.scrollTopElement = this.engine.view.chartContainer
     else
@@ -62,16 +49,14 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
 
     this.detachListeners()
 
-    this.svg = this.engine.view.svg
-    if (!this.svg) return
-    this.activeWindow = this.svg.ownerDocument.defaultView
-
     const plugin = this.chartCtx.plugin
 
     /* Placed on window for events to be able to end outside the chart */
-    plugin.registerDomEvent(this.window, 'mousemove', this.boundWindowMouseMove)
-    plugin.registerDomEvent(this.window, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(this.window, 'blur', () => this.tooltipManager.hideTooltip('blur'))
+    if (this.activeWindow) {
+      plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
+      plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
+      plugin.registerDomEvent(this.activeWindow, 'blur', () => this.tooltipManager.hideTooltip('blur'))
+    }
 
     const svgEl = this.svg as unknown as HTMLElement
 
@@ -86,7 +71,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     if (this.activeWindow) {
       this.activeWindow.removeEventListener('mousemove', this.boundWindowMouseMove)
       this.activeWindow.removeEventListener('mouseup', this.boundWindowMouseUp)
-      this.activeWindow = null
+      // this.activeWindow = null
     }
 
     if (this.svg) {
@@ -94,7 +79,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       this.svg.removeEventListener('wheel', this.boundSvgWheel)
       this.svg.removeEventListener('mousemove', this.boundSvgMouseMove)
       this.svg.removeEventListener('click', this.boundSvgClick)
-      this.svg = null
+      // this.svg = null
     }
   }
 
@@ -105,7 +90,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       const deltaY = e.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
 
-      this.rafId ??= this.window.requestAnimationFrame(() => {
+      if (this.activeWindow) this.rafId ??= this.activeWindow.requestAnimationFrame(() => {
         if (this.scrollTopElement) {
           this.scrollTopElement.scrollTop = this.startDragScrollTop - deltaY
         }
@@ -164,7 +149,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     const deltaX = -Math.floor(e.deltaY / 2)
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
-    this.rafId ??= this.window.requestAnimationFrame(() => {
+    if (this.activeWindow) this.rafId ??= this.activeWindow.requestAnimationFrame(() => {
       this.engine.panDiff(deltaX)
       this.rafId = null
     })
@@ -215,7 +200,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   private stopAnimation() {
-    if (this.rafId) this.window.cancelAnimationFrame(this.rafId)
+    if (this.activeWindow && this.rafId) this.activeWindow.cancelAnimationFrame(this.rafId)
     this.rafId = null
   }
 
@@ -227,8 +212,8 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     return this.chartCtx.settings
   }
 
-  private get window(): Window {
-    return this.activeWindow ?? window
-  }
+  // private get window(): Window {
+  //   return this.activeWindow ?? window
+  // }
 
 }
