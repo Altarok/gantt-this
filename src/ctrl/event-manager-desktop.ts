@@ -31,7 +31,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     else
       this.scrollTopElement = this.engine.view.container.parentElement
 
-
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
@@ -40,25 +39,20 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     this.boundSvgMouseMove = this.handleSvgMouseMove.bind(this)
     this.boundSvgClick = this.handleSvgClick.bind(this)
 
-    this.attachSvgListeners()
+    if (this.svg && this.activeWindow)
+      this.attachSvgListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
 
-  public attachSvgListeners() {
-    if (!this.svg) return
-
-    this.detachListeners()
+  public attachSvgListeners(svgEl: HTMLElement,
+                            activeWindow: Window) {
 
     const plugin = this.chartCtx.plugin
 
     /* Placed on window for events to be able to end outside the chart */
-    if (this.activeWindow) {
-      plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
-      plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
-      plugin.registerDomEvent(this.activeWindow, 'blur', () => this.tooltipManager.hideTooltip('blur'))
-    }
-
-    const svgEl = this.svg as unknown as HTMLElement
+    plugin.registerDomEvent(activeWindow, 'mousemove', this.boundWindowMouseMove)
+    plugin.registerDomEvent(activeWindow, 'mouseup', this.boundWindowMouseUp)
+    plugin.registerDomEvent(activeWindow, 'blur', () => this.tooltipManager.hideTooltip('blur'))
 
     /* Placed on chart for events to start inside the chart */
     plugin.registerDomEvent(svgEl, 'mousedown', this.boundSvgMouseDown)
@@ -67,11 +61,11 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
   }
 
-  private detachListeners() {
+  detachListeners() {
     if (this.activeWindow) {
       this.activeWindow.removeEventListener('mousemove', this.boundWindowMouseMove)
       this.activeWindow.removeEventListener('mouseup', this.boundWindowMouseUp)
-      // this.activeWindow = null
+      this.activeWindow = null
     }
 
     if (this.svg) {
@@ -79,7 +73,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       this.svg.removeEventListener('wheel', this.boundSvgWheel)
       this.svg.removeEventListener('mousemove', this.boundSvgMouseMove)
       this.svg.removeEventListener('click', this.boundSvgClick)
-      // this.svg = null
+      this.svg = null
     }
   }
 
@@ -90,13 +84,13 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       const deltaY = e.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
 
-      if (this.activeWindow) this.rafId ??= this.activeWindow.requestAnimationFrame(() => {
+      this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
         if (this.scrollTopElement) {
           this.scrollTopElement.scrollTop = this.startDragScrollTop - deltaY
         }
 
         this.engine.panAbsoluteX(targetTranslateX)
-        this.rafId = null
+        this.rafId = undefined
       })
     }
   }
@@ -149,9 +143,9 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     const deltaX = -Math.floor(e.deltaY / 2)
 
     // Pan horizontally (and vertically if your timeline pans Y-axis too)
-    if (this.activeWindow) this.rafId ??= this.activeWindow.requestAnimationFrame(() => {
+    this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
       this.engine.panDiff(deltaX)
-      this.rafId = null
+      this.rafId = undefined
     })
   }
 
@@ -190,19 +184,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
        */
       this.engine.panDiff(0)
     }
-    this.stopAnimation()
-  }
-
-  /** Fully unhook and release all window and SVG listeners to prevent leaks */
-  public destroy() {
-    this.stopAnimation()
-    this.detachListeners()
-  }
-
-  private stopAnimation() {
-    // TODO remove checks:  if (this.activeWindow
-    if (this.activeWindow && this.rafId) this.activeWindow.cancelAnimationFrame(this.rafId)
-    this.rafId = null
+    this.destroyAnimation()
   }
 
   private handleSvgMouseMove(): void {

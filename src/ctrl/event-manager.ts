@@ -6,7 +6,7 @@ export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
   isDragging: boolean
   /** Attaches or re-binds SVG event listeners */
-  attachSvgListeners(): void
+  // attachSvgListeners(): void
   /** Unbinds all window and SVG listeners and cleans up pending animation frames */
   destroy(): void
 }
@@ -30,26 +30,41 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected startDragScrollTop = 0
 
   /** Reference to current */
-  protected rafId: number | null = null
+  protected rafId: number | undefined = undefined
 
   protected readonly viewModel: GanttChartModel
-  protected svg: SVGElement
-  protected activeWindow: Window
+  protected svg: SVGElement | null
+  protected activeWindow: Window | null
 
   protected constructor(protected readonly chartCtx: ChartContext,
                         protected readonly engine: GanttRenderEngine) {
     this.viewModel = engine.viewModel
     this.svg = this.engine.view.svg
-    this.activeWindow = this.svg?.ownerDocument.defaultView ?? window
+    this.activeWindow = this.svg.ownerDocument.defaultView ?? window
   }
 
   /** Attaches or re-binds SVG event listeners */
-  abstract attachSvgListeners(): void
+  protected abstract attachSvgListeners(svg: HTMLElement,
+                                        activeWindow: Window): void
 
-  /** Unbinds all window and SVG listeners and cleans up pending animation frames */
-  abstract destroy(): void
+  protected abstract detachListeners(): void
+
+  /**
+   * Unbinds all window and SVG listeners and cleans up pending animation frames
+   * Fully unhook and release all window and SVG listeners to prevent leaks
+   */
+  public destroy() {
+    this.destroyAnimation()
+    this.detachListeners()
+  }
 
   protected get settings() {
     return this.chartCtx.settings
   }
+
+  protected destroyAnimation(): void {
+    if (this.rafId) this.activeWindow?.cancelAnimationFrame(this.rafId)
+    this.rafId = undefined
+  }
+
 }

@@ -22,36 +22,37 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     this.boundSvgTouchStart = this.handleTouchStart.bind(this)
     this.boundSvgClick = this.handleClick.bind(this)
 
-    this.attachSvgListeners()
+    if (this.svg && this.activeWindow)
+      this.attachSvgListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
-  public attachSvgListeners() {
-    this.detachListeners()
+  public attachSvgListeners(svgEl: HTMLElement,
+                            activeWindow: Window) {
 
-    // this.svg = this.engine.view.svg
-    if (!this.svg) return
+    const plugin = this.chartCtx.plugin
 
-    // this.activeWindow = this.svg.ownerDocument.defaultView ?? window
-    this.activeWindow?.addEventListener('touchmove', this.boundWindowTouchMove, {passive: false})
-    this.activeWindow?.addEventListener('touchend', this.boundWindowTouchEnd)
-    this.activeWindow?.addEventListener('touchcancel', this.boundWindowTouchEnd)
+    /* Placed on window for events to be able to end outside the chart */
+   plugin.registerDomEvent(activeWindow,'touchmove', this.boundWindowTouchMove, {passive: false})
+   plugin.registerDomEvent(activeWindow,'touchend', this.boundWindowTouchEnd)
+   plugin.registerDomEvent(activeWindow,'touchcancel', this.boundWindowTouchEnd)
 
-    this.svg.addEventListener('touchstart', this.boundSvgTouchStart, {passive: false})
-    this.svg.addEventListener('click', this.boundSvgClick)
+    /* Placed on chart for events to start inside the chart */
+    plugin.registerDomEvent(svgEl, 'touchstart', this.boundSvgTouchStart, {passive: false})
+    plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
   }
 
-  private detachListeners() {
+  detachListeners() {
     if (this.activeWindow) {
       this.activeWindow.removeEventListener('touchmove', this.boundWindowTouchMove)
       this.activeWindow.removeEventListener('touchend', this.boundWindowTouchEnd)
       this.activeWindow.removeEventListener('touchcancel', this.boundWindowTouchEnd)
-      // this.activeWindow = null
+      this.activeWindow = null
     }
 
     if (this.svg) {
       this.svg.removeEventListener('touchstart', this.boundSvgTouchStart)
       this.svg.removeEventListener('click', this.boundSvgClick)
-      // this.svg = null
+      this.svg = null
     }
   }
 
@@ -65,13 +66,13 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       const deltaY = e.touches[0]!.clientY - this.startDragMouseY
       const targetTranslateX = this.startTranslateX + deltaX
 
-      this.rafId ??= window.requestAnimationFrame(() => {
+      this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
         if (this.engine.view.container.parentElement) {
           this.engine.view.container.parentElement.scrollTop = this.startDragScrollTop - deltaY
         }
 
         this.engine.panAbsoluteX(targetTranslateX)
-        this.rafId = null
+        this.rafId = undefined
       })
     } else if (e.touches.length === 2 && this.pinchDistance) {
       if (e.cancelable) e.preventDefault()
@@ -136,12 +137,13 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
 
     const frameFactor = currentDistance / this.pinchDistance
     this.pinchDistance = currentDistance
-    this.rafId ??= window.requestAnimationFrame(() => {
+    this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
       this.engine.zoom(frameFactor, touchMidX) /* delegate to renderer */
-      this.rafId = null
+      this.rafId = undefined
     })
   }
 
+  // TODO merge with other endInteraction()
   private handleTouchEnd(/*e: TouchEvent*/) {
     if (this.isDragging) {
       this.isDragging = false
@@ -151,17 +153,6 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     this.pinchDistance = null
     this.touchStartPos = null
     this.destroyAnimation()
-  }
-
-  public destroy() {
-    this.destroyAnimation()
-    this.detachListeners()
-  }
-
-  private destroyAnimation() {
-    if (this.rafId !== null) window.cancelAnimationFrame(this.rafId)
-    this.rafId = null
-
   }
 
   private getTouchDistance(t1: Touch, t2: Touch): number {
