@@ -156,7 +156,12 @@ export const knownErrors: Record<string, ErrorDef> = {
   missingTodayDate: {
     level: 'warn',
     type: 'calendar',
-    messageTemplate: `Calendar {id} has no today date.`
+    messageTemplate: `Can't parse {date}. Calendar {id} has no today date.`
+  },
+  invalidFormatTodayDate: {
+    level: 'info',
+    type: 'date',
+    messageTemplate: `Can't parse {date}. Invalid format.`
   }
 
 } as const // = immutable

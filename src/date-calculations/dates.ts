@@ -13,18 +13,18 @@ export function getGregorianTodayInAbsoluteDays(): number {
 
 /**
  * Calculate 'today' as absolute integer value (days since DayZero)
- * @param input starts with 'TODAY'
+ * @param date trimmed input, starts with 'TODAY'
  * @param config
  */
-export function parseDescriptiveDateToValidInput(input: string, config: CalendarConfig): string {
-  if (!config.today) throwGanttError('missingTodayDate', {id: config.id})
+export function parseDescriptiveDateToValidInput(date: string, config: CalendarConfig): string {
+  if (!config.today) throwGanttError('missingTodayDate', {date, id: config.id})
 
   let absoluteDay = config.today
 
-  if (input.length > TODAY.length) {
-    const suffix = input.slice(TODAY.length).trim()
+  if (date.trim().length > TODAY.length) {
+    const suffix = date.slice(TODAY.length).trim()
     if (TODAY_SUFFIX_PATTERN.test(suffix)) absoluteDay += Number(suffix)
-    // else TODO #errorCache new Notice(`Failed to parse descriptive date '${input}'.'`)
+    else throwGanttError('invalidFormatTodayDate', {date})
   }
 
   /* pass calculated day count into description generator */
