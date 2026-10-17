@@ -109,7 +109,7 @@ export class ToolbarView {
 
     const g4 = createGroup(this.container)
     const groupButton = createButton(g4, 'eye', 'Toggle group visibility')
-    
+
     const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
     dropdown.style.display = 'none'
     dropdown.createDiv({text: 'Toggle group visibility', cls: 'gt-group-dropdown-row'})
@@ -159,15 +159,14 @@ export class ToolbarView {
     })
   }
 
+  /**
+   * Gets called only once per chart!
+   */
   private getCurrentGroups(): GroupOrCalendarSettings[] {
-    const groupNames = this.viewModel.allGroupNames
-    const groups: GroupOrCalendarSettings[] = []
-    groupNames.forEach(g => {
-      if (this.viewModel.mappedGrpConfigs[g]) groups.push(this.viewModel.mappedGrpConfigs[g])
-    })
-    return groups
-    // return this.viewModel.activeGroupNames.map(g => this.viewModel.mappedGrpConfigs[g])
-    // .filter((g): g is GroupOrCalendarSettings => g !== undefined)
+    const groupNames = this.viewModel.allGroupNames.map(g => this.viewModel.mappedGrpConfigs[g])
+    .filter((g): g is GroupOrCalendarSettings => g !== undefined)
+    groupNames.sort((a, b) => (a.priority ?? -Infinity) - (b.priority ?? -Infinity))
+    return groupNames
   }
 
   handleToggleBarsButtonClick(): void {

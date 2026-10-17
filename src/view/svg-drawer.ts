@@ -235,8 +235,6 @@ export class GanttRenderEngine {
 
     const headerHeight = this.viewModel.getGroupHeaderHeight
 
-    // console.log('renderData > width', width)
-
     this.groups.forEach(group => {
       const groupContentHeight = (group.lanes ?? 1) * this.viewModel.eventRowHeight
       const totalGroupHeight = headerHeight + groupContentHeight
@@ -251,9 +249,8 @@ export class GanttRenderEngine {
 
         const x1 = this.getXPosition(d.startDays)
         const x2 = (d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays)
-        // const renderWidth = this.getRenderWidth(width)
 
-        // Calculate available width for timestamp text (Method 1)
+        /* Calculate available width for timestamp text (Method 1) */
         const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
         const currentIndex = currentLaneItems.indexOf(d)
         const nextItem = currentIndex !== -1 ? currentLaneItems[currentIndex + 1] : undefined
@@ -461,14 +458,12 @@ export class GanttRenderEngine {
    * @param percentage - positive number shifts view right, negative number shifts view left
    */
   panRelative(percentage: number) {
-    // console.log('panRelative > percentage', percentage)
     if (this.eventManager?.isDragging) return /* Triggered by buttons */
     this.viewModel.panTranslateX += this.currRenderWidth * percentage
     this.handlePanOrZoom()
   }
 
   panDiff(shift: number) {
-    // console.log('panDiff > shift', shift)
     this.viewModel.panTranslateX += shift
     this.handlePanOrZoom()
   }
@@ -477,11 +472,6 @@ export class GanttRenderEngine {
     this.viewModel.panTranslateX = value
     this.handlePanOrZoom()
   }
-
-  // panAbsoluteY(value: number) {
-  //   this.viewModel.panTranslateY = value
-  //   this.handlePanOrZoom()
-  // }
 
   updateViewAfterToggle() {
     this.initLayout()
@@ -503,14 +493,13 @@ export class GanttRenderEngine {
 
     const totalRange = this.viewModel.totalDaysSpan
     if (totalRange <= 0) {
-      // console.log('transitionToPredefinedBounds > resetPanAndZoom')
       this.viewModel.resetPanAndZoom()
       return
     }
 
     const renderWidth = this.currRenderWidth
 
-    // Case A: Predefined min and/or max bounds supplied
+    /* Case A: Predefined min and/or max bounds supplied */
     if (lower !== undefined || upper !== undefined) {
       const targetMin = lower ?? this.viewModel.minDays
       const targetMax = upper ?? this.viewModel.maxDays
@@ -586,13 +575,6 @@ export class GanttRenderEngine {
   }
 
   getXPosition(days: number): number {
-    // console.log('getXPosition', {
-    //   containerClientWidth: this.container.clientWidth,
-    //   renderWidth: this.getRenderWidth(width),
-    //   panTranslateX: this.viewModel.panTranslateX
-    //   // sampleX: this.getXPosition(this.viewModel.minDays, width)
-    // })
-
     if (this.viewModel.maxDays <= this.viewModel.minDays) {
       return this.viewModel.panTranslateX
     } // fail-safe
