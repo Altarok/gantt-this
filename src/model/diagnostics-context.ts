@@ -5,7 +5,6 @@ import {TFile} from "obsidian";
 const severity: Record<ErrorSeverity, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
 
 function sortLogsBySeverity(logs: ErrorEntry[]): ErrorEntry[] {
-  // TODO ? [...logs]
   return logs.sort((a, b) => severity[a.level] - severity[b.level])
 }
 
@@ -40,7 +39,7 @@ export class DiagnosticsContext implements ChartDiagnostics {
   }
 
   /*
-   *  // TODO add msg
+   * TODO add optional parameter msg
    */
   addErr(err: GanttError, file?: TFile) {
     this.add(err.id, err.logLevel, err.type, err.message, err.filepath ?? file?.path)

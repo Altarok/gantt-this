@@ -252,8 +252,8 @@ export type PluginSettings = ChartVisualSettings & GanttChartSources & {
   autoRestrictZoom: boolean
   // uxOverrideNoteScrollInCalendar: boolean
   // uxSwitchZoomAndPan: boolean
-  uxPanButton: ControlKey // TODO #v2: keyboard key! not button
-  uxZoomButton: ControlKey // TODO #v2: keyboard key! not button
+  uxPanButton: ControlKey // WNM-#v2 naming: keyboard key! not button
+  uxZoomButton: ControlKey // WNM-#v2 naming: keyboard key! not button
   showPanAndZoomButtonsInToolbar: boolean
   // customTooltipButton: OptionalControlKey
   // nativeTooltipButton: OptionalControlKey
@@ -287,7 +287,7 @@ export type PluginSettings = ChartVisualSettings & GanttChartSources & {
   frontMatterProperty_event_successors: string
 
   /*
-   * Hideable setting pages. todo This is part of a future feature.
+   * Hideable setting pages. WNM-#v2 This is part of a future feature.
    *
    * Hidden settings disappear from the main settings into sub-pages.
    * Not hidden would mean be present on the main settings page.

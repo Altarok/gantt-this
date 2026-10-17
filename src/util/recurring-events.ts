@@ -125,7 +125,8 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
       if (item.repeatRule.step === 'day') duplicateEventWithDayDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
       else if (item.repeatRule.step === 'year') duplicateEventWithYearDelta(chartCtx, item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
     } catch (err) {
-      if (err instanceof GanttError) chartCtx.diagnostics.addErr(err) // TODO add msg 'failed to create duplicates'
+      if (err instanceof GanttError) chartCtx.diagnostics.addErr(err)
+      // TODO add msg 'failed to create duplicates'
       // continue
     }
 
