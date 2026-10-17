@@ -2,6 +2,19 @@ import {GanttRenderEngine} from './svg-drawer'
 import {CalendarConfig, Moon} from '../const/types'
 import {drawMoonPhase} from './svg-drawer-util'
 
+/**
+ * Renders moon phases along the timeline axis based on calendar configuration,
+ * cycle lengths, and current zoom/viewport dimensions.
+ *
+ * @param engine - The Gantt render engine for coordinate mapping.
+ * @param ticksG - The SVG group element where the moon phase icons are drawn.
+ * @param calendarConfig - Configuration object containing moon definitions.
+ * @param startDaysValue - Start day of the current viewport.
+ * @param endDaysValue - End day of the current viewport.
+ * @param effectiveStartDay - Effective start day including buffer bounds.
+ * @param effectiveEndDay - Effective end day including buffer bounds.
+ * @param renderWidth - Total width of the render area in pixels.
+ */
 export function drawMoons(engine: GanttRenderEngine,
                           ticksG: SVGGElement,
                           calendarConfig: CalendarConfig,
