@@ -78,12 +78,11 @@ export class GanttRenderEngine {
   initLayout() {
     let activeItems: GanttItem[] = this.filterActiveEventData()
 
-    this.viewModel.activeCalendars = Array.from(new Set(activeItems.map(d => d.calendarType)))
+    this.viewModel.activeCalendarNames = Array.from(new Set(activeItems.map(d => d.calendarType)))
+    this.viewModel.activeGroupNames = Array.from(new Set(activeItems.map(d => d.group || this.settings.defaultGroup)))
 
-    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendars, this.viewModel.mappedCalConfigs)
-
-    const groupNames: string[] = Array.from(new Set(activeItems.map(d => d.group || this.settings.defaultGroup)))
-    Priorities.sortGroupAxisByPriority(groupNames, this.viewModel.mappedGrpConfigs)
+    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendarNames, this.viewModel.mappedCalConfigs)
+    Priorities.sortGroupAxisByPriority(this.viewModel.activeGroupNames, this.viewModel.mappedGrpConfigs)
 
     this.drawnData = expandRecurringEvents(this.chartCtx, this, activeItems, this.currRenderWidth)
 
@@ -92,7 +91,7 @@ export class GanttRenderEngine {
 
     if (this.viewModel.enableGrouping) {
       const groupedMap = new Map<string, GanttItem[]>()
-      for (const name of groupNames) { /* groupNames is sorted! */
+      for (const name of this.viewModel.activeGroupNames) { /* groupNames is sorted! */
         groupedMap.set(name, [])
       }
       this.drawnData.forEach(item => {
@@ -320,7 +319,7 @@ export class GanttRenderEngine {
     const startDaysValue = Math.floor(this.viewModel.minDays / this.viewModel.stepDays) * this.viewModel.stepDays - this.viewModel.stepDays
     const endDaysValue = Math.ceil(this.viewModel.maxDays / this.viewModel.stepDays) * this.viewModel.stepDays + this.viewModel.stepDays
 
-    this.viewModel.activeCalendars.forEach((calType, index) => {
+    this.viewModel.activeCalendarNames.forEach((calType, index) => {
 
       const currentAxisYStart = itemsAreaHeight + (index * this.viewModel.calendarAxisRowHeight)
       const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor

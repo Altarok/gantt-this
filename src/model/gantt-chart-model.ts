@@ -14,11 +14,14 @@ export class GanttChartModel {
   /** Joins all events in a single group if false, default: true */
   private isEnableGrouping = true
 
+  /** Prevents days from being shown in dates when zoomed out a lot. */
   hideDays = false
+  /** Prevents months from being shown in dates when zoomed out a lot. */
   hideMonths = false
 
   /** Names of calendars actively shown as axis. */
-  activeCalendars: string[] = []
+  activeCalendarNames: string[] = []
+  activeGroupNames: string[] = []
 
   /*
    * Constants
@@ -72,10 +75,13 @@ export class GanttChartModel {
   }
 
   updateSvgDrawerData() {
-    this.mappedGrpConfigs = Object.fromEntries(this.settings.groups.map(g => [g.id, g]))
-    this.mappedCalConfigs = Object.fromEntries(this.settings.calendars.map(c => [c.id, c]))
-    // this.drawnGroups = Object.fromEntries(this.settings.groups.map(g => [g.id, {y1: 0, y2: 0}]))
-    this.drawnCals = Object.fromEntries(this.settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
+    const groupSettings = this.settings.groups
+    const calendarSettings = this.settings.calendars
+
+    this.mappedGrpConfigs = Object.fromEntries(groupSettings.map(g => [g.id, g]))
+    this.mappedCalConfigs = Object.fromEntries(calendarSettings.map(c => [c.id, c]))
+    // this.drawnGroups = Object.fromEntries(groupSettings.map(g => [g.id, {y1: 0, y2: 0}]))
+    this.drawnCals = Object.fromEntries(calendarSettings.map(c => [c.id, {y1: 0, y2: 0}]))
   }
 
   getCurrRenderWidth(): number {
@@ -95,7 +101,7 @@ export class GanttChartModel {
   }
 
   private get calendarCount() {
-    return this.activeCalendars.length
+    return this.activeCalendarNames.length
   }
 
   private get combinedAxesHeight() {

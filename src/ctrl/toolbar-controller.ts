@@ -10,6 +10,15 @@ const panLeft = -1 * panRight
 const zoomOut = 0.8
 const zoomIn = 1.25
 
+/**
+ * Binds click event listeners and interactive reactions to the Gantt chart toolbar buttons.
+ *
+ * @param plugin - The main Fantasy Gantt plugin instance.
+ * @param chartContext - The current chart context and configuration.
+ * @param toolbar - The toolbar view containing interactive UI elements.
+ * @param renderEngine - The Gantt render engine handling visual updates, panning, and zooming.
+ * @param refreshChartCallback - Callback function triggered to reload or refresh the chart.
+ */
 export function setToolbarReactions(plugin: FantasyGanttPlugin,
                                     chartContext: ChartContext,
                                     toolbar: ToolbarView,
