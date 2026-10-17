@@ -26,6 +26,7 @@ function createGroup(container: HTMLDivElement) {
 
 export class ToolbarView {
   private readonly container: HTMLDivElement
+  private isGroupsDrawn = false
   /*
    * Toolbar buttons in order (LTR) - optional buttons may be null
    */
@@ -106,31 +107,9 @@ export class ToolbarView {
 
   private showGroupVisibilityToggle(refreshChartCallback: () => void) {
 
-    // if (settings.showButtonsToHideGroups) {
-    // const g4 = createGroup(this.container)
-    //
-    //   /* Create buttons to hide groups */
-    //   const groups = settings.groups
-    //   for (const group of groups) {
-    //     let isVisible: boolean = group?.visible ?? false
-    //     const button = createButton(g4, isVisible ? 'eye' : 'eye-off', 'Click to toggle group visibility')
-    //     g4.createDiv({text: group.id})
-    //     button.addEventListener('click', () => {
-    //       if (group) {
-    //         isVisible = !isVisible
-    //         group.visible = isVisible
-    //         setIcon(button, isVisible ? 'eye' : 'eye-off')
-    //         void this.chartCtx.plugin.saveSettings()
-    //         refreshChartCallback()
-    //       }
-    //     })
-    //   }
-
     const g4 = createGroup(this.container)
-    // const g4 = this.chartView.container.createDiv({cls: 'gt-floating-group-toggle'})
-
     const groupButton = createButton(g4, 'eye', 'Toggle group visibility')
-    // const dropdown = g4.createDiv({cls: 'gt-group-dropdown'})
+    
     const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
     dropdown.style.display = 'none'
     dropdown.createDiv({text: 'Toggle group visibility', cls: 'gt-group-dropdown-row'})
@@ -140,18 +119,21 @@ export class ToolbarView {
     const toggleDropdown = (open?: boolean) => {
       isOpen = open ?? !isOpen
       if (isOpen) {
-        for (const group of this.getCurrentGroups()) {
-          const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
-          const checkbox = row.createEl('input', {type: 'checkbox'})
-          checkbox.checked = group.visible ?? false
-          row.createSpan({text: group.id})
+        if (!this.isGroupsDrawn) {
+          for (const group of this.getCurrentGroups()) {
+            const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
+            const checkbox = row.createEl('input', {type: 'checkbox'})
+            checkbox.checked = group.visible ?? false
+            row.createSpan({text: group.id})
 
-          row.addEventListener('click', () => {
-            group.visible = !group.visible
-            checkbox.checked = group.visible
-            void this.chartCtx.plugin.saveSettings()
-            refreshChartCallback()
-          })
+            row.addEventListener('click', () => {
+              group.visible = !group.visible
+              checkbox.checked = group.visible
+              void this.chartCtx.plugin.saveSettings()
+              refreshChartCallback()
+            })
+          }
+          this.isGroupsDrawn = true
         }
 
         const btnRect = groupButton.getBoundingClientRect()
@@ -169,22 +151,6 @@ export class ToolbarView {
       toggleDropdown()
     })
 
-    // const groupsInChart = this.getCurrentGroups()
-    //
-    // for (const group of groupsInChart) {
-    //   const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
-    //   const checkbox = row.createEl('input', {type: 'checkbox'})
-    //   checkbox.checked = group.visible ?? false
-    //   row.createSpan({text: group.id})
-    //
-    //   row.addEventListener('click', () => {
-    //     group.visible = !group.visible
-    //     checkbox.checked = group.visible
-    //     void this.chartCtx.plugin.saveSettings()
-    //     refreshChartCallback()
-    //   })
-    // }
-
     const activeWindow = this.chartView.container.ownerDocument.defaultView ?? window
     activeWindow.addEventListener('click', (e) => {
       if (isOpen && !g4.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
@@ -194,7 +160,7 @@ export class ToolbarView {
   }
 
   private getCurrentGroups(): GroupOrCalendarSettings[] {
-    const groupNames = this.viewModel.activeGroupNames
+    const groupNames = this.viewModel.allGroupNames
     const groups: GroupOrCalendarSettings[] = []
     groupNames.forEach(g => {
       if (this.viewModel.mappedGrpConfigs[g]) groups.push(this.viewModel.mappedGrpConfigs[g])
