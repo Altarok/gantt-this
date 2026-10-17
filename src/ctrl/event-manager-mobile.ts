@@ -84,15 +84,9 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
 
     if (e.touches.length === 1) {
       const touch = e.touches[0]!
-      this.isDragging = true
       this.isPinching = false
-      this.startX = touch.clientX
-      this.startTranslateX = this.viewModel.panTranslateX
 
-      if (this.scrollableContainer) {
-        this.startDragMouseY = touch.clientY
-        this.startDragScrollTop = this.scrollableContainer.scrollTop
-      }
+      super.startDragInteraction(touch.clientX, touch.clientY)
 
       this.touchStartPos = {x: touch.clientX, y: touch.clientY}
     } else if (e.touches.length === 2) {

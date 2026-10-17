@@ -77,16 +77,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private handleSvgMouseDown(e: MouseEvent) {
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
 
-    this.isDragging = true
-    this.startX = e.clientX
-
-    if (this.scrollableContainer) {
-      this.startDragMouseY = e.clientY
-      this.startDragScrollTop = this.scrollableContainer.scrollTop
-    }
-
-    this.startTranslateX = this.viewModel.panTranslateX
-    // this.startTranslateY = this.viewModel.panTranslateY
+    super.startDragInteraction(e.clientX, e.clientY)
   }
 
   private isModifierActive(e: MouseEvent, key: ControlKey): boolean {

@@ -57,7 +57,30 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
 
   protected abstract detachListeners(): void
 
-  handleDragInteraction(x: number, y: number) {
+  /**
+   * Start drag interaction.
+   *
+   * @param x coordinate of finger or mouse pointer
+   * @param y coordinate of finger or mouse pointer
+   */
+  protected startDragInteraction(x: number, y: number) {
+    this.isDragging = true
+    this.startX = x
+    this.startTranslateX = this.viewModel.panTranslateX
+
+    if (this.scrollableContainer) {
+      this.startDragMouseY = y
+      this.startDragScrollTop = this.scrollableContainer.scrollTop
+    }
+  }
+
+  /**
+   * Handle ongoing drag interaction.
+   *
+   * @param x coordinate of finger or mouse pointer
+   * @param y coordinate of finger or mouse pointer
+   */
+  protected handleDragInteraction(x: number, y: number) {
 
     const deltaX = x - this.startX
     const deltaY = y - this.startDragMouseY
