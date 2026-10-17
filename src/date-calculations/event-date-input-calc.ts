@@ -33,7 +33,7 @@ export function parseEventDate(doCheckForRepetitions: boolean,
     if (suffix) repeatRule = createRepeatRule(isStartDate, suffix.trim(), config)
   }
 
-  let cleanInput: string = date.startsWith(TODAY) ? parseDescriptiveDateToValidInput(date, config) : date.trim()
+  let cleanInput: string = date.startsWith(TODAY) ? parseDescriptiveDateToValidInput(date.trim(), config) : date.trim()
 
   const parsedDate = createParsedDate(cleanInput, config)
 

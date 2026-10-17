@@ -1,6 +1,6 @@
-import {GanttRenderEngine} from "../view/svg-drawer";
-import {ChartContext} from "../model/chart-context";
-import {GanttChartModel} from "../model/gantt-chart-model";
+import {GanttRenderEngine} from '../view/svg-drawer'
+import {ChartContext} from '../model/chart-context'
+import {GanttChartModel} from '../model/gantt-chart-model'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -57,6 +57,41 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
 
   protected abstract detachListeners(): void
 
+  handleDragInteraction(x: number, y: number) {
+
+    const deltaX = x - this.startX
+    const deltaY = y - this.startDragMouseY
+    const targetTranslateX = this.startTranslateX + deltaX
+
+    this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
+      if (this.scrollableContainer) {
+        this.scrollableContainer.scrollTop = this.startDragScrollTop - deltaY
+      }
+
+      this.engine.panAbsoluteX(targetTranslateX)
+      this.rafId = undefined
+    })
+  }
+
+  protected openEventFileInNewTab(target?: HTMLElement): void {
+    const dataID = target?.getAttribute?.('data-id')
+    if (!dataID) return
+    const link = this.engine.rawData.find(d => d.id === dataID)?.link
+    if (link) void this.chartCtx.workspace.openLinkText(link, '', true)
+  }
+
+  /**
+   * Does a final 0-diff pan after dragging events to re-draw event text and icons.
+   * (which do not get drawn while panning)
+   */
+  protected handleEndInteraction() {
+    if (this.isDragging) {
+      this.isDragging = false
+      this.engine.panDiff(0)
+    }
+    this.destroyAnimation()
+  }
+
   /**
    * Unbinds all window and SVG listeners and cleans up pending animation frames
    * Fully unhook and release all window and SVG listeners to prevent leaks
@@ -74,5 +109,6 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
     if (this.rafId) this.activeWindow?.cancelAnimationFrame(this.rafId)
     this.rafId = undefined
   }
+
 
 }

@@ -32,7 +32,9 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   protected getScrollableContainer(): HTMLElement | null {
-    return  this.engine.view.getScrollableContainer()
+    const isPopout = this.activeWindow?.document.body.classList.contains('is-popout-window')
+    return isPopout ? this.engine.view.chartContainer
+      : this.engine.view.container.parentElement
   }
 
   public attachSvgListeners(svgEl: HTMLElement,
@@ -69,21 +71,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   private handleWindowMouseMove(e: MouseEvent) {
-    if (this.isDragging) {
-
-      const deltaX = e.clientX - this.startX
-      const deltaY = e.clientY - this.startDragMouseY
-      const targetTranslateX = this.startTranslateX + deltaX
-
-      this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
-        if (this.scrollableContainer) {
-          this.scrollableContainer.scrollTop = this.startDragScrollTop - deltaY
-        }
-
-        this.engine.panAbsoluteX(targetTranslateX)
-        this.rafId = undefined
-      })
-    }
+    if (this.isDragging) super.handleDragInteraction(e.clientX, e.clientY)
   }
 
   private handleSvgMouseDown(e: MouseEvent) {
@@ -96,7 +84,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       this.startDragMouseY = e.clientY
       this.startDragScrollTop = this.scrollableContainer.scrollTop
     }
-
 
     this.startTranslateX = this.viewModel.panTranslateX
     // this.startTranslateY = this.viewModel.panTranslateY
@@ -149,29 +136,12 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     this.engine.zoom(factor, mouseX)
   }
 
-  private handleSvgClick(event: MouseEvent) {
-    // if (event) this.logTouchEvent('handleSvgClick', event)
-    const target = event.target as HTMLElement
-
-    if (target?.hasAttribute('data-id')) {
-      const id = target.getAttribute('data-id')
-      if (id === null) return
-      const link = this.engine.rawData.find(d => d.id === id)?.link
-      if (link) void this.chartCtx.workspace.openLinkText(link, '', true)
-    }
+  private handleSvgClick(e: MouseEvent) {
+    super.openEventFileInNewTab(e.target as HTMLElement)
   }
 
   private handleWindowMouseUp() {
-    // console.log(`handleWindowMouseUp`)
-    if (this.isDragging) {
-      this.isDragging = false
-      /*
-       * Doing a final 0-diff pan re-draws event text and icons
-       * (which do not get drawn while panning)
-       */
-      this.engine.panDiff(0)
-    }
-    this.destroyAnimation()
+    super.handleEndInteraction()
   }
 
   private handleSvgMouseMove(): void {

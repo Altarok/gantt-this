@@ -224,13 +224,6 @@ export class GanttChartView {
   setWidth(width: number) {
     this.clipRect.setAttribute('width', width.toString())
   }
-
-  /**
-   * Desktop only. Provides underlying container which holds the scroll bar.
-   */
-  getScrollableContainer(): HTMLElement | null {
-    const isPopout = window.document.body.classList.contains('is-popout-window')
-    return isPopout ? this.chartContainer : this.container.parentElement
-  }
+  
 }
 

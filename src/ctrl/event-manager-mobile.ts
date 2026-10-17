@@ -36,9 +36,9 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     const plugin = this.chartCtx.plugin
 
     /* Placed on window for events to be able to end outside the chart */
-   plugin.registerDomEvent(activeWindow,'touchmove', this.boundWindowTouchMove, {passive: false})
-   plugin.registerDomEvent(activeWindow,'touchend', this.boundWindowTouchEnd)
-   plugin.registerDomEvent(activeWindow,'touchcancel', this.boundWindowTouchEnd)
+    plugin.registerDomEvent(activeWindow, 'touchmove', this.boundWindowTouchMove, {passive: false})
+    plugin.registerDomEvent(activeWindow, 'touchend', this.boundWindowTouchEnd)
+    plugin.registerDomEvent(activeWindow, 'touchcancel', this.boundWindowTouchEnd)
 
     /* Placed on chart for events to start inside the chart */
     plugin.registerDomEvent(svgEl, 'touchstart', this.boundSvgTouchStart, {passive: false})
@@ -60,24 +60,18 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     }
   }
 
+  /**
+   * Default swipe interaction has to be prevented,
+   * otherwise the left and reight ribbons would open all the time.
+   */
   private handleTouchMove(e: TouchEvent) {
     if (e.touches.length === 1 && this.isDragging) {
-      // Prevent default scroll / panel drag behavior
       e.preventDefault()
       e.stopPropagation()
 
-      const deltaX = e.touches[0]!.clientX - this.startX
-      const deltaY = e.touches[0]!.clientY - this.startDragMouseY
-      const targetTranslateX = this.startTranslateX + deltaX
+      const touch = e.touches[0]!
+      super.handleDragInteraction(touch.clientX, touch.clientY)
 
-      this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
-        if (this.engine.view.container.parentElement) {
-          this.engine.view.container.parentElement.scrollTop = this.startDragScrollTop - deltaY
-        }
-
-        this.engine.panAbsoluteX(targetTranslateX)
-        this.rafId = undefined
-      })
     } else if (e.touches.length === 2 && this.pinchDistance) {
       if (e.cancelable) e.preventDefault()
       this.handlePinchZoom(e)
@@ -93,13 +87,11 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       this.isDragging = true
       this.isPinching = false
       this.startX = touch.clientX
-      // this.startY = touch.clientY
       this.startTranslateX = this.viewModel.panTranslateX
-      // this.startTranslateY = this.viewModel.panTranslateY
 
-      if (this.engine.view.container.parentElement) {
+      if (this.scrollableContainer) {
         this.startDragMouseY = touch.clientY
-        this.startDragScrollTop = this.engine.view.container.parentElement.scrollTop
+        this.startDragScrollTop = this.scrollableContainer.scrollTop
       }
 
       this.touchStartPos = {x: touch.clientX, y: touch.clientY}
@@ -118,13 +110,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       if (dist > 10) return // Slop threshold in pixels
     }
 
-    const target = e.target as HTMLElement
-    const id = target?.getAttribute?.('data-id')
-    if (id === null || id === undefined) return
-    const link = this.engine.rawData.find(d => d.id === id)?.link
-    if (link) {
-      void this.chartCtx.workspace.openLinkText(link, '', true)
-    }
+    super.openEventFileInNewTab(e.target as HTMLElement)
   }
 
   private handlePinchZoom(e: TouchEvent) {
@@ -147,16 +133,11 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     })
   }
 
-  // TODO merge with other endInteraction()
-  private handleTouchEnd(/*e: TouchEvent*/) {
-    if (this.isDragging) {
-      this.isDragging = false
-      this.engine.panDiff(0)
-    }
+  private handleTouchEnd() {
     this.isPinching = false
     this.pinchDistance = null
     this.touchStartPos = null
-    this.destroyAnimation()
+    super.handleEndInteraction()
   }
 
   private getTouchDistance(t1: Touch, t2: Touch): number {
