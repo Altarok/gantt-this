@@ -96,16 +96,11 @@ export class GanttChartView {
     const defs = this.svg.createSvg('defs')
 
     /* Dedicated grid container behind bars and points */
-    /*
-     * TODO create a chart specific ID (e.g. gantt-clip-UUID)
-     */
-    // const clipPath = defs.createSvg('clipPath', {attr: {id: 'gantt-clip'}})
     const clipPath = defs.createSvg('clipPath', {attr: {id: this.clipId}})
     const eventsAreaHeight = this.viewModel.eventsAreaHeight
     this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
     this.gridLayer = this.foregroundLayer.createSvg('g')
-    // this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': 'url(#gantt-clip)'}})
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': `url(#${this.clipId})`}})
 
     this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
@@ -224,6 +219,6 @@ export class GanttChartView {
   setWidth(width: number) {
     this.clipRect.setAttribute('width', width.toString())
   }
-  
+
 }
 

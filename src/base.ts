@@ -5,7 +5,7 @@ import FantasyGanttPlugin from './main'
 import BasesContext from './model/bases-context'
 
 /*
- * TODO #v2: change to 'gantt-this-view'
+ * WNM-#v2: change to 'gantt-this-view'
  * Sadly, this is a breaking change for users!
  * They'd have to manually change the base file.
  */

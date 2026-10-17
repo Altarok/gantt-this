@@ -401,7 +401,6 @@ export class GanttRenderEngine {
       }
 
       if (showMoonPhases && calendarConfig.moons) {
-        // TODO remove double param!!
         drawMoons(this, ticksG, calendarConfig, startDaysValue, endDaysValue,
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
       }
