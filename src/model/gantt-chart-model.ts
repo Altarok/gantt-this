@@ -19,9 +19,15 @@ export class GanttChartModel {
   /** Prevents months from being shown in dates when zoomed out a lot. */
   hideMonths = false
 
-  /** Names of calendars actively shown as axis. */
+  /** Names of calendars actively shown on chart (axis). */
   activeCalendarNames: string[] = []
+  /** Names of groups actively shown on chart. */
   activeGroupNames: string[] = []
+
+  /** Names of calendars actively shown on chart (axis). */
+  allCalendarNames: string[] = []
+  /** Names of groups actively shown on chart. */
+  allGroupNames: string[] = []
 
   /*
    * Constants

@@ -615,9 +615,16 @@ export class GanttRenderEngine {
   filterActiveEventData(): GanttItem[] {
     const {mappedGrpConfigs, mappedCalConfigs} = this.viewModel
 
+    this.viewModel.allCalendarNames = [...this.settings.defaultCalendar]
+    this.viewModel.allGroupNames = [...this.settings.defaultGroup]
+
     return this.rawData.filter(d => {
-      const grp = mappedGrpConfigs[d.group]
+
+      if (!this.viewModel.allCalendarNames.includes(d.calendarType)) this.viewModel.allCalendarNames.push(d.calendarType)
+      if (!this.viewModel.allGroupNames.includes(d.group)) this.viewModel.allGroupNames.push(d.group)
+
       const cal = mappedCalConfigs[d.calendarType]
+      const grp = mappedGrpConfigs[d.group]
 
       /* Undefined groups or calendars are accepted! */
       if (grp?.visible === false || cal?.visible === false) return false
