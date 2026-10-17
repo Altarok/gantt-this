@@ -5,8 +5,6 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
   isDragging: boolean
-  /** Attaches or re-binds SVG event listeners */
-  // attachSvgListeners(): void
   /** Unbinds all window and SVG listeners and cleans up pending animation frames */
   destroy(): void
 }
@@ -52,8 +50,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected abstract getScrollableContainer(): HTMLElement | null
 
   /** Attaches or re-binds SVG event listeners */
-  protected abstract attachSvgListeners(svg: HTMLElement,
-                                        activeWindow: Window): void
+  protected abstract attachListeners(svg: HTMLElement, activeWindow: Window): void
 
   protected abstract detachListeners(): void
 

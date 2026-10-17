@@ -28,7 +28,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     this.boundSvgClick = this.handleSvgClick.bind(this)
 
     if (this.svg && this.activeWindow)
-      this.attachSvgListeners(this.svg as unknown as HTMLElement, this.activeWindow)
+      this.attachListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
   protected getScrollableContainer(): HTMLElement | null {
@@ -37,8 +37,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       : this.engine.view.container.parentElement
   }
 
-  public attachSvgListeners(svgEl: HTMLElement,
-                            activeWindow: Window) {
+  public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
 
     const plugin = this.chartCtx.plugin
 
