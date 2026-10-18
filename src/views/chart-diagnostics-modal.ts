@@ -4,9 +4,12 @@ import {ChartContext} from '../model/chart-context'
 import {ChartDiagnostics} from "../const/error-types";
 
 export class ChartDiagnosticsModal extends Modal {
-  constructor(private readonly plugin: FantasyGanttPlugin,
-              private readonly chartCtx: ChartContext) {
-    super(plugin.app)
+  constructor(private readonly chartCtx: ChartContext) {
+    super(chartCtx.plugin.app)
+  }
+
+  private get plugin(): FantasyGanttPlugin {
+    return this.chartCtx.plugin
   }
 
   private createStatRow = (div: HTMLDivElement, label: string, value?: string | HTMLElement) => {

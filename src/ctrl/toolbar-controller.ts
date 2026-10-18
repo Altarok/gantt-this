@@ -13,14 +13,12 @@ const zoomIn = 1.25
 /**
  * Binds click event listeners and interactive reactions to the Gantt chart toolbar buttons.
  *
- * @param plugin - The main Fantasy Gantt plugin instance.
- * @param chartContext - The current chart context and configuration.
+ * @param chartCtx - The current chart context and configuration.
  * @param toolbar - The toolbar view containing interactive UI elements.
  * @param renderEngine - The Gantt render engine handling visual updates, panning, and zooming.
  * @param refreshChartCallback - Callback function triggered to reload or refresh the chart.
  */
-export function setToolbarReactions(plugin: FantasyGanttPlugin,
-                                    chartContext: ChartContext,
+export function setToolbarReactions(chartCtx: ChartContext,
                                     toolbar: ToolbarView,
                                     renderEngine: GanttRenderEngine,
                                     refreshChartCallback: () => void) {
@@ -46,11 +44,25 @@ export function setToolbarReactions(plugin: FantasyGanttPlugin,
   toolbar.resetZoomAndPanButton.addEventListener('click', () => renderEngine.resetZoom())
   toolbar.zoomInButton?.addEventListener('click', () => renderEngine.zoom(zoomIn))
   toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRelative(panRight))
-  toolbar.settingsButton.addEventListener('click', () => toolbar.handleSettingsButtonClick())
-
-  toolbar.debugInfoButton?.addEventListener('click', () => new ChartDiagnosticsModal(plugin, chartContext).open())
-
+  toolbar.settingsButton.addEventListener('click', () => handleSettingsButtonClick(chartCtx.plugin))
+  toolbar.debugInfoButton?.addEventListener('click', () => new ChartDiagnosticsModal(chartCtx).open())
   toolbar.foldButton.addEventListener('click', () => toolbar.fold())
   toolbar.unfoldButton.addEventListener('click', () => toolbar.unfold())
+}
 
+/**
+ * Open plugin's settings in native Obsidian modal.
+ */
+function handleSettingsButtonClick(plugin: FantasyGanttPlugin) {
+  const settingApi = (plugin.app as unknown as {
+    setting: {
+      open(): void
+      openTabById(id: string): void
+    }
+  }).setting
+
+  if (settingApi) {
+    settingApi.open()
+    settingApi.openTabById(plugin.manifest.id)
+  }
 }

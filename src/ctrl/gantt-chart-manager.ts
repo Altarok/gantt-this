@@ -99,6 +99,6 @@ export default class ChartManager {
 
     this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
-    setToolbarReactions(this.plugin, this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback())
+    setToolbarReactions(this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback())
   }
 }
