@@ -418,7 +418,6 @@ export class GanttRenderEngine {
    * @param focusX optional x value to zoom on
    */
   zoom(factor: number, focusX?: number) {
-    // console.log('zoom >', factor, focusX)
     if (Math.abs(1 - factor) < 0.01) return // ignore micro-pinch zooms
 
     const renderWidth = this.currRenderWidth

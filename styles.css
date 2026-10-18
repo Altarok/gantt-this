@@ -741,6 +741,14 @@ body.is-popout-window svg.gt-svg-canvas {
   display: block;
 }
 
+.gt-group-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+
 .gt-group-dropdown-row {
   display: flex;
   align-items: center;

@@ -107,8 +107,7 @@ export class ToolbarView {
     const groupButton = createButton(g4, 'eye', 'Toggle group visibility')
 
     const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
-    dropdown.createDiv({text: 'Toggle group visibility', cls: 'gt-group-dropdown-row'})
-
+    dropdown.createDiv({text: 'Toggle group visibility', cls: 'gt-group-dropdown-header'})
 
     let isOpen = false
     const toggleDropdown = (open?: boolean) => {
@@ -123,7 +122,7 @@ export class ToolbarView {
         const containerRect = this.chartView.container.getBoundingClientRect()
         dropdown.addClass('visible')
         dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
-        dropdown.style.right = `${containerRect.right - btnRect.right}px`
+        dropdown.style.left = `${btnRect.left - containerRect.left}px`
       } else {
         dropdown.removeClass('visible')
       }
@@ -196,6 +195,9 @@ export class ToolbarView {
     this.chartView.container.removeClass('is-toolbar-minimized')
   }
 
+  /*
+   * TODO create reset option enum and register all resettable things in reset context
+   */
   reset(): void {
     this.isGroupsDrawn = false
   }
