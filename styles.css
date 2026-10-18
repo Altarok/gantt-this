@@ -734,6 +734,11 @@ body.is-popout-window svg.gt-svg-canvas {
   overflow-y: auto;
   padding: 4px;
   min-width: 140px;
+  display: none;
+}
+
+.gt-group-dropdown.visible {
+  display: block;
 }
 
 .gt-group-dropdown-row {
