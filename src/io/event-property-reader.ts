@@ -86,8 +86,8 @@ export class EventPropertyReader {
     const key = this.settings.frontMatterProperty_event_color
     return frontMatter[key] as string
       ?? this.basesCtx?.readPropertyValue(file, key)
-      ?? this.settings.groups.find(value => value.id === group)?.color
-      ?? this.settings.calendars.find(value => value.id === calendar)?.color
+      ?? this.settings.getGroupConfig(group)?.color
+      ?? this.settings.getCalendarConfig(calendar)?.color
       ?? this.settings.fallbackColor
   }
 

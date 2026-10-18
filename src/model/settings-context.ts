@@ -34,12 +34,25 @@ export class SettingsContext implements GanttChartSources {
       eventPathSearchRecursive: rawChartInput.eventPathSearchRecursive,
       calendarPath: rawChartInput.calendarPath,
       calendarPathSearchRecursive: rawChartInput.calendarPathSearchRecursive,
-      // viewEventRowHeight: rawChartInput.viewEventRowHeight,
-      // viewEventShapeHeight: rawChartInput.viewEventShapeHeight,
-      // viewEventIconHeight: rawChartInput.viewEventIconHeight,
-      // fallbackColor: rawChartInput.fallbackColor,
-      // fallbackColorForIcons: rawChartInput.fallbackColorForIcons
+
+      grpConfigs: {},
+      calConfigs: {},
     }
+
+    this.updateGrpAndCalData()
+  }
+
+  updateGrpAndCalData(): void {
+    this.local.grpConfigs = Object.fromEntries(this.global.groups.map(g => [g.id, {...g}]))
+    this.local.calConfigs = Object.fromEntries(this.global.calendars.map(c => [c.id, {...c}]))
+  }
+
+  getGroupConfig(id: string): GroupOrCalendarSettings | undefined {
+    return this.local.grpConfigs[id]
+  }
+
+  getCalendarConfig(id: string): GroupOrCalendarSettings | undefined {
+    return this.local.calConfigs[id]
   }
 
   get hasDateBounds(): boolean {
@@ -57,7 +70,6 @@ export class SettingsContext implements GanttChartSources {
   get upperBoundDateParsed(): ParsedDate | undefined {
     return this.local.upperBoundDateParsed
   }
-
 
   get eventPath(): string {
     return this.local.eventPath ?? this.global.eventPath
@@ -159,9 +171,9 @@ export class SettingsContext implements GanttChartSources {
     return /* TODO implement  this.local.fallbackColor ?? */ this.global.fallbackColor
   }
 
-  get groups(): GroupOrCalendarSettings[] {
-    return this.global.groups
-  }
+  // get groups(): GroupOrCalendarSettings[] {
+  //   return this.global.groups
+  // }
 
   get calendars(): GroupOrCalendarSettings[] {
     return this.global.calendars

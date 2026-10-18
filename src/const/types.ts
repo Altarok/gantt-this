@@ -218,6 +218,8 @@ export type LocalChartSettings = Partial<GanttChartSources> & Partial<ChartVisua
   centerHereDateParsed?: ParsedDate
   upperBoundDateParsed?: ParsedDate
   calendarForBounds?: string
+  grpConfigs: Record<string, GroupOrCalendarSettings>
+  calConfigs: Record<string, GroupOrCalendarSettings>
 }
 
 export type RawChartInput = Partial<GanttChartSources> & /* Partial<ChartVisualSettings> & */ {

@@ -81,8 +81,8 @@ export class GanttRenderEngine {
     this.viewModel.activeCalendarNames = Array.from(new Set(activeItems.map(d => d.calendarType)))
     this.viewModel.activeGroupNames = Array.from(new Set(activeItems.map(d => d.group || this.settings.defaultGroup)))
 
-    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendarNames, this.viewModel.mappedCalConfigs)
-    Priorities.sortGroupAxisByPriority(this.viewModel.activeGroupNames, this.viewModel.mappedGrpConfigs)
+    Priorities.sortCalendarAxisByPriority(this.viewModel.activeCalendarNames, this.settings.local.calConfigs)
+    Priorities.sortGroupAxisByPriority(this.viewModel.activeGroupNames, this.settings.local.grpConfigs)
 
     this.drawnData = expandRecurringEvents(this.chartCtx, this, activeItems, this.currRenderWidth)
 
@@ -128,7 +128,7 @@ export class GanttRenderEngine {
     }
 
     /* Before going on, we have to sort groups by their respective priority */
-    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.viewModel.mappedGrpConfigs)
+    Priorities.fixGanttGroupPrioritySetupIfBroken(this.groups, this.settings.local.grpConfigs)
 
     this.viewModel.calculateTotalHeight(currentYOffset)
   }
@@ -335,7 +335,7 @@ export class GanttRenderEngine {
       if (!calendarConfig) return // continue to next axis
 
       const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
-      const axisColor = (this.settings.uxUseCalColorForCalAxis ? this.viewModel.mappedCalConfigs[calType]?.color : null) ?? 'currentColor'
+      const axisColor = (this.settings.uxUseCalColorForCalAxis ? this.settings.getCalendarConfig(calType)?.color : null) ?? 'currentColor'
 
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
@@ -595,8 +595,6 @@ export class GanttRenderEngine {
   }
 
   filterActiveEventData(): GanttItem[] {
-    const {mappedGrpConfigs, mappedCalConfigs} = this.viewModel
-
     this.viewModel.allCalendarNames = [...this.settings.defaultCalendar]
     this.viewModel.allGroupNames = [...this.settings.defaultGroup]
 
@@ -605,8 +603,8 @@ export class GanttRenderEngine {
       if (!this.viewModel.allCalendarNames.includes(d.calendarType)) this.viewModel.allCalendarNames.push(d.calendarType)
       if (!this.viewModel.allGroupNames.includes(d.group)) this.viewModel.allGroupNames.push(d.group)
 
-      const cal = mappedCalConfigs[d.calendarType]
-      const grp = mappedGrpConfigs[d.group]
+      const cal = this.settings.getCalendarConfig(d.calendarType)
+      const grp = this.settings.getGroupConfig(d.group)
 
       /* Undefined groups or calendars are accepted! */
       if (grp?.visible === false || cal?.visible === false) return false

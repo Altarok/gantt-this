@@ -1,5 +1,5 @@
 import {Consts} from '../const/constants'
-import {GroupOrCalendarDrawerData, GroupOrCalendarSettings} from '../const/types'
+import {GroupOrCalendarDrawerData} from '../const/types'
 import {SettingsContext} from './settings-context'
 
 type Margin = { top: number, bottom: number, left: number, right: number }
@@ -67,8 +67,8 @@ export class GanttChartModel {
   private lastRenderWidth = -1
 
   /**  Data updated on a redraw, not while panning or zooming */
-  mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = {}
-  mappedCalConfigs: Record<string, GroupOrCalendarSettings> = {}
+  // mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = {}
+  // mappedCalConfigs: Record<string, GroupOrCalendarSettings> = {}
   // drawnGroups: Record<string, GroupOrCalendarDrawerData> = {}
   drawnCals: Record<string, GroupOrCalendarDrawerData> = {}
 
@@ -81,13 +81,12 @@ export class GanttChartModel {
   }
 
   updateSvgDrawerData() {
-    const groupSettings = this.settings.groups
-    const calendarSettings = this.settings.calendars
-
-    this.mappedGrpConfigs = Object.fromEntries(groupSettings.map(g => [g.id, g]))
-    this.mappedCalConfigs = Object.fromEntries(calendarSettings.map(c => [c.id, c]))
+    // const groupSettings = this.settings.groups
+    // const calendarSettings = this.settings.calendars
+    // this.mappedGrpConfigs = Object.fromEntries(groupSettings.map(g => [g.id, g]))
+    // this.mappedCalConfigs = Object.fromEntries(calendarSettings.map(c => [c.id, c]))
     // this.drawnGroups = Object.fromEntries(groupSettings.map(g => [g.id, {y1: 0, y2: 0}]))
-    this.drawnCals = Object.fromEntries(calendarSettings.map(c => [c.id, {y1: 0, y2: 0}]))
+    this.drawnCals = Object.fromEntries(this.settings.calendars.map(c => [c.id, {y1: 0, y2: 0}]))
   }
 
   getCurrRenderWidth(): number {

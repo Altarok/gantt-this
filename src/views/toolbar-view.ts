@@ -93,14 +93,10 @@ export class ToolbarView {
     this.debugInfoButton = createButton(g3, 'info', 'Setup Problems & Chart Statistics')
     this.showGroupVisibilityToggle(refreshChartCallback)
 
-    /*
-     * These 2 must be the last buttons!
-     */
+    /* These 2 must be the last buttons! */
     this.foldButton = createButton(this.container, 'fold-horizontal', 'Hide Toolbar')
-    // const con = this.container.parentElement
-    // const con = chartView.chartContainer
-    const con = chartView.minimizedToolbarContainer
-    this.unfoldButton = createButton(con, 'unfold-horizontal', 'Show Toolbar')
+
+    this.unfoldButton = createButton(chartView.minimizedToolbarContainer, 'unfold-horizontal', 'Show Toolbar')
     this.unfoldButton.addClass('gt-minimized-btn')
     this.unfold()
   }
@@ -111,7 +107,6 @@ export class ToolbarView {
     const groupButton = createButton(g4, 'eye', 'Toggle group visibility')
 
     const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
-    dropdown.style.display = 'none'
     dropdown.createDiv({text: 'Toggle group visibility', cls: 'gt-group-dropdown-row'})
 
 
@@ -120,29 +115,17 @@ export class ToolbarView {
       isOpen = open ?? !isOpen
       if (isOpen) {
         if (!this.isGroupsDrawn) {
-          for (const group of this.getCurrentGroups()) {
-            const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
-            const checkbox = row.createEl('input', {type: 'checkbox'})
-            checkbox.checked = group.visible ?? false
-            row.createSpan({text: group.id})
-
-            row.addEventListener('click', () => {
-              group.visible = !group.visible
-              checkbox.checked = group.visible
-              void this.chartCtx.plugin.saveSettings()
-              refreshChartCallback()
-            })
-          }
+          this.drawGroupToggleDropdown(dropdown, refreshChartCallback)
           this.isGroupsDrawn = true
         }
 
         const btnRect = groupButton.getBoundingClientRect()
         const containerRect = this.chartView.container.getBoundingClientRect()
-        dropdown.style.display = 'block'
+        dropdown.addClass('visible')
         dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
         dropdown.style.right = `${containerRect.right - btnRect.right}px`
       } else {
-        dropdown.style.display = 'none'
+        dropdown.removeClass('visible')
       }
     }
 
@@ -159,12 +142,32 @@ export class ToolbarView {
     })
   }
 
+  private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: () => void) {
+    for (const group of this.getCurrentGroups()) {
+      const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
+      const checkbox = row.createEl('input', {type: 'checkbox'})
+      checkbox.checked = group.visible ?? false
+      row.createSpan({text: group.id})
+
+      row.addEventListener('click', () => {
+        group.visible = !group.visible
+        checkbox.checked = group.visible
+        // void this.chartCtx.plugin.saveSettings()
+        refreshChartCallback()
+      })
+    }
+  }
+
+  private get settings(): SettingsContext {
+    return this.chartCtx.settings
+  }
+
   /**
    * Gets called only once per chart!
    */
   private getCurrentGroups(): GroupOrCalendarSettings[] {
-    const groupNames = this.viewModel.allGroupNames.map(g => this.viewModel.mappedGrpConfigs[g])
-    .filter((g): g is GroupOrCalendarSettings => g !== undefined)
+    const groupNames = this.viewModel.allGroupNames.map(g => this.settings.getGroupConfig(g))
+      .filter((g): g is GroupOrCalendarSettings => g !== undefined)
     groupNames.sort((a, b) => (a.priority ?? -Infinity) - (b.priority ?? -Infinity))
     return groupNames
   }
@@ -193,21 +196,8 @@ export class ToolbarView {
     this.chartView.container.removeClass('is-toolbar-minimized')
   }
 
-  /**
-   * Open plugin's settings in native Obsidian modal.
-   */
-  handleSettingsButtonClick() {
-    const plugin = this.chartCtx.plugin
-    const settingApi = (plugin.app as unknown as {
-      setting: {
-        open(): void
-        openTabById(id: string): void
-      }
-    }).setting
-
-    if (settingApi) {
-      settingApi.open()
-      settingApi.openTabById(plugin.manifest.id)
-    }
+  reset(): void {
+    this.isGroupsDrawn = false
   }
+
 }
