@@ -157,7 +157,6 @@ export class ToolbarView {
       row.addEventListener('click', () => {
         group.visible = !group.visible
         checkbox.checked = group.visible
-        // void this.chartCtx.plugin.saveSettings()
         refreshChartCallback()
       })
     }
