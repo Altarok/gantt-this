@@ -1,6 +1,7 @@
+import {TFile} from 'obsidian'
 import {formatErrorMessage, GanttError} from './gantt-error'
 import {ChartDiagnostics, ErrorEntry, ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../const/error-types'
-import {TFile} from "obsidian";
+import {ResetPreset} from './reset-options'
 
 const severity: Record<ErrorSeverity, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
 
@@ -16,10 +17,18 @@ export class DiagnosticsContext implements ChartDiagnostics {
   logs: ErrorEntry[] = []
   loggedIDs: ErrorId[] = []
 
-  resetCache(): void {
+  resetCache(reset: ResetPreset): void {
     /*
      * TODO: map which ErrorIDs should be reset
      */
+    if (reset.full) {
+      this.totalCalendars = 0
+      this.loadedCalendars = 0
+      this.contextFilesCount = 0
+      this.contextEventCount = 0
+      this.logs = []
+      this.loggedIDs = []
+    }
   }
 
   get hasWarnings(): boolean {
