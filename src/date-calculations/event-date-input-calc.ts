@@ -169,7 +169,8 @@ function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBas
     allowedDays += (details.leapYearRule.extraDays ?? 1)
   }
 
-  if (day < 1 || day > allowedDays) throwGanttError('illegalDay4Month', {date, day, month: monthIndex})
+  const monthNameFinal = months[monthIndex]!.shortname ?? months[monthIndex]!.name ?? String(monthIndex + 1)
+  if (day < 1 || day > allowedDays) throwGanttError('illegalDay4Month', {date, day, month: monthNameFinal})
 
   let daysFromCurrentYearMonths = 0
   for (let i = 0; i < monthIndex; i++) {
@@ -179,7 +180,6 @@ function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBas
     }
   }
 
-  const monthNameFinal = months[monthIndex]!.shortname ?? months[monthIndex]!.name ?? String(monthIndex + 1)
   const days = daysFromYears + daysFromCurrentYearMonths + day + calendarConfig.offsetToDayZero
 
   return {days, display: `${year}${delimiter}${monthNameFinal}${delimiter}${day}`}
