@@ -4,7 +4,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from './gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SettingsContext} from '../model/settings-context'
-import {GroupOrCalendarSettings} from "../types/settings-types";
+import {GroupOrCalendarSettings} from '../types/settings-types'
 
 const isMobile = Platform.isMobile
 
@@ -34,13 +34,13 @@ export class ToolbarView {
   toggleBarsButton: HTMLButtonElement
   toggleTimestampButton: HTMLButtonElement
   toggleEventGroupingButton: HTMLButtonElement
-  panLeftButton: HTMLButtonElement | null = null
-  zoomOutButton: HTMLButtonElement | null = null
+  panLeftButton: HTMLButtonElement | null = null /* optional */
+  zoomOutButton: HTMLButtonElement | null = null /* optional */
   resetZoomAndPanButton: HTMLButtonElement
-  zoomInButton: HTMLButtonElement | null = null
-  panRightButton: HTMLButtonElement | null = null
+  zoomInButton: HTMLButtonElement | null = null /* optional */
+  panRightButton: HTMLButtonElement | null = null /* optional */
   settingsButton: HTMLButtonElement
-  debugInfoButton: HTMLButtonElement | null = null
+  debugInfoButton: HTMLButtonElement
   foldButton: HTMLButtonElement
   unfoldButton: HTMLButtonElement
 
@@ -142,18 +142,27 @@ export class ToolbarView {
   }
 
   private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: () => void) {
-    for (const group of this.getCurrentGroups()) {
+    let containsUnknownGroups = false
+    for (const group of this.getCurrentGroupConfigs()) {
       const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
       const checkbox = row.createEl('input', {type: 'checkbox'})
       checkbox.checked = group.visible ?? false
-      row.createSpan({text: group.id})
+      let text: string
 
+      if (group.unknown) {
+        containsUnknownGroups = true
+        text = `${group.id} *`
+      } else text = group.id
+      row.createSpan({text})
       row.addEventListener('click', () => {
         group.visible = !group.visible
         checkbox.checked = group.visible
         // void this.chartCtx.plugin.saveSettings()
         refreshChartCallback()
       })
+    }
+    if (containsUnknownGroups) {
+      dropdown.createDiv({text: '*: unregistered group', cls: 'gt-group-dropdown-footnote'})
     }
   }
 
@@ -164,11 +173,16 @@ export class ToolbarView {
   /**
    * Gets called only once per chart!
    */
-  private getCurrentGroups(): GroupOrCalendarSettings[] {
-    const groupNames = this.viewModel.allGroupNames.map(g => this.settings.getGroupConfig(g))
-    .filter((g): g is GroupOrCalendarSettings => g !== undefined)
-    groupNames.sort((a, b) => (a.priority ?? -Infinity) - (b.priority ?? -Infinity))
-    return groupNames
+  private getCurrentGroupConfigs(): GroupOrCalendarSettings[] {
+    const groupConfigs: GroupOrCalendarSettings[] = []
+
+    this.viewModel.distinctGroupNames.forEach(groupName => groupConfigs.push(this.settings.getOrCreateGroupConfig(groupName)))
+    groupConfigs.sort((a, b) => {
+      if (a.id === 'general') return -1
+      if (b.id === 'general') return 1
+      return a.id.localeCompare(b.id)
+    })
+    return groupConfigs
   }
 
   handleToggleBarsButtonClick(): void {
@@ -202,4 +216,8 @@ export class ToolbarView {
     this.isGroupsDrawn = false
   }
 
+  setHasWarnings() {
+    this.debugInfoButton.addClass(Css.toolbar.buttonWarn)
+  }
 }
+

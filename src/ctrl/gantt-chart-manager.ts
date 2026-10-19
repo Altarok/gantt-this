@@ -19,7 +19,7 @@ import {ChartContext} from '../model/chart-context'
  * Each chart should have one of these.
  */
 export default class ChartManager {
-  private readonly statisticsContext: DiagnosticsContext
+  private readonly diagnosticsContext: DiagnosticsContext
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
   private readonly chartContext: ChartContext
@@ -36,11 +36,11 @@ export default class ChartManager {
               readonly container: HTMLElement,
               readonly rawChartInput: RawChartInput,
               readonly basesCtx?: BasesContext) {
-    this.statisticsContext = new DiagnosticsContext()
+    this.diagnosticsContext = new DiagnosticsContext()
     this.settingsContext = new SettingsContext(plugin.settings, rawChartInput)
     this.eventPropertyReader = new EventPropertyReader(this.settingsContext, basesCtx)
 
-    this.chartContext = new ChartContext(plugin, this.statisticsContext, this.settingsContext,
+    this.chartContext = new ChartContext(plugin, this.diagnosticsContext, this.settingsContext,
       this.eventPropertyReader, new TextWidthCache(), basesCtx)
 
     this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
@@ -54,12 +54,12 @@ export default class ChartManager {
     try {
       await cacheKnownCalendars(this.chartContext, this.rawChartInput.calendar)
     } catch (err) {
-      if (err instanceof GanttError) this.statisticsContext.addErr(err)
+      if (err instanceof GanttError) this.diagnosticsContext.addErr(err)
     }
     try {
       this.chartContext.parseRawChartInput()
     } catch (err) {
-      if (err instanceof GanttError) this.statisticsContext.addErr(err)
+      if (err instanceof GanttError) this.diagnosticsContext.addErr(err)
     }
   }
 
@@ -100,5 +100,8 @@ export default class ChartManager {
     this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
     setToolbarReactions(this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback())
+
+    if (this.diagnosticsContext.hasWarnings) tv.setHasWarnings()
   }
 }
+

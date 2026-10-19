@@ -24,10 +24,22 @@ export class GanttChartModel {
   /** Names of groups actively shown on chart. */
   activeGroupNames: string[] = []
 
-  /** Names of calendars actively shown on chart (axis). */
-  allCalendarNames: string[] = []
-  /** Names of groups actively shown on chart. */
-  allGroupNames: string[] = []
+  /** Distinct names of calendars used on chart, but potentially hidden (axis). */
+  private distinctCalNames: string[] = []
+  /** Distinct names of groups used on chart, but potentially hidden. */
+  private distinctGrpNames: string[] = []
+
+  get distinctGroupNames(): readonly string[] {
+    return this.distinctGrpNames
+  }
+
+  addDistinctCalendar(cal: string) {
+    if (cal && !this.distinctCalNames.includes(cal)) this.distinctCalNames.push(cal)
+  }
+
+  addDistinctGroup(grp: string) {
+    if (grp && !this.distinctGrpNames.includes(grp)) this.distinctGrpNames.push(grp)
+  }
 
   /*
    * Constants

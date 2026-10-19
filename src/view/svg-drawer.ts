@@ -1,12 +1,5 @@
-import {
-  CalendarConfig,
-  GanttGroup,
-  GanttItem,
-  GanttItemDisplayType,
-  isTimespan,
-  isTimestamp,
-  NO_GROUP
-} from '../types/settings-types'
+import {GanttGroup, GanttItem, GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../types/settings-types'
+import {CalendarConfig} from '../types/calendar-types'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {createGanttEventManager} from '../ctrl/event-manager-creator'
 import {Priorities} from '../util/priority-util'
@@ -594,19 +587,22 @@ export class GanttRenderEngine {
   }
 
   filterActiveEventData(): GanttItem[] {
-    this.viewModel.allCalendarNames = [...this.settings.defaultCalendar]
-    this.viewModel.allGroupNames = [...this.settings.defaultGroup]
+    this.viewModel.addDistinctCalendar(this.settings.defaultCalendar)
+    this.viewModel.addDistinctGroup(this.settings.defaultGroup)
 
     return this.rawData.filter(d => {
 
-      if (!this.viewModel.allCalendarNames.includes(d.calendarType)) this.viewModel.allCalendarNames.push(d.calendarType)
-      if (!this.viewModel.allGroupNames.includes(d.group)) this.viewModel.allGroupNames.push(d.group)
+      const eventCalendar = d.calendarType || this.settings.defaultCalendar
+      const eventGroup = d.group || this.settings.defaultGroup
 
-      const cal = this.settings.getCalendarConfig(d.calendarType)
-      const grp = this.settings.getGroupConfig(d.group)
+      this.viewModel.addDistinctCalendar(eventCalendar)
+      this.viewModel.addDistinctGroup(eventGroup)
+
+      const cal = this.settings.getCalendarConfig(eventCalendar)
+      const grp = this.settings.getOrCreateGroupConfig(eventGroup)
 
       /* Undefined groups or calendars are accepted! */
-      if (grp?.visible === false || cal?.visible === false) return false
+      if (!grp.visible || cal?.visible === false) return false
 
       if (isTimespan(d.displayType)) switch (d.displayType) {
         case 'bar':
@@ -629,4 +625,5 @@ export class GanttRenderEngine {
   private get settings() {
     return this.chartCtx.settings
   }
+
 }
