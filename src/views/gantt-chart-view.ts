@@ -131,6 +131,9 @@ export class GanttChartView {
     this.upperHoverLayer.empty()
   }
 
+  /*
+   * TODO param unused
+   */
   clearCalendarLayer(completeReset = false) {
     this.dynamicCalendarLayer.empty()
     if (completeReset) this.staticCalendarLayer.empty()
