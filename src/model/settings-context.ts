@@ -43,6 +43,10 @@ export class SettingsContext implements GanttChartSources {
     this.updateGrpAndCalData()
   }
 
+  updateRawChartInput(data: RawChartInput): void {
+
+  }
+
   updateGrpAndCalData(): void {
     this.local.grpConfigs = Object.fromEntries(this.global.groups.map(g => [g.id, {...g}]))
     this.local.calConfigs = Object.fromEntries(this.global.calendars.map(c => [c.id, {...c}]))

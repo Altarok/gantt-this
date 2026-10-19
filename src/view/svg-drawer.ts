@@ -31,8 +31,19 @@ export class GanttRenderEngine {
     this.initEventListener()
     this.handleResize(ResetPreset.Full)
 
-    this.resizeObserver = new ResizeObserver(() => this.handleResize(ResetPreset.Resize))
-    this.resizeObserver.observe(this.view.chartContainer)
+    let lastWidth = this.view.clientWidth
+    this.resizeObserver = new ResizeObserver(() => {
+      const newWidth = this.view.clientWidth
+      // console.log('>> resize')
+      if (newWidth === lastWidth) {
+        // console.log('<< resize (short)')
+        return
+      }
+      lastWidth = newWidth
+      this.handleResize(ResetPreset.Resize)
+      // console.log('<< resize')
+    })
+    this.resizeObserver.observe(this.view.container)
   }
 
   public updateData(reset: ResetPreset, newData: GanttItem[]) {
@@ -41,7 +52,6 @@ export class GanttRenderEngine {
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    // debugger
     if (reset.view) this.redraw()
     this.initEventListener()
     this.handleResize(reset)
@@ -147,6 +157,11 @@ export class GanttRenderEngine {
   }
 
   handleResize(reset: ResetPreset) {
+    // if (reset.isManualRefresh) {
+    //   console.log(`Manual refresh.`)
+    // } else {
+    //   console.log(`Auto-refresh with options: ${reset.options}`)
+    // }
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
     const currRenderWidth = this.viewModel.getCurrRenderWidth()
@@ -304,7 +319,6 @@ export class GanttRenderEngine {
   }
 
   private drawAxes(reset: ResetPreset) {
-    // debugger
     this.view.clearCalendarLayer(reset.view)
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
@@ -399,7 +413,6 @@ export class GanttRenderEngine {
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
       }
 
-      // debugger
       if (reset.view && calBadgeTextContent) {
         this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }

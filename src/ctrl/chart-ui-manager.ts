@@ -23,6 +23,7 @@ export class ChartUiManager {
   public createRenderEngine(data: GanttItem[],
                             chartView: GanttChartView,
                             chartModel: GanttChartModel): GanttRenderEngine {
+    // console.log('<> Create new render engine')
     return new GanttRenderEngine(this.chartCtx, chartView, data, chartModel)
   }
 

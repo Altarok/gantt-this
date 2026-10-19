@@ -78,7 +78,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
    * @param y coordinate of finger or mouse pointer
    */
   protected handleDragInteraction(x: number, y: number) {
-
+    // console.log('>> handleDragInteraction', x, y)
     const deltaX = x - this.startX
     const deltaY = y - this.startDragMouseY
     const targetTranslateX = this.startTranslateX + deltaX
@@ -91,6 +91,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
       this.engine.panAbsoluteX(targetTranslateX)
       this.rafId = undefined
     })
+    // console.log('<< handleDragInteraction')
   }
 
   protected openEventFileInNewTab(target?: HTMLElement): void {
@@ -106,10 +107,12 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
    */
   protected handleEndInteraction() {
     if (this.isDragging) {
+      // console.log('>> handleEndInteraction')
       this.isDragging = false
       this.engine.panDiff(0)
-    }
-    this.destroyAnimation()
+      this.destroyAnimation()
+      // console.log('<< handleEndInteraction')
+    } // else console.log('<> handleEndInteraction (short)')
   }
 
   /**

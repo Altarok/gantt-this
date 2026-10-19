@@ -72,15 +72,16 @@ export default class ChartManager {
     const elapsed = now - this.lastRenderTimestamp
 
     const remainingCooldown = this.rerenderCooldownMs - elapsed
-    if (reset.isManualRefresh) {
-      console.log(`Manual refresh. Cooldown was at ${remainingCooldown} milliseconds.`)
-    } else if (remainingCooldown > 0) {
-      console.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
+    // if (reset.isManualRefresh) {
+    //   console.log(`Manual refresh. Cooldown was at ${remainingCooldown} milliseconds.`)
+    // } else
+    if (remainingCooldown > 0) {
+      // console.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
       return
-    } else {
-      console.log(`Auto-refresh after ${elapsed} milliseconds.`)
     }
-
+    // else {
+    //   console.log(`Auto-refresh after ${elapsed} milliseconds.`)
+    // }
 
     /* debounce to let Obsidian's internal indexing finish completely */
     this.updateTimeout = window.setTimeout(() => {

@@ -15,6 +15,7 @@ export class GanttThisBasesView extends BasesView {
   readonly type = GanttBaseViewExampleName
   private readonly containerEl: HTMLElement
   private readonly basesCtx: BasesContext
+  private chartManager?: ChartManager = undefined
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly controller: QueryController,
@@ -24,25 +25,30 @@ export class GanttThisBasesView extends BasesView {
     this.basesCtx = new BasesContext(this.plugin, this)
   }
 
+
   public onDataUpdated(): void {
 
-    this.containerEl.empty()
+    if (!this.chartManager) {
+      
+      this.containerEl.empty()
 
-    /* Omit event path stuff - use base filters instead! */
-    const rawChartInput: RawChartInput = {
-      calendarPath: this.calendarPath,
-      calendarPathSearchRecursive: this.calendarPathSearchRecursive,
-      lowerBoundDate: this.lowerBoundDate,
-      upperBoundDate: this.upperBoundDate,
-      calendar: this.calendarForBounds
-    }
+      /* Omit event path stuff - use base filters instead! */
+      const rawChartInput: RawChartInput = {
+        calendarPath: this.calendarPath,
+        calendarPathSearchRecursive: this.calendarPathSearchRecursive,
+        lowerBoundDate: this.lowerBoundDate,
+        upperBoundDate: this.upperBoundDate,
+        calendar: this.calendarForBounds
+      }
 
-    const render = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
 
-    try {
-      void render.renderGantt()
-    } catch {
-      new Notice('Failed to render Gantt chart base!')
+      this.chartManager = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
+
+      try {
+        void this.chartManager.renderGantt()
+      } catch {
+        new Notice('Failed to render Gantt chart base!')
+      }
     }
   }
 
