@@ -9,7 +9,7 @@ import {
   ParsedDate,
   PluginSettings,
   RawChartInput
-} from '../const/types'
+} from '../types/settings-types'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {ChartContext} from './chart-context'

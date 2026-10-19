@@ -1,5 +1,5 @@
 import {Consts} from '../const/constants'
-import {EpochOffsetDefinition} from '../const/types'
+import {EpochOffsetDefinition} from '../types/settings-types'
 
 /**
  * Calculates base offset for calendar definitions.

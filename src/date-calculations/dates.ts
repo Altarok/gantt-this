@@ -1,5 +1,10 @@
 // import {Notice} from 'obsidian'
-import {CalendarConfig, DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../const/types'
+import {
+  CalendarConfig,
+  DateFormatComponent,
+  PositionalCalendarConfig,
+  RuleBasedCalendarConfig
+} from '../types/settings-types'
 import {isCustomLeapYear, isGregorianLeapYear} from './leap-year-calc'
 import {Consts} from '../const/constants'
 import {throwGanttError} from '../model/gantt-error'

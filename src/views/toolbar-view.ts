@@ -4,7 +4,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from './gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SettingsContext} from '../model/settings-context'
-import {GroupOrCalendarSettings} from "../const/types";
+import {GroupOrCalendarSettings} from "../types/settings-types";
 
 const isMobile = Platform.isMobile
 
@@ -166,7 +166,7 @@ export class ToolbarView {
    */
   private getCurrentGroups(): GroupOrCalendarSettings[] {
     const groupNames = this.viewModel.allGroupNames.map(g => this.settings.getGroupConfig(g))
-      .filter((g): g is GroupOrCalendarSettings => g !== undefined)
+    .filter((g): g is GroupOrCalendarSettings => g !== undefined)
     groupNames.sort((a, b) => (a.priority ?? -Infinity) - (b.priority ?? -Infinity))
     return groupNames
   }

@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest'
 import {gregorianConfig, gregorianWithoutMonthsConfig, mayanConfig, shireConfig} from './test-configs'
 import {Consts} from '../src/const/constants'
 import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
-import {CalendarConfig, ParsedDate} from '../src/const/types'
+import {CalendarConfig, ParsedDate} from '../src/types/settings-types'
 import {runOffsetCalculations} from '../src/date-calculations/calendar-offset-calc'
 
 export function parseDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {

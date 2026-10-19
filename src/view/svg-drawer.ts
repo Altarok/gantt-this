@@ -6,7 +6,7 @@ import {
   isTimespan,
   isTimestamp,
   NO_GROUP
-} from '../const/types'
+} from '../types/settings-types'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {createGanttEventManager} from '../ctrl/event-manager-creator'
 import {Priorities} from '../util/priority-util'

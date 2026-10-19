@@ -1,6 +1,6 @@
 import {Notice} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {RawChartInput} from '../const/types'
+import {RawChartInput} from '../types/settings-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {setToolbarReactions} from './toolbar-controller'
 import TextWidthCache from '../view/text-space-cache'

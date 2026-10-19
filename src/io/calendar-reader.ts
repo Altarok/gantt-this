@@ -1,5 +1,5 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {CalendarConfig, ParsedDate, PositionalCalendarConfig, RuleBasedCalendarConfig,} from '../const/types'
+import {CalendarConfig, ParsedDate, PositionalCalendarConfig, RuleBasedCalendarConfig,} from '../types/settings-types'
 import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR} from '../const/default-values'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'

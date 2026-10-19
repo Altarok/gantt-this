@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {isCustomLeapYear, isGregorianLeapYear} from '../src/date-calculations/leap-year-calc'
 import {gregorianConfig, mayanConfig, MockCalendarConfig, shireConfig} from './test-configs'
-import {CalendarConfig, RuleBasedCalendarConfig} from '../src/const/types'
+import {CalendarConfig, RuleBasedCalendarConfig} from '../src/types/settings-types'
 
 
 const bullshitCalendarConfig: CalendarConfig = {

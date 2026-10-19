@@ -1,5 +1,5 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {CalendarConfig, EventId, GanttItem} from '../const/types'
+import {CalendarConfig, EventId, GanttItem} from '../types/settings-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
@@ -398,7 +398,7 @@ export default class TooltipManager implements HoverParent {
 
   }
 
-  private get svgDrawerUtil(){
+  private get svgDrawerUtil() {
     return this.chartCtx.svgDrawerUtil
   }
 

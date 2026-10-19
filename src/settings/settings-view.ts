@@ -1,6 +1,6 @@
 import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinitionItem} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {GroupOrCalendarSettings} from '../const/types'
+import {GroupOrCalendarSettings} from '../types/settings-types'
 import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_FALLBACK_GROUP, DEFAULT_SETTINGS} from '../const/default-values'
 import {AddEntryModal} from './settings-cal-grp-creation'
 import {createFrontMatterSettingDefinitions} from './settings-subpage-frontmatter'

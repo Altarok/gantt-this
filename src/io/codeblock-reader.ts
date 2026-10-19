@@ -1,4 +1,4 @@
-import {RawChartInput} from '../const/types'
+import {RawChartInput} from '../types/settings-types'
 import {splitOnce} from '../const/constants'
 
 /**

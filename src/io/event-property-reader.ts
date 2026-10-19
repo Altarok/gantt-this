@@ -1,5 +1,5 @@
 import {FrontMatterCache, TFile} from 'obsidian'
-import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../const/types'
+import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../types/settings-types'
 import BasesContext from '../model/bases-context'
 import {SettingsContext} from '../model/settings-context'
 

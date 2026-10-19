@@ -1,5 +1,5 @@
 import {Consts} from '../const/constants'
-import {GroupOrCalendarDrawerData} from '../const/types'
+import {GroupOrCalendarDrawerData} from '../types/settings-types'
 import {SettingsContext} from './settings-context'
 
 type Margin = { top: number, bottom: number, left: number, right: number }
@@ -67,9 +67,9 @@ export class GanttChartModel {
   private lastRenderWidth = -1
 
   /**  Data updated on a redraw, not while panning or zooming */
-  // mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = {}
-  // mappedCalConfigs: Record<string, GroupOrCalendarSettings> = {}
-  // drawnGroups: Record<string, GroupOrCalendarDrawerData> = {}
+    // mappedGrpConfigs: Record<string, GroupOrCalendarSettings> = {}
+    // mappedCalConfigs: Record<string, GroupOrCalendarSettings> = {}
+    // drawnGroups: Record<string, GroupOrCalendarDrawerData> = {}
   drawnCals: Record<string, GroupOrCalendarDrawerData> = {}
 
   constructor(private readonly settings: SettingsContext) {

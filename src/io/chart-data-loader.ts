@@ -1,5 +1,5 @@
 import {TFile} from 'obsidian'
-import {GanttItem} from '../const/types'
+import {GanttItem} from '../types/settings-types'
 import {parseFiles} from './event-frontmatter-reader'
 import {getFilteredFiles} from './file-collector'
 import {ChartContext} from '../model/chart-context'
@@ -23,7 +23,7 @@ export class ChartDataLoader {
 
     this.chartCtx.diagnostics.contextFilesCount = files.length
     this.chartCtx.diagnostics.contextEventCount = events.length
-    
+
     return events
   }
 }

@@ -1,4 +1,4 @@
-import {ControlKey} from '../const/types'
+import {ControlKey} from '../types/settings-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttEventManagerBase} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'

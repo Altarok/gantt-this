@@ -1,5 +1,5 @@
 import {SettingDefinitionItem} from 'obsidian'
-import {ControlKeyMapped, PluginSettings} from '../const/types'
+import {ControlKeyMapped, PluginSettings} from '../types/settings-types'
 import {DEFAULT_SETTINGS} from '../const/default-values'
 
 export function createChartSettingDefinition(settings: PluginSettings): SettingDefinitionItem {

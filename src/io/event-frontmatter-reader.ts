@@ -5,7 +5,7 @@ import {
   GanttItemDisplayType,
   GroupOrCalendarSettings,
   ParsedDate
-} from '../const/types'
+} from '../types/settings-types'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {EventPropertyReader} from './event-property-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'

@@ -1,6 +1,6 @@
 import {App, Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {PluginSettings, RawChartInput} from '../const/types'
+import {PluginSettings, RawChartInput} from '../types/settings-types'
 import {Consts} from '../const/constants'
 import ChartManager from '../ctrl/gantt-chart-manager'
 import {GenericModal, GenericModalInput, OutputData, UserInput} from '@Altarok/obsidian-dev-utils'

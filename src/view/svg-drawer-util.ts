@@ -1,5 +1,5 @@
 import {setIcon} from 'obsidian'
-import {GanttItem} from '../const/types'
+import {GanttItem} from '../types/settings-types'
 import {Css} from 'const/constants'
 import {ManualSvg} from './manual-svg-icons'
 import {GanttEventManager} from '../ctrl/event-manager'

@@ -10,7 +10,7 @@ import {
   Value
 } from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {GanttItem} from '../const/types'
+import {GanttItem} from '../types/settings-types'
 import {EventPropertyReader} from '../io/event-property-reader'
 
 export default class BasesContext {

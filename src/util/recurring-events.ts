@@ -1,4 +1,4 @@
-import {CalendarConfig, GanttItem, RepeatRule, Step} from '../const/types'
+import {CalendarConfig, GanttItem, RepeatRule, Step} from '../types/settings-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {ChartContext} from '../model/chart-context'

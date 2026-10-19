@@ -1,4 +1,4 @@
-import {GanttGroup, GroupOrCalendarSettings} from '../const/types'
+import {GanttGroup, GroupOrCalendarSettings} from '../types/settings-types'
 
 /**
  * 0 is the highest priority (as in 'first index of an array').<br>

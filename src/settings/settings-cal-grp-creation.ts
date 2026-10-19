@@ -1,6 +1,6 @@
 import {Modal, Notice, Setting} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {GroupOrCalendarSettings} from '../const/types'
+import {GroupOrCalendarSettings} from '../types/settings-types'
 import {getRandomHexColor} from './settings-util'
 
 const ID_REGEX = /^[\w -]+$/

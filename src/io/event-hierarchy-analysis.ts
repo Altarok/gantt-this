@@ -1,4 +1,4 @@
-import {GanttItem} from '../const/types'
+import {GanttItem} from '../types/settings-types'
 import {EventPropertyReader} from './event-property-reader'
 
 export function findPredecessorsAndSuccessors(items: GanttItem[],

@@ -1,6 +1,6 @@
 import {SettingDefinition, SettingDefinitionItem} from 'obsidian'
 import {DEFAULT_SETTINGS} from '../const/default-values'
-import {PluginSettings} from '../const/types'
+import {PluginSettings} from '../types/settings-types'
 
 /**
  * Creates setting definitions for configuring frontmatter property keys.
