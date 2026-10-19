@@ -40,14 +40,13 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected readonly scrollableContainer: HTMLElement | null
 
   protected constructor(protected readonly chartCtx: ChartContext,
-                        protected readonly engine: GanttRenderEngine) {
+                        protected readonly engine: GanttRenderEngine,
+                        isMobile: boolean ) {
     this.viewModel = engine.viewModel
     this.svg = this.engine.view.svg
     this.activeWindow = this.svg.ownerDocument.defaultView ?? window
-    this.scrollableContainer = this.getScrollableContainer()
+    this.scrollableContainer =  this.engine.view.getScrollableContainer(isMobile)
   }
-
-  protected abstract getScrollableContainer(): HTMLElement | null
 
   /** Attaches or re-binds SVG event listeners */
   protected abstract attachListeners(svg: HTMLElement, activeWindow: Window): void

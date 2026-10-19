@@ -28,9 +28,9 @@ export class ChartDiagnosticsModal extends Modal {
   }
 
   private showProblems(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
-    const {logs/* , logTypes */} = diagnostics
+    const {logs} = diagnostics
     if (logs?.length === 0) {
-      contentEl.createDiv({text: 'Set up correct, no known problems.', cls: 'gt-stats-row'})
+      contentEl.createDiv({text: 'Setup correct, no known problems.', cls: 'gt-stats-row'})
       return
     }
 

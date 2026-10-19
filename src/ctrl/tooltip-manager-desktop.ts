@@ -23,12 +23,13 @@ export default class TooltipManager implements HoverParent {
   private verticalGuides: VerticalOverlay[] = []
   private lastHoveredTarget: HTMLElement | null = null
   private lastHoverTarget: HTMLElement | null = null
-  private connectorDrawer = new GanttConnectorDrawer()
+  private connectorDrawer?: GanttConnectorDrawer
 
   constructor(private readonly chartCtx: ChartContext,
               private readonly engine: GanttRenderEngine) {
     this.searchForRelatedEventsOnHover = chartCtx.settings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.uxConnectRelatedEvents
+    if (this.isDrawArrows) this.connectorDrawer = new GanttConnectorDrawer(engine.view)
 
     this.setupDelegatedHover()
   }
@@ -339,21 +340,16 @@ export default class TooltipManager implements HoverParent {
 
     this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
 
-    relatedTargets.predecessors.forEach(r => {
-      this.createShape(r.item, r.svg, svgBackground, Css.hover.highlightRelatedEvent)
+    debugger
 
-      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(r.svg, target,
-        this.chartView.upperHoverLayer)
-      // svgBackground)
+    relatedTargets.predecessors.forEach(predecessor => {
+      this.createShape(predecessor.item, predecessor.svg, svgBackground, Css.hover.highlightRelatedEvent)
+      this.connectorDrawer?.drawCurvedArrow(predecessor.svg, target)
     })
 
-    relatedTargets.successors.forEach(r => {
-      this.createShape(r.item, r.svg, svgBackground, Css.hover.highlightRelatedEvent)
-
-      /* switch start and end in this loop */
-      if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(target, r.svg,
-        this.chartView.upperHoverLayer)
-      // svgBackground)
+    relatedTargets.successors.forEach(successor => {
+      this.createShape(successor.item, successor.svg, svgBackground, Css.hover.highlightRelatedEvent)
+      this.connectorDrawer?.drawCurvedArrow(target, successor.svg)
     })
 
   }
@@ -421,7 +417,7 @@ export default class TooltipManager implements HoverParent {
   }
 
   private hideHighlightAroundElement() {
-    this.connectorDrawer.clearArrows()
+    this.connectorDrawer?.clearArrows()
     this.chartView.clearHoverLayer()
   }
 

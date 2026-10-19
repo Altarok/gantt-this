@@ -110,7 +110,7 @@ export class GanttChartView {
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
     this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
     this.eventLayer = this.dataLayer.createSvg('g')
-    this.upperHoverLayer = this.dataLayer.createSvg('g')
+    this.upperHoverLayer = this.foregroundLayer.createSvg('g')
   }
 
 
@@ -221,6 +221,14 @@ export class GanttChartView {
 
   setWidth(width: number) {
     this.clipRect.setAttribute('width', width.toString())
+  }
+
+  getScrollableContainer(isMobile: boolean): HTMLElement | null {
+    if (isMobile) return this.container.parentElement
+
+    const activeWindow = this.svg.ownerDocument.defaultView ?? window
+    const isPopout = activeWindow?.document.body.classList.contains('is-popout-window')
+    return isPopout ? this.chartContainer : this.container.parentElement
   }
 
 }

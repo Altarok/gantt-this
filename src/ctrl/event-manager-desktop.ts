@@ -17,7 +17,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
 
   constructor(chartCtx: ChartContext, engine: GanttRenderEngine,
               private readonly tooltipManager: TooltipManager) {
-    super(chartCtx, engine)
+    super(chartCtx, engine, false)
 
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
@@ -31,11 +31,11 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       this.attachListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
-  protected getScrollableContainer(): HTMLElement | null {
-    const isPopout = this.activeWindow?.document.body.classList.contains('is-popout-window')
-    return isPopout ? this.engine.view.chartContainer
-      : this.engine.view.container.parentElement
-  }
+  // protected getScrollableContainer(): HTMLElement | null {
+  //   const isPopout = this.activeWindow?.document.body.classList.contains('is-popout-window')
+  //   return isPopout ? this.engine.view.chartContainer
+  //     : this.engine.view.container.parentElement
+  // }
 
   public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
 

@@ -43,7 +43,7 @@ export class GanttRenderEngine {
       this.handleResize(ResetPreset.Resize)
       // console.log('<< resize')
     })
-    this.resizeObserver.observe(this.view.container)
+    this.resizeObserver.observe(this.view.chartContainer)
   }
 
   public updateData(reset: ResetPreset, newData: GanttItem[]) {

@@ -15,7 +15,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   private readonly boundSvgClick: (e: MouseEvent) => void
 
   constructor(chartCtx: ChartContext, engine: GanttRenderEngine) {
-    super(chartCtx, engine)
+    super(chartCtx, engine, true)
 
     this.boundWindowTouchMove = this.handleTouchMove.bind(this)
     this.boundWindowTouchEnd = this.handleTouchEnd.bind(this)
@@ -26,9 +26,9 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       this.attachListeners(this.svg as unknown as HTMLElement, this.activeWindow)
   }
 
-  protected getScrollableContainer(): HTMLElement | null {
-    return this.engine.view.container.parentElement
-  }
+  // protected getScrollableContainer(): HTMLElement | null {
+  //   return this.engine.view.container.parentElement
+  // }
 
   public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
 
