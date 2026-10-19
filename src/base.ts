@@ -28,28 +28,32 @@ export class GanttThisBasesView extends BasesView {
 
   public onDataUpdated(): void {
 
-    if (!this.chartManager) {
-      
-      this.containerEl.empty()
+    // if (!this.chartManager) {
 
-      /* Omit event path stuff - use base filters instead! */
-      const rawChartInput: RawChartInput = {
-        calendarPath: this.calendarPath,
-        calendarPathSearchRecursive: this.calendarPathSearchRecursive,
-        lowerBoundDate: this.lowerBoundDate,
-        upperBoundDate: this.upperBoundDate,
-        calendar: this.calendarForBounds
-      }
+    /*
+     * FIXME find another way of preventing excessive re-rendering!!
+     */
 
+    this.containerEl.empty()
 
-      this.chartManager = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
-
-      try {
-        void this.chartManager.renderGantt()
-      } catch {
-        new Notice('Failed to render Gantt chart base!')
-      }
+    /* Omit event path stuff - use base filters instead! */
+    const rawChartInput: RawChartInput = {
+      calendarPath: this.calendarPath,
+      calendarPathSearchRecursive: this.calendarPathSearchRecursive,
+      lowerBoundDate: this.lowerBoundDate,
+      upperBoundDate: this.upperBoundDate,
+      calendar: this.calendarForBounds
     }
+
+
+    this.chartManager = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
+
+    try {
+      void this.chartManager.renderGantt()
+    } catch {
+      new Notice('Failed to render Gantt chart base!')
+    }
+    // }
   }
 
 

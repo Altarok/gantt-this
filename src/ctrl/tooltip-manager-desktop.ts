@@ -343,8 +343,8 @@ export default class TooltipManager implements HoverParent {
       this.createShape(r.item, r.svg, svgBackground, Css.hover.highlightRelatedEvent)
 
       if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(r.svg, target,
-        // this.chartView.upperHoverLayer)
-        svgBackground)
+        this.chartView.upperHoverLayer)
+      // svgBackground)
     })
 
     relatedTargets.successors.forEach(r => {
@@ -352,8 +352,8 @@ export default class TooltipManager implements HoverParent {
 
       /* switch start and end in this loop */
       if (this.isDrawArrows) this.connectorDrawer.drawCurvedArrow(target, r.svg,
-        // this.chartView.upperHoverLayer)
-        svgBackground)
+        this.chartView.upperHoverLayer)
+      // svgBackground)
     })
 
   }
