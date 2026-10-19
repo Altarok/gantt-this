@@ -1,53 +1,23 @@
-export enum ResetOption {
-  Zoom,
-  Pan,
-  Data,
-  Selection
-}
+export type ResetType = 'view' | 'data'
 
-export enum ResetPreset {
-  ViewOnly,
-  DataOnly,
-  Full
-}
-
-type ResetCallback = () => void
-
-export class ResetOptions {
-  private registry = new Map<ResetOption, Set<ResetCallback>>()
-
-  public register(option: ResetOption, callback: ResetCallback): () => void {
-    if (!this.registry.has(option)) {
-      this.registry.set(option, new Set())
-    }
-    this.registry.get(option)?.add(callback)
-    return () => this.unregister(option, callback)
+export class ResetPreset {
+  constructor(public readonly options: ResetType[]) {
   }
 
-  public unregister(option: ResetOption, callback: ResetCallback): void {
-    this.registry.get(option)?.delete(callback)
+  static readonly None = new ResetPreset([])
+  static readonly View = new ResetPreset(['view'])
+  static readonly Data = new ResetPreset(['data'])
+  static readonly Full = new ResetPreset(['data', 'view'])
+
+  get view(): boolean {
+    return this.options.includes('view')
   }
 
-  public reset(preset: ResetPreset): void {
-    const options = this.resolvePreset(preset)
-    options.forEach(option => {
-      const callbacks = this.registry.get(option)
-      if (callbacks) {
-        callbacks.forEach(cb => cb())
-      }
-    })
+  get data(): boolean {
+    return this.options.includes('view')
   }
 
-  private resolvePreset(preset: ResetPreset): ResetOption[] {
-    switch (preset) {
-      case ResetPreset.ViewOnly:
-        return [ResetOption.Zoom, ResetOption.Pan]
-      case ResetPreset.DataOnly:
-        return [ResetOption.Data]
-      case ResetPreset.Full:
-        return [ResetOption.Zoom, ResetOption.Pan, ResetOption.Data, ResetOption.Selection]
-      default:
-        return []
-    }
+  get full(): boolean {
+    return this === ResetPreset.Full
   }
 }
