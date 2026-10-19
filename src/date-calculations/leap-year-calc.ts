@@ -1,4 +1,4 @@
-import {CalendarConfig} from '../types/settings-types'
+import {CalendarConfig} from '../types/calendar-types'
 
 export function isGregorianLeapYear(year: number): boolean {
   const absYear = Math.abs(year)

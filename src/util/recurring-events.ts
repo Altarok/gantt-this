@@ -1,8 +1,9 @@
-import {CalendarConfig, GanttItem, RepeatRule, Step} from '../types/settings-types'
+import {GanttItem, RepeatRule, Step} from '../types/settings-types'
+import {CalendarConfig} from '../types/calendar-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {ChartContext} from '../model/chart-context'
-import {GanttError} from "../model/gantt-error";
+import {GanttError} from '../model/gantt-error'
 
 function toStep(input: string | undefined): Step | null {
   if (input === 'days' || input === 'day') return 'day'

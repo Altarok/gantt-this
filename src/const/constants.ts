@@ -5,6 +5,7 @@ export const Css = {
     minimized: 'gt-toolbar-minimized',
     buttonGroup: 'gt-toolbar-buttongroup', /* Reduces horizontal space between buttons */
     button: 'gt-toolbar-button', /* Button and SVG sizes */
+    buttonWarn: 'gt-toolbar-button-warn', /* Button and SVG sizes */
     separator: 'gt-toolbar-separator', /* Separates button groups */
   },
   inputLabel: 'gt-input-label',

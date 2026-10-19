@@ -1,6 +1,7 @@
 import {MarkdownPostProcessorContext, Platform, Plugin} from 'obsidian'
 import {FantasyGanttSettingTab} from './settings/settings-view'
-import {BaseKeys, CalendarConfig, PluginSettings, RawChartInput} from './types/settings-types'
+import {BaseKeys, PluginSettings, RawChartInput} from './types/settings-types'
+import {CalendarConfig} from './types/calendar-types'
 import {DEFAULT_SETTINGS} from './const/default-values'
 import {readCodeBlock} from './io/codeblock-reader'
 import {CodeBlockCreatorModal} from './views/gantt-codeblock-creation-modal'

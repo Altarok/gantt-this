@@ -22,6 +22,10 @@ export class DiagnosticsContext implements ChartDiagnostics {
      */
   }
 
+  get hasWarnings(): boolean {
+    return this.logs.length > 0
+  }
+
   sortLogs(): void {
     this.logs = sortLogsBySeverity(this.logs)
   }

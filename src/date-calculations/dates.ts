@@ -4,7 +4,7 @@ import {
   DateFormatComponent,
   PositionalCalendarConfig,
   RuleBasedCalendarConfig
-} from '../types/settings-types'
+} from '../types/calendar-types'
 import {isCustomLeapYear, isGregorianLeapYear} from './leap-year-calc'
 import {Consts} from '../const/constants'
 import {throwGanttError} from '../model/gantt-error'

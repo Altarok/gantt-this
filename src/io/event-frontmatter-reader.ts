@@ -1,11 +1,5 @@
-import {
-  CalendarConfig,
-  EventId,
-  GanttItem,
-  GanttItemDisplayType,
-  GroupOrCalendarSettings,
-  ParsedDate
-} from '../types/settings-types'
+import {EventId, GanttItem, GanttItemDisplayType, GroupOrCalendarSettings, ParsedDate} from '../types/settings-types'
+import {CalendarConfig} from '../types/calendar-types'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {EventPropertyReader} from './event-property-reader'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'

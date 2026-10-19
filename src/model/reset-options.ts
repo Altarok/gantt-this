@@ -1,19 +1,19 @@
 export enum ResetOption {
-  Zoom = 'ZOOM',
-  Pan = 'PAN',
-  Data = 'DATA',
-  Selection = 'SELECTION'
+  Zoom,
+  Pan,
+  Data,
+  Selection
 }
 
 export enum ResetPreset {
-  ViewOnly = 'VIEW_ONLY',
-  DataOnly = 'DATA_ONLY',
-  Full = 'FULL'
+  ViewOnly,
+  DataOnly,
+  Full
 }
 
 type ResetCallback = () => void
 
-export class ResetContext {
+export class ResetOptions {
   private registry = new Map<ResetOption, Set<ResetCallback>>()
 
   public register(option: ResetOption, callback: ResetCallback): () => void {

@@ -1,4 +1,4 @@
-import {RuleBasedCalendarConfig} from '../types/settings-types'
+import {RuleBasedCalendarConfig} from '../types/calendar-types'
 
 /**
  * Fallback calendar for lazy users.

@@ -1,5 +1,6 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {CalendarConfig, EventId, GanttItem} from '../types/settings-types'
+import {EventId, GanttItem} from '../types/settings-types'
+import {CalendarConfig} from '../types/calendar-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'

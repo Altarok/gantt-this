@@ -12,20 +12,6 @@ export class ChartDiagnosticsModal extends Modal {
     return this.chartCtx.plugin
   }
 
-  private createStatRow = (div: HTMLDivElement, label: string, value?: string | HTMLElement) => {
-
-    const row = div.createDiv({cls: 'gt-stats-row'})
-
-    if (!value) {
-      row.createSpan({text: label})
-    } else if (typeof value === 'string') {
-      row.createSpan({text: `${label}: ${String(value)}`})
-    } else {
-      row.createSpan({text: label})
-      row.appendChild(value)
-    }
-  }
-
   onOpen() {
     const {contentEl} = this
     contentEl.empty()
@@ -43,7 +29,10 @@ export class ChartDiagnosticsModal extends Modal {
 
   private showProblems(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
     const {logs/* , logTypes */} = diagnostics
-    if (logs?.length === 0) return
+    if (logs?.length === 0) {
+      contentEl.createDiv({text: 'Set up correct, no known problems.', cls: 'gt-stats-row'})
+      return
+    }
 
     contentEl.createEl('h3', {text: 'Problems'})
     const logContainer = contentEl.createDiv({cls: 'gt-stats-log-container'})
@@ -91,8 +80,23 @@ export class ChartDiagnosticsModal extends Modal {
     contentEl.createEl('h3', {text: 'Statistics'})
 
     const g = contentEl.createDiv({cls: 'gt-stats-group'})
-    this.createStatRow(g, `Calendars loaded: ${diagnostics.loadedCalendars} of ${diagnostics.totalCalendars}`)
-    this.createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files (in folder '${this.chartCtx.settings.eventPath}')`)
+    createStatRow(g, `Calendars loaded: ${diagnostics.loadedCalendars} of ${diagnostics.totalCalendars}`)
+    createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files (in folder '${this.chartCtx.settings.eventPath}')`)
+    createStatRow(g, `Current plugin version: ${this.chartCtx.version}`)
   }
 
+}
+
+function createStatRow(div: HTMLDivElement, label: string, value?: string | HTMLElement): void {
+
+  const row = div.createDiv({cls: 'gt-stats-row'})
+
+  if (!value) {
+    row.createSpan({text: label})
+  } else if (typeof value === 'string') {
+    row.createSpan({text: `${label}: ${String(value)}`})
+  } else {
+    row.createSpan({text: label})
+    row.appendChild(value)
+  }
 }

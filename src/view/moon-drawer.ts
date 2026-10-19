@@ -1,5 +1,5 @@
 import {GanttRenderEngine} from './svg-drawer'
-import {CalendarConfig, Moon} from '../types/settings-types'
+import {CalendarConfig, Moon} from '../types/calendar-types'
 import {drawMoonPhase} from './svg-drawer-util'
 
 /**

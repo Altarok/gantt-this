@@ -1,11 +1,11 @@
-import {MetadataCache, TFile} from 'obsidian'
+import {MetadataCache, PluginManifest, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DiagnosticsContext} from './diagnostics-context'
 import {SettingsContext} from './settings-context'
 import {EventPropertyReader} from '../io/event-property-reader'
 import BasesContext from './bases-context'
 import TextWidthCache from '../view/text-space-cache'
-import {CalendarConfig} from '../types/settings-types'
+import {CalendarConfig} from '../types/calendar-types'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import {GanttError} from './gantt-error'
 import {ChartDiagnostics} from '../const/error-types'
@@ -58,6 +58,13 @@ export class ChartContext {
   }
 
   // --- plugin stuff
+  get version(): string {
+    return this.manifest.version
+  }
+
+  private get manifest(): PluginManifest {
+    return this.plugin.manifest
+  }
 
   get metadataCache(): MetadataCache {
     return this.plugin.app.metadataCache
@@ -94,4 +101,6 @@ export class ChartContext {
     diagnostics.loadedCalendars = this.calendarCache.size
     return diagnostics
   }
+
+
 }

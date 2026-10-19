@@ -1,11 +1,10 @@
+import {ParsedDate, RepeatRule} from '../types/settings-types'
 import {
   CalendarConfig,
-  ParsedDate,
   PositionalCalendarConfig,
-  RepeatRule,
   RuleBasedCalendarConfig,
   RuleBasedDetails
-} from '../types/settings-types'
+} from '../types/calendar-types'
 import {isCustomLeapYear} from './leap-year-calc'
 import {parseDescriptiveDateToValidInput, TODAY} from './dates'
 import {createRepeatRule} from '../util/recurring-events'

@@ -1,5 +1,4 @@
 import {
-  CalendarConfig,
   ControlKey,
   GanttChartSources,
   GanttItemDisplayTypeTimespans,
@@ -13,7 +12,9 @@ import {
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {ChartContext} from './chart-context'
-import {GanttError} from "./gantt-error";
+import {GanttError} from './gantt-error'
+import {CalendarConfig} from '../types/calendar-types'
+import {createFallbackGroupConfig} from '../types/types-util'
 
 export class SettingsContext implements GanttChartSources {
 
@@ -49,6 +50,15 @@ export class SettingsContext implements GanttChartSources {
 
   getGroupConfig(id: string): GroupOrCalendarSettings | undefined {
     return this.local.grpConfigs[id]
+  }
+
+  getOrCreateGroupConfig(id: string): GroupOrCalendarSettings {
+    let grpConfig = this.getGroupConfig(id)
+    if (!grpConfig) {
+      grpConfig = createFallbackGroupConfig(id)
+      this.local.grpConfigs[id] = grpConfig
+    }
+    return grpConfig
   }
 
   getCalendarConfig(id: string): GroupOrCalendarSettings | undefined {
