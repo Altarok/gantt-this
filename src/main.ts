@@ -102,12 +102,12 @@ export default class FantasyGanttPlugin extends Plugin {
 
     const rawChartInput: RawChartInput = readCodeBlock(currentFile.parent.path, source)
 
-    const render = new ChartManager(this, el, rawChartInput)
+    const chartManager = new ChartManager(this, el, rawChartInput)
 
-    await render.renderGantt()
+    await chartManager.renderGantt()
 
     /* Register the child lifecycle component synchronously before any further 'await' */
-    ctx.addChild(new ChartLifecycleComponent(el, this, () => render.refreshChartCallback(ResetPreset.Data)))
+    ctx.addChild(new ChartLifecycleComponent(el, this, () => chartManager.refreshChartCallback(ResetPreset.Data)))
   }
 
 }

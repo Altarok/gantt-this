@@ -10,6 +10,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SvgDrawerUtil} from './svg-drawer-util'
+import {ResetPreset} from '../model/reset-options'
 
 export class GanttRenderEngine {
   private readonly svgDrawerUtil: SvgDrawerUtil
@@ -28,24 +29,28 @@ export class GanttRenderEngine {
     this.initLayout()
     this.redraw()
     this.initEventListener()
-    this.handleResize(true)
+    this.handleResize(ResetPreset.Full)
 
-    this.resizeObserver = new ResizeObserver(() => this.handleResize())
+    this.resizeObserver = new ResizeObserver(() => this.handleResize(ResetPreset.Resize))
     this.resizeObserver.observe(this.view.chartContainer)
   }
 
-  public updateData(newData: GanttItem[]) {
+  public updateData(reset: ResetPreset, newData: GanttItem[]) {
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
     this.viewModel.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    this.redraw()
+    // debugger
+    if (reset.view) this.redraw()
     this.initEventListener()
-    this.handleResize(true)
+    this.handleResize(reset)
   }
 
-  redraw() {
+  private redraw() {
+    /*
+     * TODO add special reset option
+     */
     this.view.redrawChart()
   }
 
@@ -133,18 +138,15 @@ export class GanttRenderEngine {
   }
 
   handlePanOrZoom() {
-    // this.view.foregroundLayer.setAttribute('transform', `translate(${this.viewModel.panTranslateX}, 0)`)
-    // this.view.setPanAndZoom(0, this.viewModel.panTranslateY)
     this.initLayout() /* -> Re-calculate repeating events */
-    this.handleResize(false)
+    this.handleResize(ResetPreset.None) // false
   }
 
   handleViewReset() {
-    this.handleResize(true)
+    this.handleResize(ResetPreset.View)
   }
 
-  handleResize(fullReset = false) {
-
+  handleResize(reset: ResetPreset) {
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
     const currRenderWidth = this.viewModel.getCurrRenderWidth()
@@ -152,7 +154,10 @@ export class GanttRenderEngine {
 
     if (currRenderWidth <= 0) return
 
-    if (!fullReset && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
+    /*
+     * Re-calculate current bounds after resize
+     */
+    if (reset === ResetPreset.Resize && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
       // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
       const totalDaysSpan = this.viewModel.totalDaysSpan
       const oldCenterPixel = lastRenderWidth / 2
@@ -172,7 +177,7 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    if (fullReset && this.settings.hasDateBounds) {
+    if (reset.view && this.settings.hasDateBounds) {
       /* Re-evaluate predefined bounds now that we have the true container width */
       this.transitionToPredefinedBounds()
     }
@@ -182,7 +187,7 @@ export class GanttRenderEngine {
     this.drawGroupBackgrounds()
     // try {// Code that might crash
     this.renderData()
-    this.drawAxes(fullReset)
+    this.drawAxes(reset)
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
@@ -298,9 +303,9 @@ export class GanttRenderEngine {
     }, 0)
   }
 
-  private drawAxes(completeReset = false) {
-    this.view.clearCalendarLayer(completeReset)
-    // const renderWidth = this.getRenderWidth()
+  private drawAxes(reset: ResetPreset) {
+    // debugger
+    this.view.clearCalendarLayer(reset.view)
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
 
@@ -394,7 +399,8 @@ export class GanttRenderEngine {
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
       }
 
-      if (completeReset && calBadgeTextContent) {
+      // debugger
+      if (reset.view && calBadgeTextContent) {
         this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }
     })
@@ -469,7 +475,7 @@ export class GanttRenderEngine {
     this.initLayout()
     this.redraw()
     this.initEventListener()
-    this.handleResize(false)
+    this.handleResize(ResetPreset.Data)
   }
 
   public destroy() {
