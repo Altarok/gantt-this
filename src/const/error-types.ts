@@ -96,12 +96,12 @@ export const knownErrors: Record<string, ErrorDef> = {
   illegalDay4Year: {
     level: 'warn',
     type: 'date',
-    messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for year {year}.`
+    messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for year: {year}`
   },
   illegalDay4Month: {
     level: 'warn',
     type: 'date',
-    messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for month {month}.`
+    messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for month: {month}`
   },
   unparseableDate: {
     level: 'warn',
