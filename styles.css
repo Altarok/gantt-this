@@ -745,7 +745,9 @@ body.is-popout-window svg.gt-svg-canvas {
   display: block;
 }
 
-.gt-group-dropdown-header {
+.gt-group-dropdown-header,
+.gt-group-dropdown-footnote,
+.gt-group-dropdown-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -754,22 +756,12 @@ body.is-popout-window svg.gt-svg-canvas {
 }
 
 .gt-group-dropdown-footnote {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
   margin-top: 6px;
-  border-radius: 2px;
   font-size: 0.75em;
 }
 
 .gt-group-dropdown-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
   cursor: pointer;
-  border-radius: 2px;
 }
 
 .gt-group-dropdown-row:hover {
