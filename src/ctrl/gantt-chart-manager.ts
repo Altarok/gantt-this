@@ -1,6 +1,6 @@
 import {Notice} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {RawChartInput} from '../types/settings-types'
+import {GanttItem, RawChartInput} from '../types/settings-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {setToolbarReactions} from './toolbar-controller'
 import TextWidthCache from '../view/text-space-cache'
@@ -15,6 +15,7 @@ import {DiagnosticsContext} from '../model/diagnostics-context'
 import {GanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
 import {ResetPreset} from '../model/reset-options'
+import {debug} from '../util/debug'
 
 /**
  * Each chart should have one of these.
@@ -32,6 +33,7 @@ export default class ChartManager {
   private updateTimeout: number | null = null
 
   private renderEngine?: GanttRenderEngine
+  private lastRawData: GanttItem[] = []
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly container: HTMLElement,
@@ -47,6 +49,23 @@ export default class ChartManager {
     this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
     this.dataLoader = new ChartDataLoader(this.chartContext)
     this.uiManager = new ChartUiManager(this.chartContext, container)
+  }
+
+  destroy(): void {
+    /* TODO ? */
+  }
+
+  async updateAfterReload(): Promise<void> {
+    debug.info('>> updateAfterReload')
+    const updatedGanttItems = await this.dataLoader.getGanttItems()
+    const haveGanttItemsChanged = compareQueryResults(this.lastRawData, updatedGanttItems)
+    debug.info(`-- updateAfterReload, haveGanttItemsChanged = ${haveGanttItemsChanged}`)
+    if (haveGanttItemsChanged) {
+      debug.info('<< updateAfterReload - update!!')
+      this.renderEngine?.updateData(ResetPreset.Data, updatedGanttItems)
+    } else {
+      debug.info('<< updateAfterReload - no update')
+    }
   }
 
   /** Do not change order of calls in this!! */
@@ -72,16 +91,14 @@ export default class ChartManager {
     const elapsed = now - this.lastRenderTimestamp
 
     const remainingCooldown = this.rerenderCooldownMs - elapsed
-    // if (reset.isManualRefresh) {
-    //   console.log(`Manual refresh. Cooldown was at ${remainingCooldown} milliseconds.`)
-    // } else
-    if (remainingCooldown > 0) {
-      // console.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
+    if (reset.isManualRefresh) {
+      debug.log(`Manual refresh. Cooldown was at ${remainingCooldown} milliseconds.`)
+    } else if (remainingCooldown > 0) {
+      debug.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
       return
+    } else {
+      debug.log(`Auto-refresh after ${elapsed} milliseconds.`)
     }
-    // else {
-    //   console.log(`Auto-refresh after ${elapsed} milliseconds.`)
-    // }
 
     /* debounce to let Obsidian's internal indexing finish completely */
     this.updateTimeout = window.setTimeout(() => {
@@ -90,10 +107,11 @@ export default class ChartManager {
       this.chartContext.resetCaches(reset)
 
       this.dataLoader.getGanttItems()
-      .then(updatedData => this.renderEngine?.updateData(reset, updatedData))
-      .catch(() => new Notice('Failed to reload Gantt.')) // TODO #errorCache
-
-
+        .then(updatedData => {
+          this.lastRawData = updatedData
+          this.renderEngine?.updateData(reset, updatedData)
+        })
+        .catch(() => new Notice('Failed to reload Gantt.'))
     }, remainingCooldown)
   }
 
@@ -117,3 +135,27 @@ export default class ChartManager {
   }
 }
 
+function compareQueryResults(prev: GanttItem[], next: GanttItem[]): boolean {
+  if (prev.length !== next.length) return true
+
+  debugger
+
+  const prevMap = new Map(prev.map(item => [item.file.path, item]))
+
+  for (const nextItem of next) {
+    const prevItem = prevMap.get(nextItem.file.path)
+    if (!prevItem) return true
+
+    if (prevItem.startDays !== nextItem.startDays
+      || prevItem.endDays !== nextItem.endDays
+      || prevItem.name !== nextItem.name
+      || prevItem.displayType !== nextItem.displayType
+      || JSON.stringify(prevItem.predecessors) !== JSON.stringify(nextItem.predecessors)
+      || JSON.stringify(prevItem.successors) !== JSON.stringify(nextItem.successors)
+    ) {
+      return true
+    }
+  }
+
+  return false
+}

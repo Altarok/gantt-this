@@ -3,6 +3,7 @@ import ChartManager from './ctrl/gantt-chart-manager'
 import {BaseKeys, RawChartInput} from './types/settings-types'
 import FantasyGanttPlugin from './main'
 import BasesContext from './model/bases-context'
+import {debug} from './util/debug'
 
 /*
  * WNM-#v2: change to 'gantt-this-view'
@@ -16,6 +17,7 @@ export class GanttThisBasesView extends BasesView {
   private readonly containerEl: HTMLElement
   private readonly basesCtx: BasesContext
   private chartManager?: ChartManager = undefined
+  private lastRawChartInput?: RawChartInput
 
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly controller: QueryController,
@@ -28,38 +30,61 @@ export class GanttThisBasesView extends BasesView {
 
   public onDataUpdated(): void {
 
-    console.log('>> onDataUpdated')
+    debug.log('>> onDataUpdated')
 
-    // if (!this.chartManager) {
+    const rawChartInput = this.createRawChartInput()
+    const isNewRawChartInput = this.isNewRawChartInput(rawChartInput)
+    this.lastRawChartInput = rawChartInput
 
-    /*
-     * FIXME find another way of preventing excessive re-rendering!!
-     */
+    if (!this.chartManager) {
+      debug.log('-- onDataUpdated - redraw: complete')
+      this.completeRedraw(rawChartInput)
+    } else if (isNewRawChartInput) {
+      debug.log('-- onDataUpdated - redraw: new base config')
+      this.completeRedraw(rawChartInput)
+    }else{
+      debug.log('-- onDataUpdated - redraw: if query results changed')
+      this.chartManager?.destroy()
+      void this.chartManager?.updateAfterReload()
+    }
 
+    debug.log('<< onDataUpdated')
+  }
+
+  private completeRedraw(rawChartInput: RawChartInput) {
     this.containerEl.empty()
+    this.chartManager?.destroy()
+    this.chartManager = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
+    try {
+      void this.chartManager.renderGantt()
+    } catch {
+      new Notice('Failed to render Gantt chart base!')
+    }
+  }
 
-    /* Omit event path stuff - use base filters instead! */
-    const rawChartInput: RawChartInput = {
+  /** Omit event path stuff - use base filters instead! */
+  private createRawChartInput(): RawChartInput {
+    return {
       calendarPath: this.calendarPath,
       calendarPathSearchRecursive: this.calendarPathSearchRecursive,
       lowerBoundDate: this.lowerBoundDate,
       upperBoundDate: this.upperBoundDate,
       calendar: this.calendarForBounds
     }
-
-
-    this.chartManager = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
-
-    try {
-      void this.chartManager.renderGantt()
-    } catch {
-      new Notice('Failed to render Gantt chart base!')
-    }
-    // }
-
-    console.log('<< onDataUpdated')
   }
 
+  private isNewRawChartInput(currRawChartInput: RawChartInput): boolean {
+    if (!this.lastRawChartInput) return true
+
+    const last = this.lastRawChartInput
+    const curr = currRawChartInput
+
+    return last.calendarPath !== curr.calendarPath
+      || last.calendarPathSearchRecursive !== curr.calendarPathSearchRecursive
+      || last.lowerBoundDate !== curr.lowerBoundDate
+      || last.upperBoundDate !== curr.upperBoundDate
+      || last.calendar !== curr.calendar
+  }
 
   private get calendarPath(): string {
     return this.getStringValue(BaseKeys.calPath) ?? this.plugin.settings.calendarPath
@@ -168,5 +193,6 @@ export class GanttThisBasesView extends BasesView {
   //    this.toolbarEl?.remove()
   //    super.onunload()
   //  }
+
 
 }

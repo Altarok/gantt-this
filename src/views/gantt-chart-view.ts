@@ -113,7 +113,6 @@ export class GanttChartView {
     this.upperHoverLayer = this.dataLayer.createSvg('g')
   }
 
-
   get clientWidth() {
     return this.container.clientWidth
   }

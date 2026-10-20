@@ -1,6 +1,7 @@
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {ChartContext} from '../model/chart-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
+import {debug} from "../util/debug";
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -77,7 +78,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
    * @param y coordinate of finger or mouse pointer
    */
   protected handleDragInteraction(x: number, y: number) {
-    // console.log('>> handleDragInteraction', x, y)
+    debug.log(`>> handleDragInteraction - x ${x}, y ${y}`)
     const deltaX = x - this.startX
     const deltaY = y - this.startDragMouseY
     const targetTranslateX = this.startTranslateX + deltaX
@@ -90,7 +91,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
       this.engine.panAbsoluteX(targetTranslateX)
       this.rafId = undefined
     })
-    // console.log('<< handleDragInteraction')
+    debug.log('<< handleDragInteraction')
   }
 
   protected openEventFileInNewTab(target?: HTMLElement): void {
@@ -106,12 +107,12 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
    */
   protected handleEndInteraction() {
     if (this.isDragging) {
-      // console.log('>> handleEndInteraction')
+      debug.log('>> handleEndInteraction')
       this.isDragging = false
       this.engine.panDiff(0)
       this.destroyAnimation()
-      // console.log('<< handleEndInteraction')
-    } // else console.log('<> handleEndInteraction (short)')
+      debug.log('<< handleEndInteraction')
+    } else debug.trace('<> handleEndInteraction (short)')
   }
 
   /**

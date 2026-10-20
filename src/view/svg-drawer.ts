@@ -11,6 +11,7 @@ import {GanttChartView} from '../views/gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SvgDrawerUtil} from './svg-drawer-util'
 import {ResetPreset} from '../model/reset-options'
+import {debug} from '../util/debug'
 
 export class GanttRenderEngine {
   private readonly svgDrawerUtil: SvgDrawerUtil
@@ -19,6 +20,7 @@ export class GanttRenderEngine {
   private resizeObserver: ResizeObserver
 
   drawnData: GanttItem[] = []
+  private lastWidth = -1
 
   constructor(private readonly chartCtx: ChartContext,
               public readonly view: GanttChartView,
@@ -31,17 +33,20 @@ export class GanttRenderEngine {
     this.handleResize(ResetPreset.Full)
     this.initEventListener()
 
-    let lastWidth = this.view.clientWidth
+    this.lastWidth = this.view.clientWidth
     this.resizeObserver = new ResizeObserver(() => {
-      const newWidth = this.view.clientWidth
-      // console.log('>> resize')
-      if (newWidth === lastWidth) {
-        // console.log('<< resize (short)')
+      const newWidth = this.view.clientWidth ?? 0
+      debug.log('>> resize')
+      if (newWidth <= 0) {
+        debug.log(`<< resize (short) newWidth = ${newWidth}`)
+        return
+      } else if (newWidth === this.lastWidth) {
+        debug.log(`<< resize (short) ${this.lastWidth} == ${newWidth}`)
         return
       }
-      lastWidth = newWidth
       this.handleResize(ResetPreset.Resize)
-      // console.log('<< resize')
+      debug.log(`<< resize (width) ${this.lastWidth} != ${newWidth}`)
+      this.lastWidth = newWidth
     })
     this.resizeObserver.observe(this.view.chartContainer)
   }
@@ -157,11 +162,11 @@ export class GanttRenderEngine {
   }
 
   handleResize(reset: ResetPreset) {
-    // if (reset.isManualRefresh) {
-    //   console.log(`Manual refresh.`)
-    // } else {
-    //   console.log(`Auto-refresh with options: ${reset.options}`)
-    // }
+    if (reset.isManualRefresh) {
+      debug.log(`Manual refresh.`)
+    } else {
+      debug.log(`Auto-refresh with options: ${String(reset.options)}`)
+    }
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
     const currRenderWidth = this.viewModel.getCurrRenderWidth()
@@ -206,10 +211,10 @@ export class GanttRenderEngine {
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
-    //   console.error('Error drawing axes:', error.message)
-    //   console.error(error.stack)
+    //   debug('Error drawing axes:', error.message)
+    //   debug(error.stack)
     // } else {
-    //   console.error('An unexpected error occurred:', error)
+    //   debug('An unexpected error occurred:', error)
     // }
     // }
   }
