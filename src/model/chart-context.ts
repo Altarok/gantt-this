@@ -1,4 +1,4 @@
-import {MetadataCache, Platform, PluginManifest, TFile} from 'obsidian'
+import {apiVersion, MetadataCache, Platform, PluginManifest, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DiagnosticsContext} from './diagnostics-context'
 import {SettingsContext} from './settings-context'
@@ -60,8 +60,12 @@ export class ChartContext {
   }
 
   // --- plugin stuff
-  get version(): string {
+  get pluginVersion(): string {
     return this.manifest.version
+  }
+
+  get obsidianVersion(): string {
+    return apiVersion
   }
 
   private get manifest(): PluginManifest {
@@ -103,5 +107,5 @@ export class ChartContext {
     diagnostics.loadedCalendars = this.calendarCache.size
     return diagnostics
   }
-  
+
 }

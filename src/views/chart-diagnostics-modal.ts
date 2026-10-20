@@ -82,7 +82,7 @@ export class ChartDiagnosticsModal extends Modal {
     const g = contentEl.createDiv({cls: 'gt-stats-group'})
     createStatRow(g, `Calendars loaded: ${diagnostics.loadedCalendars} of ${diagnostics.totalCalendars}`)
     createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files (in folder '${this.chartCtx.settings.eventPath}')`)
-    createStatRow(g, `Current plugin version: ${this.chartCtx.version}`)
+    createStatRow(g, `Current plugin version: ${this.chartCtx.pluginVersion} - Obsidian: ${this.chartCtx.obsidianVersion}`)
   }
 
 }
