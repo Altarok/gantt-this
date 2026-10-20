@@ -9,6 +9,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   /* Bound handler references for clean removal */
   private readonly boundWindowMouseMove: (e: MouseEvent) => void
   private readonly boundWindowMouseUp: (e: MouseEvent) => void
+  private readonly boundWindowMouseBlur: () => void
   private readonly boundSvgMouseDown: (e: MouseEvent) => void
   private readonly boundSvgWheel: (e: WheelEvent) => void
   private readonly boundSvgMouseMove: () => void
@@ -22,6 +23,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     /* Bind all handlers _once_ */
     this.boundWindowMouseMove = this.handleWindowMouseMove.bind(this)
     this.boundWindowMouseUp = this.handleWindowMouseUp.bind(this)
+    this.boundWindowMouseBlur = this.handleWindowMouseBlur.bind(this)
     this.boundSvgMouseDown = this.handleSvgMouseDown.bind(this)
     this.boundSvgWheel = this.handleSvgWheel.bind(this)
     this.boundSvgMouseMove = this.handleSvgMouseMove.bind(this)
@@ -44,7 +46,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     /* Placed on window for events to be able to end outside the chart */
     plugin.registerDomEvent(activeWindow, 'mousemove', this.boundWindowMouseMove)
     plugin.registerDomEvent(activeWindow, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(activeWindow, 'blur', () => this.tooltipManager.hideTooltip('blur'))
+    plugin.registerDomEvent(activeWindow, 'blur', this.boundWindowMouseBlur)
 
     /* Placed on chart for events to start inside the chart */
     plugin.registerDomEvent(svgEl, 'mousedown', this.boundSvgMouseDown)
@@ -54,9 +56,12 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   detachListeners() {
+    this.tooltipManager.destroy()
+
     if (this.activeWindow) {
       this.activeWindow.removeEventListener('mousemove', this.boundWindowMouseMove)
       this.activeWindow.removeEventListener('mouseup', this.boundWindowMouseUp)
+      this.activeWindow.removeEventListener('blur', this.boundWindowMouseBlur)
       this.activeWindow = null
     }
 
@@ -75,6 +80,10 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
 
   private handleSvgMouseDown(e: MouseEvent) {
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
+
+    // /* Prevent Obsidian from interpreting this swipe as a sidebar trigger */
+    // e.preventDefault()
+    // e.stopPropagation()
 
     super.startDragInteraction(e.clientX, e.clientY)
   }
@@ -132,6 +141,10 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
 
   private handleWindowMouseUp() {
     super.handleEndInteraction()
+  }
+
+  private handleWindowMouseBlur() {
+    this.tooltipManager.hideTooltip('blur')
   }
 
   private handleSvgMouseMove(): void {

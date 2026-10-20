@@ -5,24 +5,13 @@ const diff = 2
 type Point = { x: number, y: number }
 
 export class GanttConnectorDrawer {
-  private activeArrows: SVGElement[] = []
-  private readonly eventContainer: DOMRect
-  private readonly arrowContainer: DOMRect
-  private readonly scrollableContainer: HTMLElement | null = null
-
-  constructor(private readonly view: GanttChartView,
-              isMobile: boolean) {
-    this.eventContainer = view.eventLayer.getBoundingClientRect()
-    this.arrowContainer = view.upperHoverLayer.getBoundingClientRect()
-    this.scrollableContainer = view.getScrollableContainer(isMobile)
+  constructor(private readonly view: GanttChartView) {
   }
 
   drawCurvedArrow(fromEl: SVGElement | HTMLElement, toEl: SVGElement | HTMLElement) {
-    // const containerRect = this.offsetContainer.getBoundingClientRect()
+    const svgRect = this.view.svg.getBoundingClientRect()
     const fromRect = fromEl.getBoundingClientRect()
     const toRect = toEl.getBoundingClientRect()
-
-    const toolbarHeight = this.view.toolbarContainer.clientHeight - 36
 
     let startPoint: Point
     let endPoint: Point
@@ -41,17 +30,10 @@ export class GanttConnectorDrawer {
       endPoint = centerOfLeftBound(toRect)
     }
 
-    const scrollTop = this.scrollableContainer?.scrollTop ?? 0
-
-    // 1. Calculate relative anchor points (e.g., right edge of source to left edge of target)
-    const startX = startPoint.x + (this.arrowContainer.x - 2 * this.eventContainer.x)
-    const startY = startPoint.y + (this.arrowContainer.y - 2 * this.eventContainer.y) + scrollTop - toolbarHeight
-
-    // console.log(`const startX ${startX} = ${startPoint.x} + (${this.arrowContainer.x} - 2 * ${this.eventContainer.x})`)
-    // console.log(`const startY ${startY} = ${startPoint.y} + (${this.arrowContainer.y} - 2 * ${this.eventContainer.y}) + ${scrollTop} - ${toolbarHeight}`)
-
-    const endX = endPoint.x + (this.arrowContainer.x - 2 * this.eventContainer.x)
-    const endY = endPoint.y + (this.arrowContainer.y - 2 * this.eventContainer.y) + scrollTop - toolbarHeight
+    const startX = startPoint.x - svgRect.left
+    const startY = startPoint.y - svgRect.top
+    const endX = endPoint.x - svgRect.left
+    const endY = endPoint.y - svgRect.top
 
     const arrowPathData = createBezierCurve(startX, startY, endX, endY)
     this.drawArrow(arrowPathData)
@@ -60,16 +42,19 @@ export class GanttConnectorDrawer {
 
   /** Draw arrow and cache it to be able to delete it. */
   private drawArrow(pathData: string) {
-    const arrow = this.view.upperHoverLayer.createSvg('path', {
+    this.view.upperHoverLayer.createSvg('path', {
       cls: 'gt-dependency-arrow', attr: {d: pathData, fill: 'none', 'marker-end': 'url(#gt-arrow-head)'}
     })
-    this.activeArrows.push(arrow)
   }
 
   clearArrows() {
-    this.activeArrows.forEach(arrow => arrow.remove())
-    this.activeArrows = []
+    this.view.upperHoverLayer.empty()
   }
+
+  destroy() {
+    this.clearArrows()
+  }
+
 }
 
 function centerOfLowerBound(eventShape: DOMRect): Point {

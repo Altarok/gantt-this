@@ -78,7 +78,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   }
 
   private handleTouchStart(e: TouchEvent) {
-    // Prevent Obsidian from interpreting this swipe as a sidebar trigger
+    /* Prevent Obsidian from interpreting this swipe as a sidebar trigger */
     e.stopPropagation()
 
     if (e.touches.length === 1) {

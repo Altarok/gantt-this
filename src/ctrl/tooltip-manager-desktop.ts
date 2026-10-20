@@ -24,59 +24,63 @@ export default class TooltipManager implements HoverParent {
   private lastHoveredTarget: HTMLElement | null = null
   private lastHoverTarget: HTMLElement | null = null
   private connectorDrawer?: GanttConnectorDrawer
+  private readonly boundMouseOver: (evt: MouseEvent) => void
 
   constructor(private readonly chartCtx: ChartContext,
               private readonly engine: GanttRenderEngine) {
     this.searchForRelatedEventsOnHover = chartCtx.settings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.uxConnectRelatedEvents
-    if (this.isDrawArrows) this.connectorDrawer = new GanttConnectorDrawer(engine.view, chartCtx.isMobile)
+    if (this.isDrawArrows) this.connectorDrawer = new GanttConnectorDrawer(engine.view)
 
-    this.setupDelegatedHover()
+    this.boundMouseOver = (evt: MouseEvent) => this.handleMouseOver(evt)
+    this.engine.view.container.addEventListener('mouseover', this.boundMouseOver)
   }
 
-  private setupDelegatedHover() {
-    // Single listener on the parent container using mouseover/mouseout for bubble up support
-    this.engine.view.container.addEventListener('mouseover', (evt: MouseEvent) => {
+  public destroy() {
+    this.engine.view.container.removeEventListener('mouseover', this.boundMouseOver)
+    this.connectorDrawer?.destroy()
+    this.hideTooltip()
+  }
 
-      let hoverData: { target: HTMLElement, ganttItem: GanttItem } | null = this.getTargetAndMatchingEvent(evt)
-      if (!hoverData) {
-        this.hideTooltip()
-        return
-      }
+  private handleMouseOver(evt: MouseEvent) {
+    let hoverData: { target: HTMLElement, ganttItem: GanttItem } | null = this.getTargetAndMatchingEvent(evt)
+    if (!hoverData) {
+      this.hideTooltip('not data-id')
+      return
+    }
 
-      const {target, ganttItem} = hoverData
+    const {target, ganttItem} = hoverData
 
-      /*
-       * At THIS point we decided to really show a tooltip
-       */
+    /*
+     * At THIS point we decided to really show a tooltip
+     */
 
+    if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
+
+    /* CTRL key is reserved for native file preview */
+    if (evt.ctrlKey) {
       if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
+      this.showNativePreview(evt, target, ganttItem.link)
+      return
+    }
 
-      /* CTRL key is reserved for native file preview */
-      if (evt.ctrlKey) {
-        if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
-        this.showNativePreview(evt, target, ganttItem.link)
-        return
-      }
+    this.lastHoverTarget = target
 
-      this.lastHoverTarget = target
+    target.dataset.hasPopover = 'true' // mark element to not duplicate popover on internal mouse moves
 
-      target.dataset.hasPopover = 'true' // mark element to not duplicate popover on internal mouse moves
+    this.showHighlightAroundElement(target, ganttItem)
+    this.showVerticalGuide(target, ganttItem)
 
-      this.showHighlightAroundElement(target, ganttItem)
-      this.showVerticalGuide(target, ganttItem)
+    /* create single popover attached to the hovered event */
+    const popover = new HoverPopover(this, target, -1)
 
-      /* create single popover attached to the hovered event */
-      const popover = new HoverPopover(this, target, -1)
+    /* populate content based on event data  */
+    this.setTooltipContent(ganttItem, popover.hoverEl)
 
-      /* populate content based on event data  */
-      this.setTooltipContent(ganttItem, popover.hoverEl)
-
-      popover.hoverEl.addEventListener('mouseleave', () => {
-        /* Reset marker when popover closes/leaves */
-        this.hideTooltip('mouse leave')
-        delete target.dataset.hasPopover
-      })
+    popover.hoverEl.addEventListener('mouseleave', () => {
+      /* Reset marker when popover closes/leaves */
+      this.hideTooltip('mouse leave')
+      delete target.dataset.hasPopover
     })
   }
 
@@ -103,7 +107,6 @@ export default class TooltipManager implements HoverParent {
     const g = tooltip.createDiv({cls: Css.tooltip.tooltip})
 
     const tooltipTitle = (event.name || event.file.basename) + this.getTooltipTitleSuffix(event)
-
 
     g.createDiv({text: tooltipTitle, cls: Css.tooltip.title})
 
@@ -340,6 +343,8 @@ export default class TooltipManager implements HoverParent {
 
     this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
 
+    debugger
+
     relatedTargets.predecessors.forEach(predecessor => {
       this.createShape(predecessor.item, predecessor.svg, svgBackground, Css.hover.highlightRelatedEvent)
       this.connectorDrawer?.drawCurvedArrow(predecessor.svg, target)
@@ -415,6 +420,7 @@ export default class TooltipManager implements HoverParent {
   }
 
   private hideHighlightAroundElement() {
+    console.log('<> hideHighlightAroundElement')
     this.connectorDrawer?.clearArrows()
     this.chartView.clearHoverLayer()
   }

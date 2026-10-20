@@ -28,8 +28,8 @@ export class GanttRenderEngine {
     this.calculateGlobalBounds()
     this.initLayout()
     this.redraw()
-    this.initEventListener()
     this.handleResize(ResetPreset.Full)
+    this.initEventListener()
 
     let lastWidth = this.view.clientWidth
     this.resizeObserver = new ResizeObserver(() => {
@@ -53,8 +53,8 @@ export class GanttRenderEngine {
     this.calculateGlobalBounds()
     this.initLayout()
     if (reset.view) this.redraw()
-    this.initEventListener()
     this.handleResize(reset)
+    this.initEventListener()
   }
 
   private redraw() {
