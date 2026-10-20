@@ -1,20 +1,20 @@
 // import {createSvg} from '../view/svg-drawer-util'
 import {GanttChartView} from '../views/gantt-chart-view'
-import {Platform} from "obsidian";
 
 const diff = 2
 type Point = { x: number, y: number }
 
 export class GanttConnectorDrawer {
   private activeArrows: SVGElement[] = []
-  private readonly offsetContainer: DOMRect
-  private readonly targetContainer: DOMRect
+  private readonly eventContainer: DOMRect
+  private readonly arrowContainer: DOMRect
   private readonly scrollableContainer: HTMLElement | null = null
 
-  constructor(private readonly view: GanttChartView) {
-    this.offsetContainer = view.eventLayer.getBoundingClientRect()
-    this.targetContainer = view.upperHoverLayer.getBoundingClientRect()
-    this.scrollableContainer = view.getScrollableContainer(Platform.isMobile)
+  constructor(private readonly view: GanttChartView,
+              isMobile: boolean) {
+    this.eventContainer = view.eventLayer.getBoundingClientRect()
+    this.arrowContainer = view.upperHoverLayer.getBoundingClientRect()
+    this.scrollableContainer = view.getScrollableContainer(isMobile)
   }
 
   drawCurvedArrow(fromEl: SVGElement | HTMLElement, toEl: SVGElement | HTMLElement) {
@@ -22,55 +22,48 @@ export class GanttConnectorDrawer {
     const fromRect = fromEl.getBoundingClientRect()
     const toRect = toEl.getBoundingClientRect()
 
-    console.log('offsetContainer', this.offsetContainer)
-    console.log('targetContainer', this.targetContainer)
-    console.log('fromRect', fromRect)
-    console.log('toRect', toRect)
-
-    debugger
+    const toolbarHeight = this.view.toolbarContainer.clientHeight - 36
 
     let startPoint: Point
     let endPoint: Point
 
     if (Math.abs(fromRect.y - toRect.y) < 1) {
-      startPoint = centerOfRightBound(this.offsetContainer, fromRect)
-      endPoint = centerOfLeftBound(this.offsetContainer, toRect)
-    } else if (fromRect.bottom > toRect.top) {
-      startPoint = centerOfLowerBound(this.offsetContainer, fromRect)
-      endPoint = centerOfLeftBound(this.offsetContainer, toRect)
-    } else { // if (fromRect.top < toRect.bottom) {
-      startPoint = centerOfUpperBound(this.offsetContainer, fromRect)
-      endPoint = centerOfLeftBound(this.offsetContainer, toRect)
+      /* [from] in same lane as [to] */
+      startPoint = centerOfRightBound(fromRect)
+      endPoint = centerOfLeftBound(toRect)
+    } else if (fromRect.top > toRect.bottom) {
+      /* [from] below [to] */
+      startPoint = centerOfUpperBound(fromRect)
+      endPoint = centerOfLeftBound(toRect)
+    } else {
+      /* [from] above [to] */
+      startPoint = centerOfLowerBound(fromRect)
+      endPoint = centerOfLeftBound(toRect)
     }
 
+    const scrollTop = this.scrollableContainer?.scrollTop ?? 0
+
     // 1. Calculate relative anchor points (e.g., right edge of source to left edge of target)
-    const startX = startPoint.x + (this.targetContainer.x - this.offsetContainer.x)
-    const startY = startPoint.y + (this.targetContainer.y - this.offsetContainer.y)
-      - (this.scrollableContainer?.scrollTop ?? 0)
+    const startX = startPoint.x + (this.arrowContainer.x - 2 * this.eventContainer.x)
+    const startY = startPoint.y + (this.arrowContainer.y - 2 * this.eventContainer.y) + scrollTop - toolbarHeight
 
-    const endX = endPoint.x + (this.targetContainer.x - this.offsetContainer.x)
-    const endY = endPoint.y + (this.targetContainer.y - this.offsetContainer.y)
-      - (this.scrollableContainer?.scrollTop ?? 0)
+    // console.log(`const startX ${startX} = ${startPoint.x} + (${this.arrowContainer.x} - 2 * ${this.eventContainer.x})`)
+    // console.log(`const startY ${startY} = ${startPoint.y} + (${this.arrowContainer.y} - 2 * ${this.eventContainer.y}) + ${scrollTop} - ${toolbarHeight}`)
 
-    debugger
+    const endX = endPoint.x + (this.arrowContainer.x - 2 * this.eventContainer.x)
+    const endY = endPoint.y + (this.arrowContainer.y - 2 * this.eventContainer.y) + scrollTop - toolbarHeight
 
-    // 2. Control points for smooth horizontal S-curve (cubic bezier)
-    const dx = Math.abs(endX - startX) * 0.5
-    const cp1X = startX + dx
-    const cp1Y = startY
-    const cp2X = endX - dx
-    const cp2Y = endY
+    const arrowPathData = createBezierCurve(startX, startY, endX, endY)
+    this.drawArrow(arrowPathData)
+  }
 
-    const pathData = `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${endX} ${endY}`
 
-    // 3. Create path
-    const path = this.view.upperHoverLayer.createSvg('path', {
-      cls: 'gt-dependency-arrow', attr: {
-        d: pathData, fill: 'none', 'marker-end': 'url(#gt-arrow-head)' // SVG marker definition
-      }
+  /** Draw arrow and cache it to be able to delete it. */
+  private drawArrow(pathData: string) {
+    const arrow = this.view.upperHoverLayer.createSvg('path', {
+      cls: 'gt-dependency-arrow', attr: {d: pathData, fill: 'none', 'marker-end': 'url(#gt-arrow-head)'}
     })
-
-    this.activeArrows.push(path)
+    this.activeArrows.push(arrow)
   }
 
   clearArrows() {
@@ -79,35 +72,24 @@ export class GanttConnectorDrawer {
   }
 }
 
-
-function centerOfLowerBound(containerRect: DOMRect, eventShape: DOMRect): Point {
-  return {
-    x: eventShape.x + (eventShape.width / 2) - containerRect.x
-    ,
-    y: eventShape.y - diff - containerRect.y
-  }
+function centerOfLowerBound(eventShape: DOMRect): Point {
+  return {x: eventShape.left + (eventShape.width / 2), y: eventShape.bottom + diff}
 }
 
-function centerOfUpperBound(containerRect: DOMRect, eventShape: DOMRect): Point {
-  return {
-    x: eventShape.x + (eventShape.width / 2) - containerRect.x
-    ,
-    y: eventShape.bottom + diff - containerRect.y
-  }
+function centerOfUpperBound(eventShape: DOMRect): Point {
+  return {x: eventShape.left + (eventShape.width / 2), y: eventShape.top - diff}
 }
 
-function centerOfLeftBound(containerRect: DOMRect, eventShape: DOMRect): Point {
-  return {
-    x: eventShape.x - diff - containerRect.x
-    ,
-    y: eventShape.y + (eventShape.height / 2) - containerRect.y
-  }
+function centerOfLeftBound(eventShape: DOMRect): Point {
+  return {x: eventShape.left - diff, y: eventShape.top + (eventShape.height / 2)}
 }
 
-function centerOfRightBound(containerRect: DOMRect, eventShape: DOMRect): Point {
-  return {
-    x: eventShape.right + diff // - containerRect.x
-    ,
-    y: eventShape.y + (eventShape.height / 2) - containerRect.y
-  }
+function centerOfRightBound(eventShape: DOMRect): Point {
+  return {x: eventShape.right + diff, y: eventShape.top + (eventShape.height / 2)}
+}
+
+/** Create control points for smooth horizontal S-curve (cubic bezier). */
+function createBezierCurve(startX: number, startY: number, endX: number, endY: number) {
+  const dx = Math.abs(endX - startX) * 0.5
+  return `M ${startX} ${startY} C ${startX + dx} ${startY}, ${endX - dx} ${endY}, ${endX} ${endY}`
 }

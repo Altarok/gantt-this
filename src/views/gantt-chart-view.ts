@@ -110,7 +110,7 @@ export class GanttChartView {
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
     this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
     this.eventLayer = this.dataLayer.createSvg('g')
-    this.upperHoverLayer = this.foregroundLayer.createSvg('g')
+    this.upperHoverLayer = this.dataLayer.createSvg('g')
   }
 
 

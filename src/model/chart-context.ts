@@ -1,4 +1,4 @@
-import {MetadataCache, PluginManifest, TFile} from 'obsidian'
+import {MetadataCache, Platform, PluginManifest, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DiagnosticsContext} from './diagnostics-context'
 import {SettingsContext} from './settings-context'
@@ -16,6 +16,7 @@ import {ResetPreset} from './reset-options'
  */
 export class ChartContext {
   readonly svgDrawerUtil: SvgDrawerUtil
+  readonly isMobile = Platform.isMobile
 
   constructor(readonly plugin: FantasyGanttPlugin,
               private readonly diagnosticsContext: DiagnosticsContext,
@@ -102,6 +103,5 @@ export class ChartContext {
     diagnostics.loadedCalendars = this.calendarCache.size
     return diagnostics
   }
-
-
+  
 }

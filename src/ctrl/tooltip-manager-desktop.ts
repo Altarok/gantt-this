@@ -29,7 +29,7 @@ export default class TooltipManager implements HoverParent {
               private readonly engine: GanttRenderEngine) {
     this.searchForRelatedEventsOnHover = chartCtx.settings.uxHighlightRelatedEvents
     this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.uxConnectRelatedEvents
-    if (this.isDrawArrows) this.connectorDrawer = new GanttConnectorDrawer(engine.view)
+    if (this.isDrawArrows) this.connectorDrawer = new GanttConnectorDrawer(engine.view, chartCtx.isMobile)
 
     this.setupDelegatedHover()
   }
@@ -339,8 +339,6 @@ export default class TooltipManager implements HoverParent {
     const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
 
     this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
-
-    debugger
 
     relatedTargets.predecessors.forEach(predecessor => {
       this.createShape(predecessor.item, predecessor.svg, svgBackground, Css.hover.highlightRelatedEvent)
