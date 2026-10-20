@@ -343,7 +343,7 @@ export default class TooltipManager implements HoverParent {
 
     this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
 
-    debugger
+    // debugger
 
     relatedTargets.predecessors.forEach(predecessor => {
       this.createShape(predecessor.item, predecessor.svg, svgBackground, Css.hover.highlightRelatedEvent)
@@ -420,7 +420,7 @@ export default class TooltipManager implements HoverParent {
   }
 
   private hideHighlightAroundElement() {
-    console.log('<> hideHighlightAroundElement')
+    // console.log('<> hideHighlightAroundElement')
     this.connectorDrawer?.clearArrows()
     this.chartView.clearHoverLayer()
   }
