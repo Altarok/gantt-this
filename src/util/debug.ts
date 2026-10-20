@@ -19,6 +19,6 @@ function trace(message: string): void {
   if (isDebug) logg('[T] ', message)
 }
 
-function logg(prefix: string, message: string): void {
-  if (isDebug) console.log(prefix + message)
+function logg(_prefix: string, _message: string): void {
+  // if (isDebug) console.log(prefix + message)
 }

@@ -138,8 +138,6 @@ export default class ChartManager {
 function compareQueryResults(prev: GanttItem[], next: GanttItem[]): boolean {
   if (prev.length !== next.length) return true
 
-  debugger
-
   const prevMap = new Map(prev.map(item => [item.file.path, item]))
 
   for (const nextItem of next) {
