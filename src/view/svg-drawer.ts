@@ -270,7 +270,7 @@ export class GanttRenderEngine {
 
         const nextX = nextItem ? this.getXPosition(nextItem.startDays) : this.currRenderWidth
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
-        const svgLayer = d.isRecurringInstance ? this.view.repeaterEventLayer : this.view.eventLayer
+        const svgLayer = this.view.getLayerForEvent(d.isRecurringInstance ?? false)
 
         if (isTimespan(displayType)) switch (displayType) {
           case 'bar':
@@ -599,11 +599,11 @@ export class GanttRenderEngine {
   // const selector = `[data-id="${id}"]`
   // return Array.from(this.eventLayer.querySelectorAll<T>(selector))
   // }
-
-  findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
-    const selector = `[data-id="${id}"]`
-    return this.view.eventLayer.querySelector<T>(selector)
-  }
+  //
+  // findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
+  //   const selector = `[data-id="${id}"]`
+  //   return this.view.eventLayer.querySelector<T>(selector)
+  // }
 
   filterActiveEventData(): GanttItem[] {
     this.viewModel.addDistinctCalendar(this.settings.defaultCalendar)

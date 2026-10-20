@@ -246,6 +246,9 @@ export default class TooltipManager implements HoverParent {
       const lower = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
       this.chartView.lowerHoverLayer.appendChild(upper)
       this.chartView.dynamicCalendarLayer.appendChild(lower)
+      /*
+       * TODO add calendar hover layer to be able to draw in the view
+       */
       // if (svg.firstChild) {
       //   svg.insertBefore(upper, svg.firstChild)
       //   svg.insertBefore(lower, svg.firstChild)
@@ -307,12 +310,12 @@ export default class TooltipManager implements HoverParent {
       const successorsRaw = gtItem.successors.map(s => this.getEventById(s)).filter(x => !!x) ?? []
 
       predecessorsRaw.forEach(item => {
-        const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
+        const svg: SVGElement | null = this.engine.view.findSvgElementById(item.id)
         if (svg) predecessors.push({item, svg})
       })
 
       successorsRaw.forEach(item => {
-        const svg: SVGElement | null = this.engine.findSvgElementById(item.id)
+        const svg: SVGElement | null = this.engine.view.findSvgElementById(item.id)
         if (svg) successors.push({item, svg})
       })
     }
@@ -338,12 +341,10 @@ export default class TooltipManager implements HoverParent {
   }
 
   private addHighLightAroundSvg(ganttItem: GanttItem, svgBackground: SVGElement, target: SVGElement | HTMLElement) {
-
-    const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
-
+    debugger
     this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
 
-    // debugger
+    const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
 
     relatedTargets.predecessors.forEach(predecessor => {
       this.createShape(predecessor.item, predecessor.svg, svgBackground, Css.hover.highlightRelatedEvent)
@@ -354,7 +355,6 @@ export default class TooltipManager implements HoverParent {
       this.createShape(successor.item, successor.svg, svgBackground, Css.hover.highlightRelatedEvent)
       this.connectorDrawer?.drawCurvedArrow(target, successor.svg)
     })
-
   }
 
   private createShape(ganttItem: GanttItem,
@@ -392,8 +392,10 @@ export default class TooltipManager implements HoverParent {
     }
 
     if (shape) {
-      const highlightElement: SVGGElement = this.chartView.upperHoverLayer.createSvg('g')
-      highlightElement.appendChild(shape)
+      // const highlightElement: SVGGElement = this.chartView.upperHoverLayer.createSvg('g')
+      // highlightElement.appendChild(shape)
+      // TODO revert
+      this.chartView.upperHoverLayer.appendChild(shape)
     }
 
   }

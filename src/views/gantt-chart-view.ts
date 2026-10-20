@@ -22,9 +22,9 @@ export class GanttChartView {
   eraLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : layer used for mouse overlay */
   lowerHoverLayer!: SVGElement
-  repeaterEventLayer!: SVGElement
+  private repeaterEventLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : event layer used for other events */
-  eventLayer!: SVGElement
+  private eventLayer!: SVGElement
   upperHoverLayer!: SVGElement
 
   /** Inside foregroundLayer: calendars */
@@ -231,5 +231,13 @@ export class GanttChartView {
     return isPopout ? this.chartContainer : this.container.parentElement
   }
 
+  getLayerForEvent(isRecurringInstance: boolean): SVGElement {
+    return isRecurringInstance ? this.repeaterEventLayer : this.eventLayer
+  }
+
+  findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
+    const selector = `[data-id="${id}"]`
+    return this.eventLayer.querySelector<T>(selector)
+  }
 }
 
