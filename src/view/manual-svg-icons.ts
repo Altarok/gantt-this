@@ -14,7 +14,7 @@ const scatterChartButtonIcon = `${svgBase}<path d="M3 3v16a2 2 0 0 0 2 2h16" />
   <circle cx="6" cy="11" r="0.5" fill="currentColor" />
   <circle cx="9" cy="4" r="0.5" fill="currentColor" /></svg>`
 
-const scatterChartCrossedButtonIcon =`${svgBase}<path d="M3 3v16a2 2 0 002 2h16" />
+const scatterChartCrossedButtonIcon = `${svgBase}<path d="M3 3v16a2 2 0 002 2h16" />
   <circle cx="11.5" cy="17.5" r="0.5" fill="currentColor" />
   <circle cx="13" cy="6.5" r="0.5" fill="currentColor" />
   <circle cx="18.5" cy="13" r="0.5" fill="currentColor" />
@@ -22,7 +22,7 @@ const scatterChartCrossedButtonIcon =`${svgBase}<path d="M3 3v16a2 2 0 002 2h16"
   <circle cx="9" cy="4" r="0.5" fill="currentColor" />
   <path d="M1 1 24 24" /></svg>`
 
-const barChartCrossedButtonIcon =`${svgBase}<path d="M3 3v16a2 2 0 002 2h16" />
+const barChartCrossedButtonIcon = `${svgBase}<path d="M3 3v16a2 2 0 002 2h16" />
   <rect x="7" y="13" width="9" height="4" rx="1" />
   <rect x="7" y="5" width="12" height="4" rx="1" />
   <path d="M1 1 24 24" /></svg>`
