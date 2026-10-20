@@ -28,6 +28,8 @@ export class GanttThisBasesView extends BasesView {
 
   public onDataUpdated(): void {
 
+    console.log('>> onDataUpdated')
+
     // if (!this.chartManager) {
 
     /*
@@ -54,6 +56,8 @@ export class GanttThisBasesView extends BasesView {
       new Notice('Failed to render Gantt chart base!')
     }
     // }
+
+    console.log('<< onDataUpdated')
   }
 
 
