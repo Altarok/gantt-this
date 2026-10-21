@@ -250,7 +250,11 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get uxUseCalColorForCalAxis(): boolean {
-    return /* TODO implement this.local.uxUseCalColorForCalAxis ?? */ this.global.uxUseCalColorForCalAxis
+    return this.local.uxUseCalColorForCalAxis ?? this.global.uxUseCalColorForCalAxis
+  }
+
+  setUseCalColorForCalAxis(val: boolean) {
+    this.local.uxUseCalColorForCalAxis = val
   }
 
   get uxHighlightRelatedEvents(): boolean {

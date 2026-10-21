@@ -103,6 +103,10 @@ export class ToolbarView implements Destroyable {
         this.settings.setShowMoons(b)
         refreshChartCallback()
       })
+      this.drawRow(dropdown, 'Color-code axes', (b: boolean) => {
+        this.settings.setUseCalColorForCalAxis(b)
+        refreshChartCallback()
+      })
     })
 
     this.createDropdownButton(localSettingsGroup, 'eye', 'Toggle group visibility', 'Toggle group visibility', (dropdown) => {

@@ -149,6 +149,7 @@ export type LocalChartSettings = Partial<GanttChartSources> & Partial<ChartVisua
   calConfigs: Record<string, GroupOrCalendarSettings>
 
   uxShowMoons?: boolean
+  uxUseCalColorForCalAxis?: boolean
 }
 
 export type RawChartInput = Partial<GanttChartSources> & /* Partial<ChartVisualSettings> & */ {
