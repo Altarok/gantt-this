@@ -242,7 +242,11 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get uxShowMoons(): boolean {
-    return /* TODO implement this.local.uxShowMoons ?? */ this.global.uxShowMoons
+    return this.local.uxShowMoons ?? this.global.uxShowMoons
+  }
+
+  setShowMoons(val: boolean) {
+    this.local.uxShowMoons = val
   }
 
   get uxUseCalColorForCalAxis(): boolean {
