@@ -1,5 +1,5 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {EventId, GanttItem} from '../types/settings-types'
+import {EventId, GanttItem, isTimespan} from '../types/settings-types'
 import {CalendarConfig} from '../types/calendar-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
@@ -112,9 +112,8 @@ export default class TooltipManager implements HoverParent {
 
     const table = g.createEl('table', {cls: Css.tooltip.table})
 
-    if (event.isRecurringInstance) {
-      this.addRepeaterEventSuffix(g, event)
-    }
+
+    this.addEventDateBelowTableInOutputFormat(g, event)
 
     g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
 
@@ -130,35 +129,34 @@ export default class TooltipManager implements HoverParent {
     return createAxisDateDescription(days, cc)
   }
 
-  private addRepeaterEventSuffix(g: HTMLDivElement, d: GanttItem) {
+  private addEventDateBelowTableInOutputFormat(g: HTMLDivElement, item: GanttItem) {
 
-    const calendarConfig = this.chartCtx.calendarCache.get(d.calendarType)
+    const calendarConfig = this.chartCtx.calendarCache.get(item.calendarType)
     if (!calendarConfig) return
 
     const datesContainer = g.createDiv({cls: Css.tooltip.repeaterSuffix})
 
-    // Parent / Original Event Date Range
-    const originalItem = this.getEventById(d.parentEventId!)
-    if (originalItem) {
-      const origRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
-      origRow.createSpan({text: 'original date:', cls: 'gt-repeat-label'})
-      origRow.createSpan({
-        text: originalItem.displayType === 'bar' ?
-          `${this.dateInOutputFormat(originalItem.startDays, calendarConfig)} - ${this.dateInOutputFormat(originalItem.endDays, calendarConfig)}`
-          : this.dateInOutputFormat(originalItem.startDays, calendarConfig),
-        cls: 'gt-repeat-value'
-      })
+    if (item.isRecurringInstance) {
+      const parentItem = this.getEventById(item.parentEventId!)
+      this.addEventDateBelowTableRow(datesContainer, 'original date:', calendarConfig, parentItem)
+      this.addEventDateBelowTableRow(datesContainer, 'repeat date:', calendarConfig, item)
+    } else {
+      this.addEventDateBelowTableRow(datesContainer, 'date:', calendarConfig, item)
     }
+  }
 
-    // Active Instance Date Range
+  private addEventDateBelowTableRow(datesContainer: HTMLDivElement, text: string, calendarConfig: CalendarConfig,
+                                    item?: GanttItem) {
+    if (!item) return
+
     const dateRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
-    dateRow.createSpan({text: 'repeat date:', cls: 'gt-repeat-label'})
+    dateRow.createSpan({text, cls: 'gt-repeat-label'})
     dateRow.createSpan({
-      text: d.displayType === 'bar' ? `${this.dateInOutputFormat(d.startDays, calendarConfig)} - ${this.dateInOutputFormat(d.endDays, calendarConfig)}`
-        : this.dateInOutputFormat(d.startDays, calendarConfig),
+      text: isTimespan(item.displayType)
+        ? `${this.dateInOutputFormat(item.startDays, calendarConfig)} - ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
+        : this.dateInOutputFormat(item.startDays, calendarConfig),
       cls: 'gt-repeat-value'
     })
-
   }
 
   private get hasSelectedBaseProperties(): boolean {
