@@ -1,6 +1,6 @@
 import {Notice} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {GanttItem, RawChartInput} from '../types/settings-types'
+import {Destroyable, GanttItem, RawChartInput} from '../types/settings-types'
 import {GanttRenderEngine} from '../view/svg-drawer'
 import {setToolbarReactions} from './toolbar-controller'
 import TextWidthCache from '../view/text-space-cache'
@@ -35,6 +35,8 @@ export default class ChartManager {
   private renderEngine?: GanttRenderEngine
   private lastRawData: GanttItem[] = []
 
+  private destroyableObjects: Destroyable[] = []
+
   constructor(readonly plugin: FantasyGanttPlugin,
               readonly container: HTMLElement,
               readonly rawChartInput: RawChartInput,
@@ -52,7 +54,7 @@ export default class ChartManager {
   }
 
   destroy(): void {
-    /* TODO ? */
+    this.destroyableObjects.forEach(d => d.destroy())
   }
 
   async updateAfterReload(): Promise<void> {
@@ -107,11 +109,11 @@ export default class ChartManager {
       this.chartContext.resetCaches(reset)
 
       this.dataLoader.getGanttItems()
-        .then(updatedData => {
-          this.lastRawData = updatedData
-          this.renderEngine?.updateData(reset, updatedData)
-        })
-        .catch(() => new Notice('Failed to reload Gantt.'))
+      .then(updatedData => {
+        this.lastRawData = updatedData
+        this.renderEngine?.updateData(reset, updatedData)
+      })
+      .catch(() => new Notice('Failed to reload Gantt.'))
     }, remainingCooldown)
   }
 
@@ -124,6 +126,7 @@ export default class ChartManager {
     chartModel.setRawContainerWidth(chartView.chartContainer.clientWidth)
 
     const tv = this.uiManager.createToolbarView(chartModel, chartView, () => this.refreshChartCallback(ResetPreset.Data))
+    this.destroyableObjects.push(tv)
 
     const data = await this.dataLoader.getGanttItems()
 

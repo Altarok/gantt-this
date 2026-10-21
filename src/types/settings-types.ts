@@ -1,5 +1,9 @@
 import {FrontMatterCache, TFile} from 'obsidian'
 
+export type Destroyable = {
+  destroy(): void
+}
+
 export const NO_GROUP = ''
 export const DEFAULT_TIMESPAN = 'bar'
 export const DEFAULT_TIMESTAMP = 'point'

@@ -4,7 +4,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from './gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SettingsContext} from '../model/settings-context'
-import {GroupOrCalendarSettings} from '../types/settings-types'
+import {Destroyable, GroupOrCalendarSettings} from '../types/settings-types'
 
 const isMobile = Platform.isMobile
 
@@ -24,7 +24,7 @@ function createGroup(container: HTMLDivElement) {
   return container.createDiv({cls: Css.toolbar.buttonGroup})
 }
 
-export class ToolbarView {
+export class ToolbarView implements Destroyable {
   private readonly container: HTMLDivElement
   /*
    * Toolbar buttons in order (LTR) - optional buttons may be null
@@ -43,6 +43,8 @@ export class ToolbarView {
   foldButton: HTMLButtonElement
   unfoldButton: HTMLButtonElement
 
+  private activeCloser: (() => void) | null = null
+  private boundOutsideClick: ((e: MouseEvent) => void) | null = null
 
   /**
    * Creates an instance of the ToolbarView, initializing buttons, groups,
@@ -94,10 +96,18 @@ export class ToolbarView {
     addSeparator(this.container)
 
     const localSettingsGroup: HTMLDivElement = createGroup(this.container)
-
     localSettingsGroup.createDiv({text: 'Local settings:'})
-    this.drawLocalSettingsButton(localSettingsGroup, refreshChartCallback)
-    this.drawGroupVisibilityToggleButton(localSettingsGroup, refreshChartCallback)
+
+    this.createDropdownButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings', 'Changes affect only local chart', (dropdown) => {
+      this.drawRow(dropdown, 'Moons', (b: boolean) => {
+        this.settings.setShowMoons(b)
+        refreshChartCallback()
+      })
+    })
+
+    this.createDropdownButton(localSettingsGroup, 'eye', 'Toggle group visibility', 'Toggle group visibility', (dropdown) => {
+      this.drawGroupToggleDropdown(dropdown, refreshChartCallback)
+    })
 
     addSeparator(this.container)
 
@@ -107,17 +117,23 @@ export class ToolbarView {
     this.unfoldButton = createButton(chartView.minimizedToolbarContainer, 'unfold-horizontal', 'Show Toolbar')
     this.unfoldButton.addClass('gt-minimized-btn')
     this.unfold()
+
+    this.setupGlobalOutsideClickListener()
+  }
+
+  private setupGlobalOutsideClickListener() {
+    const activeWindow = this.chartView.container.ownerDocument.defaultView ?? window
+    this.boundOutsideClick = (e: MouseEvent) => { // ('click', (e) => {
+      const target = e.target as Node
+      if (this.activeCloser && !this.container.contains(target) && !(target as HTMLElement)?.closest?.('.gt-group-dropdown')) {
+        this.activeCloser()
+        this.activeCloser = null
+      }
+    }
+    activeWindow.addEventListener('click', this.boundOutsideClick)
   }
 
   private drawRow(dropdown: HTMLDivElement, text: string, callback: (b: boolean) => void) {
-    // const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
-    // const checkbox = row.createEl('input', {type: 'checkbox'})
-    //
-    // row.createSpan({text})
-    // row.addEventListener('click', () => {
-    //   checkbox.checked = !checkbox.checked
-    //   callback(checkbox.checked)
-    // })
     const row = dropdown.createEl('label', {cls: 'gt-group-dropdown-row'})
     const checkbox = row.createEl('input', {type: 'checkbox'})
     row.createSpan({text})
@@ -125,91 +141,6 @@ export class ToolbarView {
       callback(checkbox.checked)
     })
   }
-
-  private drawLocalSettingsButton(localSettingsGroup: HTMLDivElement, refreshChartCallback: () => void) {
-    const button = createButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings')
-    const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
-    dropdown.createDiv({text: 'Changes affect only local chart', cls: 'gt-group-dropdown-header'})
-
-    let isOpen = false
-    let isDrawn = false
-    const toggleDropdown = (open?: boolean) => {
-      isOpen = open ?? !isOpen
-      if (isOpen) {
-        if (!isDrawn) {
-          this.drawRow(dropdown, 'Moons', (b: boolean): void => {
-            this.settings.setShowMoons(b)
-            refreshChartCallback()
-          })
-
-          isDrawn = true
-        }
-
-        const btnRect = button.getBoundingClientRect()
-        const containerRect = this.chartView.container.getBoundingClientRect()
-        dropdown.addClass('visible')
-        dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
-        dropdown.style.left = `${btnRect.left - containerRect.left}px`
-      } else {
-        dropdown.removeClass('visible')
-      }
-    }
-
-
-    button.addEventListener('click', (e) => {
-      e.stopPropagation()
-      toggleDropdown()
-    })
-
-    // const activeWindow = this.chartView.container.ownerDocument.defaultView ?? window
-    // activeWindow.addEventListener('click', (e) => {
-    //   if (isOpen /* && !localSettingsGroup.contains(e.target as Node) */ && !dropdown.contains(e.target as Node)) {
-    //     toggleDropdown(false)
-    //   }
-    // })
-  }
-
-  private drawGroupVisibilityToggleButton(localSettingsGroup: HTMLDivElement, refreshChartCallback: () => void) {
-    const groupButton = createButton(localSettingsGroup, 'eye', 'Toggle group visibility')
-
-    const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
-    dropdown.createDiv({text: 'Toggle group visibility', cls: 'gt-group-dropdown-header'})
-
-    let isOpen = false
-    let isDrawn = false
-    const toggleDropdown = (open: boolean) => {
-      // isOpen = open ?? !isOpen
-      if (open) {
-        if (!isDrawn) {
-          this.drawGroupToggleDropdown(dropdown, refreshChartCallback)
-          isDrawn = true
-        }
-
-        const btnRect = groupButton.getBoundingClientRect()
-        const containerRect = this.chartView.container.getBoundingClientRect()
-        dropdown.addClass('visible')
-        dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
-        dropdown.style.left = `${btnRect.left - containerRect.left}px`
-      } else {
-        dropdown.removeClass('visible')
-      }
-      isOpen = open
-    }
-
-    groupButton.addEventListener('click', (e) => {
-      e.stopPropagation()
-      toggleDropdown(!isOpen)
-    })
-
-    // const activeWindow = this.chartView.container.ownerDocument.defaultView ?? window
-    // activeWindow.addEventListener('click', (e) => {
-    //   debugger
-    //   if (isOpen /* && !localSettingsGroup.contains(e.target as Node) */ && !dropdown.contains(e.target as Node)) {
-    //     toggleDropdown(false)
-    //   }
-    // })
-  }
-
 
   private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: () => void) {
     let containsUnknownGroups = false
@@ -278,18 +209,66 @@ export class ToolbarView {
     this.chartView.container.removeClass('is-toolbar-minimized')
   }
 
-  reset(): void {
-    /*
-     * TODO remove click listener!
-     *
-     * TODO create reset option enum and register all resettable things in reset context
-     */
-  }
 
   setHasWarnings() {
     this.debugInfoButton.addClass(Css.toolbar.buttonWarn)
   }
 
 
+  private createDropdownButton(parent: HTMLDivElement,
+                               icon: string,
+                               tooltip: string,
+                               headerText: string,
+                               onDrawContent: (dropdown: HTMLDivElement) => void) {
+    const button = createButton(parent, icon, tooltip)
+    const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
+    dropdown.createDiv({text: headerText, cls: 'gt-group-dropdown-header'})
+
+    let isOpen = false
+    let isDrawn = false
+
+    const toggle = (open?: boolean) => {
+      isOpen = open ?? !isOpen
+      if (isOpen) {
+        if (this.activeCloser && this.activeCloser !== close) {
+          this.activeCloser()
+        }
+        if (!isDrawn) {
+          onDrawContent(dropdown)
+          isDrawn = true
+        }
+        const btnRect = button.getBoundingClientRect()
+        const containerRect = this.chartView.container.getBoundingClientRect()
+        dropdown.addClass('visible')
+        dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
+        dropdown.style.left = `${btnRect.left - containerRect.left}px`
+        this.activeCloser = close
+      } else {
+        dropdown.removeClass('visible')
+        if (this.activeCloser === close) this.activeCloser = null
+      }
+    }
+    const close = () => toggle(false)
+
+    button.addEventListener('click', (e) => {
+      e.stopPropagation()
+      toggle()
+    })
+  }
+
+  destroy() {
+    if (this.boundOutsideClick) {
+      const activeWindow = this.chartView.container.ownerDocument.defaultView ?? window
+      activeWindow.removeEventListener('click', this.boundOutsideClick)
+      this.boundOutsideClick = null
+    }
+    this.activeCloser = null
+  }
+
+  reset(): void {
+    /*
+     * TODO create reset option enum and register all resettable things in reset context
+     */
+  }
 }
 
