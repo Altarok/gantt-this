@@ -42,7 +42,7 @@ export class GanttThisBasesView extends BasesView {
     } else if (isNewRawChartInput) {
       debug.log('-- onDataUpdated - redraw: new base config')
       this.completeRedraw(rawChartInput)
-    }else{
+    } else {
       debug.log('-- onDataUpdated - redraw: if query results changed')
       this.chartManager?.destroy()
       void this.chartManager?.updateAfterReload()
@@ -113,86 +113,5 @@ export class GanttThisBasesView extends BasesView {
   private getBoolValue(key: string): boolean | undefined {
     return this.config.get(key) ? this.config.get(key) === true : undefined
   }
-
-  /*
-   * TODO test code used to overwrite toolbar
-   */
-  // private toolbarEl: HTMLElement | null = null
-  //  onload(): void {
-  //    super.onload()
-  //    this.injectToolbarButton()
-  //  }
-  //
-  //  private injectToolbarButton(): void {
-  //    // Find the container parent of your view to locate the sibling toolbar
-  //    const viewEl = this.containerEl.closest('.bases-view') || this.containerEl.parentElement
-  //    const toolbar = viewEl?.parentElement?.querySelector('.bases-toolbar')
-  //
-  //
-  //    // Prevent duplicate buttons when onDataUpdated fires multiple times
-  //    if (!toolbar || toolbar.querySelector('.bases-toolbar-gantt-custom')) return
-  //
-  //    /*
-  //     * const newItem = toolbar.querySelector('.bases-toolbar-new-item-menu')
-  //if (newItem) {
-  //  toolbar.insertBefore(customItem, newItem)
-  //} else {
-  //  toolbar.appendChild(customItem)
-  //}
-  //     *
-  //     *
-  //     * oder nach properties
-  //     *
-  //     * const propsItem = toolbar.querySelector('.bases-toolbar-properties-menu')
-  //if (propsItem?.nextSibling) {
-  //  toolbar.insertBefore(customItem, propsItem.nextSibling)
-  //}
-  //     *
-  //     */
-  //
-  //    // Create the outer wrapper matching Bases toolbar item structure
-  //    const customItem = toolbar.createDiv({
-  //      cls: 'bases-toolbar-item bases-toolbar-gantt-custom'
-  //    })
-  //
-  //    // Create the inner button matching Obsidian/Bases button structure
-  //    const button = customItem.createDiv({
-  //      cls: 'text-icon-button',
-  //      attr: {tabindex: '0', role: 'button', 'aria-label': 'Reset Zoom'}
-  //    })
-  //
-  //    const iconSpan = button.createSpan({cls: 'text-button-icon'})
-  //    setIcon(iconSpan, 'lucide-rotate-ccw') // Using standard Obsidian Lucide icons
-  //
-  //    button.createSpan({
-  //      cls: 'text-button-label',
-  //      text: 'Reset Zoom'
-  //    })
-  //
-  //    // Event Handler
-  //    this.plugin.registerDomEvent(button, 'click', (evt: MouseEvent) => {
-  //      evt.preventDefault()
-  //      this.handleCustomAction()
-  //    })
-  //
-  //    // Keyboard navigation support (Enter / Space)
-  //    this.plugin.registerDomEvent(button, 'keydown', (evt: KeyboardEvent) => {
-  //      if (evt.key === 'Enter' || evt.key === ' ') {
-  //        evt.preventDefault()
-  //        this.handleCustomAction()
-  //      }
-  //    })
-  //  }
-  //
-  //  private handleCustomAction(): void {
-  //    // Custom action logic here (e.g., reset SVG zoom, trigger refresh)
-  //  }
-  //
-  //  onunload(): void {
-  //    // Clean up DOM injections when the view closes
-  //    this.toolbarEl?.remove()
-  //    super.onunload()
-  //  }
-
 
 }

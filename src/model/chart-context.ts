@@ -84,7 +84,6 @@ export class ChartContext {
     return this.plugin.app.vault
   }
 
-  // TODO used only for linking, move inside
   get workspace() {
     return this.plugin.app.workspace
   }
