@@ -79,7 +79,7 @@ async function getCalendarDefinitions(calendarIDs: string[],
     if (!fileMetadata?.frontmatter) continue
     const calendarID = chartCtx.propertyReader.getCalendarId(fileMetadata.frontmatter, file)
     if (!calendarID) continue /* nothing to load */
-    if (calendarCache.get(calendarID)) continue /* already loaded*/
+    if (calendarCache.get(calendarID)) continue /* already loaded - TODO compare! */
     if (!allKnownCalendarIDs.includes(calendarID)) chartCtx.diagnostics.addLog('unregisteredCalendar', {calendarID})
     try {
       await loadCalendar(chartCtx, calendarID, file)
