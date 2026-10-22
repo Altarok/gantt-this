@@ -239,21 +239,22 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
                                        year: number, month?: string, day?: number) {
 
   const format: DateFormatComponent[] = asInput ? calConfig.ruleBasedDetails.format : calConfig.ruleBasedDetails.outputFormat
-  const displayedYear = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
+  const displayedYear: { year: number, sign: '-' | '' } = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
 
   const outputParts: string[] = format.map(component => {
-    if (component === 'year') return formatYearValue(displayedYear)
+    if (component === 'year') return formatYearValue(displayedYear.year)
     if (component === 'month' && (asInput || !hideMonths)) return month ?? ''
     if (component === 'day' && (asInput || !hideDays)) return day?.toString().padStart(2, '0') ?? ''
     return ''
   })
 
-  return outputParts.filter(Boolean).join(calConfig.delimiter)
+  return displayedYear.sign + outputParts.filter(Boolean).join(calConfig.delimiter)
     + getEpochSuffix(absDays, calConfig)
 }
 
-function shiftYearIfNeeded(year: number, noYearZero: boolean | undefined) {
-  return (noYearZero === true && year <= 0) ? year - 1 : year
+function shiftYearIfNeeded(yearValue: number, noYearZero: boolean | undefined): { year: number, sign: '-' | '' } {
+  const y = (noYearZero === true && yearValue <= 0) ? yearValue - 1 : yearValue
+  return {year: Math.abs(y), sign: y < 0 ? '-' : ''}
 }
 
 function getEpochSuffix(days: number, config: RuleBasedCalendarConfig) {
