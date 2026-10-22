@@ -138,14 +138,17 @@ export default class TooltipManager implements HoverParent {
 
     if (item.isRecurringInstance) {
       const parentItem = this.getEventById(item.parentEventId!)
-      this.addEventDateBelowTableRow(datesContainer, 'original date:', calendarConfig, parentItem)
-      this.addEventDateBelowTableRow(datesContainer, 'repeat date:', calendarConfig, item)
+      this.addEventDateBelowTableRow(datesContainer, 'date:', calendarConfig, true, item)
+      this.addEventDateBelowTableRow(datesContainer, 'repetition of:', calendarConfig, false, parentItem)
     } else {
-      this.addEventDateBelowTableRow(datesContainer, 'date:', calendarConfig, item)
+      this.addEventDateBelowTableRow(datesContainer, 'date:', calendarConfig, true, item)
     }
   }
 
-  private addEventDateBelowTableRow(datesContainer: HTMLDivElement, text: string, calendarConfig: CalendarConfig,
+  private addEventDateBelowTableRow(datesContainer: HTMLDivElement,
+                                    text: string,
+                                    calendarConfig: CalendarConfig,
+                                    addDuration: boolean,
                                     item?: GanttItem) {
     if (!item) return
 
@@ -153,7 +156,7 @@ export default class TooltipManager implements HoverParent {
     dateRow.createSpan({text, cls: 'gt-repeat-label'})
     dateRow.createSpan({
       text: isTimespan(item.displayType)
-        ? `${this.dateInOutputFormat(item.startDays, calendarConfig)} - ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
+        ? `from ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
         : this.dateInOutputFormat(item.startDays, calendarConfig),
       cls: 'gt-repeat-value'
     })

@@ -53,11 +53,17 @@ export default class ChartManager {
     this.uiManager = new ChartUiManager(this.chartContext, container)
   }
 
-  destroy(): void {
+  reset(): void {
     this.destroyableObjects.forEach(d => d.destroy())
   }
 
+  async reloadSettings(): Promise<void> {
+    await this.plugin.loadSettings()
+  }
+
   async updateAfterReload(): Promise<void> {
+    await this.prepareCalendarCache(false)
+
     debug.info('>> updateAfterReload')
     const updatedGanttItems = await this.dataLoader.getGanttItems()
     const haveGanttItemsChanged = compareQueryResults(this.lastRawData, updatedGanttItems)
@@ -71,7 +77,13 @@ export default class ChartManager {
   }
 
   /** Do not change order of calls in this!! */
-  private async prepare() {
+  private async prepareCalendarCache(includeReset: boolean) {
+    if (includeReset) {
+      /* 1. load plugin settings */
+      await this.reloadSettings()
+      /* 2. load plugin settings */
+      this.plugin.calendarConfigsCache.clear()
+    }
 
     try {
       await cacheKnownCalendars(this.chartContext, this.rawChartInput.calendar)
@@ -86,6 +98,10 @@ export default class ChartManager {
   }
 
   refreshChartCallback(reset: ResetPreset): void {
+    /*
+     * TODO when to clear calendar cache?
+     */
+
     if (!this.renderEngine) return
     if (this.updateTimeout) window.clearTimeout(this.updateTimeout)
 
@@ -118,7 +134,7 @@ export default class ChartManager {
   }
 
   async renderGantt() {
-    await this.prepare()
+    await this.prepareCalendarCache(true)
 
     const chartModel = new GanttChartModel(this.settingsContext)
     const chartView = this.uiManager.createChartView(chartModel)

@@ -44,7 +44,7 @@ export class GanttThisBasesView extends BasesView {
       this.completeRedraw(rawChartInput)
     } else {
       debug.log('-- onDataUpdated - redraw: if query results changed')
-      this.chartManager?.destroy()
+      this.chartManager?.reset()
       void this.chartManager?.updateAfterReload()
     }
 
@@ -53,7 +53,7 @@ export class GanttThisBasesView extends BasesView {
 
   private completeRedraw(rawChartInput: RawChartInput) {
     this.containerEl.empty()
-    this.chartManager?.destroy()
+    this.chartManager?.reset()
     this.chartManager = new ChartManager(this.plugin, this.containerEl, rawChartInput, this.basesCtx)
     try {
       void this.chartManager.renderGantt()
