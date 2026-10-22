@@ -9,6 +9,8 @@ import {GanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
 
 /**
+ * TODO rename file tp event-reader
+ *
  * Parse given files to {@link GanttItem}s.
  * Call from outside Obsidian's Bases.
  */

@@ -3,6 +3,12 @@ import {GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../types/
 import BasesContext from '../model/bases-context'
 import {SettingsContext} from '../model/settings-context'
 
+function stripObsidianLinkBrackets(input?: string): string | undefined {
+  if (!input) return input
+  if (input.startsWith('[[') && input.endsWith(']]'))
+    return input.replace(/\[\[|]]/g, '')
+  return input
+}
 
 export class EventPropertyReader {
   constructor(private readonly settings: SettingsContext,
@@ -21,16 +27,16 @@ export class EventPropertyReader {
 
   getStartDate(frontMatter: FrontMatterCache, file: TFile): string | undefined {
     const key = this.settings.frontMatterProperty_event_time_start
-    return frontMatter[key] as string
+    return stripObsidianLinkBrackets(frontMatter[key] as string
       ?? this.basesCtx?.readPropertyValue(file, key)
-      ?? undefined
+      ?? undefined)
   }
 
   getEndDate(frontMatter: FrontMatterCache, file: TFile): string | undefined {
     const key = this.settings.frontMatterProperty_event_time_end
-    return frontMatter[key] as string
+    return stripObsidianLinkBrackets(frontMatter[key] as string
       ?? this.basesCtx?.readPropertyValue(file, key)
-      ?? undefined
+      ?? undefined)
   }
 
   /*

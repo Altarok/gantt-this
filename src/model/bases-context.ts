@@ -65,9 +65,7 @@ export default class BasesContext {
       const value: Value | null = basesEntry.getValue(propertyKey)
       /* isTruthy() should remove non-null empty values */
       if (!value?.isTruthy()) return null
-      /*
-       * TODO make other types possible (not only string)
-       */
+      /* TODO make other types possible (not only string) */
       if (value instanceof PrimitiveValue) /* includes string and boolean */
         return value.toString()
       if (value instanceof ListValue) {

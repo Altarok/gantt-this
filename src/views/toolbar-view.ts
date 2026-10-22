@@ -273,6 +273,7 @@ export class ToolbarView implements Destroyable {
     /*
      * TODO create reset option enum and register all resettable things in reset context
      */
+    this.destroy()
   }
 }
 
