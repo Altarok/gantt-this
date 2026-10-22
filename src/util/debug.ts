@@ -2,13 +2,17 @@ const isDebug = true
 
 export const debug = {
   log,
+  warn,
   info,
   trace,
 }
 
-
 function log(message: string): void {
   if (isDebug) logg('[L] ', message)
+}
+
+function warn(message: string): void {
+  if (isDebug) logg('[W] ', message)
 }
 
 function info(message: string): void {

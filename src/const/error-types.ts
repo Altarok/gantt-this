@@ -162,7 +162,17 @@ export const knownErrors: Record<string, ErrorDef> = {
     level: 'info',
     type: 'date',
     messageTemplate: `Can't parse {date}. Invalid format.`
-  }
+  },
+
+  /*
+   * --- External error definitions ---
+   */
+  calendarYAMLParseError: {
+    level: 'warn',
+    type: 'calendar',
+    messageTemplate: `Can't parse calendar {id}. {description}`
+  },
+
 
 } as const // = immutable
 

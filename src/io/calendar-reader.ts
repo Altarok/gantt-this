@@ -9,6 +9,7 @@ import {GregorianCalendar} from '../const/fallback-calendar'
 import {getCalendarFiles} from './io-util'
 import {GanttError, throwGanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
+import {debug} from '../util/debug'
 
 const yamlRegex = /```yaml\s([\s\S]*?)```/
 
@@ -155,7 +156,19 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
     /* Cache calendar */
     chartCtx.calendarCache.set(calendarID, newCalendarConfig)
   } catch (err) {
-    if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+    if (err instanceof GanttError) {
+      chartCtx.diagnostics.addErr(err, file)
+    } else if (err instanceof Error && err.name === 'YAMLParseError') {
+      const yamlErr = err as Error & { code?: string; linePos?: { line: number; col: number }[] }
+      let suffix = ''
+      if (yamlErr.linePos?.[0]) {
+        const {line, col} = yamlErr.linePos[0]
+        suffix = ` Problem at line ${line}, column ${col}.`
+      }
+      const description = `YAMLParseError. ${yamlErr.code ?? ''}. ${suffix}`
+      chartCtx.diagnostics.addLog('calendarYAMLParseError', {id: calendarID, description}, file?.path)
+      debug.warn(`YAML Parse Error [${yamlErr.code}]: ${yamlErr.message}`)
+    }
   }
 }
 
