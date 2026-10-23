@@ -98,9 +98,7 @@ export default class ChartManager {
   }
 
   refreshChartCallback(reset: ResetPreset): void {
-    /*
-     * TODO when to clear calendar cache?
-     */
+    if (reset.isManualRefresh) this.plugin.calendarConfigsCache.clear()
 
     if (!this.renderEngine) return
     if (this.updateTimeout) window.clearTimeout(this.updateTimeout)
