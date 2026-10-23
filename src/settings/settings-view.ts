@@ -7,6 +7,7 @@ import {createFrontMatterSettingDefinitions} from './settings-subpage-frontmatte
 import {createWorkspaceSettings} from './settings-subpage-workspace'
 import {createEventSettings} from './settings-subpage-events'
 import {createChartSettingDefinition} from './settings-subpage-chart'
+import {RenameEntryModal} from './settings-cal-grp-rename'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
 const VISIBLE_ICON = 'eye' /* an open eye */
@@ -33,6 +34,25 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       const newEntry = {...entry, priority: list.length}
 
       list.push(newEntry)
+
+      void this.plugin.saveData(this.settings).then(() => this.update())
+    }).open()
+  }
+
+  private openRenameForm(target: 'groups' | 'calendars',
+                         item: GroupOrCalendarSettings) {
+
+    const existingIds: string[] = target === 'groups'
+      ? this.settings.groups.map(g => g.id)
+      : this.settings.calendars.map(c => c.id)
+
+    new RenameEntryModal(this.plugin, existingIds, item, (newName: string) => {
+
+      const item2: GroupOrCalendarSettings | undefined = target === 'groups'
+        ? this.settings.groups.find(g => g.id === item.id)
+        : this.settings.calendars.find(c => c.id === item.id)
+
+      if (item2) item2.id = newName
 
       void this.plugin.saveData(this.settings).then(() => this.update())
     }).open()
@@ -133,7 +153,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       onDelete: (idx: number) => this.handleDelete(this.settings.calendars, idx, this.settings.defaultCalendar, DEFAULT_FALLBACK_CALENDAR, 'calendar'),
       items: this.settings.calendars.map((cal) => ({
         name: cal.id,
-        render: (setting: Setting) => this.renderItemRow(setting, cal)
+        render: (setting: Setting) => this.renderItemRow(setting, 'calendars', cal)
       }))
     }
   }
@@ -159,7 +179,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       onDelete: (idx: number) => this.handleDelete(this.settings.groups, idx, this.settings.defaultGroup, DEFAULT_FALLBACK_GROUP, 'group'),
       items: this.settings.groups.map((group) => ({
         name: group.id,
-        render: (setting: Setting) => this.renderItemRow(setting, group)
+        render: (setting: Setting) => this.renderItemRow(setting, 'groups', group)
       }))
     }
   }
@@ -186,9 +206,17 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     })()
   }
 
-  private renderItemRow(setting: Setting, item: GroupOrCalendarSettings): void {
+  private renderItemRow(setting: Setting,
+                        target: 'groups' | 'calendars',
+                        item: GroupOrCalendarSettings): void {
     let cc: ColorComponent
     setting
+    .addButton(btn => btn.setIcon('pen').setTooltip('Rename', {delay: -1})
+      .onClick(async () => {
+        this.openRenameForm(target, item)
+        await this.plugin.saveSettings()
+      })
+    )
     .addButton(btn => btn.setIcon(item.visible ? VISIBLE_ICON : INVISIBLE_ICON).setTooltip('Click to toggle visibility', {delay: -1})
       .onClick(async () => {
         item.visible = !item.visible
