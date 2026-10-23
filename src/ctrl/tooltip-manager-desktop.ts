@@ -74,9 +74,9 @@ export default class TooltipManager implements HoverParent {
 
     try {
       /* create single popover and populate/position it once in onload */
-      const popover = new SelfAligningHoverPopover(this, target, ganttItem, this.chartView.container.getBoundingClientRect(), (item, el) => {
-        this.setTooltipContent(item, el)
-      })
+      const popover = new SelfAligningHoverPopover(this, target, ganttItem, this.chartView.container.getBoundingClientRect(),
+        (item, el) => this.setTooltipContent(item, el)
+      )
 
       popover.hoverEl.addEventListener('mouseleave', () => {
         /* Reset marker when popover closes/leaves */
@@ -106,11 +106,16 @@ export default class TooltipManager implements HoverParent {
     return {target, ganttItem}
   }
 
+  /**
+   * @param event
+   * @param tooltip the popover's main div: hoverEl
+   * @private
+   */
   private setTooltipContent(event: GanttItem, tooltip: HTMLElement) {
 
     const g = tooltip.createDiv({cls: Css.tooltip.tooltip})
 
-    const tooltipTitle = (event.name || event.file.basename) + this.getTooltipTitleSuffix(event)
+    const tooltipTitle = (event.name || event.file.basename)
 
     g.createDiv({text: tooltipTitle, cls: Css.tooltip.title})
 
@@ -137,24 +142,46 @@ export default class TooltipManager implements HoverParent {
 
     const datesContainer = container.createDiv({cls: Css.tooltip.dateDetails})
 
-    this.addEventDateBelowTableRow(datesContainer, calendarConfig, true, item)
+    /*
+     * 1. Add current date
+     */
+    this.addEventDateBelowTableRow(datesContainer, calendarConfig, false, item)
+
+    /*
+     * 2. Add repeating event metadata
+     */
     if (item.isRecurringInstance) {
       const {repeatRule} = item
       if (repeatRule?.delta && repeatRule.step)
-        datesContainer.createDiv({text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`})
+        datesContainer.createDiv({
+          text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`,
+          cls: 'gt-repeat-value'
+        })
+    }
+
+    /*
+     * 3. Add absolute day (optional)
+     */
+    if (this.addDaySuffixToTooltipTitle) {
+      const absoluteDay = (!isNaN(item.endDays) && item.endDays > item.startDays)
+        ? ` ${item.startDays} to ${item.endDays}`
+        : ` ${item.startDays}`
+      datesContainer.createDiv({text: `Absolute day: ${absoluteDay}`, cls: 'gt-repeat-value'})
     }
   }
 
+  /*
+   * TODO fix duration : show years instead of days
+   */
   private addEventDateBelowTableRow(datesContainer: HTMLDivElement,
                                     calendarConfig: CalendarConfig,
                                     addDuration: boolean,
-                                    item?: GanttItem) {
-    if (!item) return
-
+                                    item: GanttItem) {
     const dateRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
     dateRow.createSpan({
       text: isTimespan(item.displayType)
-        ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
+        ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
+        // + `${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
         : this.dateInOutputFormat(item.startDays, calendarConfig),
       cls: 'gt-repeat-value'
     })
@@ -203,8 +230,10 @@ export default class TooltipManager implements HoverParent {
     const svgRect = svg.getBoundingClientRect()
 
     if (ganttItem.displayType === 'bar') {
-      /* For bars, we want two lines: one at the left edge (start) and one at the right edge (end)
-      Note: If your SVG bar element bounds represent the full width, we can use targetRect.left and targetRect.right. */
+      /*
+       * For bars, we want two lines: one at the left edge (start) and one at the right edge (end)
+       * Note: If your SVG bar element bounds represent the full width, we can use targetRect.left and targetRect.right.
+       */
       const x1 = targetRect.left - svgRect.left
       const x2 = targetRect.right - svgRect.left
 
@@ -388,9 +417,6 @@ export default class TooltipManager implements HoverParent {
     }
 
     if (shape) {
-      // const highlightElement: SVGGElement = this.chartView.upperHoverLayer.createSvg('g')
-      // highlightElement.appendChild(shape)
-      // TODO revert
       this.chartView.upperHoverLayer.appendChild(shape)
     }
 
@@ -434,12 +460,6 @@ export default class TooltipManager implements HoverParent {
     return null
   }
 
-  private getTooltipTitleSuffix(d: GanttItem) {
-    if (!this.addDaySuffixToTooltipTitle) return ''
-    if (!isNaN(d.endDays) && d.endDays > d.startDays) return ` (days: ${d.startDays} > ${d.endDays})`
-    else return ` (day: ${d.startDays})`
-  }
-
   get chartView(): GanttChartView {
     return this.engine.view
   }
@@ -475,8 +495,7 @@ class SelfAligningHoverPopover extends HoverPopover {
   onload() {
     super.onload()
     this.contentPopulator(this.ganttItem, this.hoverEl)
-
-    this.hoverEl.style.bottom = ''
+    this.hoverEl.setCssStyles({bottom: ''})
 
     const rect = this.hoverEl.getBoundingClientRect()
     const targetRect = (this.targetEl as unknown as HTMLDivElement).getBoundingClientRect()

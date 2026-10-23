@@ -112,7 +112,6 @@ export type GroupOrCalendarSettings = {
   priority?: number
 }
 
-
 export type GanttChartDateBound = string | number
 
 export type ControlKey = 'ctrl' | 'alt' | 'shift'
