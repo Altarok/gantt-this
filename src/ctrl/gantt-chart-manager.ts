@@ -98,7 +98,11 @@ export default class ChartManager {
   }
 
   refreshChartCallback(reset: ResetPreset): void {
-    if (reset.isManualRefresh) this.plugin.calendarConfigsCache.clear()
+    if (reset.isManualRefresh) {
+      this.plugin.calendarConfigsCache.clear()
+      this.diagnosticsContext.resetCache(reset)
+      // TODO reset orange color of diag button
+    }
 
     if (!this.renderEngine) return
     if (this.updateTimeout) window.clearTimeout(this.updateTimeout)

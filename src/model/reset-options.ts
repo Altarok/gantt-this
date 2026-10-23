@@ -20,7 +20,7 @@ export class ResetPreset {
   }
 
   get data(): boolean {
-    return this.options.includes('view')
+    return this.options.includes('data')
   }
 
   get full(): boolean {
