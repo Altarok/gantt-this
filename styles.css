@@ -300,6 +300,7 @@ body.is-popout-window .gt-chart-container {
   color: var(--text-normal);
 }
 
+/* Table for selected Base properties */
 .gt-tooltip-table td {
   padding: 2px 6px;
   vertical-align: top;
@@ -326,7 +327,6 @@ body.is-popout-window .gt-chart-container {
 
 /* Subtle separator between rows */
 .gt-tooltip-table tr:not(:last-child) td {
-  /* border-bottom: 1px solid var(--background-modifier-border-focus, rgb(255 255 255 / 5%)); */
   border-bottom: 1px solid var(--background-modifier-border);
 }
 

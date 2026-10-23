@@ -9,6 +9,7 @@ import {Css} from '../const/constants'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {ChartContext} from '../model/chart-context'
 import {SettingsContext} from '../model/settings-context'
+import {debug} from '../util/debug'
 
 type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
 
@@ -71,17 +72,20 @@ export default class TooltipManager implements HoverParent {
     this.showHighlightAroundElement(target, ganttItem)
     this.showVerticalGuide(target, ganttItem)
 
-    /* create single popover attached to the hovered event */
-    const popover = new HoverPopover(this, target, -1)
+    try {
+      /* create single popover and populate/position it once in onload */
+      const popover = new SelfAligningHoverPopover(this, target, ganttItem, this.chartView.container.getBoundingClientRect(), (item, el) => {
+        this.setTooltipContent(item, el)
+      })
 
-    /* populate content based on event data  */
-    this.setTooltipContent(ganttItem, popover.hoverEl)
-
-    popover.hoverEl.addEventListener('mouseleave', () => {
-      /* Reset marker when popover closes/leaves */
-      this.hideTooltip('mouse leave')
-      delete target.dataset.hasPopover
-    })
+      popover.hoverEl.addEventListener('mouseleave', () => {
+        /* Reset marker when popover closes/leaves */
+        this.hideTooltip('mouse leave')
+        delete target.dataset.hasPopover
+      })
+    } catch (err) {
+      debug.warn(String(err))
+    }
   }
 
   private getEventById(id: EventId): GanttItem | undefined {
@@ -110,53 +114,47 @@ export default class TooltipManager implements HoverParent {
 
     g.createDiv({text: tooltipTitle, cls: Css.tooltip.title})
 
-    const table = g.createEl('table', {cls: Css.tooltip.table})
-
-
-    this.addEventDateBelowTableInOutputFormat(g, event)
+    if (this.hasSelectedBaseProperties) this.createBasesTooltipContent(g, event)
 
     g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
 
-    if (this.hasSelectedBaseProperties) {
-      const success = this.createBasesTooltipContent(table, event)
-      if (!success) table.textContent = this.createFallbackTooltipContent(event) // fallback
-    } else {
-      table.textContent = this.createFallbackTooltipContent(event)
-    }
+    this.addDateDetails(g, event)
   }
 
   private dateInOutputFormat(days: number, cc: CalendarConfig): string {
     return createAxisDateDescription(days, cc)
   }
 
-  private addEventDateBelowTableInOutputFormat(g: HTMLDivElement, item: GanttItem) {
+  /**
+   * Add event date details below "click here" tip. Date gets parsed to output format.
+   * @param container where to add the tooltip
+   * @param item event data
+   */
+  private addDateDetails(container: HTMLDivElement, item: GanttItem): void {
 
     const calendarConfig = this.chartCtx.calendarCache.get(item.calendarType)
     if (!calendarConfig) return
 
-    const datesContainer = g.createDiv({cls: Css.tooltip.repeaterSuffix})
+    const datesContainer = container.createDiv({cls: Css.tooltip.dateDetails})
 
+    this.addEventDateBelowTableRow(datesContainer, calendarConfig, true, item)
     if (item.isRecurringInstance) {
-      const parentItem = this.getEventById(item.parentEventId!)
-      this.addEventDateBelowTableRow(datesContainer, 'date:', calendarConfig, true, item)
-      this.addEventDateBelowTableRow(datesContainer, 'repetition of:', calendarConfig, false, parentItem)
-    } else {
-      this.addEventDateBelowTableRow(datesContainer, 'date:', calendarConfig, true, item)
+      const {repeatRule} = item
+      if (repeatRule?.delta && repeatRule.step)
+        datesContainer.createDiv({text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`})
     }
   }
 
   private addEventDateBelowTableRow(datesContainer: HTMLDivElement,
-                                    text: string,
                                     calendarConfig: CalendarConfig,
                                     addDuration: boolean,
                                     item?: GanttItem) {
     if (!item) return
 
     const dateRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
-    dateRow.createSpan({text, cls: 'gt-repeat-label'})
     dateRow.createSpan({
       text: isTimespan(item.displayType)
-        ? `from ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
+        ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
         : this.dateInOutputFormat(item.startDays, calendarConfig),
       cls: 'gt-repeat-value'
     })
@@ -166,12 +164,13 @@ export default class TooltipManager implements HoverParent {
     return this.chartCtx.bases?.hasSelectedProperties() ?? false
   }
 
-  private createBasesTooltipContent(table: HTMLTableElement, d: GanttItem): boolean {
-    const basesCtx = this.chartCtx.bases
-    if (!basesCtx) return false
+  private createBasesTooltipContent(container: HTMLDivElement, d: GanttItem): void {
+    if (!this.chartCtx.bases) return
+    const propertyKeyValues: { key: string, value: string }[] | undefined = this.chartCtx.bases?.readPropertyValues(d)
+    if (!propertyKeyValues || propertyKeyValues.length === 0) return
 
-    const propertyKeyValues: { key: string, value: string }[] = basesCtx.readPropertyValues(d)
-    if (propertyKeyValues.length === 0) return false
+    container.createDiv({text: 'Selected Base properties:', cls: Css.tooltip.dateDetails})
+    const table = container.createEl('table', {cls: Css.tooltip.table})
 
     for (const p of propertyKeyValues) {
       const row = table.insertRow()
@@ -181,7 +180,7 @@ export default class TooltipManager implements HoverParent {
       cellVal.textContent = p.value
     }
 
-    return true
+    return
   }
 
   private showNativePreview(event: MouseEvent, targetEl: HTMLElement, linktext?: string) {
@@ -190,10 +189,6 @@ export default class TooltipManager implements HoverParent {
     this.chartCtx.workspace.trigger('hover-link', {
       event, targetEl, linktext, source: 'gantt-this', hoverParent: this.engine.view.container,
     })
-  }
-
-  private createFallbackTooltipContent(d: GanttItem): string {
-    return d.displayType === 'bar' ? `${d.startDateDisplay} to ${d.endDateDisplay}` : d.startDateDisplay
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
@@ -461,4 +456,49 @@ export default class TooltipManager implements HoverParent {
     return this.settings.uxAddDaySuffixToTooltipTitle
   }
 
+}
+
+/**
+ * AI-assisted hell of a class which aligns itself to be contained on the screen.
+ * Subclass of HoverPopover to populate content once, measure its actual height,
+ * and position it correctly with boundary checking (no double creation / no flicker).
+ */
+class SelfAligningHoverPopover extends HoverPopover {
+  constructor(parent: HoverParent,
+              private targetEl: HTMLElement,
+              private ganttItem: GanttItem,
+              private chartRect: DOMRect,
+              private contentPopulator: (item: GanttItem, el: HTMLElement) => void) {
+    super(parent, targetEl, -1)
+  }
+
+  onload() {
+    super.onload()
+    this.contentPopulator(this.ganttItem, this.hoverEl)
+
+    this.hoverEl.style.bottom = ''
+
+    const rect = this.hoverEl.getBoundingClientRect()
+    const targetRect = (this.targetEl as unknown as HTMLDivElement).getBoundingClientRect()
+    const spacing = 8
+
+    let y = targetRect.top - rect.height - spacing
+    let x = Math.max(targetRect.right, this.chartRect.left + 10)
+    x = Math.min(x, this.chartRect.right - 10 - rect.width)
+
+    if (y < 10) {
+      y = targetRect.bottom + spacing
+    }
+
+    if (y + rect.height > this.chartRect.height - 10) {
+      y = Math.max(10, this.chartRect.height - rect.height - 10)
+    }
+
+    if (x + rect.width > this.chartRect.right - 10) {
+      x = Math.max(this.chartRect.left + 10, targetRect.right - rect.width - 10)
+    }
+
+    this.hoverEl.style.left = `${x}px`
+    this.hoverEl.style.top = `${y}px`
+  }
 }

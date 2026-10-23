@@ -93,7 +93,7 @@ export default class FantasyGanttPlugin extends Plugin {
    * @param ctx
    * @private
    */
-  private async registerCalendar(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+  private async registerCalendar(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext): Promise<void> {
     const currentFile = this.app.workspace.getActiveFile()
     if (!currentFile?.parent) {
       el.createEl('pre', {text: 'Error: Could not determine current directory path scope.'})

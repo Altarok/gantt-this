@@ -54,12 +54,12 @@ export const Css = {
     highlightHoveredEvent: 'gt-item symbol-hover', /* Highlight on hovered event */
     highlightRelatedEvent: 'gt-item symbol-hover-related' /* Highlight on events related to hovered event */
   },
-  tooltip: {
-    tooltip: 'gt-tooltip', /* Use for tooltip */
-    title: 'gt-tooltip-title',  /* Use for tooltip title */
-    table: 'gt-tooltip-table', /* Use for tooltip table */
-    repeaterSuffix: 'gt-tooltip-repeat-dates', /* Use for tooltip table */
-    link: 'gt-tooltip-link' /* Use for tooltip link to related note */
+  tooltip: {  /* Use for tooltip table */
+    tooltip: 'gt-tooltip',
+    title: 'gt-tooltip-title',  /*  title */
+    table: 'gt-tooltip-table', /* table */
+    link: 'gt-tooltip-link', /* link to related note */
+    dateDetails: 'gt-tooltip-repeat-dates' /* date suffix */
   },
   settings: {
     container: 'gt-settings-container',

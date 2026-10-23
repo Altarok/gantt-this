@@ -98,14 +98,18 @@ export class ToolbarView implements Destroyable {
     const localSettingsGroup: HTMLDivElement = createGroup(this.container)
     localSettingsGroup.createDiv({text: 'Local settings:'})
 
+    const update = (): void => {
+      refreshChartCallback()
+    }
+
     this.createDropdownButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings', 'Changes affect only local chart', (dropdown) => {
       this.drawRow(dropdown, 'Moons', (b: boolean) => {
         this.settings.setShowMoons(b)
-        refreshChartCallback()
+        update()
       })
       this.drawRow(dropdown, 'Color-code axes', (b: boolean) => {
         this.settings.setUseCalColorForCalAxis(b)
-        refreshChartCallback()
+        update()
       })
     })
 

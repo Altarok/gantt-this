@@ -24,5 +24,5 @@ function trace(message: string): void {
 }
 
 function logg(_prefix: string, _message: string): void {
-  // if (isDebug) console.log(prefix + message)
+  // if (isDebug) console.log(_prefix + _message)
 }
