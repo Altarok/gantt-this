@@ -65,20 +65,29 @@ function createItem(chartCtx: ChartContext,
                     id: EventId): GanttItem | null {
 
   const eventPropertyReader: EventPropertyReader = chartCtx.propertyReader
-  let startRes: ParsedDate | null
-  let endRes: ParsedDate | null
+  let startRes: ParsedDate | undefined
+  let endRes: ParsedDate | undefined
 
   try {
     startRes = parseEventDate(true, true, startDate, calendarConfig)
     if (!startRes) return null
 
-    endRes = endDate ? parseEventDate(true, false, endDate, calendarConfig) :
-      {days: startRes.days, display: startRes.display} // ParsedDate
-    if (!endRes) return null
+    if (endDate) endRes = parseEventDate(true, false, endDate, calendarConfig)
+    // : {days: startRes.days, display: startRes.display} // ParsedDate
+    // if (!endRes) return null
   } catch (err) {
     // new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
     if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
     return null
+  }
+
+  if (endRes) {
+    if (endRes.days <= startRes.days) {
+      chartCtx.diagnostics.addLog('endDateNotAfterStartDate', {end: endRes.display, start: startRes.display}, file.path)
+      endRes = {days: startRes.days, display: startRes.display}
+    }
+  } else {
+    endRes = {days: startRes.days, display: startRes.display}
   }
 
 
