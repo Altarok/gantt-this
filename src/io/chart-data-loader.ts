@@ -1,6 +1,6 @@
 import {TFile} from 'obsidian'
 import {GanttItem} from '../types/settings-types'
-import {parseFiles} from './event-frontmatter-reader'
+import {parseFiles} from './event-reader'
 import {getFilteredFiles} from './file-collector'
 import {ChartContext} from '../model/chart-context'
 
