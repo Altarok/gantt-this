@@ -1,5 +1,5 @@
 import {BasesView, Notice, QueryController} from 'obsidian'
-import ChartManager from './ctrl/gantt-chart-manager'
+import {ChartManager} from './ctrl/gantt-chart-manager'
 import {BaseKeys, RawChartInput} from './types/settings-types'
 import FantasyGanttPlugin from './main'
 import BasesContext from './model/bases-context'

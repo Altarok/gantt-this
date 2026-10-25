@@ -17,10 +17,38 @@ import {ChartContext} from '../model/chart-context'
 import {ResetPreset} from '../model/reset-options'
 import {debug} from '../util/debug'
 
+export type ReloadChartCallbacks = {
+  /**
+   * Manually triggered. Resets all caches, especially calendar and diag caches.
+   * Does not affect current zoom or pan values.
+   */
+  manualReload(): void
+
+  /**
+   * Indirectly manually triggered by changing settings.
+   * Triggers a redraw without resetting all caches.
+   * Does not affect current zoom or pan values.
+   */
+  settingsChanged(): void
+
+  /**
+   * Automatically triggered by base (or codeblock) through Obsidian's internal BTS trigger.
+   * Updates data filtered by Base, which does not include calendars.
+   * Does not affect current zoom or pan values.
+   */
+  updatedBaseQueryResults(): void
+
+  /**
+   * Manually triggered. Only resets view (zoom and pan values) to default.
+   */
+  viewReset(): void
+
+}
+
 /**
  * Each chart should have one of these.
  */
-export default class ChartManager {
+export class ChartManager {
   private readonly diagnosticsContext: DiagnosticsContext
   private readonly settingsContext: SettingsContext
   private readonly eventPropertyReader: EventPropertyReader
