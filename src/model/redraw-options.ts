@@ -1,29 +1,60 @@
-type RedrawStep = 'redraw' | 'data' | 'full' | 'manualRefresh'
+type Steps = 'resetCaches' | 'reloadData' | 'resetZoomAndPan' | 'resize' | 'redraw'
 
 export class RedrawOption {
-  constructor(public readonly options: RedrawStep[]) {
+  constructor(private readonly options: Steps[]) {
   }
 
-  static readonly None = new RedrawOption([])
-  static readonly Resize = new RedrawOption([])
-  static readonly View = new RedrawOption(['redraw'])
-  static readonly Data = new RedrawOption(['data'])
-  static readonly ManualReload = new RedrawOption(['data', 'manualRefresh'])
-  static readonly Full = new RedrawOption(['data', 'redraw', 'full'])
-
-  get isManualRefresh(): boolean {
-    return this.options.includes('manualRefresh')
+  toString(): string {
+    return `RedrawOption: [${String(this.options)}]`
   }
 
-  get view(): boolean {
+  /** Done once during first iteration. */
+  static readonly Full = new RedrawOption(['resetCaches', 'reloadData', 'resetZoomAndPan', 'resize', 'redraw'])
+
+  /**
+   * Manually triggered by clicking 'Reload data'. Resets all caches, especially calendar and diagnostics.
+   * Does not affect current zoom or pan values.
+   */
+  static readonly ManualReload = new RedrawOption(['resetCaches', 'reloadData', 'redraw'])
+
+  /**
+   * Automatically triggered by base (or code block) through Obsidian's internal BTS trigger.
+   * Updates data filtered by Base, which does not include calendars.
+   * Does not affect current zoom or pan values.
+   */
+  static readonly DataReload = new RedrawOption(['reloadData', 'redraw'])
+
+  /**
+   * Manually triggered. Only resets view (zoom and pan values) to default.
+   */
+  static readonly ResetView = new RedrawOption(['resetZoomAndPan', 'redraw'])
+
+  static readonly Resize = new RedrawOption(['resize', 'redraw'])
+
+  /**
+   * Indirectly manually triggered by changing settings. Triggers a redraw without resetting any cache.
+   * Does not affect current zoom or pan values.
+   */
+  static readonly None = new RedrawOption(['redraw'])
+
+  get resetCaches(): boolean {
+    return this.options.includes('resetCaches')
+  }
+
+  get reloadData(): boolean {
+    return this.options.includes('reloadData')
+  }
+
+  get resetZoomAndPan(): boolean {
+    return this.options.includes('resetZoomAndPan')
+  }
+
+  get resize(): boolean {
+    return this.options.includes('resize')
+  }
+
+  get redraw(): boolean {
     return this.options.includes('redraw')
   }
 
-  get data(): boolean {
-    return this.options.includes('data')
-  }
-
-  get full(): boolean {
-    return this.options.includes('full')
-  }
 }

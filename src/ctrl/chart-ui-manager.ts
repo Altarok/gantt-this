@@ -5,6 +5,7 @@ import {GanttChartView} from '../views/gantt-chart-view'
 import {ToolbarView} from '../views/toolbar-view'
 import {ChartContext} from '../model/chart-context'
 import {debug} from "../util/debug";
+import {RedrawOption} from '../model/redraw-options'
 
 export class ChartUiManager {
   constructor(private readonly chartCtx: ChartContext,
@@ -24,7 +25,7 @@ export class ChartUiManager {
   }
 
   /** Instantiates the toolbar view for the chart. */
-  public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: () => void): ToolbarView {
+  public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: (r:RedrawOption) => void): ToolbarView {
     debug.log('<> Create new ToolbarView')
     return new ToolbarView(this.chartCtx, chartView, chartModel, refreshCallback)
   }

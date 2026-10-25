@@ -4,6 +4,7 @@ import {GanttRenderEngine} from '../view/svg-drawer'
 import {ChartDiagnosticsModal} from '../views/chart-diagnostics-modal'
 import FantasyGanttPlugin from '../main'
 import {ChartContext} from '../model/chart-context'
+import {RedrawOption} from '../model/redraw-options'
 
 const panRight = Platform.isMobile ? 0.4 : 0.25
 const panLeft = -1 * panRight
@@ -21,9 +22,9 @@ const zoomIn = 1.25
 export function setToolbarReactions(chartCtx: ChartContext,
                                     toolbar: ToolbarView,
                                     renderEngine: GanttRenderEngine,
-                                    refreshChartCallback: () => void) {
+                                    refreshChartCallback: (r:RedrawOption) => void) {
 
-  toolbar.reloadButton.addEventListener('click', () => refreshChartCallback())
+  toolbar.reloadButton.addEventListener('click', () => refreshChartCallback(RedrawOption.ManualReload))
   toolbar.toggleBarsButton.addEventListener('click', () => {
       toolbar.handleToggleBarsButtonClick()
       renderEngine.updateViewAfterToggle()
@@ -41,7 +42,7 @@ export function setToolbarReactions(chartCtx: ChartContext,
   )
   toolbar.panLeftButton?.addEventListener('click', () => renderEngine.panRelative(panLeft))
   toolbar.zoomOutButton?.addEventListener('click', () => renderEngine.zoom(zoomOut))
-  toolbar.resetZoomAndPanButton.addEventListener('click', () => renderEngine.resetZoom())
+  toolbar.resetZoomAndPanButton.addEventListener('click', () => renderEngine.resetZoomAndPan())
   toolbar.zoomInButton?.addEventListener('click', () => renderEngine.zoom(zoomIn))
   toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRelative(panRight))
   toolbar.settingsButton.addEventListener('click', () => handleSettingsButtonClick(chartCtx.plugin))

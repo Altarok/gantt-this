@@ -5,6 +5,7 @@ import {GanttChartView} from './gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SettingsContext} from '../model/settings-context'
 import {Destroyable, GroupOrCalendarSettings} from '../types/settings-types'
+import {RedrawOption} from '../model/redraw-options'
 
 const isMobile = Platform.isMobile
 
@@ -58,7 +59,7 @@ export class ToolbarView implements Destroyable {
   constructor(private readonly chartCtx: ChartContext,
               private readonly chartView: GanttChartView,
               private readonly viewModel: GanttChartModel,
-              refreshChartCallback: () => void) {
+              refreshChartCallback: (r: RedrawOption) => void) {
     const settings: SettingsContext = chartCtx.settings
 
     this.container = chartView.toolbarContainer
@@ -98,9 +99,7 @@ export class ToolbarView implements Destroyable {
     const localSettingsGroup: HTMLDivElement = createGroup(this.container)
     localSettingsGroup.createDiv({text: 'Local settings:'})
 
-    const update = (): void => {
-      refreshChartCallback()
-    }
+    const update = (): void => refreshChartCallback(RedrawOption.None)
 
     this.createDropdownButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings', 'Changes affect only local chart', (dropdown) => {
       this.drawRow(dropdown, 'Moons', (b: boolean) => {
@@ -150,7 +149,7 @@ export class ToolbarView implements Destroyable {
     })
   }
 
-  private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: () => void) {
+  private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: (r: RedrawOption) => void) {
     let containsUnknownGroups = false
     for (const group of this.getCurrentGroupConfigs()) {
       const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
@@ -166,7 +165,7 @@ export class ToolbarView implements Destroyable {
       row.addEventListener('click', () => {
         group.visible = !group.visible
         checkbox.checked = group.visible
-        refreshChartCallback()
+        refreshChartCallback(RedrawOption.None)
       })
     }
     if (containsUnknownGroups) {

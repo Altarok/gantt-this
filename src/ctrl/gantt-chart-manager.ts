@@ -17,35 +17,6 @@ import {ChartContext} from '../model/chart-context'
 import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
 
-export type ReloadChartCallbacks = {
-  /**
-   * Manually triggered. Resets all caches, especially calendar and diag caches.
-   * Does not affect current zoom or pan values.
-   */
-  reloadEverything(): void
-
-  /**
-   * Indirectly manually triggered by changing settings.
-   * Triggers a redraw without resetting all caches.
-   * Does not affect current zoom or pan values.
-   */
-  settingsChanged(): void
-
-  /**
-   * Automatically triggered by base (or code
-   * block) through Obsidian's internal BTS trigger.
-   * Updates data filtered by Base, which does not include calendars.
-   * Does not affect current zoom or pan values.
-   */
-  updatedBaseQueryResults(): void
-
-  /**
-   * Manually triggered. Only resets view (zoom and pan values) to default.
-   */
-  viewReset(): void
-
-}
-
 /**
  * Each chart should have one of these.
  */
@@ -99,7 +70,7 @@ export class ChartManager {
     debug.info(`-- updateAfterReload, haveGanttItemsChanged = ${haveGanttItemsChanged}`)
     if (haveGanttItemsChanged) {
       debug.info('<< updateAfterReload - update!!')
-      this.renderEngine?.updateData(RedrawOption.Data, updatedGanttItems)
+      this.renderEngine?.updateData(RedrawOption.DataReload, updatedGanttItems)
     } else {
       debug.info('<< updateAfterReload - no update')
     }
@@ -126,8 +97,8 @@ export class ChartManager {
     }
   }
 
-  refreshChartCallback(reset: RedrawOption): void {
-    if (reset.isManualRefresh) {
+  refreshChartCallback = (reset: RedrawOption): void => {
+    if (reset.resetCaches) {
       this.plugin.calendarConfigsCache.clear()
       this.diagnosticsContext.resetCache(reset)
       // TODO reset orange color of diag button
@@ -140,7 +111,7 @@ export class ChartManager {
     const elapsed = now - this.lastRenderTimestamp
 
     const remainingCooldown = this.rerenderCooldownMs - elapsed
-    if (reset.isManualRefresh) {
+    if (reset === RedrawOption.ManualReload) {
       debug.log(`Manual refresh. Cooldown was at ${remainingCooldown} milliseconds.`)
     } else if (remainingCooldown > 0) {
       debug.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
@@ -172,14 +143,14 @@ export class ChartManager {
 
     chartModel.setRawContainerWidth(chartView.chartContainer.clientWidth)
 
-    const tv = this.uiManager.createToolbarView(chartModel, chartView, () => this.refreshChartCallback(RedrawOption.Data))
+    const tv = this.uiManager.createToolbarView(chartModel, chartView, this.refreshChartCallback)
     this.destroyableObjects.push(tv)
 
     const data = await this.dataLoader.getGanttItems()
 
     this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
-    setToolbarReactions(this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback(RedrawOption.ManualReload))
+    setToolbarReactions(this.chartContext, tv, this.renderEngine, this.refreshChartCallback)
 
     if (this.diagnosticsContext.hasWarnings) tv.setHasWarnings()
   }

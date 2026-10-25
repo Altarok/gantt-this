@@ -21,7 +21,7 @@ export class DiagnosticsContext implements ChartDiagnostics {
     /*
      * TODO: map which ErrorIDs should be reset
      */
-    if (reset.isManualRefresh) {
+    if (reset.resetCaches) {
       this.totalCalendars = 0
       this.loadedCalendars = 0
       this.contextFilesCount = 0

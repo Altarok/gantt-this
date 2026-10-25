@@ -44,7 +44,7 @@ export class GanttRenderEngine {
         debug.log(`<< resize (short) ${this.lastWidth} == ${newWidth}`)
         return
       }
-      this.handleResize(RedrawOption.Resize)
+      this.handleResize(RedrawOption.None)
       debug.log(`<< resize (width) ${this.lastWidth} != ${newWidth}`)
       this.lastWidth = newWidth
     })
@@ -57,7 +57,7 @@ export class GanttRenderEngine {
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    if (reset.view) this.redraw()
+    if (reset.redraw) this.redraw()
     this.handleResize(reset)
     this.initEventListener()
   }
@@ -158,15 +158,15 @@ export class GanttRenderEngine {
   }
 
   handleViewReset() {
-    this.handleResize(RedrawOption.View)
+    this.handleResize(RedrawOption.None)
   }
 
   handleResize(reset: RedrawOption) {
-    if (reset.isManualRefresh) {
-      debug.log(`Manual refresh.`)
-    } else {
-      debug.log(`Auto-refresh with options: ${String(reset.options)}`)
-    }
+    // if (reset.isManualRefresh) {
+    //   debug.log(`Manual refresh.`)
+    // } else {
+    //   debug.log(`Auto-refresh with options: ${reset.toString()}`)
+    // }
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
     const currRenderWidth = this.viewModel.getCurrRenderWidth()
@@ -197,7 +197,7 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    if (reset.view && this.settings.hasDateBounds) {
+    if (reset.redraw && this.settings.hasDateBounds) {
       /* Re-evaluate predefined bounds now that we have the true container width */
       this.transitionToPredefinedBounds()
     }
@@ -324,7 +324,7 @@ export class GanttRenderEngine {
   }
 
   private drawAxes(reset: RedrawOption) {
-    this.view.clearCalendarLayer(reset.view)
+    this.view.clearCalendarLayer(reset.redraw)
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
 
@@ -418,13 +418,16 @@ export class GanttRenderEngine {
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
       }
 
-      if (reset.view && calBadgeTextContent) {
+      if (reset.redraw && calBadgeTextContent) {
         this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }
     })
   }
 
-  resetZoom() {
+  /**
+   * Triggered manually by clicking button.
+   */
+  resetZoomAndPan() {
     if (this.eventManager?.isDragging) return
     this.viewModel.resetPanAndZoom()
     this.handleViewReset()
@@ -493,7 +496,7 @@ export class GanttRenderEngine {
     this.initLayout()
     this.redraw()
     this.initEventListener()
-    this.handleResize(RedrawOption.Data)
+    this.handleResize(RedrawOption.None)
   }
 
   public destroy() {

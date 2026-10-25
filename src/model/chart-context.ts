@@ -16,7 +16,7 @@ import {RedrawOption} from './redraw-options'
  */
 export class ChartContext {
   readonly svgDrawerUtil: SvgDrawerUtil
-  readonly isMobile = Platform.isMobile
+  // readonly isMobile = Platform.isMobile
 
   constructor(readonly plugin: FantasyGanttPlugin,
               private readonly diagnosticsContext: DiagnosticsContext,
