@@ -9,7 +9,7 @@ import {CalendarConfig} from '../types/calendar-types'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import {GanttError} from './gantt-error'
 import {ChartDiagnostics} from '../const/error-types'
-import {ResetPreset} from './reset-options'
+import {RedrawOption} from './redraw-options'
 
 /**
  * Each chart has 1 of these
@@ -27,7 +27,7 @@ export class ChartContext {
     this.svgDrawerUtil = new SvgDrawerUtil(this)
   }
 
-  resetCaches(reset: ResetPreset): void {
+  resetCaches(reset: RedrawOption): void {
     this.diagnosticsContext.resetCache(reset)
   }
 

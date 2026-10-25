@@ -10,7 +10,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
 import {SvgDrawerUtil} from './svg-drawer-util'
-import {ResetPreset} from '../model/reset-options'
+import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
 
 export class GanttRenderEngine {
@@ -30,7 +30,7 @@ export class GanttRenderEngine {
     this.calculateGlobalBounds()
     this.initLayout()
     this.redraw()
-    this.handleResize(ResetPreset.Full)
+    this.handleResize(RedrawOption.Full)
     this.initEventListener()
 
     this.lastWidth = this.view.clientWidth
@@ -44,14 +44,14 @@ export class GanttRenderEngine {
         debug.log(`<< resize (short) ${this.lastWidth} == ${newWidth}`)
         return
       }
-      this.handleResize(ResetPreset.Resize)
+      this.handleResize(RedrawOption.Resize)
       debug.log(`<< resize (width) ${this.lastWidth} != ${newWidth}`)
       this.lastWidth = newWidth
     })
     this.resizeObserver.observe(this.view.chartContainer)
   }
 
-  public updateData(reset: ResetPreset, newData: GanttItem[]) {
+  public updateData(reset: RedrawOption, newData: GanttItem[]) {
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
     this.viewModel.updateSvgDrawerData()
     this.rawData = newData
@@ -154,14 +154,14 @@ export class GanttRenderEngine {
 
   handlePanOrZoom() {
     this.initLayout() /* -> Re-calculate repeating events */
-    this.handleResize(ResetPreset.None) // false
+    this.handleResize(RedrawOption.None) // false
   }
 
   handleViewReset() {
-    this.handleResize(ResetPreset.View)
+    this.handleResize(RedrawOption.View)
   }
 
-  handleResize(reset: ResetPreset) {
+  handleResize(reset: RedrawOption) {
     if (reset.isManualRefresh) {
       debug.log(`Manual refresh.`)
     } else {
@@ -177,7 +177,7 @@ export class GanttRenderEngine {
     /*
      * Re-calculate current bounds after resize
      */
-    if (reset === ResetPreset.Resize && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
+    if (reset === RedrawOption.Resize && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
       // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
       const totalDaysSpan = this.viewModel.totalDaysSpan
       const oldCenterPixel = lastRenderWidth / 2
@@ -323,7 +323,7 @@ export class GanttRenderEngine {
     }, 0)
   }
 
-  private drawAxes(reset: ResetPreset) {
+  private drawAxes(reset: RedrawOption) {
     this.view.clearCalendarLayer(reset.view)
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
@@ -493,7 +493,7 @@ export class GanttRenderEngine {
     this.initLayout()
     this.redraw()
     this.initEventListener()
-    this.handleResize(ResetPreset.Data)
+    this.handleResize(RedrawOption.Data)
   }
 
   public destroy() {

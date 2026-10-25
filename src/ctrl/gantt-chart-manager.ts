@@ -14,7 +14,7 @@ import {ChartUiManager} from './chart-ui-manager'
 import {DiagnosticsContext} from '../model/diagnostics-context'
 import {GanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
-import {ResetPreset} from '../model/reset-options'
+import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
 
 export type ReloadChartCallbacks = {
@@ -22,7 +22,7 @@ export type ReloadChartCallbacks = {
    * Manually triggered. Resets all caches, especially calendar and diag caches.
    * Does not affect current zoom or pan values.
    */
-  manualReload(): void
+  reloadEverything(): void
 
   /**
    * Indirectly manually triggered by changing settings.
@@ -32,7 +32,8 @@ export type ReloadChartCallbacks = {
   settingsChanged(): void
 
   /**
-   * Automatically triggered by base (or codeblock) through Obsidian's internal BTS trigger.
+   * Automatically triggered by base (or code
+   * block) through Obsidian's internal BTS trigger.
    * Updates data filtered by Base, which does not include calendars.
    * Does not affect current zoom or pan values.
    */
@@ -98,7 +99,7 @@ export class ChartManager {
     debug.info(`-- updateAfterReload, haveGanttItemsChanged = ${haveGanttItemsChanged}`)
     if (haveGanttItemsChanged) {
       debug.info('<< updateAfterReload - update!!')
-      this.renderEngine?.updateData(ResetPreset.Data, updatedGanttItems)
+      this.renderEngine?.updateData(RedrawOption.Data, updatedGanttItems)
     } else {
       debug.info('<< updateAfterReload - no update')
     }
@@ -125,7 +126,7 @@ export class ChartManager {
     }
   }
 
-  refreshChartCallback(reset: ResetPreset): void {
+  refreshChartCallback(reset: RedrawOption): void {
     if (reset.isManualRefresh) {
       this.plugin.calendarConfigsCache.clear()
       this.diagnosticsContext.resetCache(reset)
@@ -171,14 +172,14 @@ export class ChartManager {
 
     chartModel.setRawContainerWidth(chartView.chartContainer.clientWidth)
 
-    const tv = this.uiManager.createToolbarView(chartModel, chartView, () => this.refreshChartCallback(ResetPreset.Data))
+    const tv = this.uiManager.createToolbarView(chartModel, chartView, () => this.refreshChartCallback(RedrawOption.Data))
     this.destroyableObjects.push(tv)
 
     const data = await this.dataLoader.getGanttItems()
 
     this.renderEngine = this.uiManager.createRenderEngine(data, chartView, chartModel)
 
-    setToolbarReactions(this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback(ResetPreset.ManualReload))
+    setToolbarReactions(this.chartContext, tv, this.renderEngine, () => this.refreshChartCallback(RedrawOption.ManualReload))
 
     if (this.diagnosticsContext.hasWarnings) tv.setHasWarnings()
   }

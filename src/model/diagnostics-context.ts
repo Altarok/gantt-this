@@ -1,7 +1,7 @@
 import {TFile} from 'obsidian'
 import {formatErrorMessage, GanttError} from './gantt-error'
 import {ChartDiagnostics, ErrorEntry, ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../const/error-types'
-import {ResetPreset} from './reset-options'
+import {RedrawOption} from './redraw-options'
 
 const severity: Record<ErrorSeverity, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
 
@@ -17,7 +17,7 @@ export class DiagnosticsContext implements ChartDiagnostics {
   logs: ErrorEntry[] = []
   loggedIDs: ErrorId[] = []
 
-  resetCache(reset: ResetPreset): void {
+  resetCache(reset: RedrawOption): void {
     /*
      * TODO: map which ErrorIDs should be reset
      */

@@ -11,7 +11,7 @@ import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
 import {ManualSvg} from './view/manual-svg-icons'
 import {ChartLifecycleComponent} from './ctrl/codeblock-chart-updater'
-import {ResetPreset} from './model/reset-options'
+import {RedrawOption} from './model/redraw-options'
 
 export default class FantasyGanttPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS
@@ -107,7 +107,7 @@ export default class FantasyGanttPlugin extends Plugin {
     await chartManager.renderGantt()
 
     /* Register the child lifecycle component synchronously before any further 'await' */
-    ctx.addChild(new ChartLifecycleComponent(el, this, () => chartManager.refreshChartCallback(ResetPreset.Data)))
+    ctx.addChild(new ChartLifecycleComponent(el, this, () => chartManager.refreshChartCallback(RedrawOption.Data)))
   }
 
 }
