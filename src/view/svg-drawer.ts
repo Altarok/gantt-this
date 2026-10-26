@@ -342,7 +342,7 @@ export class GanttRenderEngine {
       if (!calendarConfig) return // continue to next axis
 
       const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
-      const axisColor = (this.settings.uxUseCalColorForCalAxis ? this.settings.getCalendarConfig(calType)?.color : null) ?? 'currentColor'
+      const axisColor = (this.settings.colorCodeCalendarAxes ? this.settings.getCalendarConfig(calType)?.color : null) ?? 'currentColor'
 
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity

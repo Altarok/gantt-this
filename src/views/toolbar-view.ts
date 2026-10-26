@@ -64,8 +64,6 @@ export class ToolbarView implements Destroyable {
 
     this.container = chartView.toolbarContainer
 
-    const {showPanAndZoomButtonsInToolbar} = settings
-
     this.reloadButton = createButton(this.container, 'refresh-cw', 'Reload data')
 
     addSeparator(this.container)
@@ -78,12 +76,12 @@ export class ToolbarView implements Destroyable {
     addSeparator(this.container)
     const g2 = createGroup(this.container)
 
-    if (showPanAndZoomButtonsInToolbar) {
+    if (settings.showPanAndZoomButtonsInToolbar) {
       this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
       this.zoomOutButton = createButton(g2, 'zoom-out', 'Zoom out')
     }
     this.resetZoomAndPanButton = createButton(g2, 'gt-custom-resetPanAndZoom', 'Reset view')
-    if (showPanAndZoomButtonsInToolbar) {
+    if (settings.showPanAndZoomButtonsInToolbar) {
       this.zoomInButton = createButton(g2, 'zoom-in', 'Zoom in')
       this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')
     }
@@ -99,17 +97,48 @@ export class ToolbarView implements Destroyable {
     const localSettingsGroup: HTMLDivElement = createGroup(this.container)
     localSettingsGroup.createDiv({text: 'Local settings:'})
 
-    const update = (): void => void refreshChartCallback(RedrawOption.None)
+    const update = (full = false): void => void refreshChartCallback(full ? RedrawOption.ManualReload : RedrawOption.None)
 
     this.createDropdownButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings', 'Changes affect only local chart', (dropdown) => {
-      this.drawRow(dropdown, 'Moons', (b: boolean) => {
-        this.settings.setShowMoons(b)
+      this.drawRow(dropdown, 'Color-code axes', this.settings.colorCodeCalendarAxes, (b: boolean) => {
+        this.settings.colorCodeCalendarAxes = b
         update()
       })
-      this.drawRow(dropdown, 'Color-code axes', (b: boolean) => {
-        this.settings.setUseCalColorForCalAxis(b)
+      this.drawRow(dropdown, 'Moons', this.settings.showMoons, (b: boolean) => {
+        this.settings.showMoons = b
         update()
       })
+
+      dropdown.createDiv({cls: 'gt-group-dropdown-separator'})
+
+      this.drawRow(dropdown, 'Hover: Draw vertical line', this.settings.drawVerticalLineOnHover, (b: boolean) => {
+        this.settings.drawVerticalLineOnHover = b
+        update()
+      })
+      this.drawRow(dropdown, 'Hover: Highlight related events', this.settings.highlightRelatedEvents, (b: boolean) => {
+        this.settings.highlightRelatedEvents = b
+        update()
+      })
+      this.drawRow(dropdown, 'Hover: Draw arrows', this.settings.drawArrows, (b: boolean) => {
+        this.settings.drawArrows = b
+        update()
+      })
+
+      dropdown.createDiv({cls: 'gt-group-dropdown-separator'})
+
+      this.drawRow(dropdown, 'Toolbar: Sticky', this.settings.stickyToolbar, (b: boolean) => {
+        this.settings.stickyToolbar = b
+        update(true)
+      })
+      this.drawRow(dropdown, 'Toolbar: At bottom', this.settings.toolbarBelowChart, (b: boolean) => {
+        this.settings.toolbarBelowChart = b
+        update(true)
+      })
+      this.drawRow(dropdown, 'Toolbar: Add zoom/pan buttons', this.settings.showPanAndZoomButtonsInToolbar, (b: boolean) => {
+        this.settings.showPanAndZoomButtonsInToolbar = b
+        update(true)
+      })
+
     })
 
     this.createDropdownButton(localSettingsGroup, 'eye', 'Toggle group visibility', 'Toggle group visibility', (dropdown) => {
@@ -140,9 +169,10 @@ export class ToolbarView implements Destroyable {
     activeWindow.addEventListener('click', this.boundOutsideClick)
   }
 
-  private drawRow(dropdown: HTMLDivElement, text: string, callback: (b: boolean) => void) {
+  private drawRow(dropdown: HTMLDivElement, text: string, initialChecked: boolean, callback: (b: boolean) => void) {
     const row = dropdown.createEl('label', {cls: 'gt-group-dropdown-row'})
     const checkbox = row.createEl('input', {type: 'checkbox'})
+    checkbox.checked = initialChecked
     row.createSpan({text})
     checkbox.addEventListener('change', () => {
       callback(checkbox.checked)
@@ -226,7 +256,8 @@ export class ToolbarView implements Destroyable {
                                headerText: string,
                                onDrawContent: (dropdown: HTMLDivElement) => void) {
     const button = createButton(parent, icon, tooltip)
-    const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
+    // const dropdown = this.chartView.container.createDiv({cls: 'gt-group-dropdown'})
+    const dropdown = (this.chartView.container.ownerDocument.defaultView ?? window).document.body.createDiv({cls: 'gt-group-dropdown'})
     dropdown.createDiv({text: headerText, cls: 'gt-group-dropdown-header'})
 
     let isOpen = false
@@ -243,10 +274,12 @@ export class ToolbarView implements Destroyable {
           isDrawn = true
         }
         const btnRect = button.getBoundingClientRect()
-        const containerRect = this.chartView.container.getBoundingClientRect()
+        // const containerRect = this.chartView.container.getBoundingClientRect()
         dropdown.addClass('visible')
-        dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
-        dropdown.style.left = `${btnRect.left - containerRect.left}px`
+        // dropdown.style.top = `${btnRect.bottom - containerRect.top + 4}px`
+        // dropdown.style.left = `${btnRect.left - containerRect.left}px`
+        dropdown.style.top = `${btnRect.bottom + 4}px`
+        dropdown.style.left = `${btnRect.left}px`
         this.activeCloser = close
       } else {
         dropdown.removeClass('visible')

@@ -38,6 +38,23 @@ export class SettingsContext implements GanttChartSources {
 
       grpConfigs: {},
       calConfigs: {},
+
+      uxShowMoons: global.uxShowMoons,
+      uxUseCalColorForCalAxis: global.uxUseCalColorForCalAxis,
+
+      /*
+       * Toolbar
+       */
+      uxMakeToolbarSticky: global.uxMakeToolbarSticky,
+      uxMoveToolbarBelowChart: global.uxMoveToolbarBelowChart,
+      showPanAndZoomButtonsInToolbar: global.showPanAndZoomButtonsInToolbar,
+
+      /*
+       * Hover events
+       */
+      mouseOverEventShowVerticalLine: global.mouseOverEventShowVerticalLine,
+      uxConnectRelatedEvents: global.uxConnectRelatedEvents,
+      uxHighlightRelatedEvents: global.uxHighlightRelatedEvents,
     }
 
     this.updateGrpAndCalData()
@@ -210,19 +227,31 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get showPanAndZoomButtonsInToolbar(): boolean {
-    return /* TODO implement this.local.showPanAndZoomButtonsInToolbar ?? */ this.global.showPanAndZoomButtonsInToolbar
+    return this.local.showPanAndZoomButtonsInToolbar ?? this.global.showPanAndZoomButtonsInToolbar
+  }
+
+  set showPanAndZoomButtonsInToolbar(b: boolean) {
+    this.local.showPanAndZoomButtonsInToolbar = b
   }
 
   get showButtonsToHideGroups(): boolean {
     return /* TODO implement this.local.showButtonsToHideGroups ?? */ this.global.showButtonsToHideGroups
   }
 
-  get uxMoveToolbarBelowChart(): boolean {
-    return /* TODO implement this.local.uxMoveToolbarBelowChart ?? */ this.global.uxMoveToolbarBelowChart
+  get toolbarBelowChart(): boolean {
+    return this.local.uxMoveToolbarBelowChart ?? this.global.uxMoveToolbarBelowChart
   }
 
-  get mouseOverEventShowVerticalLine(): boolean {
-    return /* TODO implement this.local.mouseOverEventShowVerticalLine ?? */ this.global.mouseOverEventShowVerticalLine
+  set toolbarBelowChart(b: boolean) {
+    this.local.uxMoveToolbarBelowChart = b
+  }
+
+  get drawVerticalLineOnHover(): boolean {
+    return this.local.mouseOverEventShowVerticalLine ?? this.global.mouseOverEventShowVerticalLine
+  }
+
+  set drawVerticalLineOnHover(b: boolean) {
+    this.local.mouseOverEventShowVerticalLine = b
   }
 
   get mouseOverEventShowBox(): boolean {
@@ -237,36 +266,48 @@ export class SettingsContext implements GanttChartSources {
     return /* TODO implement this.local.uxAddDaySuffixToTooltipTitle ?? */ this.global.uxAddDaySuffixToTooltipTitle
   }
 
-  get uxMakeToolbarSticky(): boolean {
-    return /* TODO implement this.local.uxMakeToolbarSticky ?? */ this.global.uxMakeToolbarSticky
+  get stickyToolbar(): boolean {
+    return this.local.uxMakeToolbarSticky ?? this.global.uxMakeToolbarSticky
+  }
+
+  set stickyToolbar(b: boolean) {
+    this.local.uxMakeToolbarSticky = b
   }
 
   get uxShowMoons(): boolean {
     return this.local.uxShowMoons ?? this.global.uxShowMoons
   }
 
-  setShowMoons(val: boolean) {
+  set showMoons(val: boolean) {
     this.local.uxShowMoons = val
   }
 
-  get uxUseCalColorForCalAxis(): boolean {
+  get colorCodeCalendarAxes(): boolean {
     return this.local.uxUseCalColorForCalAxis ?? this.global.uxUseCalColorForCalAxis
   }
 
-  setUseCalColorForCalAxis(val: boolean) {
+  set colorCodeCalendarAxes(val: boolean) {
     this.local.uxUseCalColorForCalAxis = val
   }
 
-  get uxHighlightRelatedEvents(): boolean {
-    return /* TODO implement this.local.uxHighlightRelatedEvents ?? */ this.global.uxHighlightRelatedEvents
+  get highlightRelatedEvents(): boolean {
+    return this.local.uxHighlightRelatedEvents ?? this.global.uxHighlightRelatedEvents
   }
 
-  get uxConnectRelatedEvents(): boolean {
-    return /* TODO implement this.local.uxConnectRelatedEvents ?? */ this.global.uxConnectRelatedEvents
+  set highlightRelatedEvents(b: boolean) {
+    this.local.uxHighlightRelatedEvents = b
   }
 
-  get uxRerenderCooldownSeconds(): number {
-    return /* TODO implement this.local.uxRerenderCooldownSeconds ?? */ this.global.uxRerenderCooldownSeconds
+  get drawArrows(): boolean {
+    return this.local.uxConnectRelatedEvents ?? this.global.uxConnectRelatedEvents
+  }
+
+  set drawArrows(val: boolean) {
+    this.local.uxConnectRelatedEvents = val
+  }
+
+  get rerenderCooldownSeconds(): number {
+    return /* this.local.uxRerenderCooldownSeconds ?? */ this.global.uxRerenderCooldownSeconds
   }
 
   get useFilenameAsFallbackStartDate(): boolean {

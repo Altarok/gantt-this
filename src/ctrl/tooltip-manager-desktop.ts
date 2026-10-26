@@ -29,8 +29,8 @@ export default class TooltipManager implements HoverParent {
 
   constructor(private readonly chartCtx: ChartContext,
               private readonly engine: GanttRenderEngine) {
-    this.searchForRelatedEventsOnHover = chartCtx.settings.uxHighlightRelatedEvents
-    this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.uxConnectRelatedEvents
+    this.searchForRelatedEventsOnHover = chartCtx.settings.highlightRelatedEvents
+    this.isDrawArrows = this.searchForRelatedEventsOnHover && chartCtx.settings.drawArrows
     if (this.isDrawArrows) this.connectorDrawer = new GanttConnectorDrawer(engine.view)
 
     this.boundMouseOver = (evt: MouseEvent) => this.handleMouseOver(evt)
@@ -219,7 +219,7 @@ export default class TooltipManager implements HoverParent {
   }
 
   private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
-    if (!this.settings.mouseOverEventShowVerticalLine) return
+    if (!this.settings.drawVerticalLineOnHover) return
     if (ganttItem.displayType === 'era') return
 
     const svg = target.closest('svg')

@@ -121,13 +121,6 @@ export const ControlKeyMapped = {
   'shift': 'shift'
 }
 
-export type ChartVisualSettings = {
-  viewEventRowHeight: number
-  viewEventShapeHeight: number
-  viewEventIconHeight: number
-  fallbackColor: string
-  fallbackColorForIcons: string
-}
 
 export type GanttChartSources = {
   eventPath: string
@@ -136,22 +129,7 @@ export type GanttChartSources = {
   calendarPathSearchRecursive: boolean /* part of bases configuration */
 }
 
-/**
- * Local chart-specific settings
- */
-export type LocalChartSettings = Partial<GanttChartSources> & Partial<ChartVisualSettings> & {
-  lowerBoundDateParsed?: ParsedDate
-  centerHereDateParsed?: ParsedDate
-  upperBoundDateParsed?: ParsedDate
-  calendarForBounds?: string
-  grpConfigs: Record<string, GroupOrCalendarSettings>
-  calConfigs: Record<string, GroupOrCalendarSettings>
-
-  uxShowMoons?: boolean
-  uxUseCalColorForCalAxis?: boolean
-}
-
-export type RawChartInput = Partial<GanttChartSources> & /* Partial<ChartVisualSettings> & */ {
+export type RawChartInput = Partial<GanttChartSources> & {
   calendar?: string /* part of bases configuration */
   lowerBoundDate?: GanttChartDateBound  /* part of bases configuration */
   centerHereDate?: GanttChartDateBound
@@ -160,7 +138,7 @@ export type RawChartInput = Partial<GanttChartSources> & /* Partial<ChartVisualS
 /**
  * Global plugin settings inheriting chart settings and adding global UX/app options
  */
-export type PluginSettings = ChartVisualSettings & GanttChartSources & {
+export type PluginSettings = GanttChartSources & {
   defaultCalendar: string
   defaultGroup: string
   calendars: GroupOrCalendarSettings[]
@@ -171,6 +149,11 @@ export type PluginSettings = ChartVisualSettings & GanttChartSources & {
    */
   uxDefaultTimespanEventSymbol: GanttItemDisplayTypeTimespans
   uxDefaultTimestampEventSymbol: GanttItemDisplayTypeTimestamp
+  viewEventRowHeight: number
+  viewEventShapeHeight: number
+  viewEventIconHeight: number
+  fallbackColor: string
+  fallbackColorForIcons: string
   uxAddRibbonIcon: boolean
   uxAddRibbonIconMobile: boolean
   uxAddCommands: boolean
@@ -193,7 +176,9 @@ export type PluginSettings = ChartVisualSettings & GanttChartSources & {
   uxAddDaySuffixToTooltipTitle: boolean
   useFilenameAsFallbackStartDate: boolean
   uxRerenderCooldownSeconds: number
+  /** Highlight events related to hovered event */
   uxHighlightRelatedEvents: boolean // highlight predecessors and successors
+  /** Draw arrows btw hovered event and its related events */
   uxConnectRelatedEvents: boolean // connect predecessors and successors
   uxMoveToolbarBelowChart: boolean
   uxMakeToolbarSticky: boolean
@@ -225,6 +210,18 @@ export type PluginSettings = ChartVisualSettings & GanttChartSources & {
    */
   hideSettingsPageUx: boolean
   hideSettingsPageFrontmatterProperties: boolean
+}
+
+/**
+ * Local chart-specific settings
+ */
+export type LocalChartSettings = Partial<PluginSettings> & {
+  lowerBoundDateParsed?: ParsedDate
+  centerHereDateParsed?: ParsedDate
+  upperBoundDateParsed?: ParsedDate
+  calendarForBounds?: string
+  grpConfigs: Record<string, GroupOrCalendarSettings>
+  calConfigs: Record<string, GroupOrCalendarSettings>
 }
 
 /**  Data updated on a redraw, not while panning or zooming */

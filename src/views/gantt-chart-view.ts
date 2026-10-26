@@ -41,19 +41,22 @@ export class GanttChartView {
     this.container.empty()
     this.container.addClass(Css.wrapper)
 
-    if (chartCtx.settings.uxMoveToolbarBelowChart && chartCtx.settings.uxMakeToolbarSticky) {
+    const stickyToolbar = chartCtx.settings.stickyToolbar
+    const toolbarBelowChart = chartCtx.settings.toolbarBelowChart
+
+    if (toolbarBelowChart && stickyToolbar) {
       /* separate toolbar and chart, chart first */
       this.mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
-    } else if (chartCtx.settings.uxMoveToolbarBelowChart) {
+    } else if (toolbarBelowChart) {
       /* join toolbar and chart, chart first  */
       this.mainWrapper = container.createDiv({cls: Css.wrapper})
       this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
-    } else if (chartCtx.settings.uxMakeToolbarSticky) {
+    } else if (stickyToolbar) {
       /* separate toolbar and chart, toolbar first */
       this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})

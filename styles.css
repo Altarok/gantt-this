@@ -726,13 +726,14 @@ body.is-popout-window svg.gt-svg-canvas {
 }
 
 .gt-group-dropdown {
-  position: absolute;
+  position: fixed; /* position: absolute; */
   z-index: 100;
   background-color: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   box-shadow: var(--shadow-s);
-  max-height: 500px;
+  box-sizing: border-box;
+  max-height: 400px;
   overflow-y: auto;
   padding: 4px;
   min-width: 140px;
@@ -741,6 +742,12 @@ body.is-popout-window svg.gt-svg-canvas {
 
 .gt-group-dropdown.visible {
   display: block;
+}
+
+.gt-group-dropdown-separator {
+  height: 2px;
+  background-color: var(--background-modifier-border);
+  margin: 4px 0;
 }
 
 .gt-group-dropdown-header,

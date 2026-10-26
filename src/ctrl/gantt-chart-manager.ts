@@ -48,7 +48,7 @@ export class ChartManager {
     this.chartContext = new ChartContext(plugin, this.diagnosticsContext, this.settingsContext,
       this.eventPropertyReader, new TextWidthCache(), basesCtx)
 
-    this.rerenderCooldownMs = 1000 * this.settingsContext.uxRerenderCooldownSeconds
+    this.rerenderCooldownMs = 1000 * this.settingsContext.rerenderCooldownSeconds
     this.dataLoader = new ChartDataLoader(this.chartContext)
     this.uiManager = new ChartUiManager(this.chartContext, container)
   }
