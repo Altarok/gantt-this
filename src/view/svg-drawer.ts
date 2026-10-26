@@ -44,7 +44,7 @@ export class GanttRenderEngine {
         debug.log(`<< resize (short) ${this.lastWidth} == ${newWidth}`)
         return
       }
-      this.handleResize(RedrawOption.None)
+      this.handleResize(RedrawOption.Resize)
       debug.log(`<< resize (width) ${this.lastWidth} != ${newWidth}`)
       this.lastWidth = newWidth
     })
@@ -57,21 +57,18 @@ export class GanttRenderEngine {
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    if (reset.redraw) this.redraw()
+    if (reset.has('redraw')) this.redraw()
     this.handleResize(reset)
     this.initEventListener()
   }
 
   private redraw() {
-    /*
-     * TODO add special reset option
-     */
     this.view.redrawChart()
   }
 
   private calculateGlobalBounds() {
     if (this.rawData.length === 0) {
-      const todayDays = this.chartCtx.calendarCache.get(this.chartCtx.settings.defaultCalendar)?.today ?? 0
+      const todayDays = this.chartCtx.calendarCache.get(this.settings.defaultCalendar)?.today ?? 0
       this.viewModel.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
@@ -162,7 +159,7 @@ export class GanttRenderEngine {
 
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
-    const currRenderWidth = this.viewModel.getCurrRenderWidth()
+    const currRenderWidth = this.currRenderWidth
     const lastRenderWidth = this.viewModel.getLastRenderWidth()
 
     if (currRenderWidth <= 0) return
@@ -180,7 +177,7 @@ export class GanttRenderEngine {
       const centerPercentage = (oldCenterPixel - this.viewModel.panTranslateX) / (lastRenderWidth * this.viewModel.zoomFactor)
       const centerDays = this.viewModel.minDays + (centerPercentage * totalDaysSpan)
 
-      // 2. Setze lastWidth neu
+      // cache last width
       this.viewModel.cacheCurrentRenderWidth()
 
       // 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt
@@ -190,7 +187,7 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    if (reset.redraw && this.settings.hasDateBounds) {
+    if (reset.has('resetZoomAndPan') && this.settings.hasDateBounds) {
       /* Re-evaluate predefined bounds now that we have the true container width */
       this.transitionToPredefinedBounds()
     }
@@ -317,7 +314,7 @@ export class GanttRenderEngine {
   }
 
   private drawAxes(reset: RedrawOption) {
-    this.view.clearCalendarLayer(reset.redraw)
+    this.view.clearCalendarLayer(reset.has('redraw'))
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
 
@@ -411,7 +408,7 @@ export class GanttRenderEngine {
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
       }
 
-      if (reset.redraw && calBadgeTextContent) {
+      if (reset.has('redraw') && calBadgeTextContent) {
         this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }
     })

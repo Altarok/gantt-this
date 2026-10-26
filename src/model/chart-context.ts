@@ -16,7 +16,7 @@ import {ToolbarView} from '../views/toolbar-view'
  */
 export class ChartContext {
   readonly svgDrawerUtil: SvgDrawerUtil
-  private toolbarView?: ToolbarView
+  toolbarView?: ToolbarView
 
   constructor(readonly plugin: FantasyGanttPlugin,
               private readonly diagnosticsContext: DiagnosticsContext,

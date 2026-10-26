@@ -98,11 +98,12 @@ export class ChartManager {
   }
 
   refreshChartCallback = async (reset: RedrawOption): Promise<void> => {
-    if (reset.resetCaches) {
-      this.reset()
+    if (reset.has('resetDiagnosticCache')) {
       this.diagnosticsContext.resetCache()
+      this.chartContext.toolbarView?.reset()
+    }
+    if (reset.has('resetCalendarCache')) {
       await this.prepareCalendarCache(true)
-      // TODO reset orange color of diag button
     }
 
     if (!this.renderEngine) return

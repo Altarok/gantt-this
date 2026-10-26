@@ -261,14 +261,20 @@ export class ToolbarView implements Destroyable {
     })
   }
 
+  /** Call when no longer used. */
   destroy() {
+    this.reset()
     if (this.boundOutsideClick) {
       const activeWindow = this.chartView.container.ownerDocument.defaultView ?? window
       activeWindow.removeEventListener('click', this.boundOutsideClick)
       this.boundOutsideClick = null
     }
-    this.debugInfoButton?.removeClass(Css.toolbar.buttonWarn)
     this.activeCloser = null
+  }
+
+  /** Call when reloading data. */
+  reset() {
+    this.debugInfoButton?.removeClass(Css.toolbar.buttonWarn)
   }
 
 }
