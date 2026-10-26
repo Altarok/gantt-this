@@ -152,21 +152,14 @@ export class GanttRenderEngine {
     this.svgDrawerUtil.setEventManager(this.eventManager)
   }
 
-  handlePanOrZoom() {
+  private handlePanOrZoom() {
     this.initLayout() /* -> Re-calculate repeating events */
     this.handleResize(RedrawOption.None) // false
   }
 
-  handleViewReset() {
-    this.handleResize(RedrawOption.None)
-  }
+  private handleResize(reset: RedrawOption) {
+    debug.log(`Auto-refresh with options: ${reset.toString()}`)
 
-  handleResize(reset: RedrawOption) {
-    // if (reset.isManualRefresh) {
-    //   debug.log(`Manual refresh.`)
-    // } else {
-    //   debug.log(`Auto-refresh with options: ${reset.toString()}`)
-    // }
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
     const currRenderWidth = this.viewModel.getCurrRenderWidth()
@@ -430,7 +423,7 @@ export class GanttRenderEngine {
   resetZoomAndPan() {
     if (this.eventManager?.isDragging) return
     this.viewModel.resetPanAndZoom()
-    this.handleViewReset()
+    this.handleResize(RedrawOption.ResetView)
   }
 
   /**

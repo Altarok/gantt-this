@@ -8,14 +8,14 @@ export class RedrawOption {
     return `RedrawOption: [${String(this.options)}]`
   }
 
-  /** Done once during first iteration. */
+  /** Do everything. Used once during creation. */
   static readonly Full = new RedrawOption(['resetCaches', 'reloadData', 'resetZoomAndPan', 'resize', 'redraw'])
 
   /**
+   * Do everything except resetting current zoom and pan.
    * Manually triggered by clicking 'Reload data'. Resets all caches, especially calendar and diagnostics.
-   * Does not affect current zoom or pan values.
    */
-  static readonly ManualReload = new RedrawOption(['resetCaches', 'reloadData', 'redraw'])
+  static readonly ManualReload = new RedrawOption(['resetCaches', 'reloadData', 'resize', 'redraw'])
 
   /**
    * Automatically triggered by base (or code block) through Obsidian's internal BTS trigger.

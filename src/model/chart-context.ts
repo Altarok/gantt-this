@@ -1,4 +1,4 @@
-import {apiVersion, MetadataCache, Platform, PluginManifest, TFile} from 'obsidian'
+import {apiVersion, MetadataCache, PluginManifest, TFile} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {DiagnosticsContext} from './diagnostics-context'
 import {SettingsContext} from './settings-context'
@@ -16,7 +16,6 @@ import {RedrawOption} from './redraw-options'
  */
 export class ChartContext {
   readonly svgDrawerUtil: SvgDrawerUtil
-  // readonly isMobile = Platform.isMobile
 
   constructor(readonly plugin: FantasyGanttPlugin,
               private readonly diagnosticsContext: DiagnosticsContext,
