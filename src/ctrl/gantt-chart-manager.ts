@@ -88,19 +88,20 @@ export class ChartManager {
     try {
       await cacheKnownCalendars(this.chartContext, this.rawChartInput.calendar)
     } catch (err) {
-      if (err instanceof GanttError) this.diagnosticsContext.addErr(err)
+      if (err instanceof GanttError) this.chartContext.addErr(err)
     }
     try {
       this.chartContext.parseRawChartInput()
     } catch (err) {
-      if (err instanceof GanttError) this.diagnosticsContext.addErr(err)
+      if (err instanceof GanttError) this.chartContext.addErr(err)
     }
   }
 
-  refreshChartCallback = (reset: RedrawOption): void => {
+  refreshChartCallback = async (reset: RedrawOption): Promise<void> => {
     if (reset.resetCaches) {
-      this.plugin.calendarConfigsCache.clear()
-      this.diagnosticsContext.resetCache(reset)
+      this.reset()
+      this.diagnosticsContext.resetCache()
+      await this.prepareCalendarCache(true)
       // TODO reset orange color of diag button
     }
 
@@ -124,8 +125,6 @@ export class ChartManager {
     this.updateTimeout = window.setTimeout(() => {
       this.lastRenderTimestamp = now
 
-      this.chartContext.resetCaches(reset)
-
       this.dataLoader.getGanttItems()
       .then(updatedData => {
         this.lastRawData = updatedData
@@ -144,6 +143,7 @@ export class ChartManager {
     chartModel.setRawContainerWidth(chartView.chartContainer.clientWidth)
 
     const tv = this.uiManager.createToolbarView(chartModel, chartView, this.refreshChartCallback)
+    this.chartContext.addToolBarView(tv)
     this.destroyableObjects.push(tv)
 
     const data = await this.dataLoader.getGanttItems()

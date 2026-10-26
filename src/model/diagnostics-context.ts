@@ -1,7 +1,6 @@
 import {TFile} from 'obsidian'
 import {formatErrorMessage, GanttError} from './gantt-error'
 import {ChartDiagnostics, ErrorEntry, ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../const/error-types'
-import {RedrawOption} from './redraw-options'
 
 const severity: Record<ErrorSeverity, number> = {fatal: 0, error: 1, warn: 2, info: 3,}
 
@@ -17,18 +16,13 @@ export class DiagnosticsContext implements ChartDiagnostics {
   logs: ErrorEntry[] = []
   loggedIDs: ErrorId[] = []
 
-  resetCache(reset: RedrawOption): void {
-    /*
-     * TODO: map which ErrorIDs should be reset
-     */
-    if (reset.resetCaches) {
-      this.totalCalendars = 0
-      this.loadedCalendars = 0
-      this.contextFilesCount = 0
-      this.contextEventCount = 0
-      this.logs = []
-      this.loggedIDs = []
-    }
+  resetCache(): void {
+    this.totalCalendars = 0
+    this.loadedCalendars = 0
+    this.contextFilesCount = 0
+    this.contextEventCount = 0
+    this.logs = []
+    this.loggedIDs = []
   }
 
   get hasWarnings(): boolean {
@@ -51,10 +45,7 @@ export class DiagnosticsContext implements ChartDiagnostics {
     this.logs.push(newEntry)
   }
 
-  /*
-   * TODO add optional parameter msg
-   */
-  addErr(err: GanttError, file?: TFile) {
+  addError(err: GanttError, file?: TFile) {
     this.add(err.id, err.logLevel, err.type, err.message, err.filepath ?? file?.path)
   }
 

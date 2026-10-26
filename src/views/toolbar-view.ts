@@ -59,7 +59,7 @@ export class ToolbarView implements Destroyable {
   constructor(private readonly chartCtx: ChartContext,
               private readonly chartView: GanttChartView,
               private readonly viewModel: GanttChartModel,
-              refreshChartCallback: (r: RedrawOption) => void) {
+              refreshChartCallback: (r: RedrawOption) => Promise<void>) {
     const settings: SettingsContext = chartCtx.settings
 
     this.container = chartView.toolbarContainer
@@ -99,7 +99,7 @@ export class ToolbarView implements Destroyable {
     const localSettingsGroup: HTMLDivElement = createGroup(this.container)
     localSettingsGroup.createDiv({text: 'Local settings:'})
 
-    const update = (): void => refreshChartCallback(RedrawOption.None)
+    const update = (): void => void refreshChartCallback(RedrawOption.None)
 
     this.createDropdownButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings', 'Changes affect only local chart', (dropdown) => {
       this.drawRow(dropdown, 'Moons', (b: boolean) => {
@@ -149,7 +149,7 @@ export class ToolbarView implements Destroyable {
     })
   }
 
-  private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: (r: RedrawOption) => void) {
+  private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: (r: RedrawOption) => Promise<void>) {
     let containsUnknownGroups = false
     for (const group of this.getCurrentGroupConfigs()) {
       const row = dropdown.createDiv({cls: 'gt-group-dropdown-row'})
@@ -165,7 +165,7 @@ export class ToolbarView implements Destroyable {
       row.addEventListener('click', () => {
         group.visible = !group.visible
         checkbox.checked = group.visible
-        refreshChartCallback(RedrawOption.None)
+        void refreshChartCallback(RedrawOption.None)
       })
     }
     if (containsUnknownGroups) {
@@ -216,11 +216,9 @@ export class ToolbarView implements Destroyable {
     this.chartView.container.removeClass('is-toolbar-minimized')
   }
 
-
   setHasWarnings() {
     this.debugInfoButton.addClass(Css.toolbar.buttonWarn)
   }
-
 
   private createDropdownButton(parent: HTMLDivElement,
                                icon: string,
@@ -269,14 +267,9 @@ export class ToolbarView implements Destroyable {
       activeWindow.removeEventListener('click', this.boundOutsideClick)
       this.boundOutsideClick = null
     }
+    this.debugInfoButton?.removeClass(Css.toolbar.buttonWarn)
     this.activeCloser = null
   }
 
-  reset(): void {
-    /*
-     * TODO create reset option enum and register all resettable things in reset context
-     */
-    this.destroy()
-  }
 }
 

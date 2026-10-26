@@ -80,11 +80,11 @@ async function getCalendarDefinitions(calendarIDs: string[],
     const calendarID = chartCtx.propertyReader.getCalendarId(fileMetadata.frontmatter, file)
     if (!calendarID) continue /* nothing to load */
     if (calendarCache.get(calendarID)) continue /* already loaded - TODO compare! */
-    if (!allKnownCalendarIDs.includes(calendarID)) chartCtx.diagnostics.addLog('unregisteredCalendar', {calendarID})
+    if (!allKnownCalendarIDs.includes(calendarID)) chartCtx.addLog('unregisteredCalendar', {calendarID})
     try {
       await loadCalendar(chartCtx, calendarID, file)
     } catch (err) {
-      if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+      if (err instanceof GanttError) chartCtx.addErr(err, file)
     }
   }
 
@@ -93,7 +93,7 @@ async function getCalendarDefinitions(calendarIDs: string[],
   //   try {
   //     await loadCalendar(chartCtx, calendarID, file)
   //   } catch (err) {
-  //     if (err instanceof GanttError) chartCtx.diagnostics.addErr(err, file)
+  //     if (err instanceof GanttError) chartCtx.addErr(err, file)
   //   }
   // }
 }
@@ -157,7 +157,7 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
     chartCtx.calendarCache.set(calendarID, newCalendarConfig)
   } catch (err) {
     if (err instanceof GanttError) {
-      chartCtx.diagnostics.addErr(err, file)
+      chartCtx.addErr(err, file)
     } else if (err instanceof Error && err.name === 'YAMLParseError') {
       const yamlErr = err as Error & { code?: string; linePos?: { line: number; col: number }[] }
       let suffix = ''
@@ -166,7 +166,7 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
         suffix = ` Problem at line ${line}, column ${col}.`
       }
       const description = `YAMLParseError. ${yamlErr.code ?? ''}. ${suffix}`
-      chartCtx.diagnostics.addLog('calendarYAMLParseError', {id: calendarID, description}, file?.path)
+      chartCtx.addLog('calendarYAMLParseError', {id: calendarID, description}, file?.path)
       debug.warn(`YAML Parse Error [${yamlErr.code}]: ${yamlErr.message}`)
     }
   }

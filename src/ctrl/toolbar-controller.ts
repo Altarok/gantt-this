@@ -22,9 +22,11 @@ const zoomIn = 1.25
 export function setToolbarReactions(chartCtx: ChartContext,
                                     toolbar: ToolbarView,
                                     renderEngine: GanttRenderEngine,
-                                    refreshChartCallback: (r:RedrawOption) => void) {
+                                    refreshChartCallback: (r: RedrawOption) => Promise<void>) {
 
-  toolbar.reloadButton.addEventListener('click', () => refreshChartCallback(RedrawOption.ManualReload))
+  toolbar.reloadButton.addEventListener('click', () => {
+    void refreshChartCallback(RedrawOption.ManualReload)
+  })
   toolbar.toggleBarsButton.addEventListener('click', () => {
       toolbar.handleToggleBarsButtonClick()
       renderEngine.updateViewAfterToggle()

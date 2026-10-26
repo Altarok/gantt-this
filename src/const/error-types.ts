@@ -1,6 +1,8 @@
 export type ErrorSeverity = 'info' | 'warn' | 'error' | 'fatal'
 export type ErrorType = 'general' | 'calendar' | 'event' | 'date' | 'bound' | 'unknown'
 
+// TODO move file to 'types/'
+
 export type ErrorDef = {
   level: ErrorSeverity
   type: ErrorType

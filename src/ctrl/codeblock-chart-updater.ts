@@ -7,7 +7,7 @@ export class ChartLifecycleComponent extends MarkdownRenderChild {
 
   constructor(containerEl: HTMLElement,
               private readonly plugin: FantasyGanttPlugin,
-              private readonly refreshChartCallback: (r: RedrawOption) => void) {
+              private readonly refreshChartCallback: (r: RedrawOption) => Promise<void>) {
     super(containerEl)
   }
 

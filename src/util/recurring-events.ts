@@ -128,7 +128,7 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
     } catch (err) {
       if (err instanceof GanttError) {
         err.message = `Failed to duplicate event: ${err.message}`
-        chartCtx.diagnostics.addErr(err)
+        chartCtx.addErr(err)
       }
       // continue
     }

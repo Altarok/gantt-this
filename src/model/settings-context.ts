@@ -298,7 +298,7 @@ export class SettingsContext implements GanttChartSources {
     const calendarID = rawChartInput.calendar ?? this.global.defaultCalendar
     const calendarConfig = chartCtx.calendarCache.get(calendarID)
 
-    if (!calendarConfig) return chartCtx.diagnostics.addLog('noCalForChartBounds', {calendarID})
+    if (!calendarConfig) return chartCtx.addLog('noCalForChartBounds', {calendarID})
 
     if (rawChartInput.lowerBoundDate) local.lowerBoundDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.lowerBoundDate, calendarConfig, 'lower bound')
     if (rawChartInput.centerHereDate) local.centerHereDateParsed = this.parseCodeBlockDate(chartCtx, rawChartInput.centerHereDate, calendarConfig, 'center here')
@@ -312,13 +312,13 @@ export class SettingsContext implements GanttChartSources {
     } catch (err) {
       if (err instanceof GanttError) {
         err.message = `Invalid ${description}. ${err.message}`
-        chartCtx.diagnostics.addErr(err)
+        chartCtx.addErr(err)
       }
       return undefined
     }
 
     /* Do not throw error, the other bounds may still work */
-    chartCtx.diagnostics.addLog('illegalChartBoundFormat', {bound: description, date: String(date)})
+    chartCtx.addLog('illegalChartBoundFormat', {bound: description, date: String(date)})
     return undefined
   }
 

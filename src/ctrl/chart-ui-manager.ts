@@ -25,7 +25,7 @@ export class ChartUiManager {
   }
 
   /** Instantiates the toolbar view for the chart. */
-  public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: (r:RedrawOption) => void): ToolbarView {
+  public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: (r: RedrawOption) => Promise<void>): ToolbarView {
     debug.log('<> Create new ToolbarView')
     return new ToolbarView(this.chartCtx, chartView, chartModel, refreshCallback)
   }

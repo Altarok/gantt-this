@@ -8,14 +8,15 @@ import TextWidthCache from '../view/text-space-cache'
 import {CalendarConfig} from '../types/calendar-types'
 import {SvgDrawerUtil} from '../view/svg-drawer-util'
 import {GanttError} from './gantt-error'
-import {ChartDiagnostics} from '../const/error-types'
-import {RedrawOption} from './redraw-options'
+import {ChartDiagnostics, ErrorId} from '../const/error-types'
+import {ToolbarView} from '../views/toolbar-view'
 
 /**
  * Each chart has 1 of these
  */
 export class ChartContext {
   readonly svgDrawerUtil: SvgDrawerUtil
+  private toolbarView?: ToolbarView
 
   constructor(readonly plugin: FantasyGanttPlugin,
               private readonly diagnosticsContext: DiagnosticsContext,
@@ -24,10 +25,6 @@ export class ChartContext {
               private readonly textWidthCache: TextWidthCache,
               private readonly basesCtx?: BasesContext) {
     this.svgDrawerUtil = new SvgDrawerUtil(this)
-  }
-
-  resetCaches(reset: RedrawOption): void {
-    this.diagnosticsContext.resetCache(reset)
   }
 
   get settings(): SettingsContext {
@@ -95,10 +92,6 @@ export class ChartContext {
     this.settingsContext.parseRawChartInput(this)
   }
 
-  addErr(error: GanttError): void {
-    this.diagnosticsContext.addErr(error)
-  }
-
   getUpdatedDiagnostics(): ChartDiagnostics {
     const diagnostics: DiagnosticsContext = this.diagnostics
     diagnostics.sortLogs()
@@ -106,4 +99,17 @@ export class ChartContext {
     return diagnostics
   }
 
+  addToolBarView(tv: ToolbarView) {
+    this.toolbarView = tv
+  }
+
+  addErr(error: GanttError, file?: TFile): void {
+    this.diagnosticsContext.addError(error, file)
+    this.toolbarView?.setHasWarnings()
+  }
+
+  addLog(id: ErrorId, params?: Record<string, string | number>, filepath?: string): void {
+    this.diagnosticsContext.addLog(id, params, filepath)
+    this.toolbarView?.setHasWarnings()
+  }
 }
