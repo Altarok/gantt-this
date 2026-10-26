@@ -1,4 +1,3 @@
-import {TFile} from 'obsidian'
 import {formatErrorMessage, GanttError} from './gantt-error'
 import {ChartDiagnostics, ErrorEntry, ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../const/error-types'
 
@@ -45,11 +44,11 @@ export class DiagnosticsContext implements ChartDiagnostics {
     this.logs.push(newEntry)
   }
 
-  addError(err: GanttError, file?: TFile) {
-    this.add(err.id, err.logLevel, err.type, err.message, err.filepath ?? file?.path)
+  addError(err: GanttError, filepath?: string) {
+    this.add(err.id, err.logLevel, err.type, err.message, err.filepath ?? filepath)
   }
 
-  addLog(id: ErrorId, params?: Record<string, string | number>, filepath?: string): void {
+  addErrorLog(id: ErrorId, params?: Record<string, string | number>, filepath?: string): void {
     const errorDef = knownErrors[id]
     if (!errorDef) return this.add('fatal', 'fatal', 'unknown', 'Unknown error')
 

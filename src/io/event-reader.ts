@@ -83,7 +83,7 @@ function createItem(chartCtx: ChartContext,
 
   if (endRes) {
     if (endRes.days <= startRes.days) {
-      chartCtx.addLog('endDateNotAfterStartDate', {end: endRes.display, start: startRes.display}, file.path)
+      chartCtx.addLog('endDateNotAfterStartDate', {end: endRes.display, start: startRes.display}, file)
       endRes = {days: startRes.days, display: startRes.display}
     }
   } else {

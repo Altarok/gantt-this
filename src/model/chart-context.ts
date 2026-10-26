@@ -104,12 +104,12 @@ export class ChartContext {
   }
 
   addErr(error: GanttError, file?: TFile): void {
-    this.diagnosticsContext.addError(error, file)
+    this.diagnosticsContext.addError(error, file?.path)
     this.toolbarView?.setHasWarnings()
   }
 
-  addLog(id: ErrorId, params?: Record<string, string | number>, filepath?: string): void {
-    this.diagnosticsContext.addLog(id, params, filepath)
+  addLog(id: ErrorId, params?: Record<string, string | number>, file?: TFile): void {
+    this.diagnosticsContext.addErrorLog(id, params, file?.path)
     this.toolbarView?.setHasWarnings()
   }
 }

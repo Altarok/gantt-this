@@ -166,7 +166,7 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
         suffix = ` Problem at line ${line}, column ${col}.`
       }
       const description = `YAMLParseError. ${yamlErr.code ?? ''}. ${suffix}`
-      chartCtx.addLog('calendarYAMLParseError', {id: calendarID, description}, file?.path)
+      chartCtx.addLog('calendarYAMLParseError', {id: calendarID, description}, file)
       debug.warn(`YAML Parse Error [${yamlErr.code}]: ${yamlErr.message}`)
     }
   }
