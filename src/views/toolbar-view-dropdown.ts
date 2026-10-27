@@ -30,12 +30,19 @@ export class ChartDropdownMenu extends Menu {
     return this
   }
 
-  addResetCallback(callback: () => void) {
+  addResetCallbackRow(callback: () => void) {
     this.addItem((item) => {
       item.setTitle('Restore defaults').onClick(() => {
         callback()
         void this.refreshChartCallback(RedrawOption.ManualReload)
       })
+    })
+    return this
+  }
+
+  addFootnoteRow(text: string) {
+    this.addItem((item) => {
+      item.setTitle(text).setDisabled(true)
     })
     return this
   }
