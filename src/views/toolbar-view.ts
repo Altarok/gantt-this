@@ -98,19 +98,20 @@ export class ToolbarView implements Destroyable {
   private createLocalChartSettingsDropdown(button: HTMLButtonElement, settings: SettingsContext) {
     this.createDropdownMenu(button, 'Changes only affect local chart', (menu: ChartDropdownMenu) => {
       menu
-      .addSettingRow('Color-code axes', () => settings.colorCodeCalendarAxes, (b: boolean) => settings.colorCodeCalendarAxes = b)
-      .addSettingRow('Moons', () => settings.showMoons, (b: boolean) => settings.showMoons = b)
-      .addSeparator()  /* separator for hover effects */
-      .addSettingRow('Hover: Highlight event', () => settings.highlightHoveredEvent, (b: boolean) => settings.highlightHoveredEvent = b)
-      .addSettingRow('Hover: Highlight related events', () => settings.highlightRelatedEvents, (b: boolean) => settings.highlightRelatedEvents = b)
-      .addSettingRow('Hover: Draw vertical line', () => settings.drawVerticalLineOnHover, (b: boolean) => settings.drawVerticalLineOnHover = b)
-      .addSettingRow('Hover: Draw arrows', () => settings.drawArrows, (b: boolean) => settings.drawArrows = b)
-      .addSeparator()  /* separator for toolbar */
-      .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b, true)
-      .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b, true)
-      .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b, true)
-      .addSeparator()
-      .addResetCallbackRow(() => this.chartCtx.settings.copyOverwritableGlobalSettings())
+        .addSettingRow('Moons', () => settings.showMoons, (b: boolean) => settings.showMoons = b)
+        .addSettingRow('Calendars: Color-code axes', () => settings.colorCodeCalendarAxes, (b: boolean) => settings.colorCodeCalendarAxes = b)
+        // .addSettingRow('Calendars: Sticky', () => settings.stickyCalAxes, (b: boolean) => settings.stickyCalAxes = b)
+        .addSeparator()  /* separator for hover effects */
+        .addSettingRow('Hover: Highlight event', () => settings.highlightHoveredEvent, (b: boolean) => settings.highlightHoveredEvent = b)
+        .addSettingRow('Hover: Highlight related events', () => settings.highlightRelatedEvents, (b: boolean) => settings.highlightRelatedEvents = b)
+        .addSettingRow('Hover: Draw vertical line', () => settings.drawVerticalLineOnHover, (b: boolean) => settings.drawVerticalLineOnHover = b)
+        .addSettingRow('Hover: Draw arrows', () => settings.drawArrows, (b: boolean) => settings.drawArrows = b)
+        .addSeparator()  /* separator for toolbar */
+        .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b, true)
+        .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b, true)
+        .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b, true)
+        .addSeparator()
+        .addResetCallbackRow(() => this.chartCtx.settings.copyOverwritableGlobalSettings())
     })
   }
 

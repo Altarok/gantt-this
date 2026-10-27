@@ -2,6 +2,7 @@ import {Css} from '../const/constants'
 import {ManualSvg} from '../view/manual-svg-icons'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
+import {debug} from '../util/debug'
 
 export class GanttChartView {
   mainWrapper: HTMLDivElement
@@ -41,36 +42,38 @@ export class GanttChartView {
     this.container.empty()
     this.container.addClass(Css.wrapper)
 
+    const stickyCalAxes = chartCtx.settings.stickyCalAxes
     const stickyToolbar = chartCtx.settings.stickyToolbar
     const toolbarBelowChart = chartCtx.settings.toolbarBelowChart
 
-    if (toolbarBelowChart && stickyToolbar) {
-      /* separate toolbar and chart, chart first */
-      this.mainWrapper = container.createDiv({cls: Css.wrapper})
-      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
-      this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
-    } else if (toolbarBelowChart) {
-      /* join toolbar and chart, chart first  */
-      this.mainWrapper = container.createDiv({cls: Css.wrapper})
+    debug.log(`GanttChartView ** stickyCalAxes ${stickyCalAxes}, stickyToolbar ${stickyToolbar}, toolbarBelowChart ${toolbarBelowChart}`)
+
+    this.mainWrapper = container.createDiv({cls: Css.wrapper})
+
+    if (toolbarBelowChart) {
       this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
       this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
-    } else if (stickyToolbar) {
-      /* separate toolbar and chart, toolbar first */
-      this.toolbarContainer = container.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = container.createDiv({cls: Css.toolbar.minimized})
-      this.mainWrapper = container.createDiv({cls: Css.wrapper})
-      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
     } else {
-      /* join toolbar and chart, toolbar first */
-      this.mainWrapper = container.createDiv({cls: Css.wrapper})
       this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
       this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
       this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
     }
 
+    this.updateToolbarLayout()
+
     this.initiateChartContainerSubContainers()
+  }
+
+  public updateToolbarLayout() {
+    const toolbarBelowChart = this.chartCtx.settings.toolbarBelowChart
+    if (toolbarBelowChart) {
+      this.mainWrapper.prepend(this.chartContainer)
+    } else {
+      this.mainWrapper.prepend(this.toolbarContainer, this.minimizedToolbarContainer)
+    }
+
+    this.makeToolbarSticky(this.chartCtx.settings.stickyToolbar)
   }
 
   /** Clear chart, not toolbar, and re-fill it with life */
@@ -237,6 +240,16 @@ export class GanttChartView {
   findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
     const selector = `[data-id="${id}"]`
     return this.eventLayer.querySelector<T>(selector)
+  }
+
+  makeToolbarSticky(sticky: boolean) {
+    if (sticky) {
+      this.toolbarContainer.addClass('is-sticky')
+      this.minimizedToolbarContainer.addClass('is-sticky')
+    } else {
+      this.toolbarContainer.removeClass('is-sticky')
+      this.minimizedToolbarContainer.removeClass('is-sticky')
+    }
   }
 }
 

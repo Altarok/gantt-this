@@ -6,7 +6,7 @@
   border-radius: 0;
   padding: 0;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   box-sizing: border-box;
 }
@@ -62,9 +62,7 @@ body.is-popout-window .gt-chart-container {
 
 /* base toolbar layout */
 .gt-toolbar-container {
-  position: sticky; /* new Keeps the toolbar anchored at the top of the container while scrolling down */
-  top: 0;
-  z-index: 10;
+  position: relative;
   background-color: var(--background-primary);
   display: flex;
   flex-wrap: wrap;
@@ -79,6 +77,12 @@ body.is-popout-window .gt-chart-container {
   transform: scale(1);
   max-height: 200px;
   overflow: hidden;
+}
+
+.gt-toolbar-container.is-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* The floating top-right header wrapper for the single unfold button */

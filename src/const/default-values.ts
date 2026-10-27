@@ -43,7 +43,7 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
   uxConnectRelatedEvents: false,
   uxMoveToolbarBelowChart: false,
   uxMakeToolbarSticky: true,
-
+  uxMakeCalAxesSticky: false,
   /*
    * Front-matter property names
    */

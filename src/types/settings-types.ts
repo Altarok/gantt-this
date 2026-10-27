@@ -182,7 +182,7 @@ export type PluginSettings = GanttChartSources & {
   uxConnectRelatedEvents: boolean // connect predecessors and successors
   uxMoveToolbarBelowChart: boolean
   uxMakeToolbarSticky: boolean
-
+  uxMakeCalAxesSticky: boolean
   /*
    * Front-matter property names configurable by user
    */

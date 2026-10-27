@@ -52,6 +52,7 @@ export class GanttRenderEngine {
   }
 
   public updateData(reset: RedrawOption, newData: GanttItem[]) {
+    if (reset.has('redraw')) this.view.updateToolbarLayout()
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
     this.viewModel.updateSvgDrawerData()
     this.rawData = newData

@@ -61,6 +61,7 @@ export class ChartManager {
     await this.plugin.loadSettings()
   }
 
+  /** Called by Base after data update. */
   async updateAfterReload(): Promise<void> {
     await this.prepareCalendarCache(false)
 
@@ -126,12 +127,10 @@ export class ChartManager {
     this.updateTimeout = window.setTimeout(() => {
       this.lastRenderTimestamp = now
 
-      this.dataLoader.getGanttItems()
-      .then(updatedData => {
+      this.dataLoader.getGanttItems().then(updatedData => {
         this.lastRawData = updatedData
         this.renderEngine?.updateData(reset, updatedData)
-      })
-      .catch(() => new Notice('Failed to reload Gantt.'))
+      }).catch(() => new Notice('Failed to reload Gantt.'))
     }, reset.isManual ? 100 : remainingCooldown)
   }
 

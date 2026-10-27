@@ -53,6 +53,7 @@ export class SettingsContext implements GanttChartSources {
       /* General settings */
       'uxShowMoons',
       'uxUseCalColorForCalAxis',
+      'uxMakeCalAxesSticky',
       /* Toolbar settings */
       'uxMakeToolbarSticky',
       'uxMoveToolbarBelowChart',
@@ -200,11 +201,11 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get fallbackColorForIcons(): string {
-    return /* TODO implement this.local.fallbackColorForIcons ?? */ this.global.fallbackColorForIcons
+    return /* implement this.local.fallbackColorForIcons ?? */ this.global.fallbackColorForIcons
   }
 
   get fallbackColor(): string {
-    return /* TODO implement  this.local.fallbackColor ?? */ this.global.fallbackColor
+    return /* implement this.local.fallbackColor ?? */ this.global.fallbackColor
   }
 
   // get groups(): GroupOrCalendarSettings[] {
@@ -216,19 +217,19 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get viewEventRowHeight(): number {
-    return /* TODO implement this.local.viewEventRowHeight ?? */ this.global.viewEventRowHeight
+    return /* implement this.local.viewEventRowHeight ?? */ this.global.viewEventRowHeight
   }
 
   get viewEventShapeHeight(): number {
-    return /* TODO implement this.local.viewEventShapeHeight ?? */ this.global.viewEventShapeHeight
+    return /* implement this.local.viewEventShapeHeight ?? */ this.global.viewEventShapeHeight
   }
 
   get viewEventIconHeight(): number {
-    return /* TODO implement this.local.viewEventIconHeight ?? */ this.global.viewEventIconHeight
+    return /* implement this.local.viewEventIconHeight ?? */ this.global.viewEventIconHeight
   }
 
   get uxVerticalLineEventWidth(): number {
-    return /* TODO implement this.local.uxVerticalLineEventWidth ?? */ this.global.uxVerticalLineEventWidth
+    return /* implement this.local.uxVerticalLineEventWidth ?? */ this.global.uxVerticalLineEventWidth
   }
 
   get showPanAndZoomButtonsInToolbar(): boolean {
@@ -240,7 +241,7 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get showButtonsToHideGroups(): boolean {
-    return /* TODO implement this.local.showButtonsToHideGroups ?? */ this.global.showButtonsToHideGroups
+    return /* implement this.local.showButtonsToHideGroups ?? */ this.global.showButtonsToHideGroups
   }
 
   get toolbarBelowChart(): boolean {
@@ -268,11 +269,18 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get uxVerticalOverlayColor(): string {
-    return /* TODO implement this.local.uxVerticalOverlayColor ?? */ this.global.uxVerticalOverlayColor
+    return /* implement this.local.uxVerticalOverlayColor ?? */ this.global.uxVerticalOverlayColor
   }
 
   get uxAddDaySuffixToTooltipTitle(): boolean {
-    return /* TODO implement this.local.uxAddDaySuffixToTooltipTitle ?? */ this.global.uxAddDaySuffixToTooltipTitle
+    return /* implement this.local.uxAddDaySuffixToTooltipTitle ?? */ this.global.uxAddDaySuffixToTooltipTitle
+  }
+  get stickyCalAxes(): boolean {
+    return this.local.uxMakeCalAxesSticky ?? this.global.uxMakeCalAxesSticky
+  }
+
+  set stickyCalAxes(b: boolean) {
+    this.local.uxMakeCalAxesSticky = b
   }
 
   get stickyToolbar(): boolean {
@@ -320,11 +328,11 @@ export class SettingsContext implements GanttChartSources {
   }
 
   get useFilenameAsFallbackStartDate(): boolean {
-    return /* TODO implement this.local.useFilenameAsFallbackStartDate ?? */ this.global.useFilenameAsFallbackStartDate
+    return /* implement this.local.useFilenameAsFallbackStartDate ?? */ this.global.useFilenameAsFallbackStartDate
   }
 
   get autoRestrictZoom(): boolean {
-    return /* TODO implement this.local.autoRestrictZoom ?? */ this.global.autoRestrictZoom
+    return /* implement this.local.autoRestrictZoom ?? */ this.global.autoRestrictZoom
   }
 
   get uxZoomButton(): ControlKey {
