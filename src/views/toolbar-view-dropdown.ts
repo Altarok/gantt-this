@@ -30,4 +30,14 @@ export class ChartDropdownMenu extends Menu {
     return this
   }
 
+  addResetCallback(callback: () => void) {
+    this.addItem((item) => {
+      item.setTitle('Restore defaults').onClick(() => {
+        callback()
+        void this.refreshChartCallback(RedrawOption.ManualReload)
+      })
+    })
+    return this
+  }
+
 }

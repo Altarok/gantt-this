@@ -44,10 +44,11 @@ export class SettingsContext implements GanttChartSources {
     this.updateGrpAndCalData()
   }
 
+
   /**
    * Copy global plugin settings to local chart settings when overwritable by toolbar dropdown.
    */
-  private copyOverwritableGlobalSettings(): void {
+  copyOverwritableGlobalSettings(): void {
     const keys = [
       /* General settings */
       'uxShowMoons',
