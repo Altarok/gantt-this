@@ -38,32 +38,35 @@ export class SettingsContext implements GanttChartSources {
 
       grpConfigs: {},
       calConfigs: {},
-
-      uxShowMoons: global.uxShowMoons,
-      uxUseCalColorForCalAxis: global.uxUseCalColorForCalAxis,
-
-      /*
-       * Toolbar
-       */
-      uxMakeToolbarSticky: global.uxMakeToolbarSticky,
-      uxMoveToolbarBelowChart: global.uxMoveToolbarBelowChart,
-      showPanAndZoomButtonsInToolbar: global.showPanAndZoomButtonsInToolbar,
-
-      /*
-       * Hover events
-       */
-      mouseOverEventShowBox: global.mouseOverEventShowBox,
-      uxHighlightRelatedEvents: global.uxHighlightRelatedEvents,
-      mouseOverEventShowVerticalLine: global.mouseOverEventShowVerticalLine,
-      uxConnectRelatedEvents: global.uxConnectRelatedEvents,
     }
 
+    this.copyOverwritableGlobalSettings()
     this.updateGrpAndCalData()
   }
 
-  // updateRawChartInput(data: RawChartInput): void {
-  //
-  // }
+  /**
+   * Copy global plugin settings to local chart settings when overwritable by toolbar dropdown.
+   */
+  private copyOverwritableGlobalSettings(): void {
+    const keys = [
+      /* General settings */
+      'uxShowMoons',
+      'uxUseCalColorForCalAxis',
+      /* Toolbar settings */
+      'uxMakeToolbarSticky',
+      'uxMoveToolbarBelowChart',
+      'showPanAndZoomButtonsInToolbar',
+      /* Tooltip + hover effect settings */
+      'mouseOverEventShowBox',
+      'uxHighlightRelatedEvents',
+      'mouseOverEventShowVerticalLine',
+      'uxConnectRelatedEvents'
+    ] as const
+
+    for (const key of keys) {
+      this.local[key] = this.global[key]
+    }
+  }
 
   updateGrpAndCalData(): void {
     this.local.grpConfigs = Object.fromEntries(this.global.groups.map(g => [g.id, {...g}]))
