@@ -113,8 +113,8 @@ export class ChartManager {
     const elapsed = now - this.lastRenderTimestamp
 
     const remainingCooldown = this.rerenderCooldownMs - elapsed
-    if (reset === RedrawOption.ManualReload) {
-      debug.log(`Manual refresh. Cooldown was at ${remainingCooldown} milliseconds.`)
+    if (reset.isManual) {
+      debug.log(`Manual refresh. Cooldown is at ${remainingCooldown} milliseconds.`)
     } else if (remainingCooldown > 0) {
       debug.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
       return
@@ -132,7 +132,7 @@ export class ChartManager {
         this.renderEngine?.updateData(reset, updatedData)
       })
       .catch(() => new Notice('Failed to reload Gantt.'))
-    }, remainingCooldown)
+    }, reset.isManual ? 100 : remainingCooldown)
   }
 
   async renderGantt() {

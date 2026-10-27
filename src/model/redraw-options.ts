@@ -3,7 +3,8 @@ type Step = 'resetCalendarCache' | 'resetDiagnosticCache' | 'reloadData' | 'rese
 export class RedrawOption {
   private readonly steps: Set<Step>
 
-  constructor(steps: Step[]) {
+  constructor(readonly isManual: boolean,
+              steps: Step[]) {
     this.steps = new Set(steps)
   }
 
@@ -16,27 +17,26 @@ export class RedrawOption {
   }
 
   /** Do everything. Used once during creation. */
-  static readonly Full = new RedrawOption(['resetCalendarCache', 'resetDiagnosticCache', 'reloadData', 'resetZoomAndPan', 'resize', 'redraw'])
+  static readonly Full = new RedrawOption(true, ['resetCalendarCache', 'resetDiagnosticCache', 'reloadData', 'resetZoomAndPan', 'resize', 'redraw'])
 
   /** Do everything except resetting current zoom and pan. Manually triggered by clicking 'Reload data'. */
-  static readonly ManualReload = new RedrawOption(['resetCalendarCache', 'resetDiagnosticCache', 'reloadData', 'resize', 'redraw'])
+  static readonly ManualReload = new RedrawOption(true, ['resetCalendarCache', 'resetDiagnosticCache', 'reloadData', 'resize', 'redraw'])
 
   /**
    * Automatically triggered by Obsidian's Base internal BTS trigger.
    * Updates data filtered by Base, not including calendars.
    * Does not affect current zoom or pan values.
    */
-  static readonly DataReload = new RedrawOption(['reloadData', 'redraw'])
+  static readonly DataReload = new RedrawOption(false, ['reloadData', 'redraw'])
 
-  /**
-   * Manually triggered. Only resets view (zoom and pan values) to default.
-   */
-  static readonly ResetView = new RedrawOption(['resetZoomAndPan'])
+  /** Manually triggered. Only resets view (zoom and pan values) to default. */
+  static readonly ResetView = new RedrawOption(true, ['resetZoomAndPan'])
 
-  static readonly Resize = new RedrawOption(['resize'])
+  /** Manually triggered. Changes frame size. */
+  static readonly Resize = new RedrawOption(true, ['resize'])
 
-  /** Basic redraw, does not change or reset anything. */
-  static readonly None = new RedrawOption([])
+  /** Manually triggered. Basic redraw, does not change or reset anything. */
+  static readonly None = new RedrawOption(true, [])
 
   // get resetCalendarCache(): boolean {
   //   return this.has('resetCalendarCache')
