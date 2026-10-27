@@ -49,7 +49,7 @@ export async function parseFiles(files: TFile[],
     if (err instanceof GanttError) chartCtx.addErr(err)
   }
 
-  if (chartCtx.settings.highlightRelatedEvents) findPredecessorsAndSuccessors(items, chartCtx.propertyReader)
+  findPredecessorsAndSuccessors(items, chartCtx.propertyReader)
 
   return items
 }
