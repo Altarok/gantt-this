@@ -6,24 +6,9 @@ import {ChartContext} from '../model/chart-context'
 import {SettingsContext} from '../model/settings-context'
 import {Destroyable, GroupOrCalendarSettings} from '../types/settings-types'
 import {RedrawOption} from '../model/redraw-options'
+import {ChartDropdownMenu} from './toolbar-view-dropdown'
 
 const isMobile = Platform.isMobile
-
-/* See https://lucide.dev for free icon examples */
-function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
-  const btn = parentEl.createEl('button', {cls: Css.toolbar.button})
-  setIcon(btn, icon)
-  setTooltip(btn, title, {placement: 'bottom', delay: -1})
-  return btn
-}
-
-function addSeparator(container: HTMLDivElement) {
-  if (!isMobile) container.createDiv({cls: Css.toolbar.separator})
-}
-
-function createGroup(container: HTMLDivElement) {
-  return container.createDiv({cls: Css.toolbar.buttonGroup})
-}
 
 export class ToolbarView implements Destroyable {
   private readonly container: HTMLDivElement
@@ -47,6 +32,9 @@ export class ToolbarView implements Destroyable {
   private activeCloser: (() => void) | null = null
   private boundOutsideClick: ((e: MouseEvent) => void) | null = null
 
+  // private readonly update: (b?: boolean) => void
+
+
   /**
    * Creates an instance of the ToolbarView, initializing buttons, groups,
    * and layout according to chart configuration settings.
@@ -59,7 +47,8 @@ export class ToolbarView implements Destroyable {
   constructor(private readonly chartCtx: ChartContext,
               private readonly chartView: GanttChartView,
               private readonly viewModel: GanttChartModel,
-              refreshChartCallback: (r: RedrawOption) => Promise<void>) {
+              private readonly refreshChartCallback: (r: RedrawOption) => Promise<void>) {
+    // this.update = (full = false): void => void refreshChartCallback(full ? RedrawOption.ManualReload : RedrawOption.None)
     const settings: SettingsContext = chartCtx.settings
 
     this.container = chartView.toolbarContainer
@@ -97,47 +86,21 @@ export class ToolbarView implements Destroyable {
     const localSettingsGroup: HTMLDivElement = createGroup(this.container)
     localSettingsGroup.createDiv({text: 'Local settings:'})
 
-    const update = (full = false): void => void refreshChartCallback(full ? RedrawOption.ManualReload : RedrawOption.None)
+    const textDropDown = createButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings',)
+    this.createDropdownMenu(textDropDown, 'Test', (menu: ChartDropdownMenu) => {
 
-    this.createDropdownButton(localSettingsGroup, 'sliders-horizontal', 'Change chart-only settings', 'Changes affect only local chart', (dropdown) => {
-      this.drawRow(dropdown, 'Color-code axes', this.settings.colorCodeCalendarAxes, (b: boolean) => {
-        this.settings.colorCodeCalendarAxes = b
-        update()
-      })
-      this.drawRow(dropdown, 'Moons', this.settings.showMoons, (b: boolean) => {
-        this.settings.showMoons = b
-        update()
-      })
-
-      dropdown.createDiv({cls: 'gt-group-dropdown-separator'})
-
-      this.drawRow(dropdown, 'Hover: Draw vertical line', this.settings.drawVerticalLineOnHover, (b: boolean) => {
-        this.settings.drawVerticalLineOnHover = b
-        update()
-      })
-      this.drawRow(dropdown, 'Hover: Highlight related events', this.settings.highlightRelatedEvents, (b: boolean) => {
-        this.settings.highlightRelatedEvents = b
-        update()
-      })
-      this.drawRow(dropdown, 'Hover: Draw arrows', this.settings.drawArrows, (b: boolean) => {
-        this.settings.drawArrows = b
-        update()
-      })
-
-      dropdown.createDiv({cls: 'gt-group-dropdown-separator'})
-
-      this.drawRow(dropdown, 'Toolbar: Sticky', this.settings.stickyToolbar, (b: boolean) => {
-        this.settings.stickyToolbar = b
-        update(true)
-      })
-      this.drawRow(dropdown, 'Toolbar: At bottom', this.settings.toolbarBelowChart, (b: boolean) => {
-        this.settings.toolbarBelowChart = b
-        update(true)
-      })
-      this.drawRow(dropdown, 'Toolbar: Add zoom/pan buttons', this.settings.showPanAndZoomButtonsInToolbar, (b: boolean) => {
-        this.settings.showPanAndZoomButtonsInToolbar = b
-        update(true)
-      })
+      menu
+      .addSettingRow('Color-code axes', () => settings.colorCodeCalendarAxes, (b: boolean) => settings.colorCodeCalendarAxes = b)
+      .addSettingRow('Moons', () => settings.showMoons, (b: boolean) => settings.showMoons = b)
+      .addSeparator()  /* separator for hover effects */
+      .addSettingRow('Hover: Highlight event', () => settings.highlightHoveredEvent, (b: boolean) => settings.highlightHoveredEvent = b)
+      .addSettingRow('Hover: Highlight related events', () => settings.highlightRelatedEvents, (b: boolean) => settings.highlightRelatedEvents = b)
+      .addSettingRow('Hover: Draw vertical line', () => settings.drawVerticalLineOnHover, (b: boolean) => settings.drawVerticalLineOnHover = b)
+      .addSettingRow('Hover: Draw arrows', () => settings.drawArrows, (b: boolean) => settings.drawArrows = b)
+      .addSeparator()  /* separator for toolbar */
+      .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b, true)
+      .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b, true)
+      .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b, true)
 
     })
 
@@ -152,7 +115,7 @@ export class ToolbarView implements Destroyable {
 
     this.unfoldButton = createButton(chartView.minimizedToolbarContainer, 'unfold-horizontal', 'Show Toolbar')
     this.unfoldButton.addClass('gt-minimized-btn')
-    this.unfold()
+    this.unfoldToolbar()
 
     this.setupGlobalOutsideClickListener()
   }
@@ -167,16 +130,6 @@ export class ToolbarView implements Destroyable {
       }
     }
     activeWindow.addEventListener('click', this.boundOutsideClick)
-  }
-
-  private drawRow(dropdown: HTMLDivElement, text: string, initialChecked: boolean, callback: (b: boolean) => void) {
-    const row = dropdown.createEl('label', {cls: 'gt-group-dropdown-row'})
-    const checkbox = row.createEl('input', {type: 'checkbox'})
-    checkbox.checked = initialChecked
-    row.createSpan({text})
-    checkbox.addEventListener('change', () => {
-      callback(checkbox.checked)
-    })
   }
 
   private drawGroupToggleDropdown(dropdown: HTMLDivElement, refreshChartCallback: (r: RedrawOption) => Promise<void>) {
@@ -310,5 +263,36 @@ export class ToolbarView implements Destroyable {
     this.debugInfoButton?.removeClass(Css.toolbar.buttonWarn)
   }
 
+  private createDropdownMenu(button: HTMLButtonElement,
+                             headerText: string,
+                             draw: (menu: ChartDropdownMenu) => void) {
+    button.addEventListener('click', (_e) => {
+      const menu = new ChartDropdownMenu(this.refreshChartCallback, (m) => {
+        m.addItem((item) => item.setTitle(headerText).setDisabled(true))
+        m.addSeparator()
+        draw(m)
+      })
+
+      const rect = button.getBoundingClientRect()
+      menu.showAtPosition({x: rect.left, y: rect.bottom + 4})
+    })
+  }
+
+}
+
+/* See https://lucide.dev for free icon examples */
+function createButton(parentEl: HTMLElement, icon: string, title: string): HTMLButtonElement {
+  const btn = parentEl.createEl('button', {cls: Css.toolbar.button})
+  setIcon(btn, icon)
+  setTooltip(btn, title, {placement: 'bottom', delay: -1})
+  return btn
+}
+
+function addSeparator(container: HTMLDivElement) {
+  if (!isMobile) container.createDiv({cls: Css.toolbar.separator})
+}
+
+function createGroup(container: HTMLDivElement) {
+  return container.createDiv({cls: Css.toolbar.buttonGroup})
 }
 
