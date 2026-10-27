@@ -327,7 +327,7 @@ export class GanttRenderEngine {
 
       const currentAxisYStart = itemsAreaHeight + (index * this.viewModel.calendarAxisRowHeight)
       const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
-      const showMoonPhases: boolean = this.settings.uxShowMoons && tickPixelSpacing >= 24
+      const showMoonPhases: boolean = this.settings.showMoons && tickPixelSpacing >= 24
 
       this.viewModel.drawnCals[calType] = {
         y1: currentAxisYStart,

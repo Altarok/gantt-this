@@ -49,8 +49,8 @@ export function setToolbarReactions(chartCtx: ChartContext,
   toolbar.panRightButton?.addEventListener('click', () => renderEngine.panRelative(panRight))
   toolbar.settingsButton.addEventListener('click', () => handleSettingsButtonClick(chartCtx.plugin))
   toolbar.debugInfoButton?.addEventListener('click', () => new ChartDiagnosticsModal(chartCtx).open())
-  toolbar.foldButton.addEventListener('click', () => toolbar.fold())
-  toolbar.unfoldButton.addEventListener('click', () => toolbar.unfold())
+  toolbar.foldButton.addEventListener('click', () => toolbar.foldToolbar())
+  toolbar.unfoldButton.addEventListener('click', () => toolbar.unfoldToolbar())
 }
 
 /**

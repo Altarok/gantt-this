@@ -52,9 +52,10 @@ export class SettingsContext implements GanttChartSources {
       /*
        * Hover events
        */
+      mouseOverEventShowBox: global.mouseOverEventShowBox,
+      uxHighlightRelatedEvents: global.uxHighlightRelatedEvents,
       mouseOverEventShowVerticalLine: global.mouseOverEventShowVerticalLine,
       uxConnectRelatedEvents: global.uxConnectRelatedEvents,
-      uxHighlightRelatedEvents: global.uxHighlightRelatedEvents,
     }
 
     this.updateGrpAndCalData()
@@ -254,8 +255,12 @@ export class SettingsContext implements GanttChartSources {
     this.local.mouseOverEventShowVerticalLine = b
   }
 
-  get mouseOverEventShowBox(): boolean {
-    return /* TODO implement this.local.mouseOverEventShowBox ?? */ this.global.mouseOverEventShowBox
+  get highlightHoveredEvent(): boolean {
+    return this.local.mouseOverEventShowBox ?? this.global.mouseOverEventShowBox
+  }
+
+  set highlightHoveredEvent(b: boolean) {
+    this.local.mouseOverEventShowBox = b
   }
 
   get uxVerticalOverlayColor(): string {
@@ -274,7 +279,7 @@ export class SettingsContext implements GanttChartSources {
     this.local.uxMakeToolbarSticky = b
   }
 
-  get uxShowMoons(): boolean {
+  get showMoons(): boolean {
     return this.local.uxShowMoons ?? this.global.uxShowMoons
   }
 

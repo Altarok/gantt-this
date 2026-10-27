@@ -234,13 +234,13 @@ export class ToolbarView implements Destroyable {
     setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping() ? 'group' : 'customGroupCrossed')
   }
 
-  fold() {
+  foldToolbar() {
     this.container.addClass('minimized')
     this.unfoldButton.addClass('visible')
     this.chartView.container.addClass('is-toolbar-minimized')
   }
 
-  unfold() {
+  unfoldToolbar() {
     this.container.removeClass('minimized')
     this.unfoldButton.removeClass('visible')
     this.chartView.container.removeClass('is-toolbar-minimized')
