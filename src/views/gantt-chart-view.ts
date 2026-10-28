@@ -63,6 +63,7 @@ export class GanttChartView {
     this.updateToolbarLayout()
 
     this.initiateChartContainerSubContainers()
+    this.initScrollListener()
   }
 
   public updateToolbarLayout() {
@@ -251,5 +252,39 @@ export class GanttChartView {
       this.minimizedToolbarContainer.removeClass('is-sticky')
     }
   }
+
+  private initScrollListener() {
+    /*
+     * TODO
+     */
+    // debugger
+    // if (!this.chartCtx.settings.stickyCalAxes) return
+    //
+    // const scrollContainer = this.getScrollableContainer(false)
+    // if (!scrollContainer) return
+    //
+    // scrollContainer.addEventListener('scroll', () => {
+    //   this.updateStickyAxes(scrollContainer)
+    // }, {passive: true})
+  }
+
+  private updateStickyAxes(scrollContainer: HTMLElement) {
+    // const scrollTop = scrollContainer.scrollTop
+    // const clientHeight = scrollContainer.clientHeight
+    // const bottomViewportEdge = scrollTop + clientHeight
+    //
+    // // Find all calendar axis groups inside dynamicCalendarLayer
+    // const axisGroups = Array.from(this.dynamicCalendarLayer.children) as SVGGElement[]
+    //
+    // axisGroups.forEach((group) => {
+    //   const originalY = parseFloat(group.dataset.originalY || '0')
+    //   if (!group.dataset.originalY) {
+    //     const transform = group.getAttribute('transform') || ''
+    //     const match = transform.match(/translate\(([^,]+),\s*([^\)]+)\)/)
+    //     if (match) group.dataset.originalY = match[2]
+    //   }
+    // })
+  }
+
 }
 
