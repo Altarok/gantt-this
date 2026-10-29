@@ -268,23 +268,23 @@ export class GanttChartView {
     // }, {passive: true})
   }
 
-  private updateStickyAxes(scrollContainer: HTMLElement) {
-    // const scrollTop = scrollContainer.scrollTop
-    // const clientHeight = scrollContainer.clientHeight
-    // const bottomViewportEdge = scrollTop + clientHeight
-    //
-    // // Find all calendar axis groups inside dynamicCalendarLayer
-    // const axisGroups = Array.from(this.dynamicCalendarLayer.children) as SVGGElement[]
-    //
-    // axisGroups.forEach((group) => {
-    //   const originalY = parseFloat(group.dataset.originalY || '0')
-    //   if (!group.dataset.originalY) {
-    //     const transform = group.getAttribute('transform') || ''
-    //     const match = transform.match(/translate\(([^,]+),\s*([^\)]+)\)/)
-    //     if (match) group.dataset.originalY = match[2]
-    //   }
-    // })
-  }
+  // private updateStickyAxes(_scrollContainer: HTMLElement) {
+  // const scrollTop = scrollContainer.scrollTop
+  // const clientHeight = scrollContainer.clientHeight
+  // const bottomViewportEdge = scrollTop + clientHeight
+  //
+  // // Find all calendar axis groups inside dynamicCalendarLayer
+  // const axisGroups = Array.from(this.dynamicCalendarLayer.children) as SVGGElement[]
+  //
+  // axisGroups.forEach((group) => {
+  //   const originalY = parseFloat(group.dataset.originalY || '0')
+  //   if (!group.dataset.originalY) {
+  //     const transform = group.getAttribute('transform') || ''
+  //     const match = transform.match(/translate\(([^,]+),\s*([^\)]+)\)/)
+  //     if (match) group.dataset.originalY = match[2]
+  //   }
+  // })
+  // }
 
 }
 
