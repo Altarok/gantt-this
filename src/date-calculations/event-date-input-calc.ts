@@ -51,9 +51,9 @@ export function createParsedDate(cleanInput: string, config: CalendarConfig): Pa
   const {type} = config
   switch (type) {
     case 'positional':
-      return parseEventDateWithPositionalConfig(cleanInput, config)
+      return parseDateWithPositionalConfig(cleanInput, config)
     case 'rule-based':
-      return parseEventDateWithRuleBasedConfig(cleanInput, config)
+      return parseDateWithRuleBasedConfig(cleanInput, config)
     default:
       throwGanttError('unknownCalendarType', {type})
   }
@@ -64,7 +64,7 @@ export function createParsedDate(cleanInput: string, config: CalendarConfig): Pa
  *
  * @throws GanttError - if date has invalid segment, delimiter, or length
  */
-function parseEventDateWithPositionalConfig(date: string, calendarConfig: PositionalCalendarConfig): ParsedDate {
+function parseDateWithPositionalConfig(date: string, calendarConfig: PositionalCalendarConfig): ParsedDate {
   if (!date.includes(calendarConfig.delimiter))
     throwGanttError('positionalDateWithoutDelimiter', {date, delimiter: calendarConfig.delimiter})
 
@@ -75,12 +75,13 @@ function parseEventDateWithPositionalConfig(date: string, calendarConfig: Positi
   if (segments.length === 0 || units.length === 0 || segments.length !== units.length)
     throwGanttError('positionalDateWithInvalidLength', {date, unitLength: units.length})
 
-
   for (let idx = 0; idx < units.length; idx++) {
     const segment = segments[idx]
     if (!segment || Number.isNaN(Number(segment)))
       throwGanttError('positionalDateWithInvalidSegment', {date, segment: String(segment)})
-    totalDays += Number(segment) * units[idx]!.days
+    let number = Number(segment)
+    if (idx < units.length - 1 && calendarConfig.positionalDetails?.oneBased) number--
+    totalDays += number * units[idx]!.days
   }
 
   return {days: calendarConfig.offsetToDayZero + totalDays, display: date}
@@ -91,7 +92,7 @@ function parseEventDateWithPositionalConfig(date: string, calendarConfig: Positi
  *
  * @throws GanttError - if date has invalid segment, delimiter, or length
  */
-function parseEventDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate {
+function parseDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCalendarConfig): ParsedDate {
   const {delimiter, ruleBasedDetails: details} = calendarConfig
   if (!details) throwGanttError('ruleBasedCalendarMissingDetails', {id: calendarConfig.id}) /* Should not happen, this method handles exactly that */
 

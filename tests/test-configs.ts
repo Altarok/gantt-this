@@ -1,4 +1,4 @@
-import {DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../src/types/settings-types'
+import {DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../src/types/calendar-types'
 
 const formatYMD: DateFormatComponent[] = ['year', 'month', 'day']
 

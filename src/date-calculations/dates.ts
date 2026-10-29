@@ -1,13 +1,8 @@
-// import {Notice} from 'obsidian'
-import {
-  CalendarConfig,
-  DateFormatComponent,
-  PositionalCalendarConfig,
-  RuleBasedCalendarConfig
-} from '../types/calendar-types'
+import {CalendarConfig, DateFormatComponent, RuleBasedCalendarConfig} from '../types/calendar-types'
 import {isCustomLeapYear, isGregorianLeapYear} from './leap-year-calc'
 import {Consts} from '../const/constants'
 import {throwGanttError} from '../model/gantt-error'
+import {parseDaysToPositionalDateString} from './positional-dates'
 
 export const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -187,16 +182,6 @@ function parseDaysToNonGregorianDateString(days: number,
   return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
 }
 
-function parseDaysToPositionalDateString(days: number, config: PositionalCalendarConfig): string {
-  let localDays = days - config.offsetToDayZero
-  const stringSegments: string[] = []
-  config.positionalUnits.forEach(unit => {
-    const unitCount = Math.floor(localDays / unit.days)
-    stringSegments.push(unitCount.toString())
-    localDays %= unit.days
-  })
-  return stringSegments.join(config.delimiter)
-}
 
 /* Update the axis label formatter inside the Gantt render engine class */
 

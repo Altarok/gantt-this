@@ -2,27 +2,30 @@ const isDebug = true
 
 export const debug = {
   log,
+  debug: log,
   warn,
   info,
   trace,
 }
 
+const logger: Console | undefined = undefined // window.console
+
 function log(message: string): void {
-  if (isDebug) logg('[L] ', message)
+  if (isDebug) logger?.debug('[L] ', message)
 }
 
 function warn(message: string): void {
-  if (isDebug) logg('[W] ', message)
+  if (isDebug) logger?.warn('[W] ', message)
 }
 
 function info(message: string): void {
-  if (isDebug) logg('[I] ', message)
+  if (isDebug) logger?.info('[I] ', message)
 }
 
 function trace(message: string): void {
-  if (isDebug) logg('[T] ', message)
+  if (isDebug) logger?.trace('[T] ', message)
 }
 
-function logg(_prefix: string, _message: string): void {
-  // if (isDebug) console.log(_prefix + _message)
-}
+// function logg(_prefix: string, _message: string): void {
+//   if (isDebug) logger?.log(_prefix + _message)
+// }

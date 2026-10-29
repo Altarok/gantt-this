@@ -1,6 +1,7 @@
 import {GanttRenderEngine} from './svg-drawer'
 import {CalendarConfig, Moon} from '../types/calendar-types'
 import {drawMoonPhase} from './svg-drawer-util'
+import {debug} from '../util/debug'
 
 /**
  * Renders moon phases along the timeline axis based on calendar configuration,
@@ -23,6 +24,8 @@ export function drawMoons(engine: GanttRenderEngine,
                           effectiveStartDay: number,
                           effectiveEndDay: number,
                           renderWidth: number) {
+
+  debug.log(`drawMoons >>`)
 
   const moons = calendarConfig.moons ?? []
   const moonCount = moons?.length ?? 0
@@ -63,7 +66,10 @@ export function drawMoons(engine: GanttRenderEngine,
       if (exactDay < startDaysValue || exactDay > endDaysValue)
         return
 
-      if (x >= 0 && x <= renderWidth) drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
+      if (x >= 0 && x <= renderWidth) {
+        debug.log(`drawMoons -- rendering moon`) // TODO remove
+        drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
+      }
     }
 
     for (let k = minK; k <= maxK; k++) {
@@ -88,4 +94,6 @@ export function drawMoons(engine: GanttRenderEngine,
       }
     }
   })
+
+  debug.log(`drawMoons <<`)
 }

@@ -315,6 +315,7 @@ export class GanttRenderEngine {
   }
 
   private drawAxes(reset: RedrawOption) {
+    debug.debug('drawAxes >>')
     this.view.clearCalendarLayer(reset.has('redraw'))
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
@@ -329,6 +330,7 @@ export class GanttRenderEngine {
       const currentAxisYStart = itemsAreaHeight + (index * this.viewModel.calendarAxisRowHeight)
       const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
       const showMoonPhases: boolean = this.settings.showMoons && tickPixelSpacing >= 24
+      debug.debug(`drawAxes -- showMoonPhases : ${showMoonPhases}`)
 
       this.viewModel.drawnCals[calType] = {
         y1: currentAxisYStart,
@@ -413,6 +415,7 @@ export class GanttRenderEngine {
         this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }
     })
+    debug.debug('drawAxes <<')
   }
 
   /**

@@ -1,5 +1,7 @@
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
+export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
+
 export type MonthDefinition = {
   name?: string
   shortname?: string
@@ -19,7 +21,7 @@ export type LeapYearRule = {
 }
 
 export type Moon = {
-  offset: number
+  offset: number // TODO --> EpochOffsetDefinition
   cycle: number
   color?: string
 }
@@ -37,8 +39,6 @@ export type RuleBasedDetails = {
   format: DateFormatComponent[]
   outputFormat: DateFormatComponent[]
 }
-
-export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
 /**
  * This one has to be implemented by the user inside a Markdown note.
@@ -67,6 +67,9 @@ type BaseCalendarConfig = {
 /* e.g. Mayan */
 export type PositionalCalendarConfig = BaseCalendarConfig & {
   type: 'positional',
+  positionalDetails?: {
+    oneBased?: boolean
+  }
   positionalUnits: { name: string, days: number }[]
 }
 
