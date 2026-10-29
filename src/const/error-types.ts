@@ -170,6 +170,12 @@ export const knownErrors: Record<string, ErrorDef> = {
     type: 'date',
     messageTemplate: `Can't parse {date}. Invalid format.`
   },
+  invalid1BasedPositionalDateContainsZero: {
+    level: 'warn',
+    type: 'date',
+    messageTemplate: `Can't parse 1-based positional {date} containing a zero value.`
+  },
+
 
   /*
    * --- External error definitions ---
