@@ -30,36 +30,37 @@ export function drawMoons(engine: GanttRenderEngine,
   const moons = calendarConfig.moons ?? []
   const moonCount = moons?.length ?? 0
 
-  if (moonCount) moons.forEach((moon: Moon, index: number) => {
-    const L = moon.cycle
-    if (!L || L <= 0) return
-    const O = moon.offset ?? 0
+  if (!moonCount) return
 
-    // Pixel distance for a 1/4 cycle step (quarter moon to quarter moon)
-    const quarterCycleDays = L / 4
+  moons.forEach((moon: Moon, index: number) => {
+    if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) return
+
+    const cycle = moon.cycle
+    const offset = (moon.offset + calendarConfig.offsetToDayZero) % cycle
+
+    /* Pixel distance for a 1/4 cycle step (quarter moon to quarter moon) */
+    const quarterCycleDays = cycle / 4
     const x0 = engine.getXPosition(startDaysValue)
     const xQuarter = engine.getXPosition(startDaysValue + quarterCycleDays)
     const quarterCyclePixels = Math.abs(xQuarter - x0)
 
-    // Pixel distance for a 1/2 cycle step (New to Full)
+    /* Pixel distance for a 1/2 cycle step (New to Full) */
     const halfCyclePixels = quarterCyclePixels * 2
 
-    // Minimum distance threshold to render without icon overlap
+    /* Minimum distance threshold to render without icon overlap */
     const MIN_ICON_SPACING_PX = 20
 
-    // Guard: Skip entire moon if even Full/New phases are too crowded
+    /* Guard: Skip entire moon if even Full/New phases are too crowded */
     if (halfCyclePixels < MIN_ICON_SPACING_PX) return
 
-    // Determine if zoom level allows quarter phases or major phases only
+    /* Determine if zoom level allows quarter phases or major phases only */
     const showQuarterPhases = quarterCyclePixels >= MIN_ICON_SPACING_PX
 
-    // Determine cycle integer range covering visible bounds
-    // const minK = Math.floor((startDaysValue) / L) - 1
-    // const maxK = Math.ceil((endDaysValue) / L) + 1
-    const minK = Math.floor(effectiveStartDay / L) - 1
-    const maxK = Math.ceil(effectiveEndDay / L) + 1
+    /* Determine cycle integer range covering visible bounds */
+    const minK = Math.floor(effectiveStartDay / cycle) - 1
+    const maxK = Math.ceil(effectiveEndDay / cycle) + 1
 
-    // Helper closure to handle visibility bounds checking & drawing
+    /* Helper closure to handle visibility bounds checking & drawing */
     const renderPhaseIfVisible = (x: number, exactDay: number, phaseIndex: number) => {
       if (exactDay < effectiveStartDay || exactDay > effectiveEndDay)
         return
@@ -73,23 +74,23 @@ export function drawMoons(engine: GanttRenderEngine,
     }
 
     for (let k = minK; k <= maxK; k++) {
-      // 1. New Moon (Progress 0.0) -> Phase Index 0
-      const newMoonDay = k * L - O
+      /* 1. New Moon (Progress 0.0) -> Phase Index 0 */
+      const newMoonDay = k * cycle + offset
       renderPhaseIfVisible(engine.getXPosition(newMoonDay), newMoonDay, 0)
 
-      // 2. First Quarter (Progress 0.25) -> Phase Index 1
+      /* 2. First Quarter (Progress 0.25) -> Phase Index 1 */
       if (showQuarterPhases) {
-        const firstQuarterDay = (k + 0.25) * L - O
+        const firstQuarterDay = (k + 0.25) * cycle + offset
         renderPhaseIfVisible(engine.getXPosition(firstQuarterDay), firstQuarterDay, 1)
       }
 
-      // 3. Full Moon (Progress 0.5) -> Phase Index 2
-      const fullMoonDay = (k + 0.5) * L - O
+      // 3. Full Moon (Progress 0.5) -> Phase Index 2 */
+      const fullMoonDay = (k + 0.5) * cycle + offset
       renderPhaseIfVisible(engine.getXPosition(fullMoonDay), fullMoonDay, 2)
 
-      // 4. Third Quarter (Progress 0.75) -> Phase Index 3
+      /* 4. Third Quarter (Progress 0.75) -> Phase Index 3 */
       if (showQuarterPhases) {
-        const thirdQuarterDay = (k + 0.75) * L - O
+        const thirdQuarterDay = (k + 0.75) * cycle + offset
         renderPhaseIfVisible(engine.getXPosition(thirdQuarterDay), thirdQuarterDay, 3)
       }
     }
