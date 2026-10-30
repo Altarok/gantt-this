@@ -6,6 +6,8 @@ export const CustomIcons = {
   groupCrossed: 'customGroupCrossed'
 } as const
 
+/**
+ * Central directory of all CSS classes
  */
 export const Css = {
   /** Outermost main container of the chart */
