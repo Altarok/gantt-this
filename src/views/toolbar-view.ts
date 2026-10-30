@@ -205,6 +205,17 @@ export class ToolbarView implements Destroyable {
     })
   }
 
+  toggleShowZoomAndPanButtons(show: boolean): void {
+    // debug.log(`toggleZoomAndPanButtons >> show : ${show}`)
+    const buttons = [
+      this.panLeftButton,
+      this.zoomOutButton,
+      this.zoomInButton,
+      this.panRightButton
+    ]
+
+    for (const btn of buttons) if (btn) btn.style.display = show ? '' : 'none'
+  }
 }
 
 /* See https://lucide.dev for free icon examples */

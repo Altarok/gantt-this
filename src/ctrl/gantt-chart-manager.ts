@@ -106,7 +106,9 @@ export class ChartManager {
     if (reset.has('resetCalendarCache')) {
       await this.prepareCalendarCache(true)
     }
-
+    if (reset.has('redraw')) {
+      this.chartContext.toolbarView?.toggleShowZoomAndPanButtons(this.settingsContext.showPanAndZoomButtonsInToolbar)
+    }
     if (!this.renderEngine) return
     if (this.updateTimeout) window.clearTimeout(this.updateTimeout)
 

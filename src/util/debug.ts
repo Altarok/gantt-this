@@ -26,6 +26,3 @@ function trace(message: string): void {
   if (isDebug) logger?.trace('[T] ', message)
 }
 
-// function logg(_prefix: string, _message: string): void {
-//   if (isDebug) logger?.log(_prefix + _message)
-// }
