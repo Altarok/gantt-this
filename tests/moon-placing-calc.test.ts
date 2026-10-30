@@ -1,7 +1,8 @@
 import {describe, expect, it, vi} from 'vitest'
 import {GanttRenderEngine} from '../src/view/svg-drawer'
-import {CalendarConfig} from '../src/types/calendar-types'
+import {CalendarConfig, RuleBasedCalendarConfig} from '../src/types/calendar-types'
 import {calculateMoonPositions} from '../src/date-calculations/moon-placing-calc'
+import {MockRuleBasedCalendarConfig} from './test-configs'
 
 
 describe('calculateMoonPositions', () => {
@@ -13,9 +14,8 @@ describe('calculateMoonPositions', () => {
 
   it('returns empty moon draw data if no moons are configured', () => {
     const engine = createMockEngine()
-    const config: CalendarConfig = {
-      id: 'test',
-      name: 'Test',
+    const config: RuleBasedCalendarConfig = {
+      ...MockRuleBasedCalendarConfig,
       offsetToDayZero: 0,
       moons: []
     }
@@ -26,10 +26,8 @@ describe('calculateMoonPositions', () => {
 
   it('skips moons with invalid cycle or offset parameters', () => {
     const engine = createMockEngine()
-    const config: CalendarConfig = {
-      id: 'test',
-      name: 'Test',
-      'type': 'gregorian',
+    const config: RuleBasedCalendarConfig = {
+      ...MockRuleBasedCalendarConfig,
       offsetToDayZero: 0,
       moons: [
         {cycle: NaN, offset: 0},
@@ -48,9 +46,7 @@ describe('calculateMoonPositions', () => {
     // 1px per day -> quarter cycle (7.5 days) = 7.5px -> half cycle = 15px (< MIN_ICON_SPACING_PX 20)
     const engine = createMockEngine(1)
     const config: CalendarConfig = {
-      id: 'test',
-      name: 'Test',
-      'type': 'gregorian',
+      ...MockRuleBasedCalendarConfig,
       offsetToDayZero: 0,
       moons: [
         {cycle: 30, offset: 0, color: '#ffffff'}
@@ -69,9 +65,7 @@ describe('calculateMoonPositions', () => {
     // Let's use cycle = 20, quarter = 5 days, at 3px/day -> quarterPixels = 15px (< 20px), half cycle = 30px (>= 20px).
     const engine = createMockEngine(3)
     const config: CalendarConfig = {
-      id: 'test',
-      name: 'Test',
-      'type': 'gregorian',
+      ...MockRuleBasedCalendarConfig,
       offsetToDayZero: 0,
       moons: [
         {cycle: 20, offset: 0, color: '#ff0000'}
@@ -95,9 +89,7 @@ describe('calculateMoonPositions', () => {
     // cycle = 20 days, 5px/day -> quarterPixels = 25px (>= 20px)
     const engine = createMockEngine(5)
     const config: CalendarConfig = {
-      id: 'test',
-      name: 'Test',
-      'type': 'gregorian',
+      ...MockRuleBasedCalendarConfig,
       offsetToDayZero: 0,
       moons: [
         {cycle: 20, offset: 0}

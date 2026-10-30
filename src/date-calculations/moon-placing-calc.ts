@@ -25,7 +25,6 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
                                        renderWidth: number): MoonDrawData {
 
   const moons = calendarConfig.moons ?? []
-  // const moonCount = moons.length ?? 0
 
   const moonDrawData: MoonDrawData = {
     moonCount: moons.length,
@@ -34,7 +33,6 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
 
   if (moons.length === 0) return moonDrawData /* fast-fail */
 
-  // for (const moon of moons) {
   moons.forEach((moon, index) => {
     if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) return /* fast-fail */
 
@@ -69,14 +67,9 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
 
     /* Helper closure to validate viewport bounds and collect visible moon data */
     const renderPhaseIfVisible = (x: number, exactDay: number, phase: MoonPhase) => {
-      if (exactDay < effectiveStartDay || exactDay > effectiveEndDay)
-        return
-      if (exactDay < startDaysValue || exactDay > endDaysValue)
-        return
-
-      if (x >= 0 && x <= renderWidth) {
-        singleMoonDrawData.positions.push({x, phase})
-      }
+      if (exactDay < effectiveStartDay || exactDay > effectiveEndDay) return
+      if (exactDay < startDaysValue || exactDay > endDaysValue) return
+      if (x >= 0 && x <= renderWidth) singleMoonDrawData.positions.push({x, phase})
     }
 
     const phaseOffsets = showQuarterPhases

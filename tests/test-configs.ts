@@ -6,6 +6,22 @@ export const MockCalendarConfig = {
   link: '' // falsy mock file path
 }
 
+export const MockRuleBasedCalendarConfig: RuleBasedCalendarConfig = {
+  ...MockCalendarConfig,
+  id: 'id',
+  name: 'name',
+  type: 'rule-based',
+  sharedOffset: 0,
+  offsetToDayZero: 0,
+  delimiter: '.',
+  ruleBasedDetails: {
+    daysInStandardYear: 365,
+    months: [{shortname: 'Jan', name: 'January', days: 31}],
+    format: ['year'],
+    outputFormat: ['year']
+  }
+}
+
 export const gregorianConfig: RuleBasedCalendarConfig = {
   ...MockCalendarConfig,
   id: 'gregorian',
