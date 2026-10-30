@@ -183,15 +183,15 @@ export class GanttChartView {
     })
   }
 
-  drawCalAxisTick(calGroup: SVGGElement, xPos: number): void {
+  drawCalAxisTick(calGroup: SVGGElement, xPos: number, tickColor: string): void {
     calGroup.createSvg('line', {
-      cls: Css.axis.tick, attr: {x1: xPos, y1: 0, x2: xPos, y2: 5}
+      attr: {x1: xPos, y1: 0, x2: xPos, y2: 5, stroke: tickColor}
     })
   }
 
-  drawCalAxisDate(calGroup: SVGGElement, xPos: number, date: string): void {
+  drawCalAxisDate(calGroup: SVGGElement, xPos: number, date: string, fill: string): void {
     const textSvg = calGroup.createSvg('text', {
-      cls: Css.axis.text, attr: {x: xPos, y: 20}
+      cls: Css.axis.text, attr: {x: xPos, y: 20, fill}
     })
     textSvg.textContent = date
   }

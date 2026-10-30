@@ -4,6 +4,14 @@ export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
+type Color = string
+export type CalendarColor = Color | 'none'
+
+export type CalendarColors = {
+  axis: CalendarColor
+  ticks: CalendarColor
+  dates: CalendarColor
+}
 
 export type MonthDefinition = {
   name?: string
@@ -22,7 +30,6 @@ export type LeapYearRule = {
   extraDays?: number
   applyToMonthIndex?: number /* Which month gets the leap day (e.g., February / index 1) */
 }
-
 
 export type RuleBasedDetails = {
   daysInStandardYear: number
@@ -60,6 +67,11 @@ type BaseCalendarConfig = {
   link: string
   /** Current date in fantasy world. MUST match the calendar's date format. */
   today?: number
+  colors?: CalendarColor | {
+    axis?: CalendarColor
+    dates?: CalendarColor //
+    ticks?: CalendarColor
+  }
 }
 
 /* e.g. Mayan */

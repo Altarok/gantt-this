@@ -1,5 +1,5 @@
 import {GanttGroup, GanttItem, GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../types/settings-types'
-import {CalendarConfig} from '../types/calendar-types'
+import {CalendarColors, CalendarConfig} from '../types/calendar-types'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {createGanttEventManager} from '../ctrl/event-manager-creator'
 import {Priorities} from '../util/priority-util'
@@ -13,6 +13,7 @@ import {drawMoons, SvgDrawerUtil} from './svg-drawer-util'
 import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
 import {MoonDrawData} from '../types/moon-types'
+import {getCalendarColors} from '../util/calendar-utils'
 
 export class GanttRenderEngine {
   private readonly svgDrawerUtil: SvgDrawerUtil
@@ -346,7 +347,7 @@ export class GanttRenderEngine {
       if (!calendarConfig) return // continue to next axis
 
       const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
-      const axisColor = (this.settings.colorCodeCalendarAxes ? this.settings.getCalendarConfig(calType)?.color : null) ?? 'currentColor'
+      const calendarColors: CalendarColors = getCalendarColors(this.settings,calendarConfig,  this.settings.getCalendarConfig(calType))
 
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
@@ -368,18 +369,19 @@ export class GanttRenderEngine {
       const startX = effectiveStartDay <= visibleMinDays ? 0 : this.getXPosition(effectiveStartDay)
       const endX = effectiveEndDay >= visibleMaxDays ? this.currRenderWidth : this.getXPosition(effectiveEndDay)
 
-      this.view.drawCalAxisBaseline(ticksG, startX, endX, axisColor)
+      if (calendarColors.axis !== 'none') {
+        this.view.drawCalAxisBaseline(ticksG, startX, endX, calendarColors.axis)
 
-      /* Draw start cap marker (if in visible range) */
-      if (calendarConfig.startDay && calendarConfig.startDay as number >= startDaysValue) {
-        this.view.drawCalAxisCap(ticksG, startX, axisColor)
+        /* Draw start cap marker (if in visible range) */
+        if (calendarConfig.startDay && calendarConfig.startDay as number >= startDaysValue) {
+          this.view.drawCalAxisCap(ticksG, startX, calendarColors.axis)
+        }
+
+        /* Draw end cap marker (if in visible range) */
+        if (calendarConfig.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
+          this.view.drawCalAxisCap(ticksG, endX, calendarColors.axis)
+        }
       }
-
-      /* Draw end cap marker (if in visible range) */
-      if (calendarConfig.endDay !== undefined && calendarConfig.endDay as number <= endDaysValue) {
-        this.view.drawCalAxisCap(ticksG, endX, axisColor)
-      }
-
       // if (!calBadgeTextContent && calendarConfig?.name) {
       //   const labelX = (startX + endX) / 2
       //   const title = Util.createSVGElement('text', Css.axis.calReignTitle, {
@@ -399,10 +401,14 @@ export class GanttRenderEngine {
           this.view.drawVerticalGridlineBehindEvents(xPos, itemsAreaHeight)
         }
 
-        this.view.drawCalAxisTick(ticksG, xPos)
+        if (calendarColors.ticks !== 'none') {
+          this.view.drawCalAxisTick(ticksG, xPos, calendarColors.ticks)
+        }
 
-        if (xPos - lastTextX > 80) {
-          this.view.drawCalAxisDate(ticksG, xPos, createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths))
+        if (calendarColors.dates !== 'none' && xPos - lastTextX > 80) {
+          this.view.drawCalAxisDate(ticksG, xPos,
+            createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths),
+            calendarColors.dates)
           lastTextX = xPos
         }
       }
@@ -411,13 +417,6 @@ export class GanttRenderEngine {
         const moonDrawData: MoonDrawData = calculateMoonPositions(this, calendarConfig, startDaysValue, endDaysValue,
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
         drawMoons(moonDrawData, ticksG)
-        // moonDrawData.moons?.forEach((moon) => {
-        //     const {index, color} = moon
-        //     moon.positions.forEach((pos) => {
-        //       drawMoonPhase(pos.x, pos.phase, index, moonDrawData.moonCount, ticksG, color)
-        //     })
-        //   }
-        // )
       }
 
       if (reset.has('redraw') && calBadgeTextContent) {

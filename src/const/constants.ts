@@ -60,8 +60,8 @@ export const Css = {
     labelBadge: 'gt-axis-label-badge',
     /** Text element of the axis */
     text: 'gt-axis-text',
-    /** Main tick of the scale */
-    tick: 'gt-axis-tick',
+    // /** Main tick of the scale */
+    // tick: 'gt-axis-tick',
     /** Minor tick of the scale */
     tickMinor: 'gt-axis-tick-minor',
     /** SVG icon for moon phases */
