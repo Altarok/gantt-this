@@ -1,3 +1,4 @@
+/* Outer-most gantt chart container */
 .gt-main-container {
   position: relative;
   background-color: var(--background-primary);
@@ -607,10 +608,9 @@ body.is-popout-window svg.gt-svg-canvas {
   pointer-events: none;
 }
 
-/* OBSIDIAN API! */
 /* .popover.hover-popover,
 .popover.hover-popover .popover-content, */
-.popover.hover-popover .gt-tooltip {
+.popover.hover-popover .gt-tooltip { /* OBSIDIAN API! */
   min-width: 0;
   width: max-content;
   max-width: fit-content;
