@@ -150,7 +150,7 @@ export default class TooltipManager implements HoverParent {
       if (repeatRule?.delta && repeatRule.step)
         datesContainer.createDiv({
           text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`,
-          cls: Css.tooltip.repeatValue
+          cls: Css.tooltip.suffixRow
         })
     }
 
@@ -161,7 +161,7 @@ export default class TooltipManager implements HoverParent {
       const absoluteDay = (!isNaN(item.endDays) && item.endDays > item.startDays)
         ? ` ${item.startDays} to ${item.endDays}`
         : ` ${item.startDays}`
-      datesContainer.createDiv({text: `Absolute day: ${absoluteDay}`, cls: Css.tooltip.repeatValue})
+      datesContainer.createDiv({text: `Absolute day: ${absoluteDay}`, cls: Css.tooltip.suffixRow})
     }
   }
 
@@ -177,8 +177,8 @@ export default class TooltipManager implements HoverParent {
       text: isTimespan(item.displayType)
         ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
         // + `${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
-        : this.dateInOutputFormat(item.startDays, calendarConfig),
-      cls: Css.tooltip.repeatValue
+        : `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)}`,
+      cls: Css.tooltip.suffixRow
     })
   }
 

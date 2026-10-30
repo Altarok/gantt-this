@@ -6,14 +6,21 @@ export const CustomIcons = {
   groupCrossed: 'customGroupCrossed'
 } as const
 
+ */
 export const Css = {
+  /** Outermost main container of the chart */
   wrapper: 'gt-main-container',
+  /** Prevents all user interactions (clicks, selections) */
   preventUserInteraction: 'gt-prevent-user-interactions',
   diagnostics: {
+    /** Container for the diagnostic log modal (popup)*/
     container: 'gt-stats-log-container',
+    /** List of error logs */
     errorList: 'gt-stats-error-list',
+    /** Individual row in the log */
     errorListRow: 'gt-stats-row',
     // group: 'gt-stats-group', // TODO does not even exist
+    /** Clickable link to open the corresponding note */
     openFileLink: 'gt-stats-open-file-link',
     logInfo: 'gt-log-info',
     logWarn: 'gt-log-warn',
@@ -21,99 +28,127 @@ export const Css = {
     logFatal: 'gt-log-fatal',
   },
   toolbar: {
+    /** Main container of the toolbar */
     container: 'gt-toolbar-container',
+    /** Minimized state of the toolbar */
     minimized: 'gt-toolbar-minimized',
+    /** Button group for logical grouping */
     buttonGroup: 'gt-toolbar-buttongroup', /* Reduces horizontal space between buttons */
+    /** Individual toolbar button */
     button: 'gt-toolbar-button', /* Button and SVG sizes */
+    /** Highlighted/warning toolbar button */
     buttonWarn: 'gt-toolbar-button-warn', /* Button and SVG sizes */
+    /** Separator line between button groups */
     separator: 'gt-toolbar-separator', /* Separates button groups */
-    foldButton: 'gt-minimized-btn',
+    /** Fold/unfold button in the minimized state */
+    foldButton: 'gt-minimized-btn', // TODO rename
   },
+  /** Label for form inputs */
   inputLabel: 'gt-input-label',
+  /** Scrollable container for the actual chart */
   chartContainer: 'gt-chart-container',
   axis: {
-    // /** Use for calendar axis baseline */
+    // /** Baseline of the calendar axis */
     // baseline: 'gt-axis-baseline', // TODO does not even exist
-    /** Use for calendar axis gridline */
+    /** Gridlines in the calendar grid */
     gridline: 'gt-axis-gridline',
+    /** Label of the calendar axis */
     label: 'gt-axis-label',
+    /** Badge/background for axis labels */
     labelBadge: 'gt-axis-label-badge',
+    /** Text element of the axis */
     text: 'gt-axis-text',
+    /** Main tick of the scale */
     tick: 'gt-axis-tick',
+    /** Minor tick of the scale */
     tickMinor: 'gt-axis-tick-minor',
+    /** SVG icon for moon phases */
     moonIcon: 'gt-moon-phase-icon',
-    /** Addition to 'moonIcon' */
+    /** Illuminated part of the moon phase */
     moonFull: 'gt-moon-fill',
-    /** Addition to 'moonIcon' */
+    /** Unlit part of the moon phase */
     moonUnlit: 'gt-moon-unlit',
+    /** End-cap marker at start and end days */
     capMarker: 'gt-calendar-cap-marker', /* todo rename ? */
+    /** Reign epoch title over the axis */
     calReignTitle: 'gt-calendar-reign-title',
   },
   item: {
-    /** Base CSS class event SVGs */
+    /** Base CSS class for all event SVG elements */
     item: 'gt-item',
-    /** Use for all timestamp event shapes that do not require CSS */
+    /** Standard timestamp shape without layout overhead */
     timestamp: 'gt-item timestamp',
-    /** Use for box events */
+    /** Box element for point events */
     box: 'gt-item timestamp box',
-    /** Use for bar events */
+    /** Bar element for time spans */
     bar: 'gt-item timespan bar',
-    /** Use for era events */
+    /** Era element for large time periods */
     era: 'gt-item timespan era',
-    /** Use for all texts on timestamp events */
+    /** Text for timestamp events */
     textTimestamp: 'gt-item text-timestamp',
-    /** Use for all texts on bar events */
+    /** Text for bar events */
     textBar: 'gt-item text-bar',
-    /** Use for all texts on era events */
+    /** Text for era events */
     textEra: 'gt-item text-era',
-
-    /** !? */
+    /** Visual vertical hover overlay */
     verticalOverlay: 'gt-item vertical-overlay',
-    /** !? */
+    /** Container for icons inside events */
     iconContainer: 'gt-item icon-container',
   },
   itemLayer: {
+    /** SVG layer for eras */
     era: 'gt-layers-eras',
+    /** SVG layer for repeaters */
     repeater: 'gt-layers-repeaters',
   },
   group: {
+    /** Text for group badges */
     text: 'gt-group-text',
+    /** Pill badge for groups */
     badge: 'gt-group-badge',
+    /** Background row (even) */
     rowEven: 'gt-group-row-even',
+    /** Background row (odd) */
     rowOdd: 'gt-group-row-odd',
   },
   hover: {
+    /** Highlight for the directly hovered event */
     highlightHoveredEvent: 'gt-item symbol-hover', /* Highlight on hovered event */
+    /** Highlight for related/dependent events */
     highlightRelatedEvent: 'gt-item symbol-hover-related' /* Highlight on events related to hovered event */
   },
-  tooltip: {  /* Use for tooltip table */
+  tooltip: {
+    /** Main container of the tooltip */
     tooltip: 'gt-tooltip',
-    title: 'gt-tooltip-title',  /*  title */
-    table: 'gt-tooltip-table', /* table */
-    link: 'gt-tooltip-link', /* link to related note */
-    dateDetails: 'gt-tooltip-repeat-dates', /* date suffix */
-    repeatRow: 'gt-repeat-row', /* TODO rename!? */
-    repeatValue: 'gt-repeat-value',
-    arrows: 'gt-dependency-arrow', /* TODO rename!? */
-  },
-  settings: {
-    container: 'gt-settings-container',
-    row: 'gt-settings-row',
-    list: 'gt-settings-list',
-    itemDescription: 'gt-settings-item-description',
-    calendarControl: 'gt-settings-visibility-list',
-    emptyNotice: 'gt-settings-empty-notice'
+    /** Title inside the tooltip */
+    title: 'gt-tooltip-title',
+    /** Data table inside the tooltip */
+    table: 'gt-tooltip-table',
+    /** Link to related note in the tooltip */
+    link: 'gt-tooltip-link',
+    /** Date details for repetitions */
+    dateDetails: 'gt-tooltip-repeat-dates',
+    /** Single row of a repetition */
+    repeatRow: 'gt-repeat-row',
+    /** Value inside the repetition row */
+    suffixRow: 'gt-repeat-value',
+    /** Connection line/arrow class */
+    arrows: 'gt-dependency-arrow',
   },
   svg: {
+    /** Main element of the SVG canvas */
     canvas: 'gt-svg-canvas',
   },
   /* obsidian native classes */
   theme: {
+    /** Dark Obsidian theme */
     dark: 'theme-dark',
+    /** Light Obsidian theme */
     light: 'theme-light',
   },
+  /** Width for specific modals. Raises width to 90vw */
   modalWidth: 'gt-modal-width',
-  /* obsidian native classes */
+  /** Obsidian native classes */
   modWarning: 'is-destructive',
 
 } as const

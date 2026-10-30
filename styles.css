@@ -540,51 +540,6 @@ body.is-popout-window svg.gt-svg-canvas {
   user-select: none;
 }
 
-/* ------------ settings ------------ */
-
-.gt-settings-container {
-  margin-top: 8px;
-  margin-bottom: 24px;
-  padding-left: 4px;
-}
-
-.gt-settings-item-description {
-  font-size: 0.9em;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
-
-.gt-settings-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-/* Style row text via nesting inside existing rule */
-.gt-settings-row span {
-  flex-grow: 1;
-  font-weight: bold;
-}
-
-/* Clean descriptive block for empty notifications */
-.gt-settings-empty-notice {
-  font-style: italic;
-  color: var(--text-muted);
-}
-
-.gt-settings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.gt-settings-visibility-list {
-  padding-left: 6px;
-  margin-bottom: 18px;
-}
-
 /* ----------- moons ----------- */
 
 /* Inherit text color from Obsidian theme & Smooth hover or visual transition if needed */
@@ -626,6 +581,18 @@ body.is-popout-window svg.gt-svg-canvas {
 .gt-modal-width {
   width: 90vw;
   max-width: 90vw;
+}
+
+/* --- work in progress --- */
+
+.bases-toolbar-gantt-custom .text-icon-button {
+  cursor: pointer;
+}
+
+/* Optional: match active toggle state if you are toggling a feature */
+.bases-toolbar-gantt-custom .text-icon-button.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
 }
 
 /* OBSIDIAN API! */
