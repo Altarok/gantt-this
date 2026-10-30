@@ -5,29 +5,66 @@ import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
 import {ParsedDate} from '../src/types/settings-types'
 import {runOffsetCalculations} from '../src/date-calculations/calendar-offset-calc'
 import {CalendarConfig} from '../src/types/calendar-types'
+import {GanttError} from "../src/model/gantt-error";
+import {ErrorDef, knownErrors} from "../src/const/error-types";
 
 export function parseDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {
   return parseEventDate(false, false, input, config)
 }
 
+function getGanttErrorFromId(id: string) {
+  const errDef: ErrorDef = knownErrors[id]
+  return new GanttError(id, errDef.level, '', errDef.type)
+}
+
 describe('Parsing event dates fails for', () => {
 
   it('missing input', () => {
-    expect(parseDate(null, gregorianConfig)).toBeNull()
+    // unparseableDate: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date: '{date}'`
+    // },
+    const err: GanttError = getGanttErrorFromId('unparseableDate')
+    err.message = `Can't parse date: 'null'`
+    expect(() => parseDate(null, gregorianConfig)).toThrow(err)
   })
 
   it('missing config', () => {
-    expect(parseDate('1-2-3', null)).toBeNull()
+    // missingCalConfigForDate: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date '{date}' without calendar config.`
+    // },
+    const err: GanttError = getGanttErrorFromId('missingCalConfigForDate')
+    err.message = `Can't parse date '1-2-3' without calendar config.`
+    expect(() => parseDate('1-2-3', null)).toThrow(err)
   })
 
   it('wrong config type', () => {
+    // ruleBasedCalendarMissingDetails: {
+    //   level: 'fatal',
+    //     type: 'calendar',
+    //     messageTemplate: `Can't parse rule-based calendar '{id}', missing details.`
+    // },
     const incompleteConfig: Partial<CalendarConfig> = {type: 'rule-based'}
-    expect(parseDate('1-2-3', incompleteConfig as CalendarConfig)).toBeNull()
+    const err: GanttError = getGanttErrorFromId('ruleBasedCalendarMissingDetails')
+    err.message = `Can't parse rule-based calendar 'undefined', missing details.`
+    expect(() => parseDate('1-2-3', incompleteConfig as CalendarConfig)).toThrow(err)
   })
 
   it('positional event dates of wrong length', () => {
-    expect(parseDate('1.2.3', mayanConfig)).toBeNull()
-    expect(parseDate('1.2.3.4.5.6.7', mayanConfig)).toBeNull()
+    // positionalDateWithInvalidLength: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse positional date '{date}', should have {unitLength} units.`
+    // },
+    const err: GanttError = getGanttErrorFromId('positionalDateWithInvalidLength')
+    err.message = `Can't parse positional date '1.2.3', should have 5 units.`
+    expect(() => parseDate('1.2.3', mayanConfig)).toThrow(err)
+
+    err.message = `Can't parse positional date '1.2.3.4.5.6.7', should have 5 units.`
+    expect(() => parseDate('1.2.3.4.5.6.7', mayanConfig)).toThrow(err)
   })
 
 })
@@ -227,9 +264,16 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
     const value = parseInt('00', 10)
     expect(value).toBe(0)
 
+    // illegalDateOutOfBounds: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date '{date}'. Values out of bounds.`
+    // },
+    const err: GanttError = getGanttErrorFromId('illegalDateOutOfBounds')
+    err.message = `Can't parse date '0001-00-01'. Values out of bounds.`
+
     // '00' is not a valid 1-based month for Gregorian
-    const result = parseDate('0001-00-01', gregorianConfig)
-    expect(result).toBeNull()
+    expect(() => parseDate('0001-00-01', gregorianConfig)).toThrow(err)
   })
 
   it('6. Mixed-case month names match case-insensitively', () => {
@@ -240,14 +284,47 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
   })
 
   it('7. Day out of range for standard month returns null', () => {
-    // BUG: Bounds checking edge cases on month lengths
-    expect(parseDate('2026-02-29', gregorianConfig)).toBeNull() // 2026 is not leap
-    expect(parseDate('2026-04-31', gregorianConfig)).toBeNull() // April has 30 days
+    // illegalDateOutOfBounds: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date '{date}'. Values out of bounds.`
+    // },
+    const err: GanttError = getGanttErrorFromId('illegalDateOutOfBounds')
+    err.message = `Can't parse date '0001-00-01'. Values out of bounds.`
+
+    // '00' is not a valid 1-based month for Gregorian
+    expect(() => parseDate('0001-00-01', gregorianConfig)).toThrow(err)
+
+
+    // illegalDay4Month: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for month: {month}`
+    // },
+    const err2: GanttError = getGanttErrorFromId('illegalDay4Month')
+    err2.message = `Can't parse date '2026-02-29'. Day 29 is out of range for month: Feb`
+    expect(() => parseDate('2026-02-29', gregorianConfig)).toThrow(err2) // 2026 is not leap
+
+    err2.message = `Can't parse date '2026-04-31'. Day 31 is out of range for month: Apr`
+    expect(() => parseDate('2026-04-31', gregorianConfig)).toThrow(err2) // April has 30 days
   })
 
   it('8. Leap year month extra day is strictly enforced', () => {
+
     expect(parseDate('2024-02-29', gregorianConfig)).not.toBeNull() // 2024 IS leap
-    expect(parseDate('2024-02-30', gregorianConfig)).toBeNull()     // Never valid
+
+    // illegalDay4Month: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for month: {month}`
+    // },
+    const err: GanttError = getGanttErrorFromId('illegalDay4Month')
+
+    err.message = `Can't parse date '2024-02-30'. Day 30 is out of range for month: Feb`
+    expect(() => parseDate('2024-02-30', gregorianConfig)).toThrow(err)     // Never valid
+
+    err.message = `Can't parse date '2025-02-29'. Day 29 is out of range for month: Feb`
+    expect(() => parseDate('2025-02-29', gregorianConfig)).toThrow(err)     // not leap
   })
 
   // -------------------------------------------------------------
@@ -255,14 +332,30 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
   // -------------------------------------------------------------
 
   it('9. Mayan positional parser rejects invalid segment counts', () => {
-    // BUG: Incorrect segment length checks vs units count
-    expect(parseDate('0.0.0.1', mayanConfig)).toBeNull()       // 4 units (needs 5)
-    expect(parseDate('0.0.0.0.0.1', mayanConfig)).toBeNull()   // 6 units (needs 5)
+    // positionalDateWithInvalidLength: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse positional date '{date}', should have {unitLength} units.`
+    // },
+    const err: GanttError = getGanttErrorFromId('positionalDateWithInvalidLength')
+
+    err.message = `Can't parse positional date '0.0.0.1', should have 5 units.`
+    expect(() => parseDate('0.0.0.1', mayanConfig)).toThrow(err)
+
+    err.message = `Can't parse positional date '0.0.0.0.0.1', should have 5 units.`
+    expect(() => parseDate('0.0.0.0.0.1', mayanConfig)).toThrow(err)
   })
 
   it('10. Mayan positional parser rejects NaN or non-numeric tokens', () => {
-    // BUG: NaN values slip through if array mapping isn't guarded
-    expect(parseDate('0.0.foo.0.1', mayanConfig)).toBeNull()
+    // positionalDateWithInvalidSegment: {
+    //   level: 'warn',
+    //     type: 'date',
+    //      messageTemplate: `Can't parse positional date '{date}', illegal segment: '{segment}'.`
+    // },
+    const err: GanttError = getGanttErrorFromId('positionalDateWithInvalidSegment')
+
+    err.message = `Can't parse positional date '0.0.foo.0.1', illegal segment: 'foo'.`
+    expect(() => parseDate('0.0.foo.0.1', mayanConfig)).toThrow(err)
   })
 
   it('11. Mayan positional parser rejects negative position values', () => {
@@ -278,9 +371,18 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
   // -------------------------------------------------------------
 
   it('12. Shire Intercalary 1-day months enforce max day = 1', () => {
-    // BUG: Intercalary months like '2. Yule' (days: 1) must reject day > 1
     expect(parseDate('0001-2. Yule-1', shireConfig)).not.toBeNull()
-    expect(parseDate('0001-2. Yule-2', shireConfig)).toBeNull()
+
+    // illegalDay4Month: {
+    //   level: 'warn',
+    //     type: 'date',
+    //     messageTemplate: `Can't parse date '{date}'. Day {day} is out of range for month: {month}`
+    // },
+    const err: GanttError = getGanttErrorFromId('illegalDay4Month')
+
+    err.message = `Can't parse date '0001-2. Yule-2'. Day 2 is out of range for month: 2. Yule`
+    // BUG: Intercalary months like '2. Yule' (days: 1) must reject day > 1
+    expect(() => parseDate('0001-2. Yule-2', shireConfig)).toThrow(err)
   })
 
 })

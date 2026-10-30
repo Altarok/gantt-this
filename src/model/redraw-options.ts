@@ -1,14 +1,19 @@
-type Step = 'resetCalendarCache' | 'resetDiagnosticCache' | 'reloadData' | 'resetZoomAndPan' | 'resize' | 'redraw'
+type RedrawStep = 'resetCalendarCache'
+  | 'resetDiagnosticCache'
+  | 'reloadData'
+  | 'resetZoomAndPan'
+  | 'resize'
+  | 'redraw'
 
 export class RedrawOption {
-  private readonly steps: Set<Step>
+  private readonly steps: Set<RedrawStep>
 
-  constructor(readonly isManual: boolean,
-              steps: Step[]) {
+  private constructor(readonly isManual: boolean,
+                      steps: RedrawStep[]) {
     this.steps = new Set(steps)
   }
 
-  has(step: Step): boolean {
+  has(step: RedrawStep): boolean {
     return this.steps.has(step)
   }
 
