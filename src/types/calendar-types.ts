@@ -4,8 +4,7 @@ export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
-type Color = string
-export type CalendarColor = Color | 'none'
+export type CalendarColor = string
 
 export type CalendarColors = {
   axis: CalendarColor
