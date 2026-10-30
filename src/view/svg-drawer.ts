@@ -4,14 +4,15 @@ import {GanttEventManager} from '../ctrl/event-manager'
 import {createGanttEventManager} from '../ctrl/event-manager-creator'
 import {Priorities} from '../util/priority-util'
 import {createAxisDateDescription} from '../date-calculations/dates'
-import {drawMoons} from '../date-calculations/moon-placing-calc'
+import {calculateMoonPositions} from '../date-calculations/moon-placing-calc'
 import {expandRecurringEvents} from '../util/recurring-events'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
-import {SvgDrawerUtil} from './svg-drawer-util'
+import {drawMoons, SvgDrawerUtil} from './svg-drawer-util'
 import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
+import {MoonDrawData} from '../types/moon-types'
 
 export class GanttRenderEngine {
   private readonly svgDrawerUtil: SvgDrawerUtil
@@ -407,8 +408,16 @@ export class GanttRenderEngine {
       }
 
       if (showMoonPhases && calendarConfig.moons) {
-        drawMoons(this, ticksG, calendarConfig, startDaysValue, endDaysValue,
+        const moonDrawData: MoonDrawData = calculateMoonPositions(this, calendarConfig, startDaysValue, endDaysValue,
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
+        drawMoons(moonDrawData, ticksG)
+        // moonDrawData.moons?.forEach((moon) => {
+        //     const {index, color} = moon
+        //     moon.positions.forEach((pos) => {
+        //       drawMoonPhase(pos.x, pos.phase, index, moonDrawData.moonCount, ticksG, color)
+        //     })
+        //   }
+        // )
       }
 
       if (reset.has('redraw') && calBadgeTextContent) {

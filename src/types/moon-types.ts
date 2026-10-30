@@ -14,15 +14,18 @@ export type Moon = {
   color?: string
 }
 
+export type MoonDrawPosition = {
+  /** Center X position (usually xPos of the tick) */
+  x: number
+  phase: MoonPhase
+}
+
 export type MoonDrawData = {
   moonCount: number
   /** Size of this should equal moonCount */
   moons: {
-
-    /** Center X position (usually xPos of the tick) */
-    x: number
-    phase: MoonPhase
+    index: number
     color: string
+    positions: MoonDrawPosition[]
   }[]
-
 }

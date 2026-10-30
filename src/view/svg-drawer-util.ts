@@ -4,7 +4,7 @@ import {Css} from 'const/constants'
 import {ManualSvg} from './manual-svg-icons'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
-import {MoonPhase} from '../types/moon-types'
+import {MoonDrawData, MoonPhase} from '../types/moon-types'
 
 const textLeftPadding = 3
 
@@ -383,6 +383,17 @@ export class SvgDrawerUtil {
 }
 
 
+export function drawMoons(moonDrawData: MoonDrawData,
+                          ticksG: SVGGElement) {
+  moonDrawData.moons?.forEach((moon) => {
+      const {index, color} = moon
+      moon.positions.forEach((pos) => {
+        drawMoonPhase(pos.x, pos.phase, index, moonDrawData.moonCount, ticksG, color)
+      })
+    }
+  )
+}
+
 /**
  * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
  *
@@ -393,20 +404,21 @@ export class SvgDrawerUtil {
  * @param moonCount
  * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
  */
-export function drawMoonPhase(cx: number,
-                              phase: MoonPhase,
-                              moonIndex: number,
-                              moonCount: number,
-                              svgContainer: SVGElement,
-                              color?: string): void {
+function drawMoonPhase(cx: number,
+                       phase: MoonPhase,
+                       moonIndex: number,
+                       moonCount: number,
+                       svgContainer: SVGElement,
+                       color?: string): void {
   const innerContent = moonSvgs[phase]
   if (!innerContent) return
+
 
   const iconSize = Math.max(19 - moonCount, 12)
   const halfSize = iconSize / 2
   const x = cx - halfSize
   const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
-  const y = yOffset - halfSize
+  const y = 0 - halfSize + yOffset
 
   const g = createSvg('svg', 'moon-phase-icon', {
     width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
