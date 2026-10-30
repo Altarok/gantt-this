@@ -4,11 +4,12 @@ import {Css} from 'const/constants'
 import {ManualSvg} from './manual-svg-icons'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
+import {MoonPhase} from '../types/moon-types'
 
 const textLeftPadding = 3
 
 
-const moonSvgs: Record<number, DocumentFragment> = {
+const moonSvgs: Record<MoonPhase, DocumentFragment> = {
   0: ManualSvg.newMoon,
   1: ManualSvg.crescentHalfMoon,
   2: ManualSvg.fullMoon,
@@ -386,7 +387,6 @@ export class SvgDrawerUtil {
  * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
  *
  * @param cx Center X position (usually xPos of the tick)
- * @param cy Center Y position (e.g. -12 to sit right above baseline Y=0)
  * @param phase Phase index (0 to 4)
  * @param color
  * @param moonIndex
@@ -394,8 +394,7 @@ export class SvgDrawerUtil {
  * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
  */
 export function drawMoonPhase(cx: number,
-                              cy: number,
-                              phase: number,
+                              phase: MoonPhase,
                               moonIndex: number,
                               moonCount: number,
                               svgContainer: SVGElement,
@@ -407,7 +406,7 @@ export function drawMoonPhase(cx: number,
   const halfSize = iconSize / 2
   const x = cx - halfSize
   const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
-  const y = cy - halfSize + yOffset
+  const y = yOffset - halfSize
 
   const g = createSvg('svg', 'moon-phase-icon', {
     width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y

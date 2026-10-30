@@ -1,7 +1,7 @@
-import {GanttRenderEngine} from './svg-drawer'
-import {CalendarConfig, Moon} from '../types/calendar-types'
-import {drawMoonPhase} from './svg-drawer-util'
-import {debug} from '../util/debug'
+import {GanttRenderEngine} from '../view/svg-drawer'
+import {CalendarConfig} from '../types/calendar-types'
+import {drawMoonPhase} from '../view/svg-drawer-util'
+import {Moon, MoonDrawData, MoonPhase} from "../types/moon-types";
 
 /**
  * Renders moon phases along the timeline axis based on calendar configuration,
@@ -25,14 +25,19 @@ export function drawMoons(engine: GanttRenderEngine,
                           effectiveEndDay: number,
                           renderWidth: number) {
 
-  debug.log(`drawMoons >>`)
+  // debug.log(`drawMoons >>`)
 
   const moons = calendarConfig.moons ?? []
   const moonCount = moons?.length ?? 0
 
   if (!moonCount) return
 
-  moons.forEach((moon: Moon, index: number) => {
+  const moonDrawData: MoonDrawData = {
+    moonCount: moonCount,
+    moons: []
+  }
+
+  moons.forEach((moon: Moon) => {
     if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) return
 
     const cycle = moon.cycle
@@ -61,15 +66,15 @@ export function drawMoons(engine: GanttRenderEngine,
     const maxK = Math.ceil(effectiveEndDay / cycle) + 1
 
     /* Helper closure to handle visibility bounds checking & drawing */
-    const renderPhaseIfVisible = (x: number, exactDay: number, phaseIndex: number) => {
+    const renderPhaseIfVisible = (x: number, exactDay: number, phase: MoonPhase) => {
       if (exactDay < effectiveStartDay || exactDay > effectiveEndDay)
         return
       if (exactDay < startDaysValue || exactDay > endDaysValue)
         return
 
       if (x >= 0 && x <= renderWidth) {
-        debug.log(`drawMoons -- rendering moon`) // TODO remove
-        drawMoonPhase(x, 0, phaseIndex, index, moonCount, ticksG, moon.color ?? 'currentColor')
+        // debug.log(`drawMoons -- rendering moon`)
+        moonDrawData.moons.push({x, phase, color: moon.color ?? 'currentColor'})
       }
     }
 
@@ -96,5 +101,9 @@ export function drawMoons(engine: GanttRenderEngine,
     }
   })
 
-  debug.log(`drawMoons <<`)
+  moonDrawData.moons.forEach((moon, index) =>
+    drawMoonPhase(moon.x, moon.phase, index, moonCount, ticksG, moon.color)
+  )
+
+  // debug.log(`drawMoons <<`)
 }

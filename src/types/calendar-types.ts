@@ -1,6 +1,9 @@
+import {Moon} from "./moon-types"
+
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
+
 
 export type MonthDefinition = {
   name?: string
@@ -20,11 +23,6 @@ export type LeapYearRule = {
   applyToMonthIndex?: number /* Which month gets the leap day (e.g., February / index 1) */
 }
 
-export type Moon = {
-  offset: number // TODO --> EpochOffsetDefinition
-  cycle: number
-  color?: string
-}
 
 export type RuleBasedDetails = {
   daysInStandardYear: number
