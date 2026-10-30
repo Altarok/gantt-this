@@ -1,5 +1,25 @@
+export const CustomIcons = {
+  resetZoom: 'gt-custom-resetPanAndZoom',
+  barChartCrossed: 'customBarChartCrossed',
+  scatterChart: 'customScatterChart',
+  scatterChartCrossed: 'customScatterChartCrossed',
+  groupCrossed: 'customGroupCrossed'
+} as const
+
 export const Css = {
   wrapper: 'gt-main-container',
+  preventUserInteraction: 'gt-prevent-user-interactions',
+  diagnostics: {
+    container: 'gt-stats-log-container',
+    errorList: 'gt-stats-error-list',
+    errorListRow: 'gt-stats-row',
+    // group: 'gt-stats-group', // TODO does not even exist
+    openFileLink: 'gt-stats-open-file-link',
+    logInfo: 'gt-log-info',
+    logWarn: 'gt-log-warn',
+    logError: 'gt-log-error',
+    logFatal: 'gt-log-fatal',
+  },
   toolbar: {
     container: 'gt-toolbar-container',
     minimized: 'gt-toolbar-minimized',
@@ -7,12 +27,13 @@ export const Css = {
     button: 'gt-toolbar-button', /* Button and SVG sizes */
     buttonWarn: 'gt-toolbar-button-warn', /* Button and SVG sizes */
     separator: 'gt-toolbar-separator', /* Separates button groups */
+    foldButton: 'gt-minimized-btn',
   },
   inputLabel: 'gt-input-label',
   chartContainer: 'gt-chart-container',
   axis: {
-    /** Use for calendar axis baseline */
-    baseline: 'gt-axis-baseline',
+    // /** Use for calendar axis baseline */
+    // baseline: 'gt-axis-baseline', // TODO does not even exist
     /** Use for calendar axis gridline */
     gridline: 'gt-axis-gridline',
     label: 'gt-axis-label',
@@ -20,6 +41,13 @@ export const Css = {
     text: 'gt-axis-text',
     tick: 'gt-axis-tick',
     tickMinor: 'gt-axis-tick-minor',
+    moonIcon: 'gt-moon-phase-icon',
+    /** Addition to 'moonIcon' */
+    moonFull: 'gt-moon-fill',
+    /** Addition to 'moonIcon' */
+    moonUnlit: 'gt-moon-unlit',
+    capMarker: 'gt-calendar-cap-marker', /* todo rename ? */
+    calReignTitle: 'gt-calendar-reign-title',
   },
   item: {
     /** Base CSS class event SVGs */
@@ -32,13 +60,17 @@ export const Css = {
     bar: 'gt-item timespan bar',
     /** Use for era events */
     era: 'gt-item timespan era',
-
     /** Use for all texts on timestamp events */
     textTimestamp: 'gt-item text-timestamp',
     /** Use for all texts on bar events */
     textBar: 'gt-item text-bar',
     /** Use for all texts on era events */
     textEra: 'gt-item text-era',
+
+    /** !? */
+    verticalOverlay: 'gt-item vertical-overlay',
+    /** !? */
+    iconContainer: 'gt-item icon-container',
   },
   itemLayer: {
     era: 'gt-layers-eras',
@@ -59,7 +91,10 @@ export const Css = {
     title: 'gt-tooltip-title',  /*  title */
     table: 'gt-tooltip-table', /* table */
     link: 'gt-tooltip-link', /* link to related note */
-    dateDetails: 'gt-tooltip-repeat-dates' /* date suffix */
+    dateDetails: 'gt-tooltip-repeat-dates', /* date suffix */
+    repeatRow: 'gt-repeat-row', /* TODO rename!? */
+    repeatValue: 'gt-repeat-value',
+    arrows: 'gt-dependency-arrow', /* TODO rename!? */
   },
   settings: {
     container: 'gt-settings-container',
@@ -77,6 +112,7 @@ export const Css = {
     dark: 'theme-dark',
     light: 'theme-light',
   },
+  modalWidth: 'gt-modal-width',
   /* obsidian native classes */
   modWarning: 'is-destructive',
 

@@ -1,5 +1,5 @@
 import {Platform, setIcon, setTooltip} from 'obsidian'
-import {Css} from '../const/constants'
+import {Css, CustomIcons} from '../const/constants'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from './gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
@@ -52,7 +52,7 @@ export class ToolbarView implements Destroyable {
     const g1 = createGroup(this.container)
 
     this.toggleBarsButton = createButton(g1, 'chart-bar-big', 'Toggle bar visibility')
-    this.toggleTimestampButton = createButton(g1, 'customScatterChart', 'Toggle timestamp event visibility')
+    this.toggleTimestampButton = createButton(g1, CustomIcons.scatterChart, 'Toggle timestamp event visibility')
     this.toggleEventGroupingButton = createButton(g1, 'group', 'Toggle event grouping')
 
     addSeparator(this.container)
@@ -62,7 +62,7 @@ export class ToolbarView implements Destroyable {
       this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
       this.zoomOutButton = createButton(g2, 'zoom-out', 'Zoom out')
     }
-    this.resetZoomAndPanButton = createButton(g2, 'gt-custom-resetPanAndZoom', 'Reset view')
+    this.resetZoomAndPanButton = createButton(g2, CustomIcons.resetZoom, 'Reset view')
     if (settings.showPanAndZoomButtonsInToolbar) {
       this.zoomInButton = createButton(g2, 'zoom-in', 'Zoom in')
       this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')
@@ -91,27 +91,27 @@ export class ToolbarView implements Destroyable {
     this.foldButton = createButton(this.container, 'fold-horizontal', 'Hide Toolbar')
 
     this.unfoldButton = createButton(chartView.minimizedToolbarContainer, 'unfold-horizontal', 'Show Toolbar')
-    this.unfoldButton.addClass('gt-minimized-btn')
+    this.unfoldButton.addClass(Css.toolbar.foldButton)
     this.unfoldToolbar()
   }
 
   private createLocalChartSettingsDropdown(button: HTMLButtonElement, settings: SettingsContext) {
     this.createDropdownMenu(button, 'Changes only affect local chart', (menu: ChartDropdownMenu) => {
       menu
-        .addSettingRow('Moons', () => settings.showMoons, (b: boolean) => settings.showMoons = b)
-        .addSettingRow('Calendars: Color-code axes', () => settings.colorCodeCalendarAxes, (b: boolean) => settings.colorCodeCalendarAxes = b)
-        // .addSettingRow('Calendars: Sticky', () => settings.stickyCalAxes, (b: boolean) => settings.stickyCalAxes = b)
-        .addSeparator()  /* separator for hover effects */
-        .addSettingRow('Hover: Highlight event', () => settings.highlightHoveredEvent, (b: boolean) => settings.highlightHoveredEvent = b)
-        .addSettingRow('Hover: Highlight related events', () => settings.highlightRelatedEvents, (b: boolean) => settings.highlightRelatedEvents = b)
-        .addSettingRow('Hover: Draw vertical line', () => settings.drawVerticalLineOnHover, (b: boolean) => settings.drawVerticalLineOnHover = b)
-        .addSettingRow('Hover: Draw arrows', () => settings.drawArrows, (b: boolean) => settings.drawArrows = b)
-        .addSeparator()  /* separator for toolbar */
-        .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b, true)
-        .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b, true)
-        .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b, true)
-        .addSeparator()
-        .addResetCallbackRow(() => this.chartCtx.settings.copyOverwritableGlobalSettings())
+      .addSettingRow('Moons', () => settings.showMoons, (b: boolean) => settings.showMoons = b)
+      .addSettingRow('Calendars: Color-code axes', () => settings.colorCodeCalendarAxes, (b: boolean) => settings.colorCodeCalendarAxes = b)
+      // .addSettingRow('Calendars: Sticky', () => settings.stickyCalAxes, (b: boolean) => settings.stickyCalAxes = b)
+      .addSeparator()  /* separator for hover effects */
+      .addSettingRow('Hover: Highlight event', () => settings.highlightHoveredEvent, (b: boolean) => settings.highlightHoveredEvent = b)
+      .addSettingRow('Hover: Highlight related events', () => settings.highlightRelatedEvents, (b: boolean) => settings.highlightRelatedEvents = b)
+      .addSettingRow('Hover: Draw vertical line', () => settings.drawVerticalLineOnHover, (b: boolean) => settings.drawVerticalLineOnHover = b)
+      .addSettingRow('Hover: Draw arrows', () => settings.drawArrows, (b: boolean) => settings.drawArrows = b)
+      .addSeparator()  /* separator for toolbar */
+      .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b, true)
+      .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b, true)
+      .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b, true)
+      .addSeparator()
+      .addResetCallbackRow(() => this.chartCtx.settings.copyOverwritableGlobalSettings())
     })
   }
 
@@ -153,15 +153,15 @@ export class ToolbarView implements Destroyable {
   }
 
   handleToggleBarsButtonClick(): void {
-    setIcon(this.toggleBarsButton, this.viewModel.toggleShowBars() ? 'chart-bar-big' : 'customBarChartCrossed')
+    setIcon(this.toggleBarsButton, this.viewModel.toggleShowBars() ? 'chart-bar-big' : CustomIcons.barChartCrossed)
   }
 
   handleToggleTimestampsButtonClick(): void {
-    setIcon(this.toggleTimestampButton, this.viewModel.toggleShowPoints() ? 'customScatterChart' : 'customScatterChartCrossed')
+    setIcon(this.toggleTimestampButton, this.viewModel.toggleShowPoints() ? CustomIcons.scatterChart : CustomIcons.scatterChartCrossed)
   }
 
   handleToggleGroupingButtonClick(): void {
-    setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping() ? 'group' : 'customGroupCrossed')
+    setIcon(this.toggleEventGroupingButton, this.viewModel.toggleEnableGrouping() ? 'group' : CustomIcons.groupCrossed)
   }
 
   foldToolbar() {

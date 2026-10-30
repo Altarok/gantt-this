@@ -1,5 +1,5 @@
 import {addIcon, sanitizeHTMLToDom} from 'obsidian'
-import {svgUrl} from '../const/constants'
+import {Css, CustomIcons, svgUrl} from '../const/constants'
 
 /* Button icons get most of their attributes from CSS. */
 const svgBase = `<svg xmlns="${svgUrl}" viewBox="0 0 24 24">`
@@ -36,10 +36,10 @@ const groupCrossedButtonIcon = `${svgBase}
   <rect width="7" height="5" x="10" y="12" rx="1" />
   <path d="M1 1 24 24" /></svg>`
 
-const moonPhase0 = `${svgBase}<circle cx="12" cy="12" r="9" class="moon-unlit"/></svg>`
-const moonPhase1 = `${svgBase}<path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/></svg>`
-const moonPhase2 = `${svgBase}<circle cx="12" cy="12" r="9" class="moon-fill"/></svg>`
-const moonPhase3 = `${svgBase}<path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="moon-unlit"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="moon-fill"/><circle cx="12" cy="12" r="9"/></svg>`
+const moonPhase0 = `${svgBase}<circle cx="12" cy="12" r="9" class="${Css.axis.moonUnlit}"/></svg>`
+const moonPhase1 = `${svgBase}<path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="${Css.axis.moonUnlit}"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="${Css.axis.moonFull}"/><circle cx="12" cy="12" r="9"/></svg>`
+const moonPhase2 = `${svgBase}<circle cx="12" cy="12" r="9" class="${Css.axis.moonFull}"/></svg>`
+const moonPhase3 = `${svgBase}<path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="${Css.axis.moonUnlit}"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="${Css.axis.moonFull}"/><circle cx="12" cy="12" r="9"/></svg>`
 
 function addArrowTipAsSvgDef(svgEl: SVGElement): void {
   let defs = svgEl.querySelector('defs')
@@ -74,12 +74,11 @@ function addArrowTipAsSvgDef(svgEl: SVGElement): void {
 }
 
 function addManualSvgsToObsidianCache() {
-  addIcon('customBarChartCrossed', barChartCrossedButtonIcon)
-  addIcon('customScatterChart', scatterChartButtonIcon)
-  addIcon('customScatterChartCrossed', scatterChartCrossedButtonIcon)
-  addIcon('customGroupCrossed', groupCrossedButtonIcon)
-
-  addIcon('gt-custom-resetPanAndZoom', resetZoomAndPanButtonIcon)
+  addIcon(CustomIcons.barChartCrossed, barChartCrossedButtonIcon)
+  addIcon(CustomIcons.scatterChart, scatterChartButtonIcon)
+  addIcon(CustomIcons.scatterChartCrossed, scatterChartCrossedButtonIcon)
+  addIcon(CustomIcons.groupCrossed, groupCrossedButtonIcon)
+  addIcon(CustomIcons.resetZoom, resetZoomAndPanButtonIcon)
 }
 
 export const ManualSvg = {

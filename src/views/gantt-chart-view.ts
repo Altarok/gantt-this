@@ -172,13 +172,14 @@ export class GanttChartView {
 
   drawCalAxisBaseline(calGroup: SVGGElement, x1: number, x2: number, axisColor: string): void {
     calGroup.createSvg('line', {
-      cls: Css.axis.baseline, attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
+      // cls: Css.axis.baseline, // TODO does not even exist
+      attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
     })
   }
 
   drawCalAxisCap(calGroup: SVGGElement, x: number, axisColor: string): void {
     calGroup.createSvg('line', {
-      cls: 'calendar-cap-marker', attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke: axisColor}
+      cls: Css.axis.capMarker, attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke: axisColor}
     })
   }
 

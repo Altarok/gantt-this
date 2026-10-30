@@ -150,7 +150,7 @@ export default class TooltipManager implements HoverParent {
       if (repeatRule?.delta && repeatRule.step)
         datesContainer.createDiv({
           text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`,
-          cls: 'gt-repeat-value'
+          cls: Css.tooltip.repeatValue
         })
     }
 
@@ -161,7 +161,7 @@ export default class TooltipManager implements HoverParent {
       const absoluteDay = (!isNaN(item.endDays) && item.endDays > item.startDays)
         ? ` ${item.startDays} to ${item.endDays}`
         : ` ${item.startDays}`
-      datesContainer.createDiv({text: `Absolute day: ${absoluteDay}`, cls: 'gt-repeat-value'})
+      datesContainer.createDiv({text: `Absolute day: ${absoluteDay}`, cls: Css.tooltip.repeatValue})
     }
   }
 
@@ -172,13 +172,13 @@ export default class TooltipManager implements HoverParent {
                                     calendarConfig: CalendarConfig,
                                     addDuration: boolean,
                                     item: GanttItem) {
-    const dateRow = datesContainer.createDiv({cls: 'gt-repeat-row'})
+    const dateRow = datesContainer.createDiv({cls: Css.tooltip.repeatRow})
     dateRow.createSpan({
       text: isTimespan(item.displayType)
         ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
         // + `${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
         : this.dateInOutputFormat(item.startDays, calendarConfig),
-      cls: 'gt-repeat-value'
+      cls: Css.tooltip.repeatValue
     })
   }
 
@@ -262,8 +262,8 @@ export default class TooltipManager implements HoverParent {
 
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
-      const upper = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
-      const lower = createSvg('line', 'gt-item vertical-overlay', {stroke: this.overlayColor})
+      const upper = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
+      const lower = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
       this.chartView.lowerHoverLayer.appendChild(upper)
       this.chartView.dynamicCalendarLayer.appendChild(lower)
       /*

@@ -11,6 +11,7 @@
   box-sizing: border-box;
 }
 
+/* OBSIDIAN API! */
 body.is-popout-window .gt-main-container {
   display: flex;
   flex-direction: column;
@@ -34,6 +35,7 @@ body.is-popout-window .gt-main-container {
   position: relative;
 }
 
+/* OBSIDIAN API! */
 body.is-popout-window .gt-chart-container {
   flex: 1;
   overflow-y: auto;
@@ -334,7 +336,7 @@ body.is-popout-window .gt-chart-container {
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-/* Break out of Obsidian's readable line width constraints for this specific code block type */
+/* OBSIDIAN API! - Break out of Obsidian's readable line width constraints for this specific code block type */
 .markdown-rendered .block-language-fantasy-gantt {
   width: 100%;
   max-width: 100%;
@@ -357,6 +359,7 @@ body.is-popout-window .gt-chart-container {
   cursor: grabbing;
 }
 
+/* OBSIDIAN API! */
 body.is-popout-window svg.gt-svg-canvas {
   min-height: 100%;
 }
@@ -585,7 +588,8 @@ body.is-popout-window svg.gt-svg-canvas {
 /* ----------- moons ----------- */
 
 /* Inherit text color from Obsidian theme & Smooth hover or visual transition if needed */
-.moon-phase-icon {
+
+.gt-moon-phase-icon {
   overflow: visible;
   fill: none;
   stroke: currentcolor;
@@ -595,23 +599,23 @@ body.is-popout-window svg.gt-svg-canvas {
   opacity: 0.8;
 }
 
-.moon-phase-icon .moon-fill {
+.gt-moon-phase-icon .gt-moon-fill {
   fill: currentcolor;
   stroke: none;
 }
 
-.moon-phase-icon .moon-unlit {
+.gt-moon-phase-icon .gt-moon-unlit {
   fill: var(--background-primary);
 }
 
 /* Vertical end-cap ticks at startDay and endDay */
-.calendar-cap-marker {
+.gt-calendar-cap-marker {
   stroke-width: 2px;
   stroke-linecap: round;
 }
 
 /* Reign title centered over the axis segment */
-.calendar-reign-title {
+.gt-calendar-reign-title {
   font-size: 11px;
   font-weight: 600;
   opacity: 0.85;
@@ -624,30 +628,20 @@ body.is-popout-window svg.gt-svg-canvas {
   max-width: 90vw;
 }
 
-/* --- work in progress --- */
-
-.bases-toolbar-gantt-custom .text-icon-button {
-  cursor: pointer;
-}
-
-/* Optional: match active toggle state if you are toggling a feature */
-.bases-toolbar-gantt-custom .text-icon-button.is-active {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-
+/* OBSIDIAN API! */
 .setting-item-description.is-error {
   color: var(--text-error);
   font-weight: var(--font-semibold);
 }
 
-/* Visually indicate disabled state on the CTA button */
+/* OBSIDIAN API! - Visually indicate disabled state on the CTA button */
 .setting-item button.mod-cta:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
 }
 
+/* OBSIDIAN API! */
 /* .popover.hover-popover,
 .popover.hover-popover .popover-content, */
 .popover.hover-popover .gt-tooltip {
@@ -729,50 +723,3 @@ body.is-popout-window svg.gt-svg-canvas {
   font-weight: bold;
 }
 
-.gt-group-dropdown {
-  position: fixed; /* position: absolute; */
-  z-index: 100;
-  background-color: var(--background-secondary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  box-shadow: var(--shadow-s);
-  box-sizing: border-box;
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 4px;
-  min-width: 140px;
-  display: none;
-}
-
-.gt-group-dropdown.visible {
-  display: block;
-}
-
-.gt-group-dropdown-separator {
-  height: 2px;
-  background-color: var(--background-modifier-border);
-  margin: 4px 0;
-}
-
-.gt-group-dropdown-header,
-.gt-group-dropdown-footnote,
-.gt-group-dropdown-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
-  border-radius: 2px;
-}
-
-.gt-group-dropdown-footnote {
-  margin-top: 6px;
-  font-size: 0.75em;
-}
-
-.gt-group-dropdown-row {
-  cursor: pointer;
-}
-
-.gt-group-dropdown-row:hover {
-  background-color: var(--interactive-hover);
-}

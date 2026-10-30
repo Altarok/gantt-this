@@ -1,7 +1,19 @@
 import {Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {ChartContext} from '../model/chart-context'
-import {ChartDiagnostics} from "../const/error-types";
+import {ChartDiagnostics, ErrorEntry, ErrorSeverity} from '../const/error-types'
+import {Css} from '../const/constants'
+
+const cssClasses: Record<ErrorSeverity, string> = {
+  info: Css.diagnostics.logInfo,
+  warn: Css.diagnostics.logWarn,
+  error: Css.diagnostics.logError,
+  fatal: Css.diagnostics.logFatal
+}
+
+function loglevelToCssClass(errEntry: ErrorEntry) {
+  return cssClasses[errEntry.level]
+}
 
 export class ChartDiagnosticsModal extends Modal {
   constructor(private readonly chartCtx: ChartContext) {
@@ -15,7 +27,7 @@ export class ChartDiagnosticsModal extends Modal {
   onOpen() {
     const {contentEl} = this
     contentEl.empty()
-    contentEl.addClass('gt-stats-modal')
+    // contentEl.addClass('gt-stats-modal') // TODO remove
 
     const diagnostics: ChartDiagnostics = this.chartCtx.getUpdatedDiagnostics()
 
@@ -30,22 +42,21 @@ export class ChartDiagnosticsModal extends Modal {
   private showProblems(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
     const {logs} = diagnostics
     if (logs?.length === 0) {
-      contentEl.createDiv({text: 'Setup correct, no known problems.', cls: 'gt-stats-row'})
+      contentEl.createDiv({text: 'Setup correct, no known problems.', cls: Css.diagnostics.errorListRow})
       return
     }
 
     contentEl.createEl('h3', {text: 'Problems'})
-    const logContainer = contentEl.createDiv({cls: 'gt-stats-log-container'})
+    const logContainer = contentEl.createDiv({cls: Css.diagnostics.container})
 
-    const list = logContainer.createEl('ul', {cls: 'gt-stats-error-list'})
+    const list = logContainer.createEl('ul', {cls: Css.diagnostics.errorList})
     for (const entry of logs) {
       const filepath = entry.filepath
-      const li = list.createEl('li', {text: entry.message})
-      li.addClass(`gt-log-${entry.level}`)
+      const li = list.createEl('li', {text: entry.message, cls: loglevelToCssClass(entry)})
 
       if (filepath) {
         li.createSpan({text: ' '})
-        const link = li.createEl('a', {text: 'Open file', cls: 'gt-stats-open-file-link'})
+        const link = li.createEl('a', {text: 'Open file', cls: Css.diagnostics.openFileLink})
 
         this.plugin.registerDomEvent(link as HTMLElement, 'click', (e) => {
           e.preventDefault()
@@ -79,7 +90,7 @@ export class ChartDiagnosticsModal extends Modal {
   private showStatistics(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
     contentEl.createEl('h3', {text: 'Statistics'})
 
-    const g = contentEl.createDiv({cls: 'gt-stats-group'})
+    const g = contentEl.createDiv() // TODO {cls: Css.diagnostics.group})
     createStatRow(g, `Calendars loaded: ${diagnostics.loadedCalendars} of ${diagnostics.totalCalendars}`)
     createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files`)
     // folder '${this.chartCtx.settings.eventPath}'
@@ -90,7 +101,7 @@ export class ChartDiagnosticsModal extends Modal {
 
 function createStatRow(div: HTMLDivElement, label: string, value?: string | HTMLElement): void {
 
-  const row = div.createDiv({cls: 'gt-stats-row'})
+  const row = div.createDiv({cls: Css.diagnostics.errorListRow})
 
   if (!value) {
     row.createSpan({text: label})

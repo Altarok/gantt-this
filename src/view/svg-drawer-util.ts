@@ -53,7 +53,7 @@ export class SvgDrawerUtil {
   }
 
   createIconInDiv(d: GanttItem): HTMLDivElement {
-    const iconContainerDiv = window.createDiv({cls: 'gt-item icon-container'})
+    const iconContainerDiv = window.createDiv({cls: Css.item.iconContainer})
     // if (d.displayIconColor)
     iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
     if (d.displayIcon) setIcon(iconContainerDiv, d.displayIcon)
@@ -72,7 +72,7 @@ export class SvgDrawerUtil {
     if (!d.displayIcon || this.eventManager?.isDragging) return false
 
     const foreignObj = createSvg('foreignObject',
-      'gt-prevent-user-interactions', {x, y, width: this.iconSize, height: this.iconSize}
+      Css.preventUserInteraction, {x, y, width: this.iconSize, height: this.iconSize}
     )
     foreignObj.appendChild(this.createIconInDiv(d))
     // if (availableWidth !== 0) {
@@ -420,7 +420,7 @@ function drawMoonPhase(cx: number,
   const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
   const y = 0 - halfSize + yOffset
 
-  const g = createSvg('svg', 'moon-phase-icon', {
+  const g = createSvg('svg', Css.axis.moonIcon, {
     width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
   })
 

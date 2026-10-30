@@ -382,7 +382,7 @@ export class GanttRenderEngine {
 
       // if (!calBadgeTextContent && calendarConfig?.name) {
       //   const labelX = (startX + endX) / 2
-      //   const title = Util.createSVGElement('text', 'calendar-reign-title', {
+      //   const title = Util.createSVGElement('text', Css.axis.calReignTitle, {
       //     x: labelX, y: -10, 'text-anchor': 'middle', fill: 'currentColor'
       //   })
       //   title.textContent = calendarConfig.name
