@@ -217,9 +217,7 @@ function cleanupWeekdays(config: CalendarConfig) {
     if (Number.isNaN(w.offset)) isValid = false
     else if (!w.days || w.days.length < 2) isValid = false
     else w.days.forEach(d => {
-        if (!d || !d.name || !d.short) {
-          isValid = false
-        }
+        if (!d?.name || !d?.short) isValid = false
       })
   } else isValid = false
 
