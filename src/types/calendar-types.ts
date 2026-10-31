@@ -4,6 +4,17 @@ export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
+export type Weekday = {
+  short: string
+  name: string
+}
+
+export type Weekdays = {
+  offset: number
+  dayCount: number
+  days: Weekday[]
+}
+
 export type CalendarColor = string
 
 export type CalendarColors = {
@@ -66,6 +77,7 @@ type BaseCalendarConfig = {
   link: string
   /** Current date in fantasy world. MUST match the calendar's date format. */
   today?: number
+  weekdays?: Weekdays
   colors?: CalendarColor | {
     axis?: CalendarColor
     dates?: CalendarColor //

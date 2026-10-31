@@ -139,6 +139,8 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
     newCalendarConfig.startDay = newCalendarConfig.startDay ? runOffsetCalculations(newCalendarConfig.startDay) : undefined
     newCalendarConfig.endDay = newCalendarConfig.endDay ? runOffsetCalculations(newCalendarConfig.endDay) : undefined
 
+    cleanupWeekdays(newCalendarConfig)
+
     switch (newCalendarConfig.type) {
       case 'positional':
         safetyCheckPositionalConfig(newCalendarConfig)
@@ -205,4 +207,22 @@ function safetyCheckRuleBasedConfig(config: RuleBasedCalendarConfig) {
     if (expectedDaysInYear !== ruleBasedDetails.daysInStandardYear) throwGanttError('calendarDaysInStandardMismatch',
       {calendarID: config.id, daysInStandardYear: ruleBasedDetails.daysInStandardYear})
   }
+}
+
+function cleanupWeekdays(config: CalendarConfig) {
+  let isValid = true
+  const {weekdays: w} = config
+
+  if (w) {
+    if (Number.isNaN(w.offset)) isValid = false
+    else if (!w.days || w.days.length < 2) isValid = false
+    else w.days.forEach(d => {
+        if (!d || !d.name || !d.short) {
+          isValid = false
+        }
+      })
+  } else isValid = false
+
+  if (!w || !isValid) delete config.weekdays // = undefined
+  else w.dayCount = w.days.length
 }

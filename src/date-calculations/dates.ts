@@ -68,7 +68,6 @@ function parseDaysToGregorianDateString(days: number,
   /* Calculate 1-based day of the year (e.g., Jan 1st is Day 1) */
   remainingDays -= totalDaysToYearStart
 
-
   const monthDays = [31, isGregorianLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
   let month = 1
@@ -226,10 +225,13 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
   const format: DateFormatComponent[] = asInput ? calConfig.ruleBasedDetails.format : calConfig.ruleBasedDetails.outputFormat
   const displayedYear: { year: number, sign: '-' | '' } = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
 
+  const weekday = calConfig.weekdays?.days[(absDays - calConfig.offsetToDayZero) % calConfig.weekdays.dayCount]
+  const weekdayStr = weekday?.short ?? weekday?.name
+
   const outputParts: string[] = format.map(component => {
     if (component === 'year') return formatYearValue(displayedYear.year)
     if (component === 'month' && (asInput || !hideMonths)) return month ?? ''
-    if (component === 'day' && (asInput || !hideDays)) return day?.toString().padStart(2, '0') ?? ''
+    if (component === 'day' && (asInput || !hideDays)) return (weekdayStr ? ` ${weekdayStr} ` : '') + (day?.toString().padStart(2, '0') ?? '')
     return ''
   })
 
