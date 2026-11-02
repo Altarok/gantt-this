@@ -12,11 +12,12 @@ export type Moon = {
   offset: number
   cycle: number
   color?: string
+  phases?: number
 }
 
 export type MoonDrawPosition = {
   /** Center X position (usually xPos of the tick) */
-  x: number
+  xPos: number
   phase: MoonPhase
 }
 

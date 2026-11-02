@@ -69,7 +69,7 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
     const renderPhaseIfVisible = (x: number, exactDay: number, phase: MoonPhase) => {
       if (exactDay < effectiveStartDay || exactDay > effectiveEndDay) return
       if (exactDay < startDaysValue || exactDay > endDaysValue) return
-      if (x >= 0 && x <= renderWidth) singleMoonDrawData.positions.push({x, phase})
+      if (x >= 0 && x <= renderWidth) singleMoonDrawData.positions.push({xPos: x, phase})
     }
 
     const phaseOffsets = showQuarterPhases

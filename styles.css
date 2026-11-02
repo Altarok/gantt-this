@@ -558,6 +558,16 @@ body.is-popout-window svg.gt-svg-canvas {
   fill: var(--background-primary);
 }
 
+.gt-moon-phase-manual-icons {
+  overflow: visible;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
+
 /* Vertical end-cap ticks at startDay and endDay */
 .gt-calendar-cap-marker {
   stroke-width: 2px;

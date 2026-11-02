@@ -70,6 +70,7 @@ export const Css = {
     moonFull: 'gt-moon-fill',
     /** Unlit part of the moon phase */
     moonUnlit: 'gt-moon-unlit',
+    moonManual: 'gt-moon-phase-manual-icons',
     /** End-cap marker at start and end days */
     capMarker: 'gt-calendar-cap-marker', /* todo rename ? */
     /** Reign epoch title over the axis */

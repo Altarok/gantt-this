@@ -5,9 +5,9 @@ import {ManualSvg} from './manual-svg-icons'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
 import {MoonDrawData, MoonPhase} from '../types/moon-types'
+import {MoonIconCache} from './manual-moon-icon-cache'
 
 const textLeftPadding = 3
-
 
 const moonSvgs: Record<MoonPhase, DocumentFragment> = {
   0: ManualSvg.newMoon,
@@ -40,6 +40,7 @@ export class SvgDrawerUtil {
   private readonly iconRadius: number // 8
 
   private eventManager?: GanttEventManager
+  private moonIconCache?: MoonIconCache // TODO #moons use this
 
   constructor(private readonly chartCtx: ChartContext) {
     this.shapeSize = chartCtx.settings.viewEventShapeHeight
@@ -388,7 +389,7 @@ export function drawMoons(moonDrawData: MoonDrawData,
   moonDrawData.moons?.forEach((moon) => {
       const {index, color} = moon
       moon.positions.forEach((pos) => {
-        drawMoonPhase(pos.x, pos.phase, index, moonDrawData.moonCount, ticksG, color)
+        drawMoonPhase(pos.xPos, pos.phase, index, moonDrawData.moonCount, ticksG, color)
       })
     }
   )
@@ -410,6 +411,8 @@ function drawMoonPhase(cx: number,
                        moonCount: number,
                        svgContainer: SVGElement,
                        color?: string): void {
+
+
   const innerContent = moonSvgs[phase]
   if (!innerContent) return
 
