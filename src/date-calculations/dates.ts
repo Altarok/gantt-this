@@ -225,17 +225,26 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
   const format: DateFormatComponent[] = asInput ? calConfig.ruleBasedDetails.format : calConfig.ruleBasedDetails.outputFormat
   const displayedYear: { year: number, sign: '-' | '' } = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
 
-  const weekday = calConfig.weekdays?.days[(absDays - calConfig.offsetToDayZero) % calConfig.weekdays.dayCount]
-  const weekdayStr = weekday?.short ?? weekday?.name
+  let weekdayStr: string | undefined = undefined
+  if (calConfig.weekdays) {
+    const totalDays = absDays + calConfig.offsetToDayZero - calConfig.weekdays?.offset - 1 /* -1 for human to array shift */
+    const dayCount = calConfig.weekdays.dayCount
+    const dayIndex = ((totalDays % dayCount) + dayCount) % dayCount
+    const weekday = calConfig.weekdays?.days[dayIndex]
+    weekdayStr = weekday?.short ?? weekday?.name
+  }
+
 
   const outputParts: string[] = format.map(component => {
     if (component === 'year') return formatYearValue(displayedYear.year)
     if (component === 'month' && (asInput || !hideMonths)) return month ?? ''
-    if (component === 'day' && (asInput || !hideDays)) return (weekdayStr ? ` ${weekdayStr} ` : '') + (day?.toString().padStart(2, '0') ?? '')
+    if (component === 'day' && (asInput || !hideDays)) return day?.toString().padStart(2, '0') ?? ''
     return ''
   })
 
-  return displayedYear.sign + outputParts.filter(Boolean).join(calConfig.delimiter)
+  return displayedYear.sign
+    + (!asInput && weekdayStr ? ` ${weekdayStr} ` : '')
+    + outputParts.filter(Boolean).join(calConfig.delimiter)
     + getEpochSuffix(absDays, calConfig)
 }
 
