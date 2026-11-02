@@ -9,7 +9,7 @@ import {expandRecurringEvents} from '../util/recurring-events'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {ChartContext} from '../model/chart-context'
-import {drawMoons, SvgDrawerUtil} from './svg-drawer-util'
+import {SvgDrawerUtil} from './svg-drawer-util'
 import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
 import {MoonDrawData} from '../types/moon-types'
@@ -347,7 +347,7 @@ export class GanttRenderEngine {
       if (!calendarConfig) return // continue to next axis
 
       const calBadgeTextContent = calendarConfig.displayName ?? calendarConfig.name ?? calType
-      const calendarColors: CalendarColors = getCalendarColors(this.settings,calendarConfig,  this.settings.getCalendarConfig(calType))
+      const calendarColors: CalendarColors = getCalendarColors(this.settings, calendarConfig, this.settings.getCalendarConfig(calType))
 
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
@@ -416,7 +416,7 @@ export class GanttRenderEngine {
       if (showMoonPhases && calendarConfig.moons) {
         const moonDrawData: MoonDrawData = calculateMoonPositions(this, calendarConfig, startDaysValue, endDaysValue,
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
-        drawMoons(moonDrawData, ticksG)
+        this.svgDrawerUtil.drawMoons(moonDrawData, ticksG)
       }
 
       if (reset.has('redraw') && calBadgeTextContent) {

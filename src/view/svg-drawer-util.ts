@@ -1,20 +1,19 @@
 import {setIcon} from 'obsidian'
 import {GanttItem} from '../types/settings-types'
 import {Css} from 'const/constants'
-import {ManualSvg} from './manual-svg-icons'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
-import {MoonDrawData, MoonPhase} from '../types/moon-types'
+import {MoonDrawData} from '../types/moon-types'
 import {MoonIconCache} from './manual-moon-icon-cache'
 
 const textLeftPadding = 3
 
-const moonSvgs: Record<MoonPhase, DocumentFragment> = {
-  0: ManualSvg.newMoon,
-  1: ManualSvg.crescentHalfMoon,
-  2: ManualSvg.fullMoon,
-  3: ManualSvg.waningHalfMoon
-}
+// const moonSvgs: Record<MoonPhase, DocumentFragment> = {
+//   0: ManualSvg.newMoon,
+//   1: ManualSvg.crescentHalfMoon,
+//   2: ManualSvg.fullMoon,
+//   3: ManualSvg.waningHalfMoon
+// }
 
 function setAttributes(el: Element, attrs: Record<string, string | number>): void {
   for (const key in attrs) {
@@ -381,54 +380,58 @@ export class SvgDrawerUtil {
 
     return points.join(' ')
   }
+
+  drawMoons(moonDrawData: MoonDrawData,
+            ticksG: SVGGElement) {
+    moonDrawData.moons?.forEach((moon) => {
+        const {index, color, colorBg} = moon
+        moon.positions.forEach((pos) => {
+          this.drawMoonPhase(pos.xPos, pos.step, pos.phase, index, moonDrawData.moonCount, ticksG, color, colorBg)
+        })
+      }
+    )
+  }
+
+  /**
+   * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
+   *
+   * @param cx Center X position (usually xPos of the tick)
+   * @param step
+   * @param phase Phase index (0 to 4)
+   * @param color
+   * @param moonIndex
+   * @param moonCount
+   * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
+   * @param colorBg
+   */
+  drawMoonPhase(cx: number,
+                step: number,
+                phase: number,
+                moonIndex: number,
+                moonCount: number,
+                svgContainer: SVGElement,
+                color: string,
+                colorBg: string): void {
+    this.moonIconCache ??= new MoonIconCache()
+
+    const innerContent: DocumentFragment = this.moonIconCache.getMoonIcon(phase, step, color, colorBg)
+    if (!innerContent) return
+
+    const iconSize = Math.max(19 - moonCount, 12)
+    const halfSize = iconSize / 2
+    const x = cx - halfSize
+    const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
+    const y = 0 - halfSize + yOffset
+
+    const g = createSvg('svg', Css.axis.moonIcon, {
+      width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
+    })
+
+    if (color) g.style.color = color
+
+    g.appendChild(innerContent.cloneNode(true)) // do not use g.innerHTML = innerContent
+    svgContainer.appendChild(g)
+  }
+
 }
 
-
-export function drawMoons(moonDrawData: MoonDrawData,
-                          ticksG: SVGGElement) {
-  moonDrawData.moons?.forEach((moon) => {
-      const {index, color} = moon
-      moon.positions.forEach((pos) => {
-        drawMoonPhase(pos.xPos, pos.phase, index, moonDrawData.moonCount, ticksG, color)
-      })
-    }
-  )
-}
-
-/**
- * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
- *
- * @param cx Center X position (usually xPos of the tick)
- * @param phase Phase index (0 to 4)
- * @param color
- * @param moonIndex
- * @param moonCount
- * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
- */
-function drawMoonPhase(cx: number,
-                       phase: MoonPhase,
-                       moonIndex: number,
-                       moonCount: number,
-                       svgContainer: SVGElement,
-                       color?: string): void {
-
-
-  const innerContent = moonSvgs[phase]
-  if (!innerContent) return
-
-
-  const iconSize = Math.max(19 - moonCount, 12)
-  const halfSize = iconSize / 2
-  const x = cx - halfSize
-  const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
-  const y = 0 - halfSize + yOffset
-
-  const g = createSvg('svg', Css.axis.moonIcon, {
-    width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
-  })
-
-  if (color) g.style.color = color
-
-  g.appendChild(innerContent.cloneNode(true)) // do not use g.innerHTML = innerContent
-  svgContainer.appendChild(g)
-}
