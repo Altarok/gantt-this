@@ -227,7 +227,7 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
 
   let weekdayStr: string | undefined = undefined
   if (calConfig.weekdays) {
-    const totalDays = absDays + calConfig.offsetToDayZero - calConfig.weekdays?.offset - 1 /* -1 for human to array shift */
+    const totalDays = absDays - calConfig.offsetToDayZero - calConfig.weekdays?.offset - 1 /* -1 for human to array shift */
     const dayCount = calConfig.weekdays.dayCount
     const dayIndex = ((totalDays % dayCount) + dayCount) % dayCount
     const weekday = calConfig.weekdays?.days[dayIndex]
