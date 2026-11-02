@@ -242,10 +242,11 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
     return ''
   })
 
-  return displayedYear.sign
+  const epochSuffix = getEpochSuffix(absDays, calConfig)
+  return (!epochSuffix ? displayedYear.sign : '')
     + (!asInput && weekdayStr ? ` ${weekdayStr} ` : '')
     + outputParts.filter(Boolean).join(calConfig.delimiter)
-    + getEpochSuffix(absDays, calConfig)
+    + epochSuffix
 }
 
 function shiftYearIfNeeded(yearValue: number, noYearZero: boolean | undefined): { year: number, sign: '-' | '' } {
