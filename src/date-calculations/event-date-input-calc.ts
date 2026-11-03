@@ -108,6 +108,7 @@ function parseDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCal
 
   const parts = input.split(delimiter).map(p => p.trim())
   const format = details.format
+  // debug.log(`date ${date} - parts ${String(parts)}`)
 
   /* Ensure the input has exactly the number of blocks expected by this calendar */
   // if (parts.length !== format.length) return null
@@ -149,6 +150,8 @@ function parseDateWithRuleBasedConfig(date: string, calendarConfig: RuleBasedCal
 
   /* Handle Ordinal Dates (No month block in the format) */
   if (!monthName) {
+    // debugger
+
     const maxDays = isLeap ? (details.daysInStandardYear + (details.leapYearRule?.extraDays ?? 1)) : details.daysInStandardYear
     if (day < 1 || day > maxDays) throwGanttError('illegalDay4Year', {date, day, year})
 
