@@ -5,7 +5,7 @@ export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 export type EpochOffsetDefinition = { year: number, month: number, day: number } | number
 
 export type Weekday = {
-  short: string
+  short?: string
   name: string
 }
 
