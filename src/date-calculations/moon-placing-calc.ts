@@ -65,7 +65,7 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
     const singleMoonDrawData: { index: number, color: string, colorBg: string, positions: MoonDrawPosition[] } = {
       index,
       color: moon.color ?? 'currentColor',
-      colorBg: moon.colorBg ?? 'currentColor',
+      colorBg: moon.colorBg ?? 'black',
       positions: []
     }
     moonDrawData.moons.push(singleMoonDrawData)
