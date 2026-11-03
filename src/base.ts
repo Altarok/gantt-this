@@ -6,11 +6,11 @@ import BasesContext from './model/bases-context'
 import {debug} from './util/debug'
 
 /*
- * WNM-#v2: change to 'gantt-this-render'
+ * WNM-#v2: change to 'gantt-this-view'
  * Sadly, this is a breaking change for users!
  * They'd have to manually change the base file.
  */
-export const GanttBaseViewExampleName = 'example-render'
+export const GanttBaseViewExampleName = 'example-view'
 
 export class GanttThisBasesView extends BasesView {
   readonly type = GanttBaseViewExampleName
@@ -23,7 +23,7 @@ export class GanttThisBasesView extends BasesView {
               readonly controller: QueryController,
               parentEl: HTMLElement) {
     super(controller)
-    this.containerEl = parentEl.createDiv('bases-example-render-container')
+    this.containerEl = parentEl.createDiv('bases-example-view-container')
     this.basesCtx = new BasesContext(this.plugin, this)
   }
 

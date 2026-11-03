@@ -1,4 +1,3 @@
-// import {createSvg} from '../render/svg-drawer-util'
 import {GanttChartView} from '../view/gantt-chart-view'
 import {Css} from '../const/constants'
 

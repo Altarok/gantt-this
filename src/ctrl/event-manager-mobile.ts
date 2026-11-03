@@ -27,7 +27,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   }
 
   // protected getScrollableContainer(): HTMLElement | null {
-  //   return this.engine.render.container.parentElement
+  //   return this.engine.view.container.parentElement
   // }
 
   public attachListeners(svgEl: HTMLElement, activeWindow: Window) {

@@ -15,7 +15,7 @@ const zoomIn = 1.25
  * Binds click event listeners and interactive reactions to the Gantt chart toolbar buttons.
  *
  * @param chartCtx - The current chart context and configuration.
- * @param toolbar - The toolbar render containing interactive UI elements.
+ * @param toolbar - The toolbar view containing interactive UI elements.
  * @param renderEngine - The Gantt render engine handling visual updates, panning, and zooming.
  * @param refreshChartCallback - Callback function triggered to reload or refresh the chart.
  */

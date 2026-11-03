@@ -36,7 +36,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   // protected getScrollableContainer(): HTMLElement | null {
   //   const isPopout = this.activeWindow?.document.body.classList.contains('is-popout-window')
   //   return isPopout ? this.engine.render.chartContainer
-  //     : this.engine.render.container.parentElement
+  //     : this.engine.view.container.parentElement
   // }
 
   public attachListeners(svgEl: HTMLElement, activeWindow: Window) {

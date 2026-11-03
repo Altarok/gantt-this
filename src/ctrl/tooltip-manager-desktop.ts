@@ -267,7 +267,7 @@ export default class TooltipManager implements HoverParent {
       this.chartView.lowerHoverLayer.appendChild(upper)
       this.chartView.dynamicCalendarLayer.appendChild(lower)
       /*
-       * TODO add calendar hover layer to be able to draw in the render
+       * TODO add calendar hover layer to be able to draw in the view
        */
       // if (svg.firstChild) {
       //   svg.insertBefore(upper, svg.firstChild)

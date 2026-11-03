@@ -62,7 +62,7 @@ export class ToolbarView implements Destroyable {
       this.panLeftButton = createButton(g2, 'chevron-left', 'Pan left')
       this.zoomOutButton = createButton(g2, 'zoom-out', 'Zoom out')
     }
-    this.resetZoomAndPanButton = createButton(g2, CustomIcons.resetZoom, 'Reset render')
+    this.resetZoomAndPanButton = createButton(g2, CustomIcons.resetZoom, 'Reset view')
     if (settings.showPanAndZoomButtonsInToolbar) {
       this.zoomInButton = createButton(g2, 'zoom-in', 'Zoom in')
       this.panRightButton = createButton(g2, 'chevron-right', 'Pan right')

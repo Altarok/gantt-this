@@ -14,7 +14,7 @@ const MIN_ICON_SPACING_PX = 20
  * @param endDaysValue - End day of the current viewport.
  * @param effectiveStartDay - Effective start day including buffer bounds.
  * @param effectiveEndDay - Effective end day including buffer bounds.
- * @param renderWidth - Total width of the render area in pixels.
+ * @param renderWidth - Total width of the area in pixels.
  */
 export function calculateMoonPositions(engine: GanttRenderEngine,
                                        calendarConfig: CalendarConfig,
