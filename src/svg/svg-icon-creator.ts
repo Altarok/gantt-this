@@ -85,9 +85,9 @@ export function generateManualMoonSvg(phaseCount: number, step: number, colorFg:
     // rightHalfCircle = `A ${11 - 11 * (step / phaseCount)} 11 0 0 1 12 1`
 
     if (step <= halfPhase + quarterPhase) {
-      rightHalfCircle = `A ${11 - 11 * ((step-halfPhase) / quarterPhase)} 11 0 0 0 12 1`
+      rightHalfCircle = `A ${11 - 11 * ((step - halfPhase) / quarterPhase)} 11 0 0 0 12 1`
     } else {
-      rightHalfCircle = `A ${11 - 11 * ((step-halfPhase) / quarterPhase)} 11 0 0 1 12 1`
+      rightHalfCircle = `A ${11 - 11 * ((step - halfPhase) / quarterPhase)} 11 0 0 1 12 1`
     }
 
 
@@ -102,7 +102,7 @@ export function generateManualMoonSvg(phaseCount: number, step: number, colorFg:
   }
 
   const manualSvg =
-    `<svg xmlns="${svgUrl}" width="24" height="24" viewBox="0 0 24 24" fill="none" class="gt-moon-phase-manual-icons"><circle cx="12" cy="12" r="12" fill="${colorBg}" stroke="${colorFg}"/>${path}</svg>`
+    `<svg xmlns="${svgUrl}" width="24" height="24" viewBox="0 0 24 24" fill="none" class="gt-moon-phase-manual-icons">${circle}${path}</svg>`
   return sanitizeHTMLToDom(manualSvg)
 }
 
