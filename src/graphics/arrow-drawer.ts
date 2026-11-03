@@ -1,5 +1,5 @@
 // import {createSvg} from '../render/svg-drawer-util'
-import {GanttChartView} from '../views/gantt-chart-view'
+import {GanttChartView} from '../view/gantt-chart-view'
 import {Css} from '../const/constants'
 
 const diff = 2

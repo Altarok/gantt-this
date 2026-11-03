@@ -9,7 +9,7 @@ import {CalendarConfig} from '../types/calendar-types'
 import {SvgDrawerUtil} from '../render/svg-drawer-util'
 import {GanttError} from './gantt-error'
 import {ChartDiagnostics, ErrorId} from '../const/error-types'
-import {ToolbarView} from '../views/toolbar-view'
+import {ToolbarView} from '../view/toolbar-view'
 
 /**
  * Each chart has 1 of these
