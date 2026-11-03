@@ -49,17 +49,21 @@ export function generateManualMoonSvg(phaseCount: number, step: number, colorFg:
 
   let leftHalfCircle: string
   let rightHalfCircle: string
-  let path: string = ''
+  let circle = `<circle cx="12" cy="12" r="12" fill="${colorBg}" stroke="${colorFg}"/>`
+  let path = ''
 
   const halfPhase = phaseCount / 2
   const quarterPhase = phaseCount / 4
 
   if (step === 0) {
 
-    /* new moon -> no inner circle */
+    /* new moon -> outer circle */
+    circle = `<circle cx="12" cy="12" r="12" fill="none" stroke="${colorFg}"/>`
     path = ''
 
   } else if (step < halfPhase) {
+
+    circle = ''
 
     // Zunehmende Sichel: Waxing crescent
     /* Waxing crescent -> full right outer, semi full right inner circle */

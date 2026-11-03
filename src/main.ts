@@ -9,7 +9,7 @@ import {Consts} from './const/constants'
 import {ChartManager} from './ctrl/gantt-chart-manager'
 import {GanttBaseViewExampleName, GanttThisBasesView} from './base'
 import {Commands} from './commands/commands'
-import {ManualSvg} from './view/manual-svg-icons'
+import {ManualSvg} from './svg/svg-icon-creator'
 import {ChartLifecycleComponent} from './ctrl/codeblock-chart-updater'
 
 export default class FantasyGanttPlugin extends Plugin {

@@ -1,4 +1,4 @@
-import {generateManualMoonSvg} from './manual-svg-icons'
+import {generateManualMoonSvg} from '../svg/svg-icon-creator'
 
 export class MoonIconCache {
   private cache = new Map<string, DocumentFragment>()
@@ -9,7 +9,6 @@ export class MoonIconCache {
 
   private getCacheKey(phaseCount: number, step: number, colorFg: string, colorBg: string): string {
     const normalizedStep = ((step % phaseCount) + phaseCount) % phaseCount
-    if (normalizedStep === 0) return '1:0'
 
     const divisor = this.groesterGemeinsamerTeiler(normalizedStep, phaseCount)
     const reducedStep = normalizedStep / divisor

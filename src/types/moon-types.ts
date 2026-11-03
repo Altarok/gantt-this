@@ -1,12 +1,3 @@
-// /**
-//  * Moon phase index.
-//  * 0 - new moon
-//  * 1 - first quarter
-//  * 2 - full moon
-//  * 3 - third Quarter
-//  */
-// export type MoonPhase = 0 | 1 | 2 | 3
-
 export type Moon = {
   /** New moon gets drawn here */
   offset: number

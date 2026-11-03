@@ -1,5 +1,5 @@
 import {Css} from '../const/constants'
-import {ManualSvg} from '../view/manual-svg-icons'
+import {ManualSvg} from '../svg/svg-icon-creator'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 import {debug} from '../util/debug'

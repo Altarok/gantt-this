@@ -77,25 +77,20 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
       if (x >= 0 && x <= renderWidth) singleMoonDrawData.positions.push({xPos: x, step, phase})
     }
 
-    // const phaseOffsets = showQuarterPhases
-    //   ? [{progress: 0, phase: 0}, {progress: 0.25, phase: 1}, {progress: 0.5, phase: 2}, {progress: 0.75, phase: 3}]
-    //   : [{progress: 0, phase: 0}, {progress: 0.5, phase: 2}]
-
-
-    let lastExactDay = -Infinity
+    let lastXPos = -Infinity
 
     /* Iterate through all lunar cycles falling within the visible render range */
     for (let k = minK; k <= maxK; k++) {
       /* Iterate through all lunar cycles falling within 2 new moons */
-      // for (const {progress, phase} of phaseOffsets) {
       for (let step = 0; step < phases; step++) {
         const progress = step / phases
         const exactDay = (k + progress) * cycle + offset
 
-        // if (exactDay - lastExactDay > distanceBetweenTwoPhases) {
-          renderPhaseIfVisible(engine.getXPosition(exactDay), exactDay, step, phases)
-          lastExactDay = exactDay
-        // }
+        const xPos = engine.getXPosition(exactDay)
+        if (xPos - lastXPos > distanceBetweenTwoPhases) {
+          renderPhaseIfVisible(xPos, exactDay, step, phases)
+          lastXPos = xPos
+        }
       }
     }
 

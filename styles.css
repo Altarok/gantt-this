@@ -565,7 +565,7 @@ body.is-popout-window svg.gt-svg-canvas {
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.8;
+  /* opacity: 0.8; */
 }
 
 /* Vertical end-cap ticks at startDay and endDay */
