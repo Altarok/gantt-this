@@ -226,7 +226,7 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
   const displayedYear: { year: number, sign: '-' | '' } = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
 
   let weekdayStr: string | undefined = undefined
-  if (calConfig.weekdays) {
+  if (!hideDays && calConfig.weekdays) {
     const totalDays = absDays - calConfig.offsetToDayZero - calConfig.weekdays?.offset - 1 /* -1 for human to array shift */
     const dayCount = calConfig.weekdays.dayCount
     const dayIndex = ((totalDays % dayCount) + dayCount) % dayCount
