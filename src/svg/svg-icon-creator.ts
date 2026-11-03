@@ -36,11 +36,6 @@ const groupCrossedButtonIcon = `${svgBase}
   <rect width="7" height="5" x="10" y="12" rx="1" />
   <path d="M1 1 24 24" /></svg>`
 
-// const moonPhase0 = `${svgBase}<circle cx="12" cy="12" r="9" class="${Css.axis.moonUnlit}"/></svg>`
-// const moonPhase1 = `${svgBase}<path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="${Css.axis.moonUnlit}"/><path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="${Css.axis.moonFull}"/><circle cx="12" cy="12" r="9"/></svg>`
-// const moonPhase2 = `${svgBase}<circle cx="12" cy="12" r="9" class="${Css.axis.moonFull}"/></svg>`
-// const moonPhase3 = `${svgBase}<path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="${Css.axis.moonUnlit}"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="${Css.axis.moonFull}"/><circle cx="12" cy="12" r="9"/></svg>`
-
 /**
  * Dynamically generates a custom SVG moon phase icon based on phase progression.
  * Use https://www.svgviewer.dev/ for manual testing.
@@ -161,10 +156,6 @@ function registerCustomIcons() {
 
 export const ManualSvg = {
   addManualSvgsToObsidianCache: registerCustomIcons,
-  // newMoon: sanitizeHTMLToDom(moonPhase0), // 0/4 - New Moon (Outline circle)
-  // crescentHalfMoon: sanitizeHTMLToDom(moonPhase1), // 1/4 - First Quarter / Waxing (Right half filled)
-  // fullMoon: sanitizeHTMLToDom(moonPhase2), // 2/4 - Full Moon (Solid filled circle)
-  // waningHalfMoon: sanitizeHTMLToDom(moonPhase3), // 3/4 - Third Quarter / Waning (Left half filled)
   addArrowTipAsSvgDef: appendArrowMarkerDefinition,
 }
 

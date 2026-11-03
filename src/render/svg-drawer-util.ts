@@ -388,14 +388,14 @@ export class SvgDrawerUtil {
   /**
    * Renders a moon phase SVG icon at the specified center coordinates (cx, cy).
    *
-   * @param cx Center X position (usually xPos of the tick)
-   * @param step
-   * @param phase Phase index (0 to 4)
-   * @param color
-   * @param moonIndex
-   * @param moonCount
+   * @param cx Center X position
+   * @param step Step in phase
+   * @param phase Phase count between two new moons (including 1 of both)
+   * @param moonIndex Index of the current moon
+   * @param moonCount Total number of moons for the related calendar. Used to shrink moons accordingly.
    * @param svgContainer The SVG parent group element (e.g. ticksG or individualAxisG)
-   * @param colorBg
+   * @param colorFg Foreground color
+   * @param colorBg Background color
    */
   drawMoonPhase(cx: number,
                 step: number,
@@ -403,24 +403,24 @@ export class SvgDrawerUtil {
                 moonIndex: number,
                 moonCount: number,
                 svgContainer: SVGElement,
-                color: string,
+                colorFg: string,
                 colorBg: string): void {
     this.moonIconCache ??= new MoonIconCache()
 
-    const innerContent: DocumentFragment = this.moonIconCache.getMoonIcon(phase, step, color, colorBg)
+    const innerContent: DocumentFragment = this.moonIconCache.getMoonIcon(phase, step, colorFg, colorBg)
     if (!innerContent) return
 
     const iconSize = Math.max(19 - moonCount, 12)
     const halfSize = iconSize / 2
     const x = cx - halfSize
     const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
-    const y = 0 - halfSize + yOffset
+    const y = -halfSize + yOffset
 
     const g = createSvg('svg', Css.axis.moonPhases,
       {width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y}
     )
 
-    if (color) g.style.color = color
+    if (colorFg) g.style.color = colorFg
 
     g.appendChild(innerContent.cloneNode(true)) // do not use g.innerHTML = innerContent
     svgContainer.appendChild(g)
