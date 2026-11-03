@@ -65,12 +65,7 @@ export const Css = {
     /** Minor tick of the scale */
     tickMinor: 'gt-axis-tick-minor',
     /** SVG icon for moon phases */
-    moonIcon: 'gt-moon-phase-icon',
-    /** Illuminated part of the moon phase */
-    moonFull: 'gt-moon-fill',
-    /** Unlit part of the moon phase */
-    moonUnlit: 'gt-moon-unlit',
-    moonManual: 'gt-moon-phase-manual-icons',
+    moonPhases: 'gt-moon-phases',
     /** End-cap marker at start and end days */
     capMarker: 'gt-calendar-cap-marker', /* todo rename ? */
     /** Reign epoch title over the axis */

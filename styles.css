@@ -537,35 +537,12 @@ body.is-popout-window svg.gt-svg-canvas {
 
 /* ----------- moons ----------- */
 
-/* Inherit text color from Obsidian theme & Smooth hover or visual transition if needed */
-
-.gt-moon-phase-icon {
+.gt-moon-phases {
   overflow: visible;
-  fill: none;
-  stroke: currentcolor;
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
   opacity: 0.8;
-}
-
-.gt-moon-phase-icon .gt-moon-fill {
-  fill: currentcolor;
-  stroke: none;
-}
-
-.gt-moon-phase-icon .gt-moon-unlit {
-  fill: var(--background-primary);
-}
-
-.gt-moon-phase-manual-icons {
-  overflow: visible;
-  fill: none;
-  stroke: currentcolor;
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
-  /* opacity: 0.8; */
 }
 
 /* Vertical end-cap ticks at startDay and endDay */
