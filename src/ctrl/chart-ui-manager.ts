@@ -1,5 +1,5 @@
 import {GanttItem} from '../types/settings-types'
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../views/gantt-chart-view'
 import {ToolbarView} from '../views/toolbar-view'
@@ -12,7 +12,7 @@ export class ChartUiManager {
               private readonly container: HTMLElement) {
   }
 
-  /**  Instantiates the main Gantt chart view container. */
+  /**  Instantiates the main Gantt chart render container. */
   public createChartView(chartModel: GanttChartModel): GanttChartView {
     debug.log('<> Create new GanttChartView')
     return new GanttChartView(this.chartCtx, this.container, chartModel)
@@ -24,7 +24,7 @@ export class ChartUiManager {
     return new GanttRenderEngine(this.chartCtx, chartView, data, chartModel)
   }
 
-  /** Instantiates the toolbar view for the chart. */
+  /** Instantiates the toolbar render for the chart. */
   public createToolbarView(chartModel: GanttChartModel, chartView: GanttChartView, refreshCallback: (r: RedrawOption) => Promise<void>): ToolbarView {
     debug.log('<> Create new ToolbarView')
     return new ToolbarView(this.chartCtx, chartView, chartModel, refreshCallback)

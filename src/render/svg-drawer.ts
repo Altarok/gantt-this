@@ -352,7 +352,7 @@ export class GanttRenderEngine {
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
 
-      // Skip rendering, if current view is completely outside of calendar's lifetime
+      // Skip rendering, if current render is completely outside of calendar's lifetime
       if (endDaysValue < calStart || startDaysValue > calEnd) return
 
       // Clamp rendering bounds to calendar lifetime
@@ -475,8 +475,8 @@ export class GanttRenderEngine {
   }
 
   /**
-   * Shift view left or right.
-   * @param percentage - positive number shifts view right, negative number shifts view left
+   * Shift render left or right.
+   * @param percentage - positive number shifts render right, negative number shifts render left
    */
   panRelative(percentage: number) {
     if (this.eventManager?.isDragging) return /* Triggered by buttons */
@@ -549,7 +549,7 @@ export class GanttRenderEngine {
       return
     }
 
-    /* Default: Full view reset */
+    /* Default: Full render reset */
     this.viewModel.resetPanAndZoom()
   }
 
@@ -612,7 +612,7 @@ export class GanttRenderEngine {
   //
   // findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
   //   const selector = `[data-id="${id}"]`
-  //   return this.view.eventLayer.querySelector<T>(selector)
+  //   return this.render.eventLayer.querySelector<T>(selector)
   // }
 
   filterActiveEventData(): GanttItem[] {

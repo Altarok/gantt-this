@@ -1,10 +1,10 @@
 import {HoverParent, HoverPopover} from 'obsidian'
 import {EventId, GanttItem, isTimespan} from '../types/settings-types'
 import {CalendarConfig} from '../types/calendar-types'
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttConnectorDrawer} from '../graphics/arrow-drawer'
 import {GanttChartView} from '../views/gantt-chart-view'
-import {createSvg} from '../view/svg-drawer-util'
+import {createSvg} from '../render/svg-drawer-util'
 import {Css} from '../const/constants'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {ChartContext} from '../model/chart-context'
@@ -267,7 +267,7 @@ export default class TooltipManager implements HoverParent {
       this.chartView.lowerHoverLayer.appendChild(upper)
       this.chartView.dynamicCalendarLayer.appendChild(lower)
       /*
-       * TODO add calendar hover layer to be able to draw in the view
+       * TODO add calendar hover layer to be able to draw in the render
        */
       // if (svg.firstChild) {
       //   svg.insertBefore(upper, svg.firstChild)

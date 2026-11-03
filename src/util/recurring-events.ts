@@ -1,6 +1,6 @@
 import {GanttItem, RepeatRule, Step} from '../types/settings-types'
 import {CalendarConfig} from '../types/calendar-types'
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'
 import {ChartContext} from '../model/chart-context'
 import {GanttError} from '../model/gantt-error'

@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest'
-import {GanttRenderEngine} from '../src/view/svg-drawer'
+import {GanttRenderEngine} from '../src/render/svg-drawer'
 import {CalendarConfig, RuleBasedCalendarConfig} from '../src/types/calendar-types'
 import {calculateMoonPositions} from '../src/date-calculations/moon-placing-calc'
 import {MockRuleBasedCalendarConfig} from './test-configs'

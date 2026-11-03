@@ -1,5 +1,5 @@
 import {ControlKey} from '../types/settings-types'
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttEventManagerBase} from './event-manager'
 import TooltipManager from './tooltip-manager-desktop'
 import {ChartContext} from '../model/chart-context'
@@ -35,8 +35,8 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
 
   // protected getScrollableContainer(): HTMLElement | null {
   //   const isPopout = this.activeWindow?.document.body.classList.contains('is-popout-window')
-  //   return isPopout ? this.engine.view.chartContainer
-  //     : this.engine.view.container.parentElement
+  //   return isPopout ? this.engine.render.chartContainer
+  //     : this.engine.render.container.parentElement
   // }
 
   public attachListeners(svgEl: HTMLElement, activeWindow: Window) {

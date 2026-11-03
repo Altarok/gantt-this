@@ -1,4 +1,4 @@
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {ChartContext} from '../model/chart-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {debug} from "../util/debug";

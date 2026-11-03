@@ -1,4 +1,4 @@
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {CalendarConfig} from '../types/calendar-types'
 import {MoonDrawData, MoonDrawPosition} from '../types/moon-types'
 

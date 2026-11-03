@@ -34,7 +34,7 @@ export class RedrawOption {
    */
   static readonly DataReload = new RedrawOption(false, ['reloadData', 'redraw'])
 
-  /** Manually triggered. Only resets view (zoom and pan values) to default. */
+  /** Manually triggered. Only resets render (zoom and pan values) to default. */
   static readonly ResetView = new RedrawOption(true, ['resetZoomAndPan'])
 
   /** Manually triggered. Changes frame size. */

@@ -1,4 +1,4 @@
-import {GanttRenderEngine} from '../view/svg-drawer'
+import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttEventManagerBase} from './event-manager'
 import {ChartContext} from '../model/chart-context'
 
@@ -27,7 +27,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   }
 
   // protected getScrollableContainer(): HTMLElement | null {
-  //   return this.engine.view.container.parentElement
+  //   return this.engine.render.container.parentElement
   // }
 
   public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
