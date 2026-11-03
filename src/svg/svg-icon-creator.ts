@@ -41,32 +41,33 @@ const moonPhase1 = `${svgBase}<path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class=
 const moonPhase2 = `${svgBase}<circle cx="12" cy="12" r="9" class="${Css.axis.moonFull}"/></svg>`
 const moonPhase3 = `${svgBase}<path d="M 12 3 A 9 9 0 0 1 12 21 L 12 3 Z" class="${Css.axis.moonUnlit}"/><path d="M 12 3 A 9 9 0 0 0 12 21 L 12 3 Z" class="${Css.axis.moonFull}"/><circle cx="12" cy="12" r="9"/></svg>`
 
-
 /**
- * https://www.svgviewer.dev/
+ * Used https://www.svgviewer.dev/ for manual testing
  */
 export function generateManualMoonSvg(phaseCount: number, step: number, colorFg: string, colorBg: string): DocumentFragment {
 
   let leftHalfCircle: string
   let rightHalfCircle: string
-  let circle = `<circle cx="12" cy="12" r="12" fill="${colorBg}" stroke="${colorFg}"/>`
-  let path = ''
+  let bgSvg = ''
+  let fgSvg = ''
 
   const halfPhase = phaseCount / 2
   const quarterPhase = phaseCount / 4
 
   if (step === 0) {
 
-    /* new moon -> outer circle */
-    circle = `<circle cx="12" cy="12" r="12" fill="none" stroke="${colorFg}"/>`
-    path = ''
+    /* New Moon -> thin outer circle in fg color, black in center */
+    bgSvg = `<circle cx="12" cy="12" r="12" fill="none" stroke="${colorFg}"/>`
+    fgSvg = `<circle cx="12" cy="12" r="11" fill="black" stroke="none"/>`
 
   } else if (step < halfPhase) {
 
-    circle = ''
+    bgSvg = `<circle cx="12" cy="12" r="11" fill="${colorBg}" stroke="${colorBg}"/>`
 
-    // Zunehmende Sichel: Waxing crescent
-    /* Waxing crescent -> full right outer, semi full right inner circle */
+    /*
+     * Waxing (growing) crescent
+     * -> full outer circle in bg color, partial inner circle in fg color
+     */
     leftHalfCircle = `A 11 11 0 0 1 12 23`
 
     if (step <= quarterPhase) {
@@ -75,34 +76,34 @@ export function generateManualMoonSvg(phaseCount: number, step: number, colorFg:
       rightHalfCircle = `A ${11 - 11 * (step / quarterPhase)} 11 0 0 1 12 1`
     }
 
-    path = `<path d="M 12 1 ${leftHalfCircle} ${rightHalfCircle} Z" fill="${colorFg}" />`
+    fgSvg = `<path d="M 12 1 ${leftHalfCircle} ${rightHalfCircle} Z" fill="${colorFg}" />`
 
   } else if (step > halfPhase) {
 
-    // Abnehmende Sichel: Waning crescent
-    /* Waning crescent -> full left outer, semi full left inner circle */
-    leftHalfCircle = `A 11 11 0 0 0 12 23`
-    // rightHalfCircle = `A ${11 - 11 * (step / phaseCount)} 11 0 0 1 12 1`
+    bgSvg = `<circle cx="12" cy="12" r="11" fill="${colorBg}" stroke="${colorBg}"/>`
 
+    /*
+     * Waning (shrinking) crescent
+     * -> full outer circle in bg color, partial inner circle in fg color
+     */
+    leftHalfCircle = `A 11 11 0 0 0 12 23`
     if (step <= halfPhase + quarterPhase) {
       rightHalfCircle = `A ${11 - 11 * ((step - halfPhase) / quarterPhase)} 11 0 0 0 12 1`
     } else {
       rightHalfCircle = `A ${11 - 11 * ((step - halfPhase) / quarterPhase)} 11 0 0 1 12 1`
     }
 
+    fgSvg = `<path d="M 12 1 ${leftHalfCircle} ${rightHalfCircle} Z" fill="${colorFg}" />`
 
-    path = `<path d="M 12 1 ${leftHalfCircle} ${rightHalfCircle} Z" fill="${colorFg}" />`
   } else if (step === halfPhase) {
 
     /* full moon -> full inner circle */
-    leftHalfCircle = `A 11 11 0 0 1 12 23`
-    rightHalfCircle = `A 11 11 0 0 1 12 1`
-
-    path = `<path d="M 12 1 ${leftHalfCircle} ${rightHalfCircle} Z" fill="${colorFg}" />`
+    bgSvg = `<circle cx="12" cy="12" r="12" fill="${colorFg}" stroke="${colorFg}"/>`
+    fgSvg = ''
   }
 
   const manualSvg =
-    `<svg xmlns="${svgUrl}" width="24" height="24" viewBox="0 0 24 24" fill="none" class="gt-moon-phase-manual-icons">${circle}${path}</svg>`
+    `<svg xmlns="${svgUrl}" width="24" height="24" viewBox="0 0 24 24" fill="none" class="gt-moon-phase-manual-icons">${bgSvg}${fgSvg}</svg>`
   return sanitizeHTMLToDom(manualSvg)
 }
 
