@@ -4,16 +4,9 @@ import {Css} from 'const/constants'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
 import {MoonDrawData} from '../types/moon-types'
-import {MoonIconCache} from './manual-moon-icon-cache'
+import {MoonIconCache} from '../svg/svg-moon-icon-cache'
 
 const textLeftPadding = 3
-
-// const moonSvgs: Record<MoonPhase, DocumentFragment> = {
-//   0: ManualSvg.newMoon,
-//   1: ManualSvg.crescentHalfMoon,
-//   2: ManualSvg.fullMoon,
-//   3: ManualSvg.waningHalfMoon
-// }
 
 function setAttributes(el: Element, attrs: Record<string, string | number>): void {
   for (const key in attrs) {
@@ -423,9 +416,9 @@ export class SvgDrawerUtil {
     const yOffset = moonCount > 1 ? 14 * (moonIndex / (moonCount - 1)) : 0
     const y = 0 - halfSize + yOffset
 
-    const g = createSvg('svg', Css.axis.moonIcon, {
-      width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y
-    })
+    const g = createSvg('svg', Css.axis.moonPhases,
+      {width: iconSize, height: iconSize, viewBox: `0 0 24 24`, x, y}
+    )
 
     if (color) g.style.color = color
 

@@ -1,4 +1,4 @@
-import {generateManualMoonSvg} from '../svg/svg-icon-creator'
+import {generateManualMoonSvg} from './svg-icon-creator'
 
 export class MoonIconCache {
   private cache = new Map<string, DocumentFragment>()
