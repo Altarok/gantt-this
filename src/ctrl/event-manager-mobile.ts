@@ -22,26 +22,31 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     this.boundSvgTouchStart = this.handleTouchStart.bind(this)
     this.boundSvgClick = this.handleClick.bind(this)
 
-    if (this.svg && this.activeWindow)
-      this.attachListeners(this.svg as unknown as HTMLElement, this.activeWindow)
+    this.attachListeners()
   }
 
   // protected getScrollableContainer(): HTMLElement | null {
   //   return this.engine.view.container.parentElement
   // }
 
-  public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
+  public attachListeners() {
 
     const plugin = this.chartCtx.plugin
 
-    /* Placed on window for events to be able to end outside the chart */
-    plugin.registerDomEvent(activeWindow, 'touchmove', this.boundWindowTouchMove, {passive: false})
-    plugin.registerDomEvent(activeWindow, 'touchend', this.boundWindowTouchEnd)
-    plugin.registerDomEvent(activeWindow, 'touchcancel', this.boundWindowTouchEnd)
+    if (this.activeWindow) {
+      /* Placed on window for events to be able to end outside the chart */
+      plugin.registerDomEvent(this.activeWindow, 'touchmove', this.boundWindowTouchMove, {passive: false})
+      plugin.registerDomEvent(this.activeWindow, 'touchend', this.boundWindowTouchEnd)
+      plugin.registerDomEvent(this.activeWindow, 'touchcancel', this.boundWindowTouchEnd)
+    }
 
-    /* Placed on chart for events to start inside the chart */
-    plugin.registerDomEvent(svgEl, 'touchstart', this.boundSvgTouchStart, {passive: false})
-    plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
+    if (this.eventSvg) {
+      const svgEl: HTMLElement = this.eventSvg as unknown as HTMLElement
+
+      /* Placed on chart for events to start inside the chart */
+      plugin.registerDomEvent(svgEl, 'touchstart', this.boundSvgTouchStart, {passive: false})
+      plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
+    }
   }
 
   detachListeners() {

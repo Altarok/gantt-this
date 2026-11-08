@@ -39,7 +39,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   //     : this.engine.view.container.parentElement
   // }
 
-  public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
+  protected attachListeners(svgEl: HTMLElement, activeWindow: Window) {
 
     const plugin = this.chartCtx.plugin
 
@@ -55,7 +55,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
   }
 
-  detachListeners() {
+  protected detachListeners() {
     this.tooltipManager.destroy()
 
     if (this.activeWindow) {

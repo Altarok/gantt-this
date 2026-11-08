@@ -32,7 +32,8 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected rafId: number | undefined = undefined
 
   protected readonly viewModel: GanttChartModel
-  protected svg: SVGElement | null
+  protected eventSvg: SVGElement | null
+  protected calendarSvg: SVGElement | null
   protected activeWindow: Window | null
   /**
    * Pointer to HTML element owning the scroll bar.
@@ -44,13 +45,14 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
                         protected readonly engine: GanttRenderEngine,
                         isMobile: boolean) {
     this.viewModel = engine.viewModel
-    this.svg = this.engine.view.svg
-    this.activeWindow = this.svg.ownerDocument.defaultView ?? window
+    this.eventSvg = this.engine.view.eventSvg
+    this.calendarSvg = this.engine.view.calendarSvg
+    this.activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
     this.scrollableContainer = this.engine.view.getScrollableContainer(isMobile)
   }
 
   /** Attaches or re-binds SVG event listeners */
-  protected abstract attachListeners(svg: HTMLElement, activeWindow: Window): void
+  protected abstract attachListeners(): void
 
   protected abstract detachListeners(): void
 

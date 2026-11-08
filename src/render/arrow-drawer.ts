@@ -9,7 +9,7 @@ export class GanttConnectorDrawer {
   }
 
   drawCurvedArrow(fromEl: SVGElement | HTMLElement, toEl: SVGElement | HTMLElement): void {
-    const svgRect = this.view.svg.getBoundingClientRect()
+    const svgRect = this.view.eventSvg.getBoundingClientRect()
     const fromRect = fromEl.getBoundingClientRect()
     const toRect = toEl.getBoundingClientRect()
 

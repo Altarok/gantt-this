@@ -5,13 +5,20 @@ import {ChartContext} from '../model/chart-context'
 import {debug} from '../util/debug'
 
 export class GanttChartView {
-  mainWrapper: HTMLDivElement
   chartContainer: HTMLDivElement
-  toolbarContainer: HTMLDivElement
+  /** Child of chartContainer, for events */
+  readonly chartEventContainer: HTMLDivElement
+  /** Child of chartContainer, for events */
+  readonly chartCalendarContainer: HTMLDivElement
+
+
+  readonly toolbarContainer: HTMLDivElement
   minimizedToolbarContainer: HTMLDivElement
 
-  svg!: SVGElement
-  /** Group background colors + group badges   */
+  // svg!: SVGElement
+  calendarSvg!: SVGElement
+  eventSvg!: SVGElement
+  /** Group background colors + group badges */
   private backgroundLayer!: SVGElement
   /** Foreground. Everything else */
   private foregroundLayer!: SVGElement
@@ -48,17 +55,18 @@ export class GanttChartView {
 
     debug.log(`GanttChartView ** stickyCalAxes ${stickyCalAxes}, stickyToolbar ${stickyToolbar}, toolbarBelowChart ${toolbarBelowChart}`)
 
-    this.mainWrapper = container.createDiv({cls: Css.wrapper})
-
     if (toolbarBelowChart) {
-      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
-      this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
+      this.chartContainer = this.container.createDiv({cls: Css.chartContainer})
+      this.toolbarContainer = this.container.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = this.container.createDiv({cls: Css.toolbar.minimized})
     } else {
-      this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
-      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
+      this.toolbarContainer = this.container.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarContainer = this.container.createDiv({cls: Css.toolbar.minimized})
+      this.chartContainer = this.container.createDiv({cls: Css.chartContainer})
     }
+
+    this.chartEventContainer = this.chartContainer.createDiv() // TODO add class
+    this.chartCalendarContainer = this.chartContainer.createDiv() // TODO add class
 
     this.updateToolbarLayout()
 
@@ -66,24 +74,24 @@ export class GanttChartView {
     this.initScrollListener()
   }
 
-  public updateToolbarLayout() {
+  public updateToolbarLayout(): void {
     const toolbarBelowChart = this.chartCtx.settings.toolbarBelowChart
     if (toolbarBelowChart) {
-      this.mainWrapper.prepend(this.chartContainer)
+      this.container.prepend(this.chartContainer)
     } else {
-      this.mainWrapper.prepend(this.toolbarContainer, this.minimizedToolbarContainer)
+      this.container.prepend(this.toolbarContainer, this.minimizedToolbarContainer)
     }
 
     this.makeToolbarSticky(this.chartCtx.settings.stickyToolbar)
   }
 
   /** Clear chart, not toolbar, and re-fill it with life */
-  public redrawChart() {
+  public redrawChart(): void {
     this.chartContainer.empty()
     this.initiateChartContainerSubContainers()
   }
 
-  initiateChartContainerSubContainers() {
+  initiateChartContainerSubContainers(): void {
     /*
      * cursor: grab
      * display: block
@@ -91,16 +99,25 @@ export class GanttChartView {
      *
      * :active -> cursor: grabbing
      */
-    this.svg = this.chartContainer.createSvg('svg', {
+    // this.svg = this.chartContainer.createSvg('svg', {
+    //   cls: Css.svg.canvas,
+    //   attr: {height: this.viewModel.totalHeight.toString()}
+    // })
+    this.eventSvg = this.chartEventContainer.createSvg('svg', {
       cls: Css.svg.canvas,
-      attr: {height: this.viewModel.totalHeight.toString()}
+      attr: {height: this.viewModel.eventsAreaHeight.toString()}
     })
 
-    ManualSvg.addArrowTipAsSvgDef(this.svg)
+    this.calendarSvg = this.chartCalendarContainer.createSvg('svg', {
+      cls: Css.svg.canvas,
+      attr: {height: 'auto'}
+    })
 
-    this.backgroundLayer = this.svg.createSvg('g')
-    this.foregroundLayer = this.svg.createSvg('g')
-    const defs = this.svg.createSvg('defs')
+    ManualSvg.addArrowTipAsSvgDef(this.eventSvg)
+
+    this.backgroundLayer = this.eventSvg.createSvg('g')
+    this.foregroundLayer = this.eventSvg.createSvg('g')
+    const defs = this.eventSvg.createSvg('defs')
 
     /* Dedicated grid container behind bars and points */
     const clipPath = defs.createSvg('clipPath', {attr: {id: this.clipId}})
@@ -110,8 +127,8 @@ export class GanttChartView {
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': `url(#${this.clipId})`}})
 
-    this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
-    this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
+    this.dynamicCalendarLayer = this.calendarSvg.createSvg('g')
+    this.staticCalendarLayer = this.calendarSvg.createSvg('g')
 
     this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
@@ -120,11 +137,11 @@ export class GanttChartView {
     this.upperHoverLayer = this.dataLayer.createSvg('g')
   }
 
-  get clientWidth() {
+  get clientWidth(): number {
     return this.container.clientWidth
   }
 
-  clearEventLayer() {
+  clearEventLayer(): void {
     this.eraLayer.empty()
     this.repeaterEventLayer.empty()
     this.eventLayer.empty()
@@ -132,22 +149,22 @@ export class GanttChartView {
     this.clearHoverLayer()
   }
 
-  clearHoverLayer() {
+  clearHoverLayer(): void {
     this.lowerHoverLayer.empty()
     this.upperHoverLayer.empty()
   }
 
-  clearCalendarLayer(completeReset = false) {
+  clearCalendarLayer(completeReset = false): void {
     this.dynamicCalendarLayer.empty()
     if (completeReset) this.staticCalendarLayer.empty()
     this.gridLayer.empty()
   }
 
-  clearGroupBackground() {
+  clearGroupBackground(): void {
     this.backgroundLayer.empty()
   }
 
-  drawGroupBackground(name: string, yOffset: number, height: number, isEvenGroup: boolean) {
+  drawGroupBackground(name: string, yOffset: number, height: number, isEvenGroup: boolean): void {
 
     const groupG = this.backgroundLayer.createSvg('g')
     groupG.setAttribute('transform', `translate(0, ${yOffset})`)
@@ -172,7 +189,6 @@ export class GanttChartView {
 
   drawCalAxisBaseline(calGroup: SVGGElement, x1: number, x2: number, axisColor: string): void {
     calGroup.createSvg('line', {
-      // cls: Css.axis.baseline, // TODO does not even exist
       attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
     })
   }
@@ -223,14 +239,14 @@ export class GanttChartView {
     }
   }
 
-  setWidth(width: number) {
+  setWidth(width: number): void {
     this.clipRect.setAttribute('width', width.toString())
   }
 
   getScrollableContainer(isMobile: boolean): HTMLElement | null {
     if (isMobile) return this.container.parentElement
 
-    const activeWindow = this.svg.ownerDocument.defaultView ?? window
+    const activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
     const isPopout = activeWindow?.document.body.classList.contains('is-popout-window')
     return isPopout ? this.chartContainer : this.container.parentElement
   }
@@ -244,7 +260,7 @@ export class GanttChartView {
     return this.eventLayer.querySelector<T>(selector)
   }
 
-  makeToolbarSticky(sticky: boolean) {
+  makeToolbarSticky(sticky: boolean): void {
     if (sticky) {
       this.toolbarContainer.addClass('is-sticky')
       this.minimizedToolbarContainer.addClass('is-sticky')
@@ -254,11 +270,7 @@ export class GanttChartView {
     }
   }
 
-  private initScrollListener() {
-    /*
-     * TODO
-     */
-    // debugger
+  private initScrollListener(): void {
     // if (!this.chartCtx.settings.stickyCalAxes) return
     //
     // const scrollContainer = this.getScrollableContainer(false)
