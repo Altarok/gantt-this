@@ -1,7 +1,7 @@
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {ChartContext} from '../model/chart-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
-import {debug} from "../util/debug";
+import {debug} from '../util/debug'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
@@ -32,8 +32,8 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected rafId: number | undefined = undefined
 
   protected readonly viewModel: GanttChartModel
-  protected eventSvg: SVGElement | null
-  protected calendarSvg: SVGElement | null
+  protected chartContainer: HTMLDivElement | null
+  // protected calendarSvg: SVGElement | null
   protected activeWindow: Window | null
   /**
    * Pointer to HTML element owning the scroll bar.
@@ -45,9 +45,9 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
                         protected readonly engine: GanttRenderEngine,
                         isMobile: boolean) {
     this.viewModel = engine.viewModel
-    this.eventSvg = this.engine.view.eventSvg
-    this.calendarSvg = this.engine.view.calendarSvg
-    this.activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
+    this.chartContainer = this.engine.view.chartContainer
+    // this.calendarSvg = this.engine.view.calendarSvg
+    this.activeWindow = this.chartContainer.ownerDocument.defaultView ?? window
     this.scrollableContainer = this.engine.view.getScrollableContainer(isMobile)
   }
 

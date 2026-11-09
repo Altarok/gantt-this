@@ -40,12 +40,10 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       plugin.registerDomEvent(this.activeWindow, 'touchcancel', this.boundWindowTouchEnd)
     }
 
-    if (this.eventSvg) {
-      const svgEl: HTMLElement = this.eventSvg as unknown as HTMLElement
-
+    if (this.chartContainer) {
       /* Placed on chart for events to start inside the chart */
-      plugin.registerDomEvent(svgEl, 'touchstart', this.boundSvgTouchStart, {passive: false})
-      plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
+      plugin.registerDomEvent(this.chartContainer, 'touchstart', this.boundSvgTouchStart, {passive: false})
+      plugin.registerDomEvent(this.chartContainer, 'click', this.boundSvgClick)
     }
   }
 
@@ -57,10 +55,10 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       this.activeWindow = null
     }
 
-    if (this.svg) {
-      this.svg.removeEventListener('touchstart', this.boundSvgTouchStart)
-      this.svg.removeEventListener('click', this.boundSvgClick)
-      this.svg = null
+    if (this.chartContainer) {
+      this.chartContainer.removeEventListener('touchstart', this.boundSvgTouchStart)
+      this.chartContainer.removeEventListener('click', this.boundSvgClick)
+      this.chartContainer = null
     }
   }
 
@@ -112,7 +110,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   }
 
   private handlePinchZoom(e: TouchEvent) {
-    if (!this.svg || e.touches.length < 2 || this.pinchDistance === null) return
+    if (!this.chartContainer || e.touches.length < 2 || this.pinchDistance === null) return
 
     const t1 = e.touches[0]!
     const t2 = e.touches[1]!
@@ -120,7 +118,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
 
     if (currentDistance === 0) return
 
-    const rect = this.svg.getBoundingClientRect()
+    const rect = this.chartContainer.getBoundingClientRect()
     const touchMidX = (t1.clientX + t2.clientX) / 2 - rect.left - this.engine.viewModel.margin.left
 
     const frameFactor = currentDistance / this.pinchDistance

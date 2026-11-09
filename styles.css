@@ -33,6 +33,20 @@ body.is-popout-window .gt-main-container {
   padding: 0; /* Ensures zero internal space around the chart */
   margin: 0;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.gt-event-container {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+.gt-calendar-container {
+  width: 100%;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
 }
 
 /* OBSIDIAN API! */

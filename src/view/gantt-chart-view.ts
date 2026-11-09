@@ -9,15 +9,15 @@ export class GanttChartView {
   /** Child of chartContainer, for events */
   readonly chartEventContainer: HTMLDivElement
   /** Child of chartContainer, for events */
-  readonly chartCalendarContainer: HTMLDivElement
+  // readonly chartCalendarContainer: HTMLDivElement
 
 
   readonly toolbarContainer: HTMLDivElement
   minimizedToolbarContainer: HTMLDivElement
 
   // svg!: SVGElement
-  calendarSvg!: SVGElement
   eventSvg!: SVGElement
+  // calendarSvg!: SVGElement
   /** Group background colors + group badges */
   private backgroundLayer!: SVGElement
   /** Foreground. Everything else */
@@ -65,8 +65,8 @@ export class GanttChartView {
       this.chartContainer = this.container.createDiv({cls: Css.chartContainer})
     }
 
-    this.chartEventContainer = this.chartContainer.createDiv() // TODO add class
-    this.chartCalendarContainer = this.chartContainer.createDiv() // TODO add class
+    this.chartEventContainer = this.chartContainer.createDiv({cls: 'gt-event-container'}) // TODO add class
+    // this.chartCalendarContainer = this.chartContainer.createDiv({cls: 'gt-calendar-container'}) // TODO add class
 
     this.updateToolbarLayout()
 
@@ -108,10 +108,11 @@ export class GanttChartView {
       attr: {height: this.viewModel.eventsAreaHeight.toString()}
     })
 
-    this.calendarSvg = this.chartCalendarContainer.createSvg('svg', {
-      cls: Css.svg.canvas,
-      attr: {height: 'auto'}
-    })
+    // this.calendarSvg = this.chartCalendarContainer.createSvg('svg', {
+    //   cls: Css.svg.canvas
+    //   ,
+    //   attr: {height: '100'}
+    // })
 
     ManualSvg.addArrowTipAsSvgDef(this.eventSvg)
 
@@ -127,8 +128,12 @@ export class GanttChartView {
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': `url(#${this.clipId})`}})
 
-    this.dynamicCalendarLayer = this.calendarSvg.createSvg('g')
-    this.staticCalendarLayer = this.calendarSvg.createSvg('g')
+    // this.dynamicCalendarLayer = this.calendarSvg.createSvg('g')
+    // this.staticCalendarLayer = this.calendarSvg.createSvg('g')
+
+    this.dynamicCalendarLayer = this.eventSvg.createSvg('g')
+    this.staticCalendarLayer = this.eventSvg.createSvg('g')
+
 
     this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
@@ -246,7 +251,7 @@ export class GanttChartView {
   getScrollableContainer(isMobile: boolean): HTMLElement | null {
     if (isMobile) return this.container.parentElement
 
-    const activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
+    const activeWindow = this.chartContainer.ownerDocument.defaultView ?? window
     const isPopout = activeWindow?.document.body.classList.contains('is-popout-window')
     return isPopout ? this.chartContainer : this.container.parentElement
   }

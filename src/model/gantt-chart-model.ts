@@ -1,3 +1,4 @@
+// import {debug} from 'util/debug'
 import {Consts} from '../const/constants'
 import {GroupOrCalendarDrawerData} from '../types/settings-types'
 import {SettingsContext} from './settings-context'
@@ -131,6 +132,7 @@ export class GanttChartModel {
 
   calculateTotalHeight(currentEventAreaHeight: number) {
     this.totalHeight = currentEventAreaHeight + this.combinedAxesHeight + this.margin.bottom
+    // debug.info(`calculateTotalHeight <> ${this.totalHeight}`)
   }
 
   get totalDaysSpan() {

@@ -139,6 +139,8 @@ export class ChartManager {
   async renderGantt() {
     await this.prepareCalendarCache(true)
 
+    // debugger
+
     const chartModel = new GanttChartModel(this.settingsContext)
     const chartView = this.uiManager.createChartView(chartModel)
 

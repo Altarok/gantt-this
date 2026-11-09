@@ -8,14 +8,15 @@ export const debug = {
   trace,
 }
 
-const logger: Console | undefined = undefined // window.console
+const logger: Console | undefined = // undefined //
+  window.console
 
 function log(message: string): void {
-  if (isDebug) logger?.debug('[L] ', message)
+  if (isDebug) logger?.info('[L] ', message)
 }
 
 function warn(message: string): void {
-  if (isDebug) logger?.warn('[W] ', message)
+  if (isDebug) logger?.info('[W] ', message)
 }
 
 function info(message: string): void {
@@ -23,6 +24,6 @@ function info(message: string): void {
 }
 
 function trace(message: string): void {
-  if (isDebug) logger?.trace('[T] ', message)
+  if (isDebug) logger?.info('[T] ', message)
 }
 
