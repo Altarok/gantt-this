@@ -148,7 +148,7 @@ export class GanttRenderEngine {
 
   initEventListener(): void {
     if (this.eventManager) this.eventManager.destroy()
-    this.eventManager = createGanttEventManager(this.chartCtx, this)
+    this.eventManager = createGanttEventManager(this.chartCtx, this, this.svgDrawerUtil)
     this.svgDrawerUtil.setEventManager(this.eventManager)
   }
 

@@ -36,6 +36,9 @@ export class SvgDrawerUtil {
   private moonIconCache?: MoonIconCache // TODO #moons use this
 
   constructor(private readonly chartCtx: ChartContext,
+              /*
+               * FIXME use this!!
+               */
               private readonly view: GanttChartView) {
     this.shapeSize = chartCtx.settings.viewEventShapeHeight
     this.shapeRadius = this.shapeSize / 2

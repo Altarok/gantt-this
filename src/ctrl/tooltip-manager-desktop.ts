@@ -4,7 +4,7 @@ import {CalendarConfig} from '../types/calendar-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttConnectorDrawer} from '../render/arrow-drawer'
 import {GanttChartView} from '../view/gantt-chart-view'
-import {createSvg} from '../render/svg-drawer-util'
+import {createSvg, SvgDrawerUtil} from '../render/svg-drawer-util'
 import {Css} from '../const/constants'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {ChartContext} from '../model/chart-context'
@@ -25,7 +25,8 @@ export default class TooltipManager implements HoverParent {
   private readonly boundMouseOver: (evt: MouseEvent) => void
 
   constructor(private readonly chartCtx: ChartContext,
-              private readonly engine: GanttRenderEngine) {
+              private readonly engine: GanttRenderEngine,
+              private readonly svgDrawerUtil: SvgDrawerUtil) {
     this.connectorDrawer = new GanttConnectorDrawer(engine.view)
 
     this.boundMouseOver = (evt: MouseEvent) => this.handleMouseOver(evt)
@@ -413,10 +414,6 @@ export default class TooltipManager implements HoverParent {
     }
 
     if (shape) this.chartView.renderShapeAroundEvent(shape)
-  }
-
-  private get svgDrawerUtil() {
-    return this.chartCtx.svgDrawerUtil
   }
 
   private calculatePolygonPointsForOverlay(x: number, y: number, symbol: 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'octagon' | 'star') {
