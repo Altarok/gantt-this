@@ -1,5 +1,6 @@
 import {GanttChartView} from '../view/gantt-chart-view'
 import {Css} from '../const/constants'
+import {createSvg} from './svg-drawer-util'
 
 const diff = 2
 type Point = { x: number, y: number }
@@ -42,17 +43,14 @@ export class GanttConnectorDrawer {
 
   /** Draw arrow and cache it to be able to delete it. */
   private drawArrow(pathData: string) {
-    this.view.upperHoverLayer.createSvg('path', {
-      cls: Css.tooltip.arrows, attr: {d: pathData, fill: 'none', 'marker-end': 'url(#gt-arrow-head)'}
-    })
-  }
-
-  clearArrows() {
-    this.view.upperHoverLayer.empty()
+    const arrow = createSvg('path', Css.tooltip.arrows,
+      {'d': pathData, 'fill': 'none', 'marker-end': 'url(#gt-arrow-head)'}
+    )
+    this.view.renderArrow(arrow)
   }
 
   destroy() {
-    this.clearArrows()
+    this.view.clearHoverLayer() /* Destroys arrows */
   }
 
 }

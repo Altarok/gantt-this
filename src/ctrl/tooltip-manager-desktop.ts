@@ -262,10 +262,9 @@ export default class TooltipManager implements HoverParent {
 
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
-      const upper = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
-      const lower = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
-      this.chartView.lowerHoverLayer.appendChild(upper)
-      this.chartView.dynamicCalendarLayer.appendChild(lower)
+      const upper: SVGLineElement = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
+      const lower: SVGLineElement = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
+      this.chartView.renderVerticalGuidesOverEvent(upper, lower)
       /*
        * TODO add calendar hover layer to be able to draw in the view
        */
@@ -413,10 +412,7 @@ export default class TooltipManager implements HoverParent {
       shape = createSvg('polygon', cssClass, {points, stroke: this.overlayColor})
     }
 
-    if (shape) {
-      this.chartView.upperHoverLayer.appendChild(shape)
-    }
-
+    if (shape) this.chartView.renderShapeAroundEvent(shape)
   }
 
   private get svgDrawerUtil() {
@@ -442,7 +438,6 @@ export default class TooltipManager implements HoverParent {
 
   private hideHighlightAroundElement() {
     // debug.trace('<> hideHighlightAroundElement')
-    this.connectorDrawer?.clearArrows()
     this.chartView.clearHoverLayer()
   }
 

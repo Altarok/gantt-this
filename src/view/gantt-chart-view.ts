@@ -5,10 +5,9 @@ import {ChartContext} from '../model/chart-context'
 import {debug} from '../util/debug'
 
 export class GanttChartView {
-  mainWrapper: HTMLDivElement
   chartContainer: HTMLDivElement
-  toolbarContainer: HTMLDivElement
-  minimizedToolbarContainer: HTMLDivElement
+  private readonly toolbarCont: HTMLDivElement
+  private readonly minimizedToolbarCont: HTMLDivElement
 
   svg!: SVGElement
   /** Group background colors + group badges   */
@@ -16,23 +15,24 @@ export class GanttChartView {
   /** Foreground. Everything else */
   private foregroundLayer!: SVGElement
   /** Inside foregroundLayer: background grid elements */
-  gridLayer!: SVGElement
+  private gridLayer!: SVGElement
   /** Inside foregroundLayer: data events */
   private dataLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : era layer used for eras and vertical-line events */
   eraLayer!: SVGElement
-  /** Inside foregroundLayer > dataLayer : layer used for mouse overlay */
-  lowerHoverLayer!: SVGElement
+  /** Inside foregroundLayer > dataLayer : layer used for mouse overlay (behind events) */
+  private lowerHoverLayer!: SVGElement
   private repeaterEventLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : event layer used for other events */
   private eventLayer!: SVGElement
-  upperHoverLayer!: SVGElement
+  /** For arrows btw events and shapes around hovered events. */
+  private upperHoverLayer!: SVGElement
 
   /** Inside foregroundLayer: calendars */
-  dynamicCalendarLayer!: SVGElement
-  staticCalendarLayer!: SVGElement
+  private dynamicCalendarLayer!: SVGElement
+  private staticCalendarLayer!: SVGElement
 
-  readonly clipId = `gantt-clip-${Math.random().toString(36).substring(2, 9)}`
+  private readonly clipId = `gantt-clip-${Math.random().toString(36).substring(2, 9)}`
   /** Prevent overflow rectangle */
   private clipRect!: SVGElement
 
@@ -48,16 +48,14 @@ export class GanttChartView {
 
     debug.log(`GanttChartView ** stickyCalAxes ${stickyCalAxes}, stickyToolbar ${stickyToolbar}, toolbarBelowChart ${toolbarBelowChart}`)
 
-    this.mainWrapper = container.createDiv({cls: Css.wrapper})
-
     if (toolbarBelowChart) {
-      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
-      this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
+      this.chartContainer = this.container.createDiv({cls: Css.chartContainer})
+      this.toolbarCont = this.container.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarCont = this.container.createDiv({cls: Css.toolbar.minimized})
     } else {
-      this.toolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.container})
-      this.minimizedToolbarContainer = this.mainWrapper.createDiv({cls: Css.toolbar.minimized})
-      this.chartContainer = this.mainWrapper.createDiv({cls: Css.chartContainer})
+      this.toolbarCont = this.container.createDiv({cls: Css.toolbar.container})
+      this.minimizedToolbarCont = this.container.createDiv({cls: Css.toolbar.minimized})
+      this.chartContainer = this.container.createDiv({cls: Css.chartContainer})
     }
 
     this.updateToolbarLayout()
@@ -69,9 +67,9 @@ export class GanttChartView {
   public updateToolbarLayout() {
     const toolbarBelowChart = this.chartCtx.settings.toolbarBelowChart
     if (toolbarBelowChart) {
-      this.mainWrapper.prepend(this.chartContainer)
+      this.container.prepend(this.chartContainer)
     } else {
-      this.mainWrapper.prepend(this.toolbarContainer, this.minimizedToolbarContainer)
+      this.container.prepend(this.toolbarCont, this.minimizedToolbarCont)
     }
 
     this.makeToolbarSticky(this.chartCtx.settings.stickyToolbar)
@@ -246,12 +244,38 @@ export class GanttChartView {
 
   makeToolbarSticky(sticky: boolean) {
     if (sticky) {
-      this.toolbarContainer.addClass('is-sticky')
-      this.minimizedToolbarContainer.addClass('is-sticky')
+      this.toolbarCont.addClass('is-sticky')
+      this.minimizedToolbarCont.addClass('is-sticky')
     } else {
-      this.toolbarContainer.removeClass('is-sticky')
-      this.minimizedToolbarContainer.removeClass('is-sticky')
+      this.toolbarCont.removeClass('is-sticky')
+      this.minimizedToolbarCont.removeClass('is-sticky')
     }
+  }
+
+  /** Draws vertical dotted line when mouse hovers an event. */
+  renderArrow(arrow: SVGPathElement): void {
+    this.upperHoverLayer.appendChild(arrow)
+  }
+
+  /** Draws vertical dotted line when mouse hovers an event. */
+  renderShapeAroundEvent(shape: SVGElement): void {
+    this.upperHoverLayer.appendChild(shape)
+  }
+
+  /** Draws vertical dotted line when mouse hovers an event. */
+  renderVerticalGuidesOverEvent(upper: SVGLineElement, lower: SVGLineElement): void {
+    this.lowerHoverLayer.appendChild(upper)
+    this.dynamicCalendarLayer.appendChild(lower)
+  }
+
+  /** Used by ToolbarView to create toolbar */
+  get toolbarContainer(): HTMLDivElement {
+    return this.toolbarCont
+  }
+
+  /** Used by ToolbarView to create minimize-toolbar-button */
+  get minimizedToolbarContainer(): HTMLDivElement {
+    return this.minimizedToolbarCont
   }
 
   private initScrollListener() {
