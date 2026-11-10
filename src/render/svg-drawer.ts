@@ -28,7 +28,7 @@ export class GanttRenderEngine {
               public readonly view: GanttChartView,
               public rawData: GanttItem[],
               readonly viewModel: GanttChartModel) {
-    this.svgDrawerUtil = chartCtx.svgDrawerUtil
+    this.svgDrawerUtil = new SvgDrawerUtil(this.chartCtx, this.view)
     this.calculateGlobalBounds()
     this.initLayout()
     this.redraw()

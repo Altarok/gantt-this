@@ -5,6 +5,7 @@ import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
 import {MoonDrawData} from '../types/moon-types'
 import {MoonIconCache} from '../svg/svg-moon-icon-cache'
+import {GanttChartView} from '../view/gantt-chart-view'
 
 const textLeftPadding = 3
 
@@ -34,7 +35,8 @@ export class SvgDrawerUtil {
   private eventManager?: GanttEventManager
   private moonIconCache?: MoonIconCache // TODO #moons use this
 
-  constructor(private readonly chartCtx: ChartContext) {
+  constructor(private readonly chartCtx: ChartContext,
+              private readonly view: GanttChartView) {
     this.shapeSize = chartCtx.settings.viewEventShapeHeight
     this.shapeRadius = this.shapeSize / 2
     this.iconSize = chartCtx.settings.viewEventIconHeight

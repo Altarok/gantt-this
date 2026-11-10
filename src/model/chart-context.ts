@@ -6,7 +6,6 @@ import {EventPropertyReader} from '../io/event-property-reader'
 import BasesContext from './bases-context'
 import TextWidthCache from '../render/text-space-cache'
 import {CalendarConfig} from '../types/calendar-types'
-import {SvgDrawerUtil} from '../render/svg-drawer-util'
 import {GanttError} from './gantt-error'
 import {ChartDiagnostics, ErrorId} from '../const/error-types'
 import {ToolbarView} from '../view/toolbar-view'
@@ -15,7 +14,6 @@ import {ToolbarView} from '../view/toolbar-view'
  * Each chart has 1 of these
  */
 export class ChartContext {
-  readonly svgDrawerUtil: SvgDrawerUtil
   toolbarView?: ToolbarView
 
   constructor(readonly plugin: FantasyGanttPlugin,
@@ -24,7 +22,6 @@ export class ChartContext {
               private readonly eventPropertyReader: EventPropertyReader,
               private readonly textWidthCache: TextWidthCache,
               private readonly basesCtx?: BasesContext) {
-    this.svgDrawerUtil = new SvgDrawerUtil(this)
   }
 
   get settings(): SettingsContext {
