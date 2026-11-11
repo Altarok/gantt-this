@@ -19,7 +19,7 @@ export class GanttChartView {
   /** Inside foregroundLayer: data events */
   private dataLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : era layer used for eras and vertical-line events */
-  eraLayer!: SVGElement
+  private eraLayer!: SVGElement
   /** Inside foregroundLayer > dataLayer : layer used for mouse overlay (behind events) */
   private lowerHoverLayer!: SVGElement
   private repeaterEventLayer!: SVGElement
@@ -271,6 +271,11 @@ export class GanttChartView {
   /** Used by ToolbarView to create toolbar */
   get toolbarContainer(): HTMLDivElement {
     return this.toolbarCont
+  }
+
+  /** SVG Container for eras and vertical-line events. Behind all other layers in event area */
+  get eraAndLineContainer(): SVGElement {
+    return this.eraLayer
   }
 
   /** Used by ToolbarView to create minimize-toolbar-button */

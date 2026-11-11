@@ -149,9 +149,8 @@ export class SvgDrawerUtil {
    * @param x1 left bound of svg to draw
    * @param x2 right bound of svg to draw
    * @param y vertical center of svg to draw
-   * @param svgContainer
    */
-  drawBar(d: GanttItem, x1: number, x2: number, y: number, svgContainer: SVGElement): void {
+  drawBar(d: GanttItem, x1: number, x2: number, y: number): void {
     const width = Math.max(2, x2 - x1)
 
     const bar = createSvg('rect', Css.item.bar, {
@@ -162,6 +161,8 @@ export class SvgDrawerUtil {
       'data-id': d.id
     })
     if (d.color) bar.setAttribute('fill', d.color)
+
+    const svgContainer = this.getEventLayer(d)
     svgContainer.appendChild(bar)
 
     this.addAndMoveIconAndText(d, x1, y - this.iconRadius, svgContainer, width, Css.item.textBar)
@@ -174,13 +175,14 @@ export class SvgDrawerUtil {
    * @param x2 right bound of svg to draw
    * @param y upper bound of svg to draw
    * @param height height of svg to draw
-   * @param svgContainer
    */
-  drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number, svgContainer: SVGElement): void {
+  drawEra(d: GanttItem, x1: number, x2: number, y: number, height: number): void {
     const width = Math.max(2, x2 - x1)
 
     const era = createSvg('rect', Css.item.era, {x: x1, y: y, width, height, 'data-id': d.id})
     if (d.color) era.setAttribute('fill', d.color)
+
+    const svgContainer = this.view.eraAndLineContainer
     svgContainer.appendChild(era)
 
     this.addAndMoveIconAndText(d, x1, y, svgContainer, width, Css.item.textEra)
@@ -193,7 +195,6 @@ export class SvgDrawerUtil {
    * @param attrs
    * @param x center of svg
    * @param y center of svg
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    * @param cssClass
    */
@@ -202,12 +203,14 @@ export class SvgDrawerUtil {
                          attrs: Record<string, string | number>,
                          x: number,
                          y: number,
-                         svgContainer: SVGElement,
                          freeSpace: number,
                          cssClass: string = Css.item.timestamp): void {
     const el = createSvg(shape, cssClass, {...attrs, 'data-id': d.id})
     if (d.color) el.setAttribute('fill', d.color)
+
+    const svgContainer = this.getEventLayer(d)
     svgContainer.appendChild(el)
+
     this.addIconIfPresent(d, x - this.iconRadius, y - this.iconRadius, svgContainer)
     this.addTextIfFitting(d.name, x + this.shapeRadius, y, freeSpace, svgContainer, Css.item.textTimestamp)
   }
@@ -217,15 +220,14 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw
    * @param cy vertical center of svg to draw
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawBox(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawBox(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     this.drawSmallShape(d, 'rect', {
       x: cx - this.shapeRadius,
       y: cy - this.shapeRadius,
       width: this.shapeSize, height: this.shapeSize
-    }, cx, cy, svgContainer, freeSpace, Css.item.box)
+    }, cx, cy, freeSpace, Css.item.box)
   }
 
   /**
@@ -233,12 +235,11 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw, keep as is for 'polygon'
    * @param cy vertical center of svg to draw, keep as is for 'polygon'
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawDiamond(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawDiamond(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 4)
-    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, freeSpace)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, freeSpace)
   }
 
   /**
@@ -246,15 +247,14 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw
    * @param cy vertical center of svg to draw
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawPoint(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawPoint(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     this.drawSmallShape(d, 'circle', {
       cx,
       cy,
       r: this.shapeRadius
-    }, cx, cy, svgContainer, freeSpace)
+    }, cx, cy, freeSpace)
   }
 
   /**
@@ -262,12 +262,11 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw
    * @param cy vertical center of svg to draw
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawTriangle(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawTriangle(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 3)
-    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, freeSpace)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, freeSpace)
   }
 
   /**
@@ -275,17 +274,16 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw
    * @param cy vertical center of svg to draw
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawPentagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawPentagon(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 5)
-    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, freeSpace)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, freeSpace)
   }
 
-  drawStar(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawStar(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 10, 0.382)
-    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, freeSpace)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, freeSpace)
   }
 
   /**
@@ -293,12 +291,11 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw
    * @param cy vertical center of svg to draw
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawHexagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawHexagon(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 6)
-    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, freeSpace)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, freeSpace)
   }
 
   /**
@@ -306,12 +303,11 @@ export class SvgDrawerUtil {
    * @param d event to draw
    * @param cx horizontal center of svg to draw
    * @param cy vertical center of svg to draw
-   * @param svgContainer
    * @param freeSpace distance to next event to the right, used for event description
    */
-  drawOctagon(d: GanttItem, cx: number, cy: number, svgContainer: SVGElement, freeSpace: number): void {
+  drawOctagon(d: GanttItem, cx: number, cy: number, freeSpace: number): void {
     const points = this.calculatePolygonPoints(cx, cy, 8, 1, 1 / 8)
-    this.drawSmallShape(d, 'polygon', {points}, cx, cy, svgContainer, freeSpace)
+    this.drawSmallShape(d, 'polygon', {points}, cx, cy, freeSpace)
   }
 
   /**
@@ -322,13 +318,14 @@ export class SvgDrawerUtil {
    * @param y1 upper vertical bound of svg to draw
    * @param y2 lower vertical bound of svg to draw
    * @param width width of svg to draw
-   * @param svgContainer
    */
-  drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number, svgContainer: SVGElement): void {
+  drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number): void {
     const line = createSvg('line', Css.item.timestamp, {
       x1, x2: x1, y1, y2, 'stroke-width': this.chartCtx.settings.uxVerticalLineEventWidth, 'data-id': d.id
     })
     if (d.color) line.setAttribute('stroke', d.color)
+
+    const svgContainer = this.view.eraAndLineContainer
     svgContainer.appendChild(line)
 
     // const availableWidth = 200 // Or calculate based on container bounds/remaining width
@@ -431,5 +428,8 @@ export class SvgDrawerUtil {
     svgContainer.appendChild(g)
   }
 
+  private getEventLayer(d: GanttItem) {
+    return this.view.getLayerForEvent(d.isRecurringInstance ?? false)
+  }
 }
 

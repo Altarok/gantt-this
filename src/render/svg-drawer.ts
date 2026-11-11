@@ -268,41 +268,40 @@ export class GanttRenderEngine {
 
         const nextX = nextItem ? this.getXPosition(nextItem.startDays) : this.currRenderWidth
         const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
-        const svgLayer = this.view.getLayerForEvent(d.isRecurringInstance ?? false)
 
         if (isTimespan(displayType)) switch (displayType) {
           case 'bar':
-            return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight, svgLayer)
+            return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight)
           case 'era': {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
             const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return this.svgDrawerUtil.drawEra(d, x1, x2, y, height, this.view.eraLayer)
+            return this.svgDrawerUtil.drawEra(d, x1, x2, y, height)
           }
 
         } else if (isTimestamp(displayType)) switch (displayType) {
           case 'point':
-            return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, availableWidth)
           case 'box':
-            return this.svgDrawerUtil.drawBox(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawBox(d, x1, laneY + halfRowHeight, availableWidth)
           case 'vertical-line': {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
             const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height, this.settings.uxVerticalLineEventWidth, this.view.eraLayer)
+            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height, this.settings.uxVerticalLineEventWidth)
           }
           case 'diamond':
-            return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, availableWidth)
           case 'triangle':
-            return this.svgDrawerUtil.drawTriangle(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawTriangle(d, x1, laneY + halfRowHeight, availableWidth)
           case 'pentagon':
-            return this.svgDrawerUtil.drawPentagon(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawPentagon(d, x1, laneY + halfRowHeight, availableWidth)
           case 'star':
-            return this.svgDrawerUtil.drawStar(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawStar(d, x1, laneY + halfRowHeight, availableWidth)
           case 'hexagon':
-            return this.svgDrawerUtil.drawHexagon(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawHexagon(d, x1, laneY + halfRowHeight, availableWidth)
           case 'octagon':
-            return this.svgDrawerUtil.drawOctagon(d, x1, laneY + halfRowHeight, svgLayer, availableWidth)
+            return this.svgDrawerUtil.drawOctagon(d, x1, laneY + halfRowHeight, availableWidth)
         }
 
       }) // end loop group.items.forEach(GanttItem)
