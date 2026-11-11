@@ -29,8 +29,8 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     this.boundSvgMouseMove = this.handleSvgMouseMove.bind(this)
     this.boundSvgClick = this.handleSvgClick.bind(this)
 
-    if (this.svg && this.activeWindow)
-      this.attachListeners(this.svg as unknown as HTMLElement, this.activeWindow)
+
+    this.attachListeners()
   }
 
   // protected getScrollableContainer(): HTMLElement | null {
@@ -39,20 +39,25 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   //     : this.engine.view.container.parentElement
   // }
 
-  public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
+  public attachListeners() {
 
     const plugin = this.chartCtx.plugin
 
-    /* Placed on window for events to be able to end outside the chart */
-    plugin.registerDomEvent(activeWindow, 'mousemove', this.boundWindowMouseMove)
-    plugin.registerDomEvent(activeWindow, 'mouseup', this.boundWindowMouseUp)
-    plugin.registerDomEvent(activeWindow, 'blur', this.boundWindowMouseBlur)
+    if (this.activeWindow) {
+      /* Placed on window for events to be able to end outside the chart */
+      plugin.registerDomEvent(this.activeWindow, 'mousemove', this.boundWindowMouseMove)
+      plugin.registerDomEvent(this.activeWindow, 'mouseup', this.boundWindowMouseUp)
+      plugin.registerDomEvent(this.activeWindow, 'blur', this.boundWindowMouseBlur)
+    }
 
-    /* Placed on chart for events to start inside the chart */
-    plugin.registerDomEvent(svgEl, 'mousedown', this.boundSvgMouseDown)
-    plugin.registerDomEvent(svgEl, 'wheel', this.boundSvgWheel, {passive: false})
-    plugin.registerDomEvent(svgEl, 'mousemove', this.boundSvgMouseMove)
-    plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
+    if (this.chartContainer) {
+      // const svgEl: HTMLElement = this.svg as unknown as HTMLElement
+      /* Placed on chart for events to start inside the chart */
+      plugin.registerDomEvent(this.chartContainer, 'mousedown', this.boundSvgMouseDown)
+      plugin.registerDomEvent(this.chartContainer, 'wheel', this.boundSvgWheel, {passive: false})
+      plugin.registerDomEvent(this.chartContainer, 'mousemove', this.boundSvgMouseMove)
+      plugin.registerDomEvent(this.chartContainer, 'click', this.boundSvgClick)
+    }
   }
 
   detachListeners() {
@@ -65,12 +70,12 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
       this.activeWindow = null
     }
 
-    if (this.svg) {
-      this.svg.removeEventListener('mousedown', this.boundSvgMouseDown)
-      this.svg.removeEventListener('wheel', this.boundSvgWheel)
-      this.svg.removeEventListener('mousemove', this.boundSvgMouseMove)
-      this.svg.removeEventListener('click', this.boundSvgClick)
-      this.svg = null
+    if (this.chartContainer) {
+      this.chartContainer.removeEventListener('mousedown', this.boundSvgMouseDown)
+      this.chartContainer.removeEventListener('wheel', this.boundSvgWheel)
+      this.chartContainer.removeEventListener('mousemove', this.boundSvgMouseMove)
+      this.chartContainer.removeEventListener('click', this.boundSvgClick)
+      this.chartContainer = null
     }
   }
 
@@ -101,7 +106,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
 
   private handleSvgWheel(e: WheelEvent) {
     // if (e) this.logTouchEvent('handleSvgWheel', e)
-    if (!this.svg) return
+    if (!this.chartContainer) return
 
     if (this.isModifierActive(e, this.settings.uxZoomButton)) {
       e.preventDefault()
@@ -123,12 +128,12 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   private mouseWheelZoom(e: WheelEvent) {
-    if (!this.svg) return
+    if (!this.chartContainer) return
 
     // Determine direction: positive factor zooms in (> 1), negative factor zooms out (< 1)
     const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
 
-    const rect = this.svg.getBoundingClientRect()
+    const rect = this.chartContainer.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.viewModel.margin.left
 
     // Delegate to GanttRenderEngine

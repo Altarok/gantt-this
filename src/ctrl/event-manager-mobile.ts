@@ -22,26 +22,30 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     this.boundSvgTouchStart = this.handleTouchStart.bind(this)
     this.boundSvgClick = this.handleClick.bind(this)
 
-    if (this.svg && this.activeWindow)
-      this.attachListeners(this.svg as unknown as HTMLElement, this.activeWindow)
+    this.attachListeners()
   }
 
   // protected getScrollableContainer(): HTMLElement | null {
   //   return this.engine.view.container.parentElement
   // }
 
-  public attachListeners(svgEl: HTMLElement, activeWindow: Window) {
+  public attachListeners() {
 
     const plugin = this.chartCtx.plugin
 
-    /* Placed on window for events to be able to end outside the chart */
-    plugin.registerDomEvent(activeWindow, 'touchmove', this.boundWindowTouchMove, {passive: false})
-    plugin.registerDomEvent(activeWindow, 'touchend', this.boundWindowTouchEnd)
-    plugin.registerDomEvent(activeWindow, 'touchcancel', this.boundWindowTouchEnd)
+    if (this.activeWindow) {
+      /* Placed on window for events to be able to end outside the chart */
+      plugin.registerDomEvent(this.activeWindow, 'touchmove', this.boundWindowTouchMove, {passive: false})
+      plugin.registerDomEvent(this.activeWindow, 'touchend', this.boundWindowTouchEnd)
+      plugin.registerDomEvent(this.activeWindow, 'touchcancel', this.boundWindowTouchEnd)
+    }
 
-    /* Placed on chart for events to start inside the chart */
-    plugin.registerDomEvent(svgEl, 'touchstart', this.boundSvgTouchStart, {passive: false})
-    plugin.registerDomEvent(svgEl, 'click', this.boundSvgClick)
+    if (this.chartContainer) {
+      // const svgEl: HTMLElement = this.svg as unknown as HTMLElement
+      /* Placed on chart for events to start inside the chart */
+      plugin.registerDomEvent(this.chartContainer, 'touchstart', this.boundSvgTouchStart, {passive: false})
+      plugin.registerDomEvent(this.chartContainer, 'click', this.boundSvgClick)
+    }
   }
 
   detachListeners() {
@@ -52,10 +56,10 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
       this.activeWindow = null
     }
 
-    if (this.svg) {
-      this.svg.removeEventListener('touchstart', this.boundSvgTouchStart)
-      this.svg.removeEventListener('click', this.boundSvgClick)
-      this.svg = null
+    if (this.chartContainer) {
+      this.chartContainer.removeEventListener('touchstart', this.boundSvgTouchStart)
+      this.chartContainer.removeEventListener('click', this.boundSvgClick)
+      this.chartContainer = null
     }
   }
 
@@ -107,7 +111,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
   }
 
   private handlePinchZoom(e: TouchEvent) {
-    if (!this.svg || e.touches.length < 2 || this.pinchDistance === null) return
+    if (!this.chartContainer || e.touches.length < 2 || this.pinchDistance === null) return
 
     const t1 = e.touches[0]!
     const t2 = e.touches[1]!
@@ -115,7 +119,7 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
 
     if (currentDistance === 0) return
 
-    const rect = this.svg.getBoundingClientRect()
+    const rect = this.chartContainer.getBoundingClientRect()
     const touchMidX = (t1.clientX + t2.clientX) / 2 - rect.left - this.engine.viewModel.margin.left
 
     const frameFactor = currentDistance / this.pinchDistance
