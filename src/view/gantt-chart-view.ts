@@ -9,7 +9,7 @@ export class GanttChartView {
   private readonly toolbarCont: HTMLDivElement
   private readonly minimizedToolbarCont: HTMLDivElement
 
-  svg!: SVGElement
+  private svg!: SVGElement
   /** Group background colors + group badges   */
   private backgroundLayer!: SVGElement
   /** Foreground. Everything else */
@@ -281,6 +281,11 @@ export class GanttChartView {
   /** Used by ToolbarView to create minimize-toolbar-button */
   get minimizedToolbarContainer(): HTMLDivElement {
     return this.minimizedToolbarCont
+  }
+
+  /** Used by arrow drawer */
+  get canvasDimensions(): DOMRect {
+    return this.svg.getBoundingClientRect()
   }
 
   private initScrollListener() {
