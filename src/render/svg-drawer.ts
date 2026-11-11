@@ -212,7 +212,6 @@ export class GanttRenderEngine {
     // }
   }
 
-
   private drawGroupBackgrounds() {
     this.view.clearGroupBackground()
 

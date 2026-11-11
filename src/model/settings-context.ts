@@ -275,6 +275,7 @@ export class SettingsContext implements GanttChartSources {
   get uxAddDaySuffixToTooltipTitle(): boolean {
     return /* implement this.local.uxAddDaySuffixToTooltipTitle ?? */ this.global.uxAddDaySuffixToTooltipTitle
   }
+
   get stickyCalAxes(): boolean {
     return this.local.uxMakeCalAxesSticky ?? this.global.uxMakeCalAxesSticky
   }
