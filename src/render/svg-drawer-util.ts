@@ -317,9 +317,8 @@ export class SvgDrawerUtil {
    * @param x1 horizontal center of svg to draw
    * @param y1 upper vertical bound of svg to draw
    * @param y2 lower vertical bound of svg to draw
-   * @param width width of svg to draw
    */
-  drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number, width: number): void {
+  drawVerticalLine(d: GanttItem, x1: number, y1: number, y2: number): void {
     const line = createSvg('line', Css.item.timestamp, {
       x1, x2: x1, y1, y2, 'stroke-width': this.chartCtx.settings.uxVerticalLineEventWidth, 'data-id': d.id
     })

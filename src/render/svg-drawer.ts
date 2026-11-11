@@ -288,7 +288,7 @@ export class GanttRenderEngine {
             const isNotInAGroup = d.group === NO_GROUP
             const y: number = isNotInAGroup ? firstYValue : group.yOffset
             const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height, this.settings.uxVerticalLineEventWidth)
+            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height)
           }
           case 'diamond':
             return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, availableWidth)
