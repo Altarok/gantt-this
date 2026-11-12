@@ -10,9 +10,9 @@ export class GanttChartView {
   private readonly minimizedToolbarCont: HTMLDivElement
 
   private chartEventContainer!: HTMLDivElement
-  // private chartCalendarContainer!: HTMLDivElement
+  private chartCalendarContainer!: HTMLDivElement
   private eventSvg!: SVGElement
-  // private calendarSvg!: SVGElement
+  private calendarSvg!: SVGElement
 
   /** Group background colors + group badges   */
   private backgroundLayer!: SVGGElement
@@ -64,6 +64,7 @@ export class GanttChartView {
 
     this.updateToolbarLayout()
 
+    // this.updateCalendarStickyState()
     this.initiateChartContainerSubContainers()
     this.initScrollListener()
   }
@@ -86,41 +87,54 @@ export class GanttChartView {
   }
 
   initiateChartContainerSubContainers() {
-    /*
-     * cursor: grab
-     * display: block
-     * width: 100%
-     *
-     * :active -> cursor: grabbing
-     */
-    this.eventSvg = this.chartContainer.createSvg('svg', {
+    this.chartEventContainer = this.chartContainer.createDiv({cls: 'gt-event-container'})
+    this.eventSvg = this.chartEventContainer.createSvg('svg', {
       cls: Css.svg.canvas,
-      attr: {height: this.viewModel.totalHeight.toString()}
+      attr: {height: this.viewModel.eventsAreaHeight.toString()}
     })
 
     ManualSvg.addArrowTipAsSvgDef(this.eventSvg)
 
     this.backgroundLayer = this.eventSvg.createSvg('g')
     this.foregroundLayer = this.eventSvg.createSvg('g')
-    const defs: SVGDefsElement = this.eventSvg.createSvg('defs')
+    const defs = this.eventSvg.createSvg('defs')
 
     /* Dedicated grid container behind bars and points */
-    const clipPath: SVGClipPathElement = defs.createSvg('clipPath', {attr: {id: this.clipId}})
+    const clipPath = defs.createSvg('clipPath', {attr: {id: this.clipId}})
     const eventsAreaHeight = this.viewModel.eventsAreaHeight
     this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': `url(#${this.clipId})`}})
 
-    this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
-    this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
+    // this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
+    // this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
 
     this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
     this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
     this.eventLayer = this.dataLayer.createSvg('g')
     this.upperHoverLayer = this.dataLayer.createSvg('g')
+
+    this.chartCalendarContainer = this.chartContainer.createDiv({cls: 'gt-calendar-container'})
+    this.calendarSvg = this.chartCalendarContainer.createSvg('svg', {
+      cls: Css.svg.canvas,
+      attr: {height: this.viewModel.calendarAreaHeight.toString()}
+    })
+
+    this.dynamicCalendarLayer = this.calendarSvg.createSvg('g')
+    this.staticCalendarLayer = this.calendarSvg.createSvg('g')
+
+    // this.updateCalendarStickyState()
   }
+
+  // public updateCalendarStickyState() {
+  //   const scrollContainer = this.getScrollableContainer(false)
+  //   if (!scrollContainer) return
+  //
+  //   const isScrollable = scrollContainer.scrollHeight > scrollContainer.clientHeight
+  //   this.chartContainer.toggleClass('gt-calendar-sticky', isScrollable)
+  // }
 
   get clientWidth() {
     return this.container.clientWidth
@@ -304,6 +318,18 @@ export class GanttChartView {
     //
     // scrollContainer.addEventListener('scroll', () => {
     //   this.updateStickyAxes(scrollContainer)
+    // }, {passive: true})
+    /*
+     * TODO 2
+     */
+    // if (!this.chartCtx.settings.stickyCalAxes) return
+    //
+    // const scrollContainer = this.getScrollableContainer(false)
+    // if (!scrollContainer) return
+    //
+    // scrollContainer.addEventListener('scroll', () => {
+    //   const scrollTop = scrollContainer.scrollTop
+    //   this.calendarSvg.style.transform = `translateY(-${scrollTop}px)`
     // }, {passive: true})
   }
 

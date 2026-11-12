@@ -198,4 +198,8 @@ export class GanttChartModel {
     this.hideMonths = tickStepInDays > Consts.AXIS_TICK_DIFF_TO_HIDE_MONTHS
   }
 
+  get calendarAreaHeight(): number {
+    return this.calendarAxisRowHeight * (this.distinctCalNames.length + 1)
+  }
+
 }

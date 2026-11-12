@@ -326,10 +326,9 @@ export class GanttRenderEngine {
     const endDaysValue = Math.ceil(this.viewModel.maxDays / this.viewModel.stepDays) * this.viewModel.stepDays + this.viewModel.stepDays
 
     this.viewModel.activeCalendarNames.forEach((calType, index) => {
-
-      const currentAxisYStart = itemsAreaHeight + (index * this.viewModel.calendarAxisRowHeight)
-      const tickPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
-      const showMoonPhases: boolean = this.settings.showMoons && tickPixelSpacing >= 24
+      const currentAxisYStart = index * this.viewModel.calendarAxisRowHeight
+      const tickHorizontalPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
+      const showMoonPhases: boolean = this.settings.showMoons && tickHorizontalPixelSpacing >= 24
       debug.debug(`drawAxes -- showMoonPhases : ${showMoonPhases}`)
 
       this.viewModel.drawnCals[calType] = {
