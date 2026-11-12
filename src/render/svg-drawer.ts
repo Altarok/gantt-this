@@ -404,9 +404,8 @@ export class GanttRenderEngine {
         }
 
         if (calendarColors.dates !== 'none' && xPos - lastTextX > 80) {
-          this.view.drawCalAxisDate(ticksG, xPos,
-            createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths),
-            calendarColors.dates)
+          const dateString = createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths)
+          this.view.drawCalAxisDate(ticksG, xPos, dateString, calendarColors.dates)
           lastTextX = xPos
         }
       }
