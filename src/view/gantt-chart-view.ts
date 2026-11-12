@@ -9,28 +9,32 @@ export class GanttChartView {
   private readonly toolbarCont: HTMLDivElement
   private readonly minimizedToolbarCont: HTMLDivElement
 
-  private svg!: SVGElement
+  private chartEventContainer!: HTMLDivElement
+  // private chartCalendarContainer!: HTMLDivElement
+  private eventSvg!: SVGElement
+  // private calendarSvg!: SVGElement
+
   /** Group background colors + group badges   */
-  private backgroundLayer!: SVGElement
+  private backgroundLayer!: SVGGElement
   /** Foreground. Everything else */
-  private foregroundLayer!: SVGElement
+  private foregroundLayer!: SVGGElement
   /** Inside foregroundLayer: background grid elements */
-  private gridLayer!: SVGElement
+  private gridLayer!: SVGGElement
   /** Inside foregroundLayer: data events */
-  private dataLayer!: SVGElement
+  private dataLayer!: SVGGElement
   /** Inside foregroundLayer > dataLayer : era layer used for eras and vertical-line events */
-  private eraLayer!: SVGElement
+  private eraLayer!: SVGGElement
   /** Inside foregroundLayer > dataLayer : layer used for mouse overlay (behind events) */
-  private lowerHoverLayer!: SVGElement
-  private repeaterEventLayer!: SVGElement
+  private lowerHoverLayer!: SVGGElement
+  private repeaterEventLayer!: SVGGElement
   /** Inside foregroundLayer > dataLayer : event layer used for other events */
-  private eventLayer!: SVGElement
+  private eventLayer!: SVGGElement
   /** For arrows btw events and shapes around hovered events. */
-  private upperHoverLayer!: SVGElement
+  private upperHoverLayer!: SVGGElement
 
   /** Inside foregroundLayer: calendars */
-  private dynamicCalendarLayer!: SVGElement
-  private staticCalendarLayer!: SVGElement
+  private dynamicCalendarLayer!: SVGGElement
+  private staticCalendarLayer!: SVGGElement
 
   private readonly clipId = `gantt-clip-${Math.random().toString(36).substring(2, 9)}`
   /** Prevent overflow rectangle */
@@ -89,19 +93,19 @@ export class GanttChartView {
      *
      * :active -> cursor: grabbing
      */
-    this.svg = this.chartContainer.createSvg('svg', {
+    this.eventSvg = this.chartContainer.createSvg('svg', {
       cls: Css.svg.canvas,
       attr: {height: this.viewModel.totalHeight.toString()}
     })
 
-    ManualSvg.addArrowTipAsSvgDef(this.svg)
+    ManualSvg.addArrowTipAsSvgDef(this.eventSvg)
 
-    this.backgroundLayer = this.svg.createSvg('g')
-    this.foregroundLayer = this.svg.createSvg('g')
-    const defs = this.svg.createSvg('defs')
+    this.backgroundLayer = this.eventSvg.createSvg('g')
+    this.foregroundLayer = this.eventSvg.createSvg('g')
+    const defs: SVGDefsElement = this.eventSvg.createSvg('defs')
 
     /* Dedicated grid container behind bars and points */
-    const clipPath = defs.createSvg('clipPath', {attr: {id: this.clipId}})
+    const clipPath: SVGClipPathElement = defs.createSvg('clipPath', {attr: {id: this.clipId}})
     const eventsAreaHeight = this.viewModel.eventsAreaHeight
     this.clipRect = clipPath.createSvg('rect', {attr: {height: eventsAreaHeight}})
 
@@ -228,7 +232,7 @@ export class GanttChartView {
   getScrollableContainer(isMobile: boolean): HTMLElement | null {
     if (isMobile) return this.container.parentElement
 
-    const activeWindow = this.svg.ownerDocument.defaultView ?? window
+    const activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
     const isPopout = activeWindow?.document.body.classList.contains('is-popout-window')
     return isPopout ? this.chartContainer : this.container.parentElement
   }
@@ -285,7 +289,7 @@ export class GanttChartView {
 
   /** Used by arrow drawer */
   get canvasDimensions(): DOMRect {
-    return this.svg.getBoundingClientRect()
+    return this.eventSvg.getBoundingClientRect()
   }
 
   private initScrollListener() {

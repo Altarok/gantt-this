@@ -32,7 +32,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   protected rafId: number | undefined = undefined
 
   protected readonly viewModel: GanttChartModel
-  protected chartContainer: HTMLDivElement| null
+  protected chartContainer: HTMLDivElement | null
   protected activeWindow: Window | null
   /**
    * Pointer to HTML element owning the scroll bar.
