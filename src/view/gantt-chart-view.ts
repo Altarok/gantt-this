@@ -117,6 +117,7 @@ export class GanttChartView {
     this.upperHoverLayer = this.dataLayer.createSvg('g')
 
     this.chartCalendarContainer = this.chartContainer.createDiv({cls: 'gt-calendar-container'})
+    // if (this.settings.stickyCalAxes) this.chartCalendarContainer.addClass('is-sticky-calendar')
     this.calendarSvg = this.chartCalendarContainer.createSvg('svg', {
       cls: Css.svg.canvas,
       attr: {height: this.viewModel.calendarAreaHeight.toString()}

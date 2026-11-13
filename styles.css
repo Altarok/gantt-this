@@ -46,9 +46,24 @@ body.is-popout-window .gt-main-container {
   min-height: 0;
 }
 
-.gt-calendar-container svg {
+/*
+!* Standard (wenn aus): normaler Fluss *!
+.gt-calendar-container {
+  position: static;
+}
+
+!* Wenn aktiv: sticky *!
+.is-sticky-calendar .gt-calendar-container {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
   overflow: visible;
 }
+
+.is-sticky-calendar .gt-calendar-container svg {
+ overflow: visible
+}
+*/
 
 /* Child of .gt-chart-container */
 .gt-calendar-container {
@@ -59,6 +74,10 @@ body.is-popout-window .gt-main-container {
   width: 100%;
   overflow: visible;
   background: var(--background-primary); /* Prevents transparency overlap */
+}
+
+.gt-calendar-container svg {
+  overflow: visible;
 }
 
 /* OBSIDIAN API! */
