@@ -11,7 +11,7 @@ export class GanttChartView {
 
   private chartEventContainer!: HTMLDivElement
   private chartCalendarContainer!: HTMLDivElement
-  private eventSvg!: SVGElement
+  eventSvg!: SVGElement
   private calendarSvg!: SVGElement
 
   /** Group background colors + group badges   */
@@ -265,10 +265,14 @@ export class GanttChartView {
    */
   getScrollableContainer(isMobile: boolean): HTMLElement | null {
     if (isMobile) return this.container.parentElement
-
-    const activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
-    const isPopout = activeWindow?.document.body.classList.contains('is-popout-window')
-    return isPopout ? this.chartContainer : this.container.parentElement
+    //
+    // const activeWindow = this.eventSvg.ownerDocument.defaultView ?? window
+    // const isPopout = activeWindow?.document.body.classList.contains('is-popout-window')
+    // return isPopout
+    // ? this.chartContainer
+    // :
+    //   this.container.parentElement
+    return this.chartEventContainer
   }
 
   getLayerForEvent(isRecurringInstance: boolean): SVGElement {
@@ -358,6 +362,15 @@ export class GanttChartView {
   //   }
   // })
   // }
+
+  /**
+   * Event area height has to be set once after drawing everything.
+   * TODO: when to reset?
+   * @param height
+   */
+  public setEventAreaHeight(height: number) {
+    this.chartEventContainer.style.height = `${height}px`
+  }
 
 }
 

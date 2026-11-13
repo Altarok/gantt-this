@@ -29,21 +29,30 @@ body.is-popout-window .gt-main-container {
 .gt-chart-container {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  padding: 0; /* Ensures zero internal space around the chart */
+  max-height: 100%;
+  padding: 0;
   margin: 0;
   position: relative;
-  display: flex; /* ?? */
-  flex-direction: column; /* ?? */
-  overflow-y: auto; /* ?? */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
+/* Child of .gt-chart-container */
 .gt-event-container {
-  flex: 1 0 auto; /* ?? */
+  flex: 1 1 auto;
+  overflow-y: auto;
   width: 100%;
+  min-height: 0;
 }
 
+.gt-calendar-container svg {
+  overflow: visible;
+}
+
+/* Child of .gt-chart-container */
 .gt-calendar-container {
+  flex: 0 0 auto;
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -52,16 +61,16 @@ body.is-popout-window .gt-main-container {
   background: var(--background-primary); /* Prevents transparency overlap */
 }
 
-.gt-chart-container.gt-calendar-sticky .gt-calendar-container {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-}
-
 /* OBSIDIAN API! */
 body.is-popout-window .gt-chart-container {
   flex: 1;
   overflow-y: auto;
+}
+
+/* OBSIDIAN API! - remove native scrollbar */
+.bases-view, .workspace-leaf-content[data-type="gantt-this"] {
+  overflow: hidden;
+  height: 100%;
 }
 
 .gt-layers-eras {
@@ -570,7 +579,6 @@ body.is-popout-window svg.gt-svg-canvas {
 
 /* Vertical end-cap ticks at startDay and endDay */
 .gt-calendar-cap-marker {
-  stroke-width: 2px;
   stroke-linecap: round;
 }
 

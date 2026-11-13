@@ -210,6 +210,28 @@ export class GanttRenderEngine {
     //   debug('An unexpected error occurred:', error)
     // }
     // }
+
+    this.calculateAndSetEventAreaHeight()
+  }
+
+  private calculateAndSetEventAreaHeight(): void {
+    // const scrollHeight = this.view.chartContainer.scrollHeight
+    const activeWindow = this.view.eventSvg.ownerDocument.defaultView ?? window
+    const viewportHeight = activeWindow.innerHeight
+    const workspaceLeaf = this.view.container.closest('.workspace-leaf')
+    const viewHeaderHeight = workspaceLeaf?.querySelector('.view-header')?.getBoundingClientRect().height ?? 0
+    const basesHeaderHeight = workspaceLeaf?.querySelector('.bases-header')?.getBoundingClientRect().height ?? 0
+    const statusBarHeight = window.document.querySelector('.status-bar')?.getBoundingClientRect().height ?? 0
+    const toolbarHeight = this.view.toolbarContainer.offsetHeight || 0
+    const calendarHeight = this.viewModel.calendarAreaHeight
+    const actualHeight = this.calculateTotalChartHeight()
+    const maxAllowed = Math.max(0, viewportHeight - viewHeaderHeight - basesHeaderHeight - toolbarHeight - calendarHeight - statusBarHeight)
+    const finalHeight = Math.min(actualHeight, maxAllowed)
+
+    // debug.info(`[StickyDebug] scrollHeight: ${scrollHeight}`)
+    debug.info(`[StickyDebug] viewportH: ${viewportHeight}, viewHeaderH: ${viewHeaderHeight}, basesHeaderH: ${basesHeaderHeight},
+     statusBarH: ${statusBarHeight}, toolbarH: ${toolbarHeight}, calendarH: ${calendarHeight}, actualH: ${actualHeight}, maxAllowed: ${maxAllowed}, finalH: ${finalHeight}`)
+    this.view.setEventAreaHeight(finalHeight)
   }
 
   private drawGroupBackgrounds() {
