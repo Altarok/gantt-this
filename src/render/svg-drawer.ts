@@ -215,9 +215,7 @@ export class GanttRenderEngine {
   }
 
   private calculateAndSetEventAreaHeight(): void {
-    // const scrollHeight = this.view.chartContainer.scrollHeight
-    // TODO change to .chartContainer.ownerDocument. + make eventSvg private
-    const activeWindow = this.view.eventSvg.ownerDocument.defaultView ?? window
+    const activeWindow = this.view.chartContainer.ownerDocument.defaultView ?? window
     const viewportHeight = activeWindow.innerHeight
     const workspaceLeaf = this.view.container.closest('.workspace-leaf')
     const viewHeaderHeight = workspaceLeaf?.querySelector('.view-header')?.getBoundingClientRect().height ?? 0
@@ -230,8 +228,8 @@ export class GanttRenderEngine {
     const finalHeight = Math.min(actualHeight, maxAllowed)
 
     // debug.info(`[StickyDebug] scrollHeight: ${scrollHeight}`)
-    debug.info(`[StickyDebug] viewportH: ${viewportHeight}, viewHeaderH: ${viewHeaderHeight}, basesHeaderH: ${basesHeaderHeight},
-     statusBarH: ${statusBarHeight}, toolbarH: ${toolbarHeight}, calendarH: ${calendarHeight}, actualH: ${actualHeight}, maxAllowed: ${maxAllowed}, finalH: ${finalHeight}`)
+    // debug.info(`[StickyDebug] viewportH: ${viewportHeight}, viewHeaderH: ${viewHeaderHeight}, basesHeaderH: ${basesHeaderHeight},
+    //  statusBarH: ${statusBarHeight}, toolbarH: ${toolbarHeight}, calendarH: ${calendarHeight}, actualH: ${actualHeight}, maxAllowed: ${maxAllowed}, finalH: ${finalHeight}`)
     this.view.setEventAreaHeight(finalHeight)
   }
 
