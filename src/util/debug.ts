@@ -5,7 +5,7 @@ export const debug = {
   debug: log,
   warn,
   info,
-  trace,
+  trace
 }
 
 const logger: Console | undefined = undefined // window.console
@@ -25,4 +25,3 @@ function info(message: string): void {
 function trace(message: string): void {
   if (isDebug) logger?.trace('[T] ', message)
 }
-

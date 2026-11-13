@@ -67,7 +67,7 @@ export const Css = {
     /** SVG icon for moon phases */
     moonPhases: 'gt-moon-phases',
     /** End-cap marker at start and end days */
-    capMarker: 'gt-calendar-cap-marker', /* todo rename ? */
+    capMarker: 'gt-calendar-cap-marker',
     /** Reign epoch title over the axis */
     calReignTitle: 'gt-calendar-reign-title',
   },

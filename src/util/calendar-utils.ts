@@ -1,7 +1,8 @@
-import {SettingsContext} from 'model/settings-context'
+import {SettingsContext} from '../model/settings-context'
 import {GroupOrCalendarSettings} from '../types/settings-types'
 import {CalendarColor, CalendarColors, CalendarConfig} from '../types/calendar-types'
-import {debug} from './debug'
+
+// import {debug} from './debug'
 
 export function isValidColor(c?: string): c is string {
   return !!c && (c === 'none' || CSS.supports('color', c))
@@ -34,7 +35,9 @@ export function getCalendarColors(settings: SettingsContext,
     }
   }
 
-  const ret: CalendarColors = {axis, ticks, dates}
-  debug.info(`CalendarColors (id ${calendarConfig.id}): ${JSON.stringify(ret)}`)
-  return ret
+  return {axis, ticks, dates}
+
+  // const ret: CalendarColors = {axis, ticks, dates}
+  // debug.log(`CalendarColors (id ${calendarConfig.id}): ${JSON.stringify(ret)}`)
+  // return ret
 }
