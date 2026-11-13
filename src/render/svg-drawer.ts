@@ -216,6 +216,7 @@ export class GanttRenderEngine {
 
   private calculateAndSetEventAreaHeight(): void {
     // const scrollHeight = this.view.chartContainer.scrollHeight
+    // TODO change to .chartContainer.ownerDocument. + make eventSvg private
     const activeWindow = this.view.eventSvg.ownerDocument.defaultView ?? window
     const viewportHeight = activeWindow.innerHeight
     const workspaceLeaf = this.view.container.closest('.workspace-leaf')
