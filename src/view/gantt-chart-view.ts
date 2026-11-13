@@ -186,16 +186,26 @@ export class GanttChartView {
     return g
   }
 
-  drawCalAxisBaseline(calGroup: SVGGElement, x1: number, x2: number, axisColor: string): void {
+  /**
+   * @param calGroup
+   * @param x1 on-screen coordinates
+   * @param x2 on-screen coordinates
+   * @param stroke the axis' color
+   */
+  drawCalAxisBaseline(calGroup: SVGGElement, x1: number, x2: number, stroke: string): void {
     calGroup.createSvg('line', {
-      // cls: Css.axis.baseline, // TODO does not even exist
-      attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke: axisColor}
+      attr: {x1, y1: 0, x2, y2: 0, 'stroke-width': 2.5, stroke}
     })
   }
 
-  drawCalAxisCap(calGroup: SVGGElement, x: number, axisColor: string): void {
+  /**
+   * @param calGroup
+   * @param x on-screen coordinate
+   * @param stroke the axis' color
+   */
+  drawCalAxisCap(calGroup: SVGGElement, x: number, stroke: string): void {
     calGroup.createSvg('line', {
-      cls: Css.axis.capMarker, attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke: axisColor}
+      cls: Css.axis.capMarker, attr: {x1: x, y1: -6, x2: x, y2: +6, 'stroke-width': 2.5, stroke}
     })
   }
 
@@ -212,10 +222,15 @@ export class GanttChartView {
     textSvg.textContent = date
   }
 
-  /** Draw vertical gridlines into dedicated grid container. */
-  drawVerticalGridlineBehindEvents(xPos: number, itemsAreaHeight: number): void {
+  /**
+   * Draw vertical gridlines into dedicated grid container.
+   * @param xPos on-screen coordinate
+   * @param y2 height of event area
+   */
+  drawVerticalGridlineBehindEvents(xPos: number, y2: number): void {
     this.gridLayer.createSvg('line', {
-      cls: Css.axis.gridline, attr: {x1: xPos, y1: 0, x2: xPos, y2: itemsAreaHeight}
+      cls: Css.axis.gridline,
+      attr: {x1: xPos, y1: 0, x2: xPos, y2}
     })
   }
 
@@ -243,6 +258,11 @@ export class GanttChartView {
     this.clipRect.setAttribute('width', width.toString())
   }
 
+  /**
+   * Provides the primary scrollable container element used for event interactions and panning.
+   * @param isMobile - Flag indicating whether the view is running on a mobile device
+   * @returns The scrollable HTMLElement or null
+   */
   getScrollableContainer(isMobile: boolean): HTMLElement | null {
     if (isMobile) return this.container.parentElement
 
@@ -309,18 +329,6 @@ export class GanttChartView {
   private initScrollListener() {
     /*
      * TODO
-     */
-    // debugger
-    // if (!this.chartCtx.settings.stickyCalAxes) return
-    //
-    // const scrollContainer = this.getScrollableContainer(false)
-    // if (!scrollContainer) return
-    //
-    // scrollContainer.addEventListener('scroll', () => {
-    //   this.updateStickyAxes(scrollContainer)
-    // }, {passive: true})
-    /*
-     * TODO 2
      */
     // if (!this.chartCtx.settings.stickyCalAxes) return
     //
