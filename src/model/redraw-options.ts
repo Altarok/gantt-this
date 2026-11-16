@@ -42,30 +42,5 @@ export class RedrawOption {
 
   /** Manually triggered. Basic redraw, does not change or reset anything. */
   static readonly None = new RedrawOption(true, [])
-
-  // get resetCalendarCache(): boolean {
-  //   return this.has('resetCalendarCache')
-  // }
-  //
-  // get resetDiagnosticCache(): boolean {
-  //   return this.has('resetDiagnosticCache')
-  // }
-  //
-  // get reloadData(): boolean {
-  //   return this.has('reloadData')
-  // }
-  //
-  //
-  // get resetZoomAndPan(): boolean {
-  //   return this.has('resetZoomAndPan')
-  // }
-  //
-  // get resize(): boolean {
-  //   return this.has('resize')
-  // }
-  //
-  // get redraw(): boolean {
-  //   return this.has('redraw')
-  // }
-
+  
 }
