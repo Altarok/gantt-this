@@ -214,6 +214,11 @@ export class GanttRenderEngine {
     this.calculateAndSetEventAreaHeight()
   }
 
+  /*
+   * TODO call after
+   * - hiding/unhiding toolbar
+   * - hiding/unhiding a group
+   */
   private calculateAndSetEventAreaHeight(): void {
     const activeWindow = this.view.chartContainer.ownerDocument.defaultView ?? window
     const viewportHeight = activeWindow.innerHeight

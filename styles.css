@@ -86,8 +86,8 @@ body.is-popout-window .gt-chart-container {
   overflow-y: auto;
 }
 
-/* OBSIDIAN API! - remove native scrollbar */
-.bases-view, .workspace-leaf-content[data-type="gantt-this"] {
+/* OBSIDIAN API! - remove native scrollbar in gantt bases */
+.bases-view[data-view-type="example-view"] {
   overflow: hidden;
   height: 100%;
 }
