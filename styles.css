@@ -721,3 +721,8 @@ body.is-popout-window svg.gt-svg-canvas {
   font-weight: bold;
 }
 
+/* Debug Tool */
+.gt-red-border {
+  outline: 1px solid red;
+}
+

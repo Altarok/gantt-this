@@ -215,6 +215,9 @@ export class GanttRenderEngine {
   }
 
   private calculateAndSetEventAreaHeight(): void {
+
+    debug.info(`calculateAndSetEventAreaHeight >>`)
+
     const activeWindow = this.view.chartContainer.ownerDocument.defaultView ?? window
     const viewportHeight = activeWindow.innerHeight
     const workspaceLeaf = this.view.container.closest('.workspace-leaf')
@@ -223,14 +226,16 @@ export class GanttRenderEngine {
     const statusBarHeight = window.document.querySelector('.status-bar')?.getBoundingClientRect().height ?? 0
     const toolbarHeight = this.view.toolbarContainer.offsetHeight || 0
     const calendarHeight = this.viewModel.calendarAreaHeight
-    const actualHeight = this.calculateTotalChartHeight()
+    const actualHeight = this.calculateTotalChartHeight(true)
     const maxAllowed = Math.max(0, viewportHeight - viewHeaderHeight - basesHeaderHeight - toolbarHeight - calendarHeight - statusBarHeight)
     const finalHeight = Math.min(actualHeight, maxAllowed)
 
-    // debug.info(`[StickyDebug] scrollHeight: ${scrollHeight}`)
-    // debug.info(`[StickyDebug] viewportH: ${viewportHeight}, viewHeaderH: ${viewHeaderHeight}, basesHeaderH: ${basesHeaderHeight},
-    //  statusBarH: ${statusBarHeight}, toolbarH: ${toolbarHeight}, calendarH: ${calendarHeight}, actualH: ${actualHeight}, maxAllowed: ${maxAllowed}, finalH: ${finalHeight}`)
-    this.view.setEventAreaHeight(finalHeight)
+    // debug.info(`calculateAndSetEventAreaHeight -- scrollHeight: ${scrollHeight}`)
+    debug.info(`calculateAndSetEventAreaHeight -- viewportH: ${viewportHeight}, viewHeaderH: ${viewHeaderHeight}, basesHeaderH: ${basesHeaderHeight},
+     statusBarH: ${statusBarHeight}, toolbarH: ${toolbarHeight}, calendarH: ${calendarHeight}, actualH: ${actualHeight}, maxAllowed: ${maxAllowed}, finalH: ${finalHeight}`)
+    this.view.setEventAreaContainerHeight(finalHeight, actualHeight)
+
+    debug.info(`calculateAndSetEventAreaHeight << used final height: ${finalHeight}`)
   }
 
   private drawGroupBackgrounds() {
@@ -328,8 +333,14 @@ export class GanttRenderEngine {
     })
   }
 
-  calculateTotalChartHeight() {
-    return this.groups.reduce((acc, g) => {
+  calculateTotalChartHeight(evaluateInvisibleGroups = false) {
+    return this.groups.reduce((acc, g: GanttGroup) => {
+
+      if (evaluateInvisibleGroups) {
+        const visible = this.settings.getGroupConfig(g.name)?.visible ?? false
+        if (!visible) return acc
+      }
+
       const content = (g.lanes ?? 1) * this.viewModel.eventRowHeight
       return acc + this.viewModel.getGroupHeaderHeight + content
     }, 0)

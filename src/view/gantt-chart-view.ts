@@ -63,10 +63,7 @@ export class GanttChartView {
     }
 
     this.updateToolbarLayout()
-
-    // this.updateCalendarStickyState()
     this.initiateChartContainerSubContainers()
-    this.initScrollListener()
   }
 
   public updateToolbarLayout() {
@@ -107,9 +104,6 @@ export class GanttChartView {
     this.gridLayer = this.foregroundLayer.createSvg('g')
     this.dataLayer = this.foregroundLayer.createSvg('g', {attr: {'clip-path': `url(#${this.clipId})`}})
 
-    // this.dynamicCalendarLayer = this.foregroundLayer.createSvg('g')
-    // this.staticCalendarLayer = this.foregroundLayer.createSvg('g')
-
     this.eraLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.era})
     this.lowerHoverLayer = this.dataLayer.createSvg('g')
     this.repeaterEventLayer = this.dataLayer.createSvg('g', {cls: Css.itemLayer.repeater})
@@ -117,7 +111,6 @@ export class GanttChartView {
     this.upperHoverLayer = this.dataLayer.createSvg('g')
 
     this.chartCalendarContainer = this.chartContainer.createDiv({cls: 'gt-calendar-container'})
-    // if (this.settings.stickyCalAxes) this.chartCalendarContainer.addClass('is-sticky-calendar')
     this.calendarSvg = this.chartCalendarContainer.createSvg('svg', {
       cls: Css.svg.canvas,
       attr: {height: this.viewModel.calendarAreaHeight.toString()}
@@ -125,17 +118,7 @@ export class GanttChartView {
 
     this.dynamicCalendarLayer = this.calendarSvg.createSvg('g')
     this.staticCalendarLayer = this.calendarSvg.createSvg('g')
-
-    // this.updateCalendarStickyState()
   }
-
-  // public updateCalendarStickyState() {
-  //   const scrollContainer = this.getScrollableContainer(false)
-  //   if (!scrollContainer) return
-  //
-  //   const isScrollable = scrollContainer.scrollHeight > scrollContainer.clientHeight
-  //   this.chartContainer.toggleClass('gt-calendar-sticky', isScrollable)
-  // }
 
   get clientWidth() {
     return this.container.clientWidth
@@ -331,46 +314,17 @@ export class GanttChartView {
     return this.eventSvg.getBoundingClientRect()
   }
 
-  private initScrollListener() {
-    /*
-     * TODO
-     */
-    // if (!this.chartCtx.settings.stickyCalAxes) return
-    //
-    // const scrollContainer = this.getScrollableContainer(false)
-    // if (!scrollContainer) return
-    //
-    // scrollContainer.addEventListener('scroll', () => {
-    //   const scrollTop = scrollContainer.scrollTop
-    //   this.calendarSvg.style.transform = `translateY(-${scrollTop}px)`
-    // }, {passive: true})
-  }
-
-  // private updateStickyAxes(_scrollContainer: HTMLElement) {
-  // const scrollTop = scrollContainer.scrollTop
-  // const clientHeight = scrollContainer.clientHeight
-  // const bottomViewportEdge = scrollTop + clientHeight
-  //
-  // // Find all calendar axis groups inside dynamicCalendarLayer
-  // const axisGroups = Array.from(this.dynamicCalendarLayer.children) as SVGGElement[]
-  //
-  // axisGroups.forEach((group) => {
-  //   const originalY = parseFloat(group.dataset.originalY || '0')
-  //   if (!group.dataset.originalY) {
-  //     const transform = group.getAttribute('transform') || ''
-  //     const match = transform.match(/translate\(([^,]+),\s*([^\)]+)\)/)
-  //     if (match) group.dataset.originalY = match[2]
-  //   }
-  // })
-  // }
-
   /**
-   * Event area height has to be set once after drawing everything.
-   * @param height new value for event area height
+   * Event area height has to be set once after drawing everything or when height changes.
+   * @param visibleHeight new value for event area height
+   * @param totalHeight new value for event area height
    */
-  public setEventAreaHeight(height: number) {
-    this.chartEventContainer.style.height = `${height}px`
+  setEventAreaContainerHeight(visibleHeight: number,
+                              totalHeight: number) {
+    this.chartEventContainer.style.height = `${visibleHeight}px`
+    this.eventSvg.setAttribute('height', `${totalHeight}`)
   }
+
 
 }
 
