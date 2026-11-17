@@ -1,6 +1,6 @@
 import {setIcon} from 'obsidian'
 import {GanttItem} from '../types/settings-types'
-import {Css} from 'const/constants'
+import {Css} from '../const/constants'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'
 import {MoonDrawData} from '../types/moon-types'
@@ -50,7 +50,7 @@ export class SvgDrawerUtil {
     this.eventManager = em
   }
 
-  createIconInDiv(d: GanttItem): HTMLDivElement {
+  private createIconInDiv(d: GanttItem): HTMLDivElement {
     const iconContainerDiv = window.createDiv({cls: Css.item.iconContainer})
     // if (d.displayIconColor)
     iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
@@ -119,11 +119,11 @@ export class SvgDrawerUtil {
    * @param width
    * @param textCssClass
    */
-  addAndMoveIconAndText(d: GanttItem,
-                        x: number, y: number,
-                        container: SVGElement,
-                        width: number,
-                        textCssClass: string) {
+  private addAndMoveIconAndText(d: GanttItem,
+                                x: number, y: number,
+                                container: SVGElement,
+                                width: number,
+                                textCssClass: string) {
     if (this.eventManager?.isDragging) return
 
     let availableWidth: number
@@ -398,14 +398,14 @@ export class SvgDrawerUtil {
    * @param colorFg Foreground color
    * @param colorBg Background color
    */
-  drawMoonPhase(cx: number,
-                step: number,
-                phase: number,
-                moonIndex: number,
-                moonCount: number,
-                svgContainer: SVGElement,
-                colorFg: string,
-                colorBg: string): void {
+  private drawMoonPhase(cx: number,
+                        step: number,
+                        phase: number,
+                        moonIndex: number,
+                        moonCount: number,
+                        svgContainer: SVGElement,
+                        colorFg: string,
+                        colorBg: string): void {
     this.moonIconCache ??= new MoonIconCache()
 
     const innerContent: DocumentFragment = this.moonIconCache.getMoonIcon(phase, step, colorFg, colorBg)

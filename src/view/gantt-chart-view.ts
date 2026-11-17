@@ -366,8 +366,7 @@ export class GanttChartView {
 
   /**
    * Event area height has to be set once after drawing everything.
-   * TODO: when to reset?
-   * @param height
+   * @param height new value for event area height
    */
   public setEventAreaHeight(height: number) {
     this.chartEventContainer.style.height = `${height}px`
