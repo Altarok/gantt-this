@@ -5,10 +5,10 @@ import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
 import {ParsedDate} from '../src/types/settings-types'
 import {runOffsetCalculations} from '../src/date-calculations/calendar-offset-calc'
 import {CalendarConfig} from '../src/types/calendar-types'
-import {GanttError} from "../src/model/gantt-error";
-import {ErrorDef, knownErrors} from "../src/const/error-types";
+import {GanttError} from '../src/model/gantt-error'
+import {ErrorDef, knownErrors} from '../src/types/error-types'
 
-export function parseDate(input?: string, config?: CalendarConfig | null): ParsedDate | null {
+function parseDate(input: string, config?: CalendarConfig | null): ParsedDate {
   return parseEventDate(false, false, input, config)
 }
 
@@ -27,6 +27,7 @@ describe('Parsing event dates fails for', () => {
     // },
     const err: GanttError = getGanttErrorFromId('unparseableDate')
     err.message = `Can't parse date: 'null'`
+    // @ts-ignore
     expect(() => parseDate(null, gregorianConfig)).toThrow(err)
   })
 

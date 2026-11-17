@@ -7,7 +7,7 @@ import BasesContext from './bases-context'
 import TextWidthCache from '../render/text-space-cache'
 import {CalendarConfig} from '../types/calendar-types'
 import {GanttError} from './gantt-error'
-import {ChartDiagnostics, ErrorId} from '../const/error-types'
+import {ChartDiagnostics, ErrorId} from '../types/error-types'
 import {ToolbarView} from '../view/toolbar-view'
 
 /**

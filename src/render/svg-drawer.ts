@@ -198,16 +198,16 @@ export class GanttRenderEngine {
     this.view.setWidth(currRenderWidth)
 
     this.drawGroupBackgrounds()
-    // try {// Code that might crash
+    // try {
     this.renderData()
     this.drawAxes(redrawOption)
     // } catch (error) {
     // WNM #errorCache keep code
     // if (error instanceof Error) {
-    //   debug('Error drawing axes:', error.message)
-    //   debug(error.stack)
+    //   debug.info('Error drawing axes:', error.message)
+    //   debug.info(error.stack)
     // } else {
-    //   debug('An unexpected error occurred:', error)
+    //   debug.info('An unexpected error occurred:', error)
     // }
     // }
 

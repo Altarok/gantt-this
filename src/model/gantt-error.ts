@@ -1,5 +1,5 @@
 import {TFile} from 'obsidian'
-import {ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../const/error-types'
+import {ErrorId, ErrorSeverity, ErrorType, knownErrors} from '../types/error-types'
 
 export function formatErrorMessage(template: string, params?: Record<string, string | number>): string {
   if (!params) return template

@@ -1,7 +1,7 @@
 import {Modal} from 'obsidian'
 import FantasyGanttPlugin from '../main'
 import {ChartContext} from '../model/chart-context'
-import {ChartDiagnostics, ErrorEntry, ErrorSeverity} from '../const/error-types'
+import {ChartDiagnostics, ErrorEntry, ErrorSeverity} from '../types/error-types'
 import {Css} from '../const/constants'
 
 const cssClasses: Record<ErrorSeverity, string> = {
