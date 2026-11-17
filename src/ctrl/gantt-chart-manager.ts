@@ -99,14 +99,14 @@ export class ChartManager {
   }
 
   refreshChartCallback = async (reset: RedrawOption): Promise<void> => {
-    if (reset.has('resetDiagnosticCache')) {
+    if (reset.resetDiagnosticCache) {
       this.diagnosticsContext.resetCache()
       this.chartContext.toolbarView?.reset()
     }
-    if (reset.has('resetCalendarCache')) {
+    if (reset.resetCalendarCache) {
       await this.prepareCalendarCache(true)
     }
-    if (reset.has('redraw')) {
+    if (reset.redrawEverything) {
       this.chartContext.toolbarView?.toggleShowZoomAndPanButtons(this.settingsContext.showPanAndZoomButtonsInToolbar)
     }
     if (!this.renderEngine) return

@@ -168,14 +168,14 @@ export class ToolbarView implements Destroyable {
     this.container.addClass('minimized')
     this.unfoldButton.addClass('visible')
     this.chartView.container.addClass('is-toolbar-minimized')
-    void this.refreshChartCallback(RedrawOption.None)
+    void this.refreshChartCallback(RedrawOption.ToolbarFold)
   }
 
   unfoldToolbar() {
     this.container.removeClass('minimized')
     this.unfoldButton.removeClass('visible')
     this.chartView.container.removeClass('is-toolbar-minimized')
-    void this.refreshChartCallback(RedrawOption.None)
+    void this.refreshChartCallback(RedrawOption.ToolbarFold)
   }
 
   setHasWarnings() {

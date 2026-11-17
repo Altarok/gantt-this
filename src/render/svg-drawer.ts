@@ -54,13 +54,13 @@ export class GanttRenderEngine {
   }
 
   public updateData(reset: RedrawOption, newData: GanttItem[]) {
-    if (reset.has('redraw')) this.view.updateToolbarLayout()
+    if (reset.redrawEverything) this.view.updateToolbarLayout()
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
     this.viewModel.updateSvgDrawerData()
     this.rawData = newData
     this.calculateGlobalBounds()
     this.initLayout()
-    if (reset.has('redraw')) this.redraw()
+    if (reset.redrawEverything) this.redraw()
     this.handleResize(reset)
     this.initEventListener()
   }
@@ -157,8 +157,8 @@ export class GanttRenderEngine {
     this.handleResize(RedrawOption.None) // false
   }
 
-  private handleResize(reset: RedrawOption) {
-    debug.log(`Auto-refresh with options: ${reset.toString()}`)
+  private handleResize(redrawOption: RedrawOption) {
+    debug.log(`Auto-refresh with options: ${redrawOption.toString()}`)
 
     this.viewModel.setRawContainerWidth(this.view.clientWidth)
 
@@ -170,7 +170,7 @@ export class GanttRenderEngine {
     /*
      * Re-calculate current bounds after resize
      */
-    if (reset === RedrawOption.Resize && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
+    if (redrawOption.changedWidth && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
       // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
       const totalDaysSpan = this.viewModel.totalDaysSpan
       const oldCenterPixel = lastRenderWidth / 2
@@ -190,7 +190,7 @@ export class GanttRenderEngine {
       this.viewModel.cacheCurrentRenderWidth()
     }
 
-    if (reset.has('resetZoomAndPan') && this.settings.hasDateBounds) {
+    if (redrawOption.resetZoomAndPan && this.settings.hasDateBounds) {
       /* Re-evaluate predefined bounds now that we have the true container width */
       this.transitionToPredefinedBounds()
     }
@@ -200,7 +200,7 @@ export class GanttRenderEngine {
     this.drawGroupBackgrounds()
     // try {// Code that might crash
     this.renderData()
-    this.drawAxes(reset)
+    this.drawAxes(redrawOption)
     // } catch (error) {
     // TODO #errorCache keep code
     // if (error instanceof Error) {
@@ -211,7 +211,7 @@ export class GanttRenderEngine {
     // }
     // }
 
-    this.calculateAndSetEventAreaHeight()
+    if (redrawOption.changedHeight) this.calculateAndSetEventAreaHeight()
   }
 
   /*
@@ -342,7 +342,7 @@ export class GanttRenderEngine {
 
   private drawAxes(reset: RedrawOption) {
     debug.debug('drawAxes >>')
-    this.view.clearCalendarLayer(reset.has('redraw'))
+    this.view.clearCalendarLayer(reset.redrawEverything)
 
     const itemsAreaHeight = this.viewModel.eventsAreaHeight
 
@@ -441,7 +441,7 @@ export class GanttRenderEngine {
         this.svgDrawerUtil.drawMoons(moonDrawData, ticksG)
       }
 
-      if (reset.has('redraw') && calBadgeTextContent) {
+      if (reset.redrawEverything && calBadgeTextContent) {
         this.view.drawCalendarBadge(calBadgeTextContent.toUpperCase(), calendarConfig.link, currentAxisYStart)
       }
     })
@@ -454,7 +454,7 @@ export class GanttRenderEngine {
   resetZoomAndPan() {
     if (this.eventManager?.isDragging) return
     this.viewModel.resetPanAndZoom()
-    this.handleResize(RedrawOption.ResetView)
+    this.handleResize(RedrawOption.ResetZoomAndPan)
   }
 
   /**
