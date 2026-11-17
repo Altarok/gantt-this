@@ -60,7 +60,7 @@ describe('RedrawOption', () => {
   })
 
   it('Resize should contain only resize and be marked as manual', () => {
-    const ro = RedrawOption.Resize
+    const ro = RedrawOption.ResizeContainer
 
     assertProperConfig(ro, false, false, false, false,
       true, false, true)
@@ -79,7 +79,7 @@ describe('RedrawOption', () => {
 
 
   it('Toolbar folding should contain 2 steps and be marked as manual', () => {
-    const ro = RedrawOption.ToolbarFold
+    const ro = RedrawOption.HeightChange
 
     assertProperConfig(ro, false, false, false, false,
       false, false, true)

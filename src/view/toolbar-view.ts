@@ -107,9 +107,12 @@ export class ToolbarView implements Destroyable {
       .addSettingRow('Hover: Draw vertical line', () => settings.drawVerticalLineOnHover, (b: boolean) => settings.drawVerticalLineOnHover = b)
       .addSettingRow('Hover: Draw arrows', () => settings.drawArrows, (b: boolean) => settings.drawArrows = b)
       .addSeparator()  /* separator for toolbar */
-      .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b, true)
-      .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b, true)
-      .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b, true)
+      .addSettingRow('Toolbar: Sticky', () => settings.stickyToolbar, (b: boolean) => settings.stickyToolbar = b,
+        RedrawOption.ManualReload)
+      .addSettingRow('Toolbar: At bottom', () => settings.toolbarBelowChart, (b: boolean) => settings.toolbarBelowChart = b,
+        RedrawOption.ManualReload)
+      .addSettingRow('Toolbar: Zoom/Pan buttons', () => settings.showPanAndZoomButtonsInToolbar, (b: boolean) => settings.showPanAndZoomButtonsInToolbar = b,
+        RedrawOption.ManualReload)
       .addSeparator()
       .addResetCallbackRow(() => this.chartCtx.settings.copyOverwritableGlobalSettings())
     })
@@ -128,7 +131,10 @@ export class ToolbarView implements Destroyable {
           text = `${group.id} *`
         } else text = group.id
 
-        menu.addSettingRow(text, () => group.visible, (b: boolean) => group.visible = b)
+        menu.addSettingRow(text,
+          () => group.visible,
+          (b: boolean) => group.visible = b,
+          RedrawOption.HeightChange)
       }
 
       if (containsUnknownGroups) menu.addFootnoteRow('* : unregistered group')
@@ -168,14 +174,14 @@ export class ToolbarView implements Destroyable {
     this.container.addClass('minimized')
     this.unfoldButton.addClass('visible')
     this.chartView.container.addClass('is-toolbar-minimized')
-    void this.refreshChartCallback(RedrawOption.ToolbarFold)
+    void this.refreshChartCallback(RedrawOption.HeightChange)
   }
 
   unfoldToolbar() {
     this.container.removeClass('minimized')
     this.unfoldButton.removeClass('visible')
     this.chartView.container.removeClass('is-toolbar-minimized')
-    void this.refreshChartCallback(RedrawOption.ToolbarFold)
+    void this.refreshChartCallback(RedrawOption.HeightChange)
   }
 
   setHasWarnings() {

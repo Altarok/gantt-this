@@ -14,7 +14,9 @@ export class ChartDropdownMenu extends Menu {
     debug.log('Open dropdown')
   }
 
-  addSettingRow(title: string, getValue: () => boolean, onChange: (b: boolean) => void, fullRedraw = false): this {
+  addSettingRow(title: string, getValue: () => boolean,
+                onChange: (b: boolean) => void,
+                redraw: RedrawOption = RedrawOption.None): this {
     debug.log(`Add dropdown option: ${title} = ${getValue()}`)
     this.addItem((item) => {
       item.setTitle(title)
@@ -23,8 +25,7 @@ export class ChartDropdownMenu extends Menu {
         const next = !getValue()
         debug.log(`Set dropdown option: ${title} -> ${next}`)
         onChange(next)
-        if (fullRedraw) void this.refreshChartCallback(RedrawOption.ManualReload)
-        else void this.refreshChartCallback(RedrawOption.None)
+        void this.refreshChartCallback(redraw)
       })
     })
     return this

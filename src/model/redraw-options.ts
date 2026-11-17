@@ -1,11 +1,11 @@
 type RedrawStep =
-  'resetCalendarCache'
-  | 'resetDiagnosticCache'
+  'resetCalendarCache' /* Reset calendar cache */
+  | 'resetDiagCache' /* Reset error diagnostic cache */
   | 'reloadData'
   | 'resetZoomAndPan'
   | 'redraw'
-  | 'calculateEventAreaWidth'
-  | 'calculateEventAreaHeight'
+  | 'calcEventAreaWidth'
+  | 'calcEventAreaHeight'
 
 export class RedrawOption {
   private readonly steps: Set<RedrawStep>
@@ -34,7 +34,7 @@ export class RedrawOption {
   }
 
   get resetDiagnosticCache(): boolean {
-    return this.has('resetDiagnosticCache')
+    return this.has('resetDiagCache')
   }
 
   get resetZoomAndPan(): boolean {
@@ -42,11 +42,11 @@ export class RedrawOption {
   }
 
   get changedHeight(): boolean {
-    return this.has('calculateEventAreaHeight')
+    return this.has('calcEventAreaHeight')
   }
 
   get changedWidth(): boolean {
-    return this.has('calculateEventAreaWidth')
+    return this.has('calcEventAreaWidth')
   }
 
   private has(step: RedrawStep): boolean {
@@ -58,32 +58,34 @@ export class RedrawOption {
   }
 
   /** Do everything. Used once during creation. */
-  static readonly Full = new RedrawOption(true, ['resetCalendarCache', 'resetDiagnosticCache',
-    'reloadData', 'resetZoomAndPan', 'calculateEventAreaWidth', 'redraw', 'calculateEventAreaHeight'])
+  static readonly Full = new RedrawOption(true, ['resetCalendarCache', 'resetDiagCache',
+    'reloadData', 'resetZoomAndPan', 'calcEventAreaWidth', 'redraw', 'calcEventAreaHeight'])
 
   /** Do everything except resetting current zoom and pan. Manually triggered by clicking 'Reload data'. */
-  static readonly ManualReload = new RedrawOption(true, ['resetCalendarCache',
-    'resetDiagnosticCache', 'reloadData', 'calculateEventAreaWidth', 'redraw', 'calculateEventAreaHeight'])
+  static readonly ManualReload = new RedrawOption(true,
+    ['resetCalendarCache', 'resetDiagCache', 'reloadData', 'calcEventAreaWidth', 'redraw', 'calcEventAreaHeight'])
 
   /**
    * Automatically triggered by Obsidian's Base internal BTS trigger.
    * Updates data filtered by Base, not including calendars.
    * Does not affect current zoom or pan values.
    */
-  static readonly DataReload = new RedrawOption(false, ['reloadData', 'redraw',
-    'calculateEventAreaHeight'])
+  static readonly DataReload = new RedrawOption(false,
+    ['reloadData', 'redraw', 'calcEventAreaHeight'])
 
   /** Manually triggered. Only resets view (zoom and pan values) to default. */
-  static readonly ResetZoomAndPan = new RedrawOption(true, ['resetZoomAndPan'])
+  static readonly ResetZoomAndPan = new RedrawOption(true,
+    ['resetZoomAndPan'])
 
   /** Manually triggered. Changes frame size. */
-  static readonly Resize = new RedrawOption(true, ['calculateEventAreaWidth',
-    'calculateEventAreaHeight'])
+  static readonly ResizeContainer = new RedrawOption(true,
+    ['calcEventAreaWidth', 'calcEventAreaHeight'])
 
   /** Manually triggered. Basic redraw, does not change or reset anything. */
   static readonly None = new RedrawOption(true, [])
 
-  /** Manually triggered. No content change, but re-calculation of areas. */
-  static readonly ToolbarFold = new RedrawOption(true, ['calculateEventAreaHeight'])
+  /** Manually triggered. No content change, but re-calculation of event area height. */
+  static readonly HeightChange = new RedrawOption(true,
+    ['calcEventAreaHeight'])
 
 }

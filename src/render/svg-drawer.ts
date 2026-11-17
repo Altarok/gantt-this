@@ -46,7 +46,7 @@ export class GanttRenderEngine {
         debug.log(`<< resize (short) ${this.lastWidth} == ${newWidth}`)
         return
       }
-      this.handleResize(RedrawOption.Resize)
+      this.handleResize(RedrawOption.ResizeContainer)
       debug.log(`<< resize (width) ${this.lastWidth} != ${newWidth}`)
       this.lastWidth = newWidth
     })
@@ -202,7 +202,7 @@ export class GanttRenderEngine {
     this.renderData()
     this.drawAxes(redrawOption)
     // } catch (error) {
-    // TODO #errorCache keep code
+    // WNM #errorCache keep code
     // if (error instanceof Error) {
     //   debug('Error drawing axes:', error.message)
     //   debug(error.stack)
@@ -214,11 +214,6 @@ export class GanttRenderEngine {
     if (redrawOption.changedHeight) this.calculateAndSetEventAreaHeight()
   }
 
-  /*
-   * TODO call after
-   * - hiding/unhiding toolbar
-   * - hiding/unhiding a group
-   */
   private calculateAndSetEventAreaHeight(): void {
     const activeWindow = this.view.chartContainer.ownerDocument.defaultView ?? window
     const viewportHeight = activeWindow.innerHeight
