@@ -112,7 +112,7 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
       this.engine.panDiff(0)
       this.destroyAnimation()
       debug.log('<< handleEndInteraction')
-    } else debug.trace('<> handleEndInteraction (short)')
+    } else debug.log('<> handleEndInteraction (short)')
   }
 
   /**

@@ -1,4 +1,5 @@
 import {generateManualMoonSvg} from './svg-icon-creator'
+import {gcd} from '../util/mathe'
 
 /**
  * Caches dynamically generated moon phase icons to avoid redundant DOM allocations.
@@ -6,18 +7,11 @@ import {generateManualMoonSvg} from './svg-icon-creator'
 export class MoonIconCache {
   private cache = new Map<string, DocumentFragment>()
 
-  /**
-   * Calculates the greatest common divisor using the Euclidean algorithm.
-   * greatest common divisor = Groesster gemeinsamer Teiler
-   */
-  private gcd(a: number, b: number): number {
-    return b === 0 ? a : this.gcd(b, a % b)
-  }
 
   private getCacheKey(phaseCount: number, step: number, colorFg: string, colorBg: string): string {
     const normalizedStep = ((step % phaseCount) + phaseCount) % phaseCount
 
-    const divisor = this.gcd(normalizedStep, phaseCount)
+    const divisor = gcd(normalizedStep, phaseCount)
     const reducedStep = normalizedStep / divisor
     const reducedCount = phaseCount / divisor
 

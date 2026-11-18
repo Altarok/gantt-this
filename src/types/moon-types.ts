@@ -14,13 +14,15 @@ export type MoonDrawPosition = {
   phase: number
 }
 
+export type SingleMoonDrawData = {
+  index: number
+  color: string
+  colorBg: string
+  positions: MoonDrawPosition[]
+}
+
 export type MoonDrawData = {
   moonCount: number
   /** Size of this should equal moonCount */
-  moons: {
-    index: number
-    color: string
-    colorBg: string
-    positions: MoonDrawPosition[]
-  }[]
+  moons: SingleMoonDrawData[]
 }

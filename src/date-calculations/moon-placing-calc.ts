@@ -1,9 +1,36 @@
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {CalendarConfig} from '../types/calendar-types'
-import {MoonDrawData, MoonDrawPosition} from '../types/moon-types'
+import {Moon, MoonDrawData, SingleMoonDrawData} from '../types/moon-types'
+import {getDivisors} from '../util/mathe'
 
 /** Minimum distance threshold to render without icon overlap */
 const MIN_ICON_SPACING_PX = 20
+
+function calculatePhaseStepsForThisMoon(engine: GanttRenderEngine,
+                                        moon: Moon): number | null {
+  let result: number | null = null
+
+  const cycle = moon.cycle
+  const phases = moon.phases ?? 4
+  const singleStep = cycle / phases
+
+  const x0 = engine.getXPosition(0)
+
+  const descendingDivisors = getDivisors(phases, false)
+
+  for (const divisor of descendingDivisors) {
+    // check if we can draw moons at this distance
+
+    const x1 = engine.getXPosition(divisor * singleStep)
+    const distanceOnScreen = Math.abs(x1 - x0)
+
+    if (distanceOnScreen < MIN_ICON_SPACING_PX) break
+
+    result = divisor
+  }
+
+  return result
+}
 
 /**
  * Calculates and returns draw data for all visible moon phases across configured lunar cycles.
@@ -33,27 +60,16 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
 
   if (moons.length === 0) return moonDrawData /* fast-fail */
 
-  moons.forEach((moon, index) => {
-    if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) return /* fast-fail */
+  moons.forEach((moon: Moon, index) => {
+    if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) return /* fast-fail TODO add error */
+
+    const phaseStep: number | null = calculatePhaseStepsForThisMoon(engine, moon)
+
+    if (!phaseStep) return /* fast-fail */
 
     const cycle = moon.cycle
     const phases = moon.phases ?? 4
     const offset = (moon.offset + calendarConfig.offsetToDayZero) % cycle
-
-    /* Pixel distance for a 1/4 cycle step (quarter moon to quarter moon) */
-    const singleStepDays = cycle / phases
-    const x0 = engine.getXPosition(0)
-    const x1 = engine.getXPosition(singleStepDays)
-    const distanceBetweenTwoPhases = Math.abs(x1 - x0)
-
-    /* Pixel distance for a 1/2 cycle step (New to Full) */
-    const halfCyclePixels = distanceBetweenTwoPhases * 2
-
-    /* Guard: Skip entire moon if even major phases (New/Full) would overlap */
-    if (halfCyclePixels < MIN_ICON_SPACING_PX) return /* fast-fail */
-
-    /* Determine if zoom level provides enough screen space for intermediate quarter phases */
-    // const showQuarterPhases = distanceBetweenTwoPhases >= MIN_ICON_SPACING_PX
 
     /*
      * Determine the range of cycle indices (k) that intersect with the
@@ -62,12 +78,7 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
     const minK = Math.floor(effectiveStartDay / cycle) - 1
     const maxK = Math.ceil(effectiveEndDay / cycle) + 1
 
-    const singleMoonDrawData: { index: number, color: string, colorBg: string, positions: MoonDrawPosition[] } = {
-      index,
-      color: moon.color ?? 'currentColor',
-      colorBg: moon.colorBg ?? 'black',
-      positions: []
-    }
+    const singleMoonDrawData: SingleMoonDrawData = createDefaultSingleMoonData(index, moon)
     moonDrawData.moons.push(singleMoonDrawData)
 
     /* Helper closure to validate viewport bounds and collect visible moon data */
@@ -77,20 +88,15 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
       if (x >= 0 && x <= renderWidth) singleMoonDrawData.positions.push({xPos: x, step, phase})
     }
 
-    let lastXPos = -Infinity
-
     /* Iterate through all lunar cycles falling within the visible render range */
     for (let k = minK; k <= maxK; k++) {
       /* Iterate through all lunar cycles falling within 2 new moons */
-      for (let step = 0; step < phases; step++) {
+      for (let step = 0; step < phases; step = step + phaseStep) {
         const progress = step / phases
         const exactDay = (k + progress) * cycle + offset
 
         const xPos = engine.getXPosition(exactDay)
-        if (xPos - lastXPos > distanceBetweenTwoPhases) {
-          renderPhaseIfVisible(xPos, exactDay, step, phases)
-          lastXPos = xPos
-        }
+        renderPhaseIfVisible(xPos, exactDay, step, phases)
       }
     }
 
@@ -98,4 +104,13 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
 
 
   return moonDrawData
+}
+
+function createDefaultSingleMoonData(index: number, moon: Moon): SingleMoonDrawData {
+  return {
+    index,
+    color: moon.color ?? 'currentColor',
+    colorBg: moon.colorBg ?? 'black',
+    positions: []
+  }
 }

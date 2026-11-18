@@ -359,9 +359,6 @@ export class GanttRenderEngine {
 
     this.viewModel.activeCalendarNames.forEach((calType, index) => {
       const currentAxisYStart = index * this.viewModel.calendarAxisRowHeight
-      const tickHorizontalPixelSpacing = (this.viewModel.stepDays / (this.viewModel.totalDaysSpan)) * this.currRenderWidth * this.viewModel.zoomFactor
-      const showMoonPhases: boolean = this.settings.showMoons && tickHorizontalPixelSpacing >= 24
-      debug.debug(`drawAxes -- showMoonPhases : ${showMoonPhases}`)
 
       this.viewModel.drawnCals[calType] = {
         y1: currentAxisYStart,
@@ -441,7 +438,7 @@ export class GanttRenderEngine {
         }
       }
 
-      if (showMoonPhases && calendarConfig.moons) {
+      if (this.settings.showMoons && calendarConfig.moons) {
         const moonDrawData: MoonDrawData = calculateMoonPositions(this, calendarConfig, startDaysValue, endDaysValue,
           effectiveStartDay, effectiveEndDay, this.currRenderWidth)
         this.svgDrawerUtil.drawMoons(moonDrawData, ticksG)
