@@ -12,7 +12,6 @@ export default class TextWidthCache {
 
   getSvgWidth(svg: SVGTextElement, groupName: string): number {
     const text = groupName.toUpperCase()
-    // svg.textContent = text
     if (this.svgCache[text] !== undefined) return this.svgCache[text]
 
     const w = (svg.getComputedTextLength() || text.length * 6.5) + 20
