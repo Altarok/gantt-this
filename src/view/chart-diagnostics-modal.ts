@@ -69,7 +69,7 @@ export class ChartDiagnosticsModal extends Modal {
      * Potential overview of related documentation URLs
      */
     // if (logTypes?.length > 0) {
-    //   const tipps = contentEl.createDiv({cls: 'gt-stats-group'})
+    //   const tipps = contentEl.createDiv({cls: 'WIP'})
     //
     //   for (const logType of logTypes) switch (logType) {
     //     case 'calendar': {

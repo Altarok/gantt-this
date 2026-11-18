@@ -21,7 +21,6 @@ export const Css = {
     errorList: 'gt-stats-error-list',
     /** Individual row in the log */
     errorListRow: 'gt-stats-row',
-    // group: 'gt-stats-group', // TODO does not even exist
     /** Clickable link to open the corresponding note */
     openFileLink: 'gt-stats-open-file-link',
     logInfo: 'gt-log-info',
@@ -50,8 +49,6 @@ export const Css = {
   /** Scrollable container for the actual chart */
   chartContainer: 'gt-chart-container',
   axis: {
-    // /** Baseline of the calendar axis */
-    // baseline: 'gt-axis-baseline', // TODO does not even exist
     /** Gridlines in the calendar grid */
     gridline: 'gt-axis-gridline',
     /** Label of the calendar axis */

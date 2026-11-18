@@ -152,7 +152,8 @@ body.is-popout-window .gt-chart-container {
 }
 
 .gt-minimized-btn {
-  /* Nutzt das normale Button-Styling, keine absolute Positionierung mehr nötig */
+  /* Use default button styling, but make it transparent */
+  opacity: 0.5;
 }
 
 /* When the main container is minimized, hide the toolbar and show this header */
