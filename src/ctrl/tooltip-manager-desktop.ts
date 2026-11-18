@@ -423,7 +423,6 @@ export default class TooltipManager implements HoverParent {
   }
 
   private hideHighlightAroundElement() {
-    // debug.trace('<> hideHighlightAroundElement')
     this.chartView.clearHoverLayer()
   }
 

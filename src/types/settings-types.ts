@@ -80,7 +80,7 @@ export type GanttItem = {
   predecessors: EventId[] // IDs of predecessor GanttItems
   successors: EventId[] // IDs of successors GanttItems
 
-  // stuff for repetition:
+  /* stuff for repetition: */
   repeatRule?: RepeatRule
   // repeatEveryDays?: number // X interval in days from your regex
   // repeatUntilDays?: number // Optional upper end bound for recurrence

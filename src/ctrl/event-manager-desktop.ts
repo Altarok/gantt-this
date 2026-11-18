@@ -33,12 +33,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     this.attachListeners()
   }
 
-  // protected getScrollableContainer(): HTMLElement | null {
-  //   const isPopout = this.activeWindow?.document.body.classList.contains('is-popout-window')
-  //   return isPopout ? this.engine.render.chartContainer
-  //     : this.engine.view.container.parentElement
-  // }
-
   public attachListeners() {
 
     const plugin = this.chartCtx.plugin
@@ -51,7 +45,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     }
 
     if (this.chartContainer) {
-      // const svgEl: HTMLElement = this.svg as unknown as HTMLElement
       /* Placed on chart for events to start inside the chart */
       plugin.registerDomEvent(this.chartContainer, 'mousedown', this.boundSvgMouseDown)
       plugin.registerDomEvent(this.chartContainer, 'wheel', this.boundSvgWheel, {passive: false})
@@ -86,10 +79,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private handleSvgMouseDown(e: MouseEvent) {
     if ((e.target as HTMLElement).hasAttribute('data-id')) return
 
-    // /* Prevent Obsidian from interpreting this swipe as a sidebar trigger */
-    // e.preventDefault()
-    // e.stopPropagation()
-
     super.startDragInteraction(e.clientX, e.clientY)
   }
 
@@ -105,7 +94,6 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   }
 
   private handleSvgWheel(e: WheelEvent) {
-    // if (e) this.logTouchEvent('handleSvgWheel', e)
     if (!this.chartContainer) return
 
     if (this.isModifierActive(e, this.settings.uxZoomButton)) {
@@ -120,7 +108,7 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private mouseWheelPan(e: WheelEvent) {
     const deltaX = -Math.floor(e.deltaY / 2)
 
-    // Pan horizontally (and vertically if your timeline pans Y-axis too)
+    /* Pan horizontally (and vertically if your timeline pans Y-axis too) */
     this.rafId ??= this.activeWindow?.requestAnimationFrame(() => {
       this.engine.panDiff(deltaX)
       this.rafId = undefined
@@ -130,13 +118,13 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
   private mouseWheelZoom(e: WheelEvent) {
     if (!this.chartContainer) return
 
-    // Determine direction: positive factor zooms in (> 1), negative factor zooms out (< 1)
+    /* Determine direction: positive factor zooms in (> 1), negative factor zooms out (< 1) */
     const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
 
     const rect = this.chartContainer.getBoundingClientRect()
     const mouseX = e.clientX - rect.left - this.viewModel.margin.left
 
-    // Delegate to GanttRenderEngine
+    /* Delegate to GanttRenderEngine */
     this.engine.zoom(factor, mouseX)
   }
 

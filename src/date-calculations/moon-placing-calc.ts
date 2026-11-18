@@ -19,8 +19,7 @@ function calculatePhaseStepsForThisMoon(engine: GanttRenderEngine,
   const descendingDivisors = getDivisors(phases, false)
 
   for (const divisor of descendingDivisors) {
-    // check if we can draw moons at this distance
-
+    /* check if we can draw moons at this distance */
     const x1 = engine.getXPosition(divisor * singleStep)
     const distanceOnScreen = Math.abs(x1 - x0)
 

@@ -25,10 +25,6 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     this.attachListeners()
   }
 
-  // protected getScrollableContainer(): HTMLElement | null {
-  //   return this.engine.view.container.parentElement
-  // }
-
   public attachListeners() {
 
     const plugin = this.chartCtx.plugin
@@ -41,7 +37,6 @@ export class GanttMobileEventManager extends GanttEventManagerBase {
     }
 
     if (this.chartContainer) {
-      // const svgEl: HTMLElement = this.svg as unknown as HTMLElement
       /* Placed on chart for events to start inside the chart */
       plugin.registerDomEvent(this.chartContainer, 'touchstart', this.boundSvgTouchStart, {passive: false})
       plugin.registerDomEvent(this.chartContainer, 'click', this.boundSvgClick)

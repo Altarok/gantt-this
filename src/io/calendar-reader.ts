@@ -87,15 +87,6 @@ async function getCalendarDefinitions(calendarIDs: string[],
       if (err instanceof GanttError) chartCtx.addErr(err, file)
     }
   }
-
-  // for (const calendarID of Object.keys(mappedFiles)) {
-  //   const file = mappedFiles[calendarID]
-  //   try {
-  //     await loadCalendar(chartCtx, calendarID, file)
-  //   } catch (err) {
-  //     if (err instanceof GanttError) chartCtx.addErr(err, file)
-  //   }
-  // }
 }
 
 // /**

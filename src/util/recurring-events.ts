@@ -112,7 +112,7 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
   const pixelsPerDay = (renderWidth / totalDaysSpan) * engine.viewModel.zoomFactor
   if (pixelsPerDay <= 0) return items
 
-  // Compute exact start/end days currently visible on the physical screen
+  /* Compute exact start/end days currently visible on the physical screen */
   const panX = engine.viewModel.panTranslateX
   const visibleMinDays = engine.viewModel.minDays + (-panX / pixelsPerDay)
   const visibleMaxDays = visibleMinDays + (renderWidth / pixelsPerDay)
@@ -130,7 +130,6 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
         err.message = `Failed to duplicate event: ${err.message}`
         chartCtx.addErr(err)
       }
-      // continue
     }
 
   }
@@ -177,8 +176,8 @@ function duplicateEventWithYearDelta(chartCtx: ChartContext,
   if (isNaN(currentYear)) return // continue loop in calling method
 
 
-  // 3. Compute minimum year multiplier to prevent icon overlapping on screen
-  // Assume an average year length to estimate pixel spacing per interval
+  /* 3. Compute minimum year multiplier to prevent icon overlapping on screen */
+  /* Assume an average year length to estimate pixel spacing per interval */
   const approxDaysPerYear = 365
   const pixelSpacingPerInterval = delta * approxDaysPerYear * pixelsPerDay
   let minIntervalMultiplier = 1
@@ -200,29 +199,29 @@ function duplicateEventWithYearDelta(chartCtx: ChartContext,
     }
   }
 
-  // 5. Iteratively increment year integer forward
+  /* 5. Iteratively increment year integer forward */
   let safetyGuard = 0
 
-  while (safetyGuard < 100) { // minimal distance of double icon make the real maximum circa 32
+  while (safetyGuard < 100) { /* minimal distance of double icon make the real maximum circa 32 */
     safetyGuard++
 
-    // Replace the year part in the date string
+    /* Replace the year part in the date string */
     const nextDateParts = [...dateParts]
     nextDateParts[yearIndex] = String(currentYear + (yearOffset))
     const nextDateStr = nextDateParts.join(calendarConfig.delimiter)
 
-    // Re-evaluate through your parser engine
+    /* Re-evaluate through your parser engine */
     const nextParsedDate = createParsedDate(nextDateStr, calendarConfig)
     if (!nextParsedDate) break
 
     const nextStartDays = nextParsedDate.days
 
-    // Stop if we have swept past the physical screen viewport or rule limits
+    /* Stop if we have swept past the physical screen viewport or rule limits */
     if (nextStartDays > visibleMaxDays || nextStartDays > item.repeatRule.endDay) {
       break
     }
 
-    // Only push if it falls within the visible screen area
+    /* Only push if it falls within the visible screen area */
     if (nextStartDays >= visibleMinDays && nextStartDays >= item.repeatRule.startDay) {
       expanded.push(createItem(item, nextStartDays, duration))
     }
@@ -238,12 +237,12 @@ function duplicateEventWithDayDelta(item: GanttItem,
                                     doubleIconSize: number,
                                     visibleMinDays: number,
                                     visibleMaxDays: number): void {
-  if (!item.repeatRule) return // continue loop in calling method
+  if (!item.repeatRule) return /* continue loop in calling method */
   const {delta} = item.repeatRule
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
-  // Compute minimum multiplier cleanly in O(1) without iterating
+  /* Compute minimum multiplier cleanly in O(1) without iterating */
   const pixelSpacingPerInterval = delta * pixelsPerDay
   let minIntervalMultiplier = 1
   if (pixelSpacingPerInterval < doubleIconSize && pixelSpacingPerInterval > 0) {
@@ -251,19 +250,19 @@ function duplicateEventWithDayDelta(item: GanttItem,
   }
 
   const step = minIntervalMultiplier * delta
-  if (step <= 0 || !Number.isFinite(step)) return // continue loop in calling method
+  if (step <= 0 || !Number.isFinite(step)) return /* continue loop in calling method */
 
-  // 1. Get real bounds of event's rule
+  /* 1. Get real bounds of event's rule */
   const ruleStart = item.repeatRule.startDay !== -Infinity ? Math.max(item.startDays, item.repeatRule.startDay) : item.startDays
   const ruleEnd = item.repeatRule.endDay !== +Infinity ? item.repeatRule.endDay : renderEngine.viewModel.maxDays
 
-  // 2. Intersect rule bounds strictly with physical screen viewport (+/- 1 step buffer)
+  /* 2. Intersect rule bounds strictly with physical screen viewport (+/- 1 step buffer) */
   const renderMin = Math.max(ruleStart, visibleMinDays - step)
   const renderMax = Math.min(ruleEnd, visibleMaxDays + step)
 
-  if (renderMin > renderMax) return // continue loop in calling method
+  if (renderMin > renderMax) return /* continue loop in calling method */
 
-  // 3. Jump directly to the first visible occurrence inside the render window
+  /* 3. Jump directly to the first visible occurrence inside the render window */
   const firstStepOffset = Math.ceil((renderMin - ruleStart) / step) * step
   let currentStart = ruleStart + Math.max(step, firstStepOffset)
   let iterations = 0

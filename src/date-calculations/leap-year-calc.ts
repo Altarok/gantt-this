@@ -14,7 +14,7 @@ export function isCustomLeapYear(year: number, calConfig: CalendarConfig, yearWa
   /* No rule means there never is a leap year. */
   if (!leapYearRule || leapYearRule.ruleType === 'none') return false
 
-  // Apply noYearZero offset once upfront if active on negative years
+  /* Apply noYearZero offset once upfront if active on negative years */
   let targetYear = year
   if (!yearWasAlreadyShifted) {
     targetYear = (calConfig.ruleBasedDetails.noYearZero && year < 0) ? year + 1 : year

@@ -171,19 +171,18 @@ export class GanttRenderEngine {
      * Re-calculate current bounds after resize
      */
     if (redrawOption.changedWidth && lastRenderWidth > 0 && lastRenderWidth !== currRenderWidth) {
-      // 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt
+      /* 1. Berechne, welches absolute 'days' aktuell in der Mitte des Sichtfeldes liegt */
       const totalDaysSpan = this.viewModel.totalDaysSpan
       const oldCenterPixel = lastRenderWidth / 2
 
-      // Invertierte Formel von getXPosition, um 'centerDay' zu bestimmen:
-      // centerPixel = percentage * oldRenderWidth * zoomFactor + panTranslateX
+      /* Invertierte Formel von getXPosition, um 'centerDay' zu bestimmen: */
       const centerPercentage = (oldCenterPixel - this.viewModel.panTranslateX) / (lastRenderWidth * this.viewModel.zoomFactor)
       const centerDays = this.viewModel.minDays + (centerPercentage * totalDaysSpan)
 
-      // cache last width
+      /* cache last width */
       this.viewModel.cacheCurrentRenderWidth()
 
-      // 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt
+      /* 3. Berechne das neue panTranslateX so, dass centerDays exakt in newRenderWidth / 2 liegt */
       const newCenterPercentage = (centerDays - this.viewModel.minDays) / totalDaysSpan
       this.viewModel.panTranslateX = (currRenderWidth / 2) - (newCenterPercentage * currRenderWidth * this.viewModel.zoomFactor)
     } else {
@@ -378,10 +377,10 @@ export class GanttRenderEngine {
       const calStart = calendarConfig.startDay as number ?? -Infinity
       const calEnd = calendarConfig.endDay as number ?? Infinity
 
-      // Skip rendering, if current view is completely outside of calendar's lifetime
+      /* Skip rendering, if current view is completely outside of calendar's lifetime */
       if (endDaysValue < calStart || startDaysValue > calEnd) return
 
-      // Clamp rendering bounds to calendar lifetime
+      /* Clamp rendering bounds to calendar lifetime */
       const absoluteStartDay = Math.max(startDaysValue, calStart)
       const absoluteEndDay = Math.min(endDaysValue, calEnd)
 
@@ -629,16 +628,6 @@ export class GanttRenderEngine {
     const percentage = (days - this.viewModel.minDays) / (this.viewModel.totalDaysSpan)
     return (percentage * renderWidth * this.viewModel.zoomFactor) + this.viewModel.panTranslateX
   }
-
-  // findSvgElementsById<T extends SVGElement = SVGElement>(id: number): T[] {
-  // const selector = `[data-id="${id}"]`
-  // return Array.from(this.eventLayer.querySelectorAll<T>(selector))
-  // }
-  //
-  // findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
-  //   const selector = `[data-id="${id}"]`
-  //   return this.render.eventLayer.querySelector<T>(selector)
-  // }
 
   filterActiveEventData(): GanttItem[] {
     this.viewModel.addDistinctCalendar(this.settings.defaultCalendar)

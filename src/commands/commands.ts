@@ -58,20 +58,9 @@ function addCommandEventFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) 
   })
 }
 
-//function addCommandCalendarFrontMatterPropertiesToFile(plugin: FantasyGanttPlugin) {
-//
-//}
-//
-//function addCommandOpenMarkdownCodeBlock(plugin: FantasyGanttPlugin) {
-//
-//}
-
-
 export const Commands = {
   /* To be fne-tuned later */
   addAll(plugin: FantasyGanttPlugin): void {
     addCommandEventFrontMatterPropertiesToFile(plugin)
-    // addCommandCalendarFrontMatterPropertiesToFile(plugin)
-    // addCommandOpenMarkdownCodeBlock(plugin)
   }
 }

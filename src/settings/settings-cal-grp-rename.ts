@@ -36,13 +36,13 @@ export class RenameEntryModal extends Modal {
       text.setValue(result.id).onChange(value => {
         result.id = value.trim()
 
-        // Validation checks
+        /* Validation checks */
         const isValidFormat = ID_REGEX.test(result.id)
         const isUnique = result.id === this.item.id || !this.existingIds.has(result.id)
         const isChanged = result.id !== this.item.id
         const isValid = result.id.length > 0 && isValidFormat && isUnique
 
-        // Toggle error UI feedback
+        /* Toggle error UI feedback */
         idSetting.descEl.toggleClass('is-error', !isValid && result.id.length > 0)
         if (!isValidFormat && result.id.length > 0) {
           void idSetting.setDesc(DESCRIPTION_INVALID)

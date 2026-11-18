@@ -30,7 +30,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
     new AddEntryModal(this.plugin, existingIds, (entry) => {
       const list = this.settings[target]
-      // Set priority to the end of the current list
+      /* Set priority to the end of the current list */
       const newEntry = {...entry, priority: list.length}
 
       list.push(newEntry)
@@ -87,8 +87,6 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       /* Advanced UX settings */
       createChartSettingDefinition(this.settings),
-      // /* Size of events, event rows, and icons */
-      // createPixelMagicSettings(),
 
       {
         heading: 'Advanced',
@@ -136,7 +134,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     return {
       heading: 'Calendars',
       type: 'list',
-      desc: 'Control calendar visibility, color, and order of appearance.',
+      // desc: 'Control calendar visibility, color, and order of appearance.',
       emptyState: 'No calendar defined yet.',
       addItem: {name: 'Add calendar', action: () => this.openAddForm('calendars')},
       onReorder: (oldIndex: number, newIndex: number) => {
@@ -162,7 +160,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
     return {
       heading: 'Groups',
       type: 'list',
-      desc: 'Control group visibility, color and order of appearance.',
+      // desc: 'Control group visibility, color and order of appearance.',
       emptyState: 'No group defined yet.',
       addItem: {name: 'Add group', action: () => this.openAddForm('groups')},
       onReorder: (oldIndex: number, newIndex: number) => {

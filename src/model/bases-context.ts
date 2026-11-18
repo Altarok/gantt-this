@@ -94,7 +94,7 @@ export default class BasesContext {
       const hasStartDate = this.plugin.settings.useFilenameAsFallbackStartDate || eventPropertyReader.hasStartDate(frontmatter, entry.file)
       const hasValidMarker = isCheckboxMarkerOptional || eventPropertyReader.isFileMarkedAsEvent(frontmatter, entry.file)
 
-      // Check if note contains the required frontmatter properties
+      /* Check if note contains the required frontmatter properties */
       return hasStartDate && hasValidMarker
     }).map(entry => entry.file)
   }

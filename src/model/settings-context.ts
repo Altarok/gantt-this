@@ -208,10 +208,6 @@ export class SettingsContext implements GanttChartSources {
     return /* implement this.local.fallbackColor ?? */ this.global.fallbackColor
   }
 
-  // get groups(): GroupOrCalendarSettings[] {
-  //   return this.global.groups
-  // }
-
   get calendars(): GroupOrCalendarSettings[] {
     return this.global.calendars
   }

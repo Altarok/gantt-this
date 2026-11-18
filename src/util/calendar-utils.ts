@@ -2,13 +2,11 @@ import {SettingsContext} from '../model/settings-context'
 import {GroupOrCalendarSettings} from '../types/settings-types'
 import {CalendarColor, CalendarColors, CalendarConfig} from '../types/calendar-types'
 
-// import {debug} from './debug'
-
 export function isValidColor(c?: string): c is string {
   return !!c && (c === 'none' || CSS.supports('color', c))
 }
 
-// TODO write tests for this
+/* TODO write tests for this */
 export function getCalendarColors(settings: SettingsContext,
                                   calendarConfig: CalendarConfig,
                                   config?: GroupOrCalendarSettings): CalendarColors {

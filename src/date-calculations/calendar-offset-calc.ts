@@ -18,7 +18,7 @@ export function runOffsetCalculations(offsetConfig?: EpochOffsetDefinition): num
   const month = Math.max(1, offsetConfig.month ?? 1)
   const day = Math.max(1, offsetConfig.day ?? 1)
 
-  // Date.UTC() correctly handles 0001-0099 without shifting to 1900s
+  /* Date.UTC() correctly handles 0001-0099 without shifting to 1900s */
   const utcDate = new Date('0001-01-01T00:00:00Z')
   utcDate.setUTCFullYear(year, month - 1, day)
   const dateTime = utcDate.getTime()

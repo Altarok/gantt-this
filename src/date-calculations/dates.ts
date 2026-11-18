@@ -138,7 +138,7 @@ function parseDaysToNonGregorianDateString(days: number,
       }
     }
   } else {
-    // For negative days or 0, decrement year until remainingDays fits into positive day-of-year range
+    /* For negative days or 0, decrement year until remainingDays fits into positive day-of-year range */
     while (remainingDays <= 0) {
       year--
       const isLeap = isCustomLeapYear(year, config, true)
@@ -181,11 +181,9 @@ function parseDaysToNonGregorianDateString(days: number,
   return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
 }
 
-
 /* Update the axis label formatter inside the Gantt render engine class */
 
-
-// called during runtime, to get axis description
+/* called during runtime, to get axis description */
 export function createAxisDateDescription(days: number,
                                           calendarConfig: CalendarConfig,
                                           asInput = false, hideDays = false, hideMonths = false): string {

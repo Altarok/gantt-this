@@ -69,10 +69,8 @@ function createItem(chartCtx: ChartContext,
   try {
     startRes = parseEventDate(true, true, startDate, calendarConfig)
     if (!startRes) return null
-
     if (endDate) endRes = parseEventDate(true, false, endDate, calendarConfig)
-    // : {days: startRes.days, display: startRes.display} // ParsedDate
-    // if (!endRes) return null
+
   } catch (err) {
     // new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
     if (err instanceof GanttError) chartCtx.addErr(err, file)

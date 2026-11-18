@@ -36,12 +36,12 @@ export class AddEntryModal extends Modal {
       text.onChange(value => {
         result.id = value.trim()
 
-        // Validation checks
+        /* Validation checks */
         const isValidFormat = ID_REGEX.test(result.id)
         const isUnique = !this.existingIds.has(result.id)
         const isValid = result.id.length > 0 && isValidFormat && isUnique
 
-        // Toggle error UI feedback
+        /* Toggle error UI feedback */
         idSetting.descEl.toggleClass('is-error', !isValid && result.id.length > 0)
         if (!isValidFormat && result.id.length > 0) {
           void idSetting.setDesc(DESCRIPTION_INVALID)
@@ -51,7 +51,7 @@ export class AddEntryModal extends Modal {
           void idSetting.setDesc(DESCRIPTION)
         }
 
-        // Disable/Enable the submit button
+        /* Disable/Enable the submit button */
         if (addButton) {
           addButton.disabled = !isValid
         }
@@ -64,7 +64,6 @@ export class AddEntryModal extends Modal {
       btn.setButtonText('Add')
       .setCta()
       .onClick(() => {
-        // !ID_REGEX.test(result.id) || this.existingIds.has(result.id)
         if (!result.id || addButton.disabled) {
           new Notice('Please enter a valid, unique ID.')
           return

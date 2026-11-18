@@ -52,7 +52,6 @@ export class ChartContext {
     return this.basesCtx!.filterQueryResults(this.eventPropertyReader)
   }
 
-  // --- plugin stuff
   get pluginVersion(): string {
     return this.manifest.version
   }
