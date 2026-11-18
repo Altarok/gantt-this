@@ -162,7 +162,7 @@ export function createFrontMatterSettingDefinitions(settings: PluginSettings): S
     },
 
     /*
-     * TO-DO #hide-setting-groups
+     * WNM #hide-setting-groups
      */
     // {
     // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,

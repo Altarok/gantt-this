@@ -260,22 +260,11 @@ export default class TooltipManager implements HoverParent {
       lines?.lower?.remove()
     }
 
-
     /* Add missing if switching from point to bar */
     while (this.verticalGuides.length < count) {
       const upper: SVGLineElement = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
       const lower: SVGLineElement = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
       this.chartView.renderVerticalGuidesOverEvent(upper, lower)
-      /*
-       * TODO add calendar hover layer to be able to draw in the view
-       */
-      // if (svg.firstChild) {
-      //   svg.insertBefore(upper, svg.firstChild)
-      //   svg.insertBefore(lower, svg.firstChild)
-      // } else {
-      //   svg.appendChild(upper)
-      //   svg.appendChild(lower)
-      // }
       this.verticalGuides.push({upper, lower})
     }
   }

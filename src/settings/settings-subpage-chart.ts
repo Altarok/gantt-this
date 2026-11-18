@@ -97,18 +97,9 @@ export function createChartSettingDefinition(settings: PluginSettings): SettingD
         }
       ]
     },
-    // { // TODO #zoom-entire-svg-canvas
-    //   name: 'Enable visual canvas zoom',
-    //   desc: 'Scale the entire chart visually instead of adjusting the timeline date range.',
-    //   control: {
-    //     type: 'toggle',
-    //     key: 'uxEnableVisualZoom',
-    //     defaultValue: DEFAULT_SETTINGS.uxEnableVisualZoom
-    //   }
-    // },
 
     /*
-     * TO-DO #hide-setting-groups
+     * WNM #hide-setting-groups
      */
     // {
     // name: 'Hide this group', desc: HIDEABLE_GROUP_DESCRIPTION,

@@ -27,7 +27,6 @@ export class ChartDiagnosticsModal extends Modal {
   onOpen() {
     const {contentEl} = this
     contentEl.empty()
-    // contentEl.addClass('gt-stats-modal') // TODO remove
 
     const diagnostics: ChartDiagnostics = this.chartCtx.getUpdatedDiagnostics()
 
@@ -90,7 +89,7 @@ export class ChartDiagnosticsModal extends Modal {
   private showStatistics(contentEl: HTMLElement, diagnostics: ChartDiagnostics) {
     contentEl.createEl('h3', {text: 'Statistics'})
 
-    const g = contentEl.createDiv() // TODO {cls: Css.diagnostics.group})
+    const g = contentEl.createDiv()
     createStatRow(g, `Calendars loaded: ${diagnostics.loadedCalendars} of ${diagnostics.totalCalendars}`)
     createStatRow(g, `Events loaded: ${diagnostics.contextEventCount} from ${diagnostics.contextFilesCount} files`)
     // folder '${this.chartCtx.settings.eventPath}'

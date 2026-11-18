@@ -151,7 +151,7 @@ body.is-popout-window .gt-chart-container {
   pointer-events: none;
 }
 
-.gt-minimized-btn {
+.gt-minimized-toolbar-btn {
   /* Use default button styling, but make it transparent */
   opacity: 0.5;
 }
@@ -726,4 +726,3 @@ body.is-popout-window svg.gt-svg-canvas {
 .gt-red-border {
   outline: 1px solid red;
 }
-

@@ -42,7 +42,7 @@ export const Css = {
     /** Separator line between button groups */
     separator: 'gt-toolbar-separator', /* Separates button groups */
     /** Fold/unfold button in the minimized state */
-    foldButton: 'gt-minimized-btn', // TODO rename
+    foldButton: 'gt-minimized-toolbar-btn',
   },
   /** Label for form inputs */
   inputLabel: 'gt-input-label',
