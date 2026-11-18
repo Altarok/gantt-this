@@ -349,7 +349,7 @@ body.is-popout-window .gt-chart-container {
 }
 
 .gt-tooltip-repeat-dates .gt-repeat-value {
-  font-family: var(--font-monospace);
+  font-family: var(--font-monospace), monospace;
   color: var(--text-normal);
 }
 
