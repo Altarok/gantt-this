@@ -49,3 +49,16 @@ export function getDivisors(n: number, ascending = true): number[] {
   }
   return divisors.sort((a, b) => ascending ? a - b : b - a)
 }
+
+/**
+ * Helper to format large numbers (like years) with commas or dynamic compact units (M/B).
+ */
+export function shortenLargeNumber(rawVal: number): string {
+  const value = Math.abs(rawVal)
+  const prefix = rawVal < 0 ? '-' : ''
+  if (value >= 1_000_000_000) return `${prefix}${(value / 1_000_000_000).toFixed(1)}B`
+  if (value >= 1_000_000) return `${prefix}${(value / 1_000_000).toFixed(1)}M`
+  if (value >= 100_000) return `${prefix}${(value / 1_000).toFixed(1)}K`
+  if (value >= 10_000) return `${prefix}${value.toLocaleString('en-US')}`
+  return `${prefix}${value.toString().padStart(4, '0')}`
+}

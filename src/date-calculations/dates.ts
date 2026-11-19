@@ -3,6 +3,7 @@ import {isCustomLeapYear, isGregorianLeapYear} from './leap-year-calc'
 import {Consts} from '../const/constants'
 import {throwGanttError} from '../model/gantt-error'
 import {parseDaysToPositionalDateString} from './positional-dates'
+import {shortenLargeNumber} from '../util/mathe'
 
 export const TODAY = 'today'
 const TODAY_SUFFIX_PATTERN = /^[+-][1-9]\d*$/
@@ -201,19 +202,6 @@ export function createAxisDateDescription(days: number,
   }
 }
 
-/**
- * Helper to format large year numbers with commas or dynamic compact units (M/B).
- */
-function formatYearValue(year: number): string {
-  const absYear = Math.abs(year)
-  const prefix = year < 0 ? '-' : ''
-  if (absYear >= 1_000_000_000) return `${prefix}${(absYear / 1_000_000_000).toFixed(1)}B`
-  if (absYear >= 1_000_000) return `${prefix}${(absYear / 1_000_000).toFixed(1)}M`
-  if (absYear >= 100_000) return `${prefix}${(absYear / 1_000).toFixed(1)}K`
-  if (absYear >= 10_000) return `${prefix}${absYear.toLocaleString('en-US')}`
-  return `${prefix}${absYear.toString().padStart(4, '0')}`
-}
-
 /** Construct date based on calConfig.ruleBasedDetails.format */
 function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMonths: boolean,
                                        hideDays: boolean,
@@ -234,7 +222,7 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
 
 
   const outputParts: string[] = format.map(component => {
-    if (component === 'year') return formatYearValue(displayedYear.year)
+    if (component === 'year') return shortenLargeNumber(displayedYear.year)
     if (component === 'month' && (asInput || !hideMonths)) return month ?? ''
     if (component === 'day' && (asInput || !hideDays)) return day?.toString().padStart(2, '0') ?? ''
     return ''
