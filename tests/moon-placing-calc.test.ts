@@ -65,7 +65,7 @@ describe('calculateMoonPositions', () => {
      * Waxing moon at 5(*3) does not get drawn, since the distance is below 20
      * Full moon at 10(*3) gets drawn
      *
-     * First moon at 0, last moon at 500 -> 11 moons
+     * First moon at 0, last moon at 300 -> 11 moons
      * X-Positions at [0, 30, 60, ... , 270,  300]
      */
 
@@ -82,7 +82,7 @@ describe('calculateMoonPositions', () => {
     expect(result.moons).toHaveLength(1)
     expect(result.moons[0].index).toBe(0)
     expect(result.moons[0].color).toBe('#ff0000')
-    
+
     const positions: MoonDrawPosition[] = result.moons[0].positions
     expect(positions.length).toBe(11)
 
