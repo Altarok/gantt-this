@@ -3,6 +3,7 @@ import {GanttRenderEngine} from '../src/render/svg-drawer'
 import {CalendarConfig, RuleBasedCalendarConfig} from '../src/types/calendar-types'
 import {calculateMoonPositions} from '../src/date-calculations/moon-placing-calc'
 import {MockRuleBasedCalendarConfig} from './test-configs'
+import {MoonDrawData, MoonDrawPosition} from "../src/types/moon-types";
 
 
 describe('calculateMoonPositions', () => {
@@ -43,26 +44,31 @@ describe('calculateMoonPositions', () => {
   })
 
   it('skips rendering if major phases are too crowded below spacing threshold', () => {
-    // 1px per day -> quarter cycle (7.5 days) = 7.5px -> half cycle = 15px (< MIN_ICON_SPACING_PX 20)
     const engine = createMockEngine(1)
     const config: CalendarConfig = {
       ...MockRuleBasedCalendarConfig,
       offsetToDayZero: 0,
       moons: [
-        {cycle: 30, offset: 0, color: '#ffffff'}
+        {cycle: 10, offset: 0, color: '#ffffff'}
       ]
     }
 
-    const result = calculateMoonPositions(engine, config, 0, 100, 0, 100, 1000)
+    const result: MoonDrawData = calculateMoonPositions(engine, config, 0, 100, 0, 100, 1000)
     expect(result.moons).toHaveLength(0)
   })
 
   it('renders only major phases (New/Full) when zoom level is moderate', () => {
-    // 3px per day -> quarter cycle (7.5 days) = 22.5px (>= 20px) -> showQuarterPhases = true,
-    // but let's test cycle where half cycle is valid but let's check zoom condition.
-    // Wait, with cycle = 30, quarter = 7.5 days. At 3px/day, quarterPixels = 22.5px (> 20px), so quarter phases ARE shown.
-    // Let's use cycle = 40, quarter = 10 days, at 2px/day -> quarterPixels = 20px.
-    // Let's use cycle = 20, quarter = 5 days, at 3px/day -> quarterPixels = 15px (< 20px), half cycle = 30px (>= 20px).
+    /*
+     * cycle = 20 days, 3px/day -> waxing and waning moons do not get drawn
+     *
+     * New moon at 0(*3) gets drawn
+     * Waxing moon at 5(*3) does not get drawn, since the distance is below 20
+     * Full moon at 10(*3) gets drawn
+     *
+     * First moon at 0, last moon at 500 -> 11 moons
+     * X-Positions at [0, 30, 60, ... , 270,  300]
+     */
+
     const engine = createMockEngine(3)
     const config: CalendarConfig = {
       ...MockRuleBasedCalendarConfig,
@@ -76,17 +82,27 @@ describe('calculateMoonPositions', () => {
     expect(result.moons).toHaveLength(1)
     expect(result.moons[0].index).toBe(0)
     expect(result.moons[0].color).toBe('#ff0000')
+    
+    const positions: MoonDrawPosition[] = result.moons[0].positions
+    expect(positions.length).toBe(11)
 
-    // Should contain only phases 0 (New) and 2 (Full) because quarterPixels (15px) < 20px
-    const phases = result.moons[0].positions.map(p => p.phase)
-    expect(phases).toContain(0)
-    expect(phases).toContain(2)
-    expect(phases).not.toContain(1)
-    expect(phases).not.toContain(3)
+    for (let i = 0; i < 11; i++) {
+      const pos = positions[i]
+      expect(pos.xPos).toBe(i * 30)
+      expect(pos.step).toBe(2 * (i % 2)) /* only phases 0 and 2 (new and full) should get drawn */
+      expect(pos.phase).toBe(4) /* constant */
+    }
   })
 
   it('renders all four phases when zoom level provides enough screen space', () => {
-    // cycle = 20 days, 5px/day -> quarterPixels = 25px (>= 20px)
+    /*
+     * cycle = 20 days, 5px/day -> full 4 phases drawn on 100 pixels
+     *
+     * Render range goes from 0 to 500 -> 5*4(moon phases) + 1 (at end) should get drawn
+     *
+     * First moon at 0, last moon at 500 -> 21 moons
+     * X-Positions at [0, 25, 50, 75, 100, 125, ... , 475, 500]
+     */
     const engine = createMockEngine(5)
     const config: CalendarConfig = {
       ...MockRuleBasedCalendarConfig,
@@ -99,11 +115,17 @@ describe('calculateMoonPositions', () => {
     const result = calculateMoonPositions(engine, config, 0, 100, 0, 100, 1000)
     expect(result.moons).toHaveLength(1)
 
-    const phases = result.moons[0].positions.map(p => p.phase)
-    expect(phases).toContain(0)
-    expect(phases).toContain(1)
-    expect(phases).toContain(2)
-    expect(phases).toContain(3)
-  })
+    const positions: MoonDrawPosition[] = result.moons[0].positions
+    expect(positions.length).toBe(21)
+
+    for (let i = 0; i < 21; i++) {
+      const pos = positions[i]
+      expect(pos.xPos).toBe(i * 25)
+      expect(pos.step).toBe(i % 4) /* all 4 phases should get drawn (new, waxing, full, waning) */
+      expect(pos.phase).toBe(4) /* constant */
+    }
+
+
+  });
 })
 

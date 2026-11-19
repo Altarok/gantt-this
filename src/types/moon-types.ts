@@ -10,7 +10,9 @@ export type Moon = {
 export type MoonDrawPosition = {
   /** Center X position (usually xPos of the tick) */
   xPos: number
+  /** Nominator */
   step: number
+  /** Denominator */
   phase: number
 }
 
