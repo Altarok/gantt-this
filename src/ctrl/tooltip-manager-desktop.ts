@@ -138,14 +138,10 @@ export default class TooltipManager implements HoverParent {
 
     const datesContainer = container.createDiv({cls: Css.tooltip.dateDetails})
 
-    /*
-     * 1. Add current date
-     */
-    this.addEventDateBelowTableRow(datesContainer, calendarConfig, false, item)
+    /* add current date */
+    this.addEventDateBelowTableRow(datesContainer, calendarConfig, item)
 
-    /*
-     * 2. Add repeating event metadata
-     */
+    /* add repeating event metadata */
     if (item.isRecurringInstance) {
       const {repeatRule} = item
       if (repeatRule?.delta && repeatRule.step)
@@ -166,18 +162,13 @@ export default class TooltipManager implements HoverParent {
     }
   }
 
-  /*
-   * TODO fix duration : show years instead of days
-   */
   private addEventDateBelowTableRow(datesContainer: HTMLDivElement,
                                     calendarConfig: CalendarConfig,
-                                    addDuration: boolean,
                                     item: GanttItem) {
     const dateRow = datesContainer.createDiv({cls: Css.tooltip.repeatRow})
     dateRow.createSpan({
       text: isTimespan(item.displayType)
         ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
-        // + `${addDuration ? ` (${(item.endDays - item.startDays + 1)} days)` : ''}`
         : `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)}`,
       cls: Css.tooltip.suffixRow
     })
