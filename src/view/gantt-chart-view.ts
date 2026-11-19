@@ -199,7 +199,10 @@ export class GanttChartView {
     })
   }
 
-  drawCalAxisDate(calGroup: SVGGElement, xPos: number, date: string, fill: string): void {
+  drawCalAxisDate(calGroup: SVGGElement,
+                  xPos: number,
+                  date: string,
+                  fill: string): void {
     const textSvg = calGroup.createSvg('text', {
       cls: Css.axis.text, attr: {x: xPos, y: 20, fill}
     })

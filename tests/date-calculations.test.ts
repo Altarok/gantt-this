@@ -10,7 +10,13 @@ import {
 } from './test-configs'
 import {Consts} from '../src/const/constants'
 import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
+import {CalendarConfig} from '../src/types/calendar-types'
 
+function createAxisDate(days: number,
+                        calendarConfig: CalendarConfig,
+                        asInput = false, hideDays = false, hideMonths = false): string {
+  return createAxisDateDescription(days, calendarConfig, asInput, hideDays, hideMonths)
+}
 
 describe('Verify test data is configured correctly', () => {
 
@@ -102,9 +108,9 @@ describe('Verify test data is configured correctly', () => {
 
 describe('Creation of axis date description works for', () => {
 
-  const gregorian = (days: number) => createAxisDateDescription(days, gregorianConfig)
-  const gregorianWithoutZero = (days: number) => createAxisDateDescription(days, gregorianConfigWithoutYearZero)
-  const french = (days: number) => createAxisDateDescription(frenchRevolutionConfig.offsetToDayZero + days, frenchRevolutionConfig)
+  const gregorian = (days: number) => createAxisDate(days, gregorianConfig)
+  const gregorianWithoutZero = (days: number) => createAxisDate(days, gregorianConfigWithoutYearZero)
+  const french = (days: number) => createAxisDate(frenchRevolutionConfig.offsetToDayZero + days, frenchRevolutionConfig)
 
   it('positive Gregorian dates (iso-8601)', () => {
     expect(gregorian(1)).toBe('0001-Jan-01')
@@ -200,32 +206,32 @@ describe('Creation of axis date description works for', () => {
 describe('Parse days to date format', () => {
 
   it('Gregorian', () => {
-    expect(createAxisDateDescription(1, gregorianConfig)).toBe('0001-Jan-01')
+    expect(createAxisDate(1, gregorianConfig)).toBe('0001-Jan-01')
   })
 
   it('Gregorian without months', () => {
-    expect(createAxisDateDescription(1, gregorianWithoutMonthsConfig)).toBe('0001.01')
-    expect(createAxisDateDescription(2, gregorianWithoutMonthsConfig)).toBe('0001.02')
-    expect(createAxisDateDescription(3, gregorianWithoutMonthsConfig)).toBe('0001.03')
+    expect(createAxisDate(1, gregorianWithoutMonthsConfig)).toBe('0001.01')
+    expect(createAxisDate(2, gregorianWithoutMonthsConfig)).toBe('0001.02')
+    expect(createAxisDate(3, gregorianWithoutMonthsConfig)).toBe('0001.03')
 
-    expect(createAxisDateDescription(1 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.01')
-    expect(createAxisDateDescription(2 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.02')
-    expect(createAxisDateDescription(3 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.03')
+    expect(createAxisDate(1 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.01')
+    expect(createAxisDate(2 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.02')
+    expect(createAxisDate(3 + 2 * 365, gregorianWithoutMonthsConfig)).toBe('0003.03')
 
     /* add 400 years + 97 leap days */
-    expect(createAxisDateDescription(1 + 400 * 365 + 97, gregorianWithoutMonthsConfig)).toBe('0401.01')
-    expect(createAxisDateDescription(1 + 400 * 365 + 97 + 222, gregorianWithoutMonthsConfig)).toBe('0401.223')
+    expect(createAxisDate(1 + 400 * 365 + 97, gregorianWithoutMonthsConfig)).toBe('0401.01')
+    expect(createAxisDate(1 + 400 * 365 + 97 + 222, gregorianWithoutMonthsConfig)).toBe('0401.223')
 
   })
 
   it('shire', () => {
-    expect(createAxisDateDescription(-7, shireConfig)).toBe('0001-2. Yule-01')
+    expect(createAxisDate(-7, shireConfig)).toBe('0001-2. Yule-01')
   })
 
   it('have reversible in- and output', () => {
     const expected = parseEventDate(false, false, '1970-01-01', gregorianConfig)
 
-    const s = createAxisDateDescription(expected.days, gregorianConfig)
+    const s = createAxisDate(expected.days, gregorianConfig)
 
     expect(s).toBe('1970-Jan-01')
   })

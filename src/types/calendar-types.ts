@@ -85,13 +85,20 @@ type BaseCalendarConfig = {
   }
 }
 
+type PositionalUnit = {
+  name: string
+  days: number
+  color?: string
+}
+
 /* e.g. Mayan */
 export type PositionalCalendarConfig = BaseCalendarConfig & {
   type: 'positional',
   positionalDetails?: {
-    oneBased?: boolean
+    oneBased?: boolean /* as opposed to zero-based */
+    hideLeadingUnits?: boolean
   }
-  positionalUnits: { name: string, days: number }[]
+  positionalUnits: PositionalUnit[]
 }
 
 /* e.g. Gregorian */
