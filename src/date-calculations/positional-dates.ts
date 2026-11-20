@@ -22,6 +22,8 @@ export function parseDaysToPositionalDateString(days: number, config: Positional
   const isOneBased: boolean = config.positionalDetails?.oneBased ?? false /* as opposed to zero-based */
   const stringSegments: string[] = []
 
+  const unhideTreshold = isOneBased ? 1 : 0
+
   config.positionalUnits.forEach((unit, index) => {
 
     const isNotLastUnit = index < unitsCount - 1
@@ -39,7 +41,7 @@ export function parseDaysToPositionalDateString(days: number, config: Positional
     if (!isNotLastUnit || !hideLeadingUnit) {
       stringSegments.push(digit.toString())
     } else if (hideLeadingUnit) {
-      if ((isOneBased && digit > 1) || digit > 0) {
+      if (digit > unhideTreshold) {
         hideLeadingUnit = false
         stringSegments.push(digit.toString())
       }
@@ -72,6 +74,9 @@ export function parseDaysToPositionalDateString_experimental(
   // let hideDigit = hideLeadingUnits
   const isOneBased: boolean = config.positionalDetails?.oneBased ?? false /* as opposed to zero-based */
   const segments: { digit: number, color?: string }[] = []
+
+  const unhideTreshold = isOneBased ? 1 : 0
+
   config.positionalUnits.forEach((unit, index) => {
 
     const isNotLastUnit = index < unitsCount - 1
@@ -88,7 +93,7 @@ export function parseDaysToPositionalDateString_experimental(
     if (!isNotLastUnit || !hideLeadingUnit) {
       segments.push({digit, color: unit.color})
     } else if (hideLeadingUnit) {
-      if ((isOneBased && digit > 1) || digit > 0) {
+      if (digit > unhideTreshold) {
         hideLeadingUnit = false
         segments.push({digit, color: unit.color})
       }
