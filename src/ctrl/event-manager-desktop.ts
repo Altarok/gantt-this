@@ -102,6 +102,8 @@ export class GanttDesktopEventManager extends GanttEventManagerBase {
     } else if (this.isModifierActive(e, this.settings.uxPanButton)) {
       e.preventDefault()
       this.mouseWheelPan(e)
+    } else if (!this.settings.scrollingWithMouseWheel) {
+      e.preventDefault()
     }
   }
 

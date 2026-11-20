@@ -40,6 +40,12 @@ export function readCodeBlock(currentFolder: string,
       case 'calendarForBounds':
         codeBlockContent.calendar = value
         break
+      case 'width':
+        codeBlockContent.width = value
+        break
+      case 'height':
+        codeBlockContent.height = value
+        break
     }
   }
 

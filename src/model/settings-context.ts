@@ -28,7 +28,7 @@ export class SettingsContext implements GanttChartSources {
    * @param rawChartInput chart-related user input
    */
   constructor(private readonly global: PluginSettings,
-              private readonly rawChartInput: RawChartInput) {
+              readonly rawChartInput: RawChartInput) {
     this.local = {
       /* I/O sources */
       eventPath: rawChartInput.eventPath,
@@ -54,6 +54,7 @@ export class SettingsContext implements GanttChartSources {
       'uxShowMoons',
       'uxUseCalColorForCalAxis',
       'uxMakeCalAxesSticky',
+      'uxScrollingWithMouseWheel',
       /* Toolbar settings */
       'uxMakeToolbarSticky',
       'uxMoveToolbarBelowChart',
@@ -318,6 +319,14 @@ export class SettingsContext implements GanttChartSources {
 
   set drawArrows(val: boolean) {
     this.local.uxConnectRelatedEvents = val
+  }
+
+  get scrollingWithMouseWheel(): boolean {
+    return this.local.uxScrollingWithMouseWheel ?? this.global.uxScrollingWithMouseWheel
+  }
+
+  set scrollingWithMouseWheel(val: boolean) {
+    this.local.uxScrollingWithMouseWheel = val
   }
 
   get rerenderCooldownSeconds(): number {

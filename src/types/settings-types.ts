@@ -134,6 +134,8 @@ export type RawChartInput = Partial<GanttChartSources> & {
   lowerBoundDate?: GanttChartDateBound  /* part of bases configuration */
   centerHereDate?: GanttChartDateBound
   upperBoundDate?: GanttChartDateBound  /* part of bases configuration */
+  width?: string
+  height?: string
 }
 /**
  * Global plugin settings inheriting chart settings and adding global UX/app options
@@ -164,6 +166,7 @@ export type PluginSettings = GanttChartSources & {
   uxVerticalOverlayColor: string
   uxShowMoons: boolean
   autoRestrictZoom: boolean
+  uxScrollingWithMouseWheel: boolean
   // uxOverrideNoteScrollInCalendar: boolean
   // uxSwitchZoomAndPan: boolean
   uxPanButton: ControlKey // WNM-#v2 naming: keyboard key! not button

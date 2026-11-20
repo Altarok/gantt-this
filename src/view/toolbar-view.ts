@@ -100,7 +100,7 @@ export class ToolbarView implements Destroyable {
       menu
       .addSettingRow('Moons', () => settings.showMoons, (b: boolean) => settings.showMoons = b)
       .addSettingRow('Calendars: Color-code axes', () => settings.colorCodeCalendarAxes, (b: boolean) => settings.colorCodeCalendarAxes = b)
-      // .addSettingRow('Calendars: Sticky', () => settings.stickyCalAxes, (b: boolean) => settings.stickyCalAxes = b)
+      .addSettingRow('Mouse-wheel scrolling', () => settings.scrollingWithMouseWheel, (b: boolean) => settings.scrollingWithMouseWheel = b)
       .addSeparator()  /* separator for hover effects */
       .addSettingRow('Hover: Highlight event', () => settings.highlightHoveredEvent, (b: boolean) => settings.highlightHoveredEvent = b)
       .addSettingRow('Hover: Highlight related events', () => settings.highlightRelatedEvents, (b: boolean) => settings.highlightRelatedEvents = b)

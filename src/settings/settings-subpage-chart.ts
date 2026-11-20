@@ -63,6 +63,13 @@ export function createChartSettingDefinition(settings: PluginSettings): SettingD
       type: 'group',
       items: [
         {
+          name: 'Scrolling with mouse wheel',
+          desc: 'Deactivate to prevent unwanted panning.',
+          control: {
+            type: 'toggle', key: 'uxScrollingWithMouseWheel', defaultValue: DEFAULT_SETTINGS.uxScrollingWithMouseWheel
+          }
+        },
+        {
           name: 'Restrict minimum and maximum zoom',
           desc: 'Maximum zoom shows 4 adjacent days, minimum zoom fits your complete dataset.',
           control: {

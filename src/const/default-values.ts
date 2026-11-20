@@ -31,6 +31,7 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
   uxVerticalOverlayColor: '#ff0000',
   uxShowMoons: true,
   autoRestrictZoom: true,
+  uxScrollingWithMouseWheel: true,
   uxPanButton: 'shift',
   uxZoomButton: 'ctrl',
   showPanAndZoomButtonsInToolbar: true,

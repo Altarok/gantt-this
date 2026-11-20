@@ -4,6 +4,8 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 import {debug} from '../util/debug'
 import {ColoredDateData} from '../date-calculations/positional-dates'
+import {SettingsContext} from '../model/settings-context'
+import {RawChartInput} from '../types/settings-types'
 
 export class GanttChartView {
   chartContainer: HTMLDivElement
@@ -46,6 +48,8 @@ export class GanttChartView {
               private readonly viewModel: GanttChartModel) {
     this.container.empty()
     this.container.addClass(Css.wrapper)
+
+    this.addOptionalCodeBlockRestriction()
 
     const stickyCalAxes = chartCtx.settings.stickyCalAxes
     const stickyToolbar = chartCtx.settings.stickyToolbar
@@ -358,6 +362,28 @@ export class GanttChartView {
     this.eventSvg.setAttribute('height', `${totalHeight}`)
   }
 
+  private get settings(): SettingsContext {
+    return this.chartCtx.settings
+  }
 
+  private addOptionalCodeBlockRestriction() {
+
+    const codeBlockWrapper =
+      this.container.closest<HTMLElement>('.cm-preview-code-block') ??
+      this.container.parentElement
+    if (!codeBlockWrapper) return
+
+    const rawChartInput: RawChartInput = this.settings.rawChartInput
+    const {width /* , height */} = rawChartInput
+
+    if (width && /^\d+(px|%)$/.test(width)) {
+      codeBlockWrapper.style.maxWidth = width
+    }
+
+    // if (height && /^\d+(px|%)$/.test(height)) {
+    //   codeBlockWrapper.style.maxHeight = height
+    // }
+
+  }
 }
 
