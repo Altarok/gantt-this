@@ -90,16 +90,17 @@ type PositionalUnit = {
   days: number
   color?: string
 }
+type PositionalDetails = {
+  oneBased?: boolean /* as opposed to zero-based */
+  hideLeadingUnits?: boolean /* 0.0.3.4.0 -> 3.4.0 */
+  colorAxisDates?: boolean
+}
 
-/* e.g. Mayan */
+/* e.g. Mayan, Zotaran */
 export type PositionalCalendarConfig = BaseCalendarConfig & {
   type: 'positional',
-  positionalDetails?: {
-    oneBased?: boolean /* as opposed to zero-based */
-    hideLeadingUnits?: boolean /* 0.0.3.4.0 -> 3.4.0 */
-    colorAxisDates?: boolean
-  }
   positionalUnits: PositionalUnit[]
+  positionalDetails?: PositionalDetails
 }
 
 /* e.g. Gregorian */
