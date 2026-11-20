@@ -14,6 +14,7 @@ import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
 import {MoonDrawData} from '../types/moon-types'
 import {getCalendarColors} from '../util/calendar-utils'
+import {ColoredDateData, parseDaysToPositionalDateString_experimental} from '../date-calculations/positional-dates'
 
 export class GanttRenderEngine {
   private readonly svgDrawerUtil: SvgDrawerUtil
@@ -431,9 +432,15 @@ export class GanttRenderEngine {
         }
 
         if (calendarColors.dates !== 'none' && xPos - lastTextX > 80) {
-          const dateString = createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths)
-          this.view.drawCalAxisDate(ticksG, xPos, dateString, calendarColors.dates)
-          lastTextX = xPos
+          if (calendarConfig.type === 'positional' && calendarConfig.positionalDetails?.colorAxisDates) {
+            const coloredDateData: ColoredDateData | null = parseDaysToPositionalDateString_experimental(currDays, calendarConfig)
+            if (coloredDateData) this.view.drawColouredCalAxisDate(ticksG, coloredDateData, xPos)
+            lastTextX = xPos
+          } else {
+            const dateString = createAxisDateDescription(currDays, calendarConfig, false, this.viewModel.hideDays, this.viewModel.hideMonths)
+            this.view.drawCalAxisDate(ticksG, xPos, dateString, calendarColors.dates)
+            lastTextX = xPos
+          }
         }
       }
 

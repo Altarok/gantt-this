@@ -75,16 +75,23 @@ function parseDateWithPositionalConfig(date: string, calendarConfig: PositionalC
   if (segments.length === 0 || units.length === 0 || segments.length !== units.length)
     throwGanttError('positionalDateWithInvalidLength', {date, unitLength: units.length})
 
+  const hideLeadingUnit = calendarConfig.positionalDetails?.hideLeadingUnits ?? false
+  const oneBased = calendarConfig.positionalDetails?.oneBased ?? false
+
   for (let idx = 0; idx < units.length; idx++) {
     const segment = segments[idx]
     if (!segment || Number.isNaN(Number(segment)))
       throwGanttError('positionalDateWithInvalidSegment', {date, segment: String(segment)})
     let number = Number(segment)
-    if (idx < units.length - 1 && calendarConfig.positionalDetails?.oneBased) number--
+    if (idx < units.length - 1 && oneBased) number--
     totalDays += number * units[idx]!.days
   }
 
-  return {days: calendarConfig.offsetToDayZero + totalDays, display: date}
+  const display = hideLeadingUnit
+    ? (oneBased ? date.replaceAll('1.', '') : date.replaceAll('0.', ''))
+    : date
+
+  return {days: calendarConfig.offsetToDayZero + totalDays, display}
 }
 
 /**

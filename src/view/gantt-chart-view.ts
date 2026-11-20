@@ -3,6 +3,7 @@ import {ManualSvg} from '../svg/svg-icon-creator'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {ChartContext} from '../model/chart-context'
 import {debug} from '../util/debug'
+import {ColoredDateData} from '../date-calculations/positional-dates'
 
 export class GanttChartView {
   chartContainer: HTMLDivElement
@@ -207,6 +208,35 @@ export class GanttChartView {
       cls: Css.axis.text, attr: {x: xPos, y: 20, fill}
     })
     textSvg.textContent = date
+  }
+
+  /**
+   * Renders a segmented, optionally signed date label onto a calendar axis group
+   * using per-digit fill colors and `currentColor` for the sign and dot separators.
+   */
+  drawColouredCalAxisDate(calGroup: SVGGElement,
+                          coloredDateData: ColoredDateData,
+                          xPos: number): void {
+    const textSvg = calGroup.createSvg('text', {
+      cls: Css.axis.text, attr: {x: xPos, y: 20}
+    })
+
+    if (coloredDateData.sign) {
+      const signTspan = textSvg.createSvg('tspan', {attr: {fill: 'currentColor'}})
+      signTspan.textContent = coloredDateData.sign
+    }
+
+    coloredDateData.segments.forEach((segment, index) => {
+      if (index > 0) {
+        const dotTspan = textSvg.createSvg('tspan', {attr: {fill: 'currentColor'}})
+        dotTspan.textContent = '.'
+      }
+
+      const digitTspan = textSvg.createSvg('tspan', {
+        attr: {fill: segment.color ?? 'currentColor'},
+      })
+      digitTspan.textContent = String(segment.digit)
+    })
   }
 
   /**
