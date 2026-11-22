@@ -87,8 +87,9 @@ function parseDateWithPositionalConfig(date: string, calendarConfig: PositionalC
     totalDays += number * units[idx]!.days
   }
 
+  /* hideLeadingUnitsPattern exists when hideLeadingUnit is true */
   const display = hideLeadingUnit
-    ? date.replace(oneBased ? /^(1\.)*/ : /^(0\.)*/ , '')
+    ? date.replace(calendarConfig.positionalDetails!.hideLeadingUnitsPattern!, '')
     : date
 
   return {days: calendarConfig.offsetToDayZero + totalDays, display}
