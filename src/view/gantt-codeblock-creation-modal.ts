@@ -15,10 +15,10 @@ export class CodeBlockCreatorModal extends Modal {
   }
 
   /**
-   * <div class="modal-container"> <!-- Backdrop/overlay -->
-   *   <div class="modal"> <!-- THIS is this.modalEl -->
-   *     <div class="modal-close-button"></div>
-   *     <div class="modal-content"> <!-- THIS is this.contentEl -->
+   * <div class='modal-container'> <!-- Backdrop/overlay -->
+   *   <div class='modal'> <!-- THIS is this.modalEl -->
+   *     <div class='modal-close-button'></div>
+   *     <div class='modal-content'> <!-- THIS is this.contentEl -->
    *       <!-- Your custom form/preview gets injected here -->
    *     </div>
    *   </div>

@@ -127,7 +127,7 @@ export default class TooltipManager implements HoverParent {
   }
 
   /**
-   * Add event date details below "click here" tip. Date gets parsed to output format.
+   * Add event date details below 'click here' tip. Date gets parsed to output format.
    * @param container where to add the tooltip
    * @param item event data
    */

@@ -1,4 +1,4 @@
-import {Moon} from "./moon-types"
+import {Moon} from './moon-types'
 
 export type DateFormatComponent = 'year' | 'month' | 'day' | 'intercalary'
 
