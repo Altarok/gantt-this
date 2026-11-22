@@ -128,6 +128,11 @@ export const knownErrors: Record<string, ErrorDef> = {
     type: 'date',
     messageTemplate: `Can't parse positional date '{date}' without delimiter ('{delimiter}').`
   },
+  positionalCalendarConfigWithoutDelimiter: {
+    level: 'warn',
+    type: 'calendar',
+    messageTemplate: `Can't parse positional calendar '{id}' without delimiter.`
+  },
   positionalDateWithInvalidLength: {
     level: 'warn',
     type: 'date',
