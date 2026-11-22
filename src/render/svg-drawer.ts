@@ -1,4 +1,13 @@
-import {GanttGroup, GanttItem, GanttItemDisplayType, isTimespan, isTimestamp, NO_GROUP} from '../types/settings-types'
+import {
+  GanttGroup,
+  GanttItem,
+  GanttItemDisplayType,
+  GanttItemDisplayTypeTimespans,
+  GanttItemDisplayTypeTimestamp,
+  isTimespan,
+  isTimestamp,
+  NO_GROUP
+} from '../types/settings-types'
 import {CalendarColors, CalendarConfig} from '../types/calendar-types'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {createGanttEventManager} from '../ctrl/event-manager-creator'
@@ -286,51 +295,84 @@ export class GanttRenderEngine {
         const x1 = this.getXPosition(d.startDays)
         const x2 = (d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays)
 
-        /* Calculate available width for timestamp text (Method 1) */
-        const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
-        const currentIndex = currentLaneItems.indexOf(d)
-        const nextItem = currentIndex !== -1 ? currentLaneItems[currentIndex + 1] : undefined
 
-        const nextX = nextItem ? this.getXPosition(nextItem.startDays) : this.currRenderWidth
-        const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
+        if (isTimespan(displayType))
+          return this.drawTimeSpan(x1, x2, displayType, d, laneY, halfRowHeight, firstYValue, group, totalChartHeight, totalGroupHeight)
+        else if (isTimestamp(displayType)) {
 
-        if (isTimespan(displayType)) switch (displayType) {
-          case 'bar':
-            return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight)
-          case 'era': {
-            const isNotInAGroup = d.group === NO_GROUP
-            const y: number = isNotInAGroup ? firstYValue : group.yOffset
-            const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return this.svgDrawerUtil.drawEra(d, x1, x2, y, height)
-          }
-
-        } else if (isTimestamp(displayType)) switch (displayType) {
-          case 'point':
-            return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'box':
-            return this.svgDrawerUtil.drawBox(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'vertical-line': {
-            const isNotInAGroup = d.group === NO_GROUP
-            const y: number = isNotInAGroup ? firstYValue : group.yOffset
-            const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
-            return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height)
-          }
-          case 'diamond':
-            return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'triangle':
-            return this.svgDrawerUtil.drawTriangle(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'pentagon':
-            return this.svgDrawerUtil.drawPentagon(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'star':
-            return this.svgDrawerUtil.drawStar(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'hexagon':
-            return this.svgDrawerUtil.drawHexagon(d, x1, laneY + halfRowHeight, availableWidth)
-          case 'octagon':
-            return this.svgDrawerUtil.drawOctagon(d, x1, laneY + halfRowHeight, availableWidth)
+          /* Calculate available width for timestamp text */
+          const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
+          const currentIndex = currentLaneItems.indexOf(d)
+          const nextItem = currentIndex !== -1 ? currentLaneItems[currentIndex + 1] : undefined
+          const nextX = nextItem ? this.getXPosition(nextItem.startDays) : this.currRenderWidth
+          const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
+          return this.drawTimeStamp(x1, displayType, d, laneY, halfRowHeight, firstYValue, group, totalChartHeight, totalGroupHeight, availableWidth)
         }
 
       }) // end loop group.items.forEach(GanttItem)
     })
+  }
+
+
+  private drawTimeSpan(xStart: number,
+                       xEnd: number,
+                       displayType: GanttItemDisplayTypeTimespans,
+                       d: GanttItem,
+                       laneY: number,
+                       halfRowHeight: number,
+                       firstYValue: number,
+                       group: GanttGroup,
+                       totalChartHeight: number,
+                       totalGroupHeight: number) {
+    if (xStart > this.currRenderWidth || xEnd < 0) return
+    const x1 = Math.max(xStart, -8)
+    const x2 = Math.min(xEnd, this.currRenderWidth + 8)
+    switch (displayType) {
+      case 'bar':
+        return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight)
+      case 'era': {
+        const isNotInAGroup = d.group === NO_GROUP
+        const y: number = isNotInAGroup ? firstYValue : group.yOffset
+        const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
+        return this.svgDrawerUtil.drawEra(d, x1, x2, y, height)
+      }
+    }
+  }
+
+  private drawTimeStamp(x1: number,
+                        displayType: GanttItemDisplayTypeTimestamp,
+                        d: GanttItem,
+                        laneY: number,
+                        halfRowHeight: number,
+                        firstYValue: number,
+                        group: GanttGroup,
+                        totalChartHeight: number,
+                        totalGroupHeight: number,
+                        availableWidth: number): void {
+    switch (displayType) {
+      case 'point':
+        return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'box':
+        return this.svgDrawerUtil.drawBox(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'vertical-line': {
+        const isNotInAGroup = d.group === NO_GROUP
+        const y: number = isNotInAGroup ? firstYValue : group.yOffset
+        const height: number = isNotInAGroup ? totalChartHeight : totalGroupHeight
+        return this.svgDrawerUtil.drawVerticalLine(d, x1, y, y + height)
+      }
+      case 'diamond':
+        return this.svgDrawerUtil.drawDiamond(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'triangle':
+        return this.svgDrawerUtil.drawTriangle(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'pentagon':
+        return this.svgDrawerUtil.drawPentagon(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'star':
+        return this.svgDrawerUtil.drawStar(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'hexagon':
+        return this.svgDrawerUtil.drawHexagon(d, x1, laneY + halfRowHeight, availableWidth)
+      case 'octagon':
+        return this.svgDrawerUtil.drawOctagon(d, x1, laneY + halfRowHeight, availableWidth)
+    }
   }
 
   calculateTotalChartHeight(evaluateInvisibleGroups = false) {
@@ -417,7 +459,12 @@ export class GanttRenderEngine {
       //   ticksG.appendChild(title)
       // }
 
-      for (let currDays = absoluteStartDay; currDays <= absoluteEndDay; currDays += this.viewModel.stepDays) {
+      let tickStep = this.viewModel.stepDays
+
+      const loopStartDay = Math.max(absoluteStartDay, Math.floor(effectiveStartDay / tickStep) * tickStep - tickStep)
+      const loopEndDay = Math.min(absoluteEndDay, Math.ceil(effectiveEndDay / tickStep) * tickStep + tickStep)
+
+      for (let currDays = loopStartDay; currDays <= loopEndDay; currDays += tickStep) {
         if (currDays < effectiveStartDay - 1) continue
         if (currDays > effectiveEndDay + 1) break
         const xPos = this.getXPosition(currDays)
