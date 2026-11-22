@@ -135,6 +135,7 @@ async function loadCalendar(chartCtx: ChartContext, calendarID: string, file?: T
     switch (newCalendarConfig.type) {
       case 'positional':
         safetyCheckPositionalConfig(newCalendarConfig)
+        extendPositionalConfigDetails(newCalendarConfig)
         break
       case 'rule-based':
         safetyCheckRuleBasedConfig(newCalendarConfig)
@@ -172,10 +173,37 @@ function fallbackIfGregorian(calendarId: string, chartCtx: ChartContext,): void 
   }
 }
 
-function safetyCheckPositionalConfig(config: PositionalCalendarConfig) {
-  if (config.positionalUnits?.length === 0) {
+function safetyCheckPositionalConfig(config: PositionalCalendarConfig): void {
+  if (!config.positionalUnits?.length)
     throwGanttError('positionalCalendarMissingSegments', {id: config.id})
-  }
+  if (!config.delimiter)
+    throwGanttError('positionalCalendarConfigWithoutDelimiter', {id: config.id})
+}
+
+/**
+ * Check user YAML input for validity, default nonsense to false
+ */
+function extendPositionalConfigDetails(config: PositionalCalendarConfig): void {
+  const {positionalDetails: details} = config
+  if (!details) return
+
+  if (details.oneBased !== true)
+    details.oneBased = false
+  if (details.colorAxisDates !== true)
+    details.colorAxisDates = false
+  if (details.hideLeadingUnits !== true)
+    details.hideLeadingUnits = false
+  else
+    details.hideLeadingUnitsPattern = createHideLeadingUnitsPattern(config)
+}
+
+/**
+ * @param config Calendar config WITH delimiter AND details
+ */
+function createHideLeadingUnitsPattern(config: PositionalCalendarConfig) {
+  const leadingUnit = config.positionalDetails!.oneBased ? '1' : '0'
+  const escapedDelimiter = config.delimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`^(?:${leadingUnit}${escapedDelimiter})*`)
 }
 
 /**
