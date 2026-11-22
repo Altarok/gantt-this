@@ -57,7 +57,7 @@ export const Css = {
     labelBadge: 'gt-axis-label-badge',
     /**
      * Text element of the axis
-     * text-anchor: middle; font-size: 11px; font-weight: 500;
+     * text-anchor: middle; font-size: 11px; font-weight: 500
      */
     text: 'gt-axis-text',
     /** Minor tick of the scale */

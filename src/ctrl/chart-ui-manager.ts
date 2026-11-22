@@ -4,7 +4,7 @@ import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../view/gantt-chart-view'
 import {ToolbarView} from '../view/toolbar-view'
 import {ChartContext} from '../model/chart-context'
-import {debug} from "../util/debug";
+import {debug} from '../util/debug'
 import {RedrawOption} from '../model/redraw-options'
 
 export class ChartUiManager {

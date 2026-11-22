@@ -542,7 +542,7 @@ export class GanttRenderEngine {
     this.updateWhichDateElementsToHide()
 
     /* Focal point zoom: adjust translateX so center point stays pinned */
-    const pX = centerX - (centerX - this.viewModel.panTranslateX) * (newScale / oldScale);
+    const pX = centerX - (centerX - this.viewModel.panTranslateX) * (newScale / oldScale)
     this.viewModel.setPanAndZoom(pX, 0, newScale)
     this.handlePanOrZoom()
   }

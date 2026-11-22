@@ -1,7 +1,7 @@
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {ChartContext} from '../model/chart-context'
 import {GanttChartModel} from '../model/gantt-chart-model'
-import {debug} from "../util/debug";
+import {debug} from '../util/debug'
 
 export type GanttEventManager = {
   /** Whether a drag or gesture interaction is currently in progress */
