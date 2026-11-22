@@ -65,34 +65,69 @@ export function createParsedDate(cleanInput: string, config: CalendarConfig): Pa
  * @throws GanttError - if date has invalid segment, delimiter, or length
  */
 function parseDateWithPositionalConfig(date: string, calendarConfig: PositionalCalendarConfig): ParsedDate {
-  if (!date.includes(calendarConfig.delimiter))
-    throwGanttError('positionalDateWithoutDelimiter', {date, delimiter: calendarConfig.delimiter})
-
-  const segments: string[] = date.split(calendarConfig.delimiter)
-  let totalDays = 0
-
+  const {delimiter} = calendarConfig
   const units = calendarConfig.positionalUnits ?? []
-  if (segments.length === 0 || units.length === 0 || segments.length !== units.length)
-    throwGanttError('positionalDateWithInvalidLength', {date, unitLength: units.length})
-
   const hideLeadingUnit = calendarConfig.positionalDetails?.hideLeadingUnits ?? false
   const oneBased = calendarConfig.positionalDetails?.oneBased ?? false
+  const emptyValue = oneBased ? '1' : '0'
 
-  for (let idx = 0; idx < units.length; idx++) {
-    const segment = segments[idx]
+  /*
+   * Split date input, includes; parse 7*5 as seven fives in a row (5.5.5.5.5.5.5)
+   *
+   * TODO refactor AI-assisted hell of a code snippet
+   */
+  let segments = date.split(delimiter).map((s) => s.trim()).flatMap((segment: string) => {
+    if (!/^(\d+)\*(\d+)$/.test(segment)) return [segment]
+    const ms = segment.split('*')
+    if (ms.length < 2) return [segment]
+    const times = parseInt(ms[0]!, 10)
+    if (times < 1 || times > units.length) throwGanttError('positionalDateWithInvalidSegment', {date, segment})
+    return new Array<string>(times).fill(ms[1]!)
+  })
+  /*
+   * If date ends on a delimiter, the last part is an empty string.
+   * In this case fill it up with default empty values.
+   */
+  const padTrailing = segments.length > 1 && segments[segments.length - 1] === ''
+  if (padTrailing) {
+    segments.pop()
+    while (segments.length > 0 && segments.length < units.length - 1) segments.push(emptyValue)
+    if (segments.length < units.length) segments.push('1')
+  }
+
+  if (segments.length === 0 || units.length === 0 || segments.length > units.length)
+    throwGanttError('positionalDateWithInvalidLength', {date, unitLength: units.length})
+
+  if (segments.length < units.length) {
+    const padding = new Array<string>(units.length - segments.length).fill(emptyValue)
+    segments = [...padding, ...segments]
+  }
+
+  let totalDays = 0
+
+  for (let i = 0; i < units.length; i++) {
+    const segment = segments[i]
     if (!segment || Number.isNaN(Number(segment)))
       throwGanttError('positionalDateWithInvalidSegment', {date, segment: String(segment)})
     let number = Number(segment)
-    if (idx < units.length - 1 && oneBased) number--
-    totalDays += number * units[idx]!.days
+    if (i < units.length - 1 && oneBased) {
+      if (number < 1) throwGanttError('invalid1BasedPositionalDateContainsZero', {date})
+      number--
+    }
+    totalDays += number * units[i]!.days
   }
 
-  /* hideLeadingUnitsPattern exists when hideLeadingUnit is true */
-  const display = hideLeadingUnit
-    ? date.replace(calendarConfig.positionalDetails!.hideLeadingUnitsPattern!, '')
-    : date
+  let displaySegments = segments
+  if (hideLeadingUnit) {
+    let start = 0
+    while (start < segments.length - 1 && segments[start] === emptyValue) start++
+    displaySegments = segments.slice(start)
+  }
 
-  return {days: calendarConfig.offsetToDayZero + totalDays, display}
+  return {
+    days: calendarConfig.offsetToDayZero + totalDays,
+    display: displaySegments.join(delimiter)
+  }
 }
 
 /**

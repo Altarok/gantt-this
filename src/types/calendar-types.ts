@@ -93,7 +93,6 @@ type PositionalUnit = {
 export type PositionalDetails = {
   oneBased?: boolean /* as opposed to zero-based */
   hideLeadingUnits?: boolean /* 0.0.3.4.0 -> 3.4.0 */
-  hideLeadingUnitsPattern?: RegExp
   colorAxisDates?: boolean
 }
 

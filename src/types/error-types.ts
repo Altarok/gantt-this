@@ -176,7 +176,7 @@ export const knownErrors: Record<string, ErrorDef> = {
   invalid1BasedPositionalDateContainsZero: {
     level: 'warn',
     type: 'date',
-    messageTemplate: `Can't parse 1-based positional {date} containing a zero value.`
+    messageTemplate: `Can't parse 1-based positional date '{date}' containing a zero value.`
   },
 
 

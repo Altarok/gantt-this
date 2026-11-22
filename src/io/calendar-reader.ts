@@ -187,23 +187,9 @@ function extendPositionalConfigDetails(config: PositionalCalendarConfig): void {
   const {positionalDetails: details} = config
   if (!details) return
 
-  if (details.oneBased !== true)
-    details.oneBased = false
-  if (details.colorAxisDates !== true)
-    details.colorAxisDates = false
-  if (details.hideLeadingUnits !== true)
-    details.hideLeadingUnits = false
-  else
-    details.hideLeadingUnitsPattern = createHideLeadingUnitsPattern(config)
-}
-
-/**
- * @param config Calendar config WITH delimiter AND details
- */
-function createHideLeadingUnitsPattern(config: PositionalCalendarConfig) {
-  const leadingUnit = config.positionalDetails!.oneBased ? '1' : '0'
-  const escapedDelimiter = config.delimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return new RegExp(`^(?:${leadingUnit}${escapedDelimiter})*`)
+  if (details.oneBased !== true) details.oneBased = false
+  if (details.colorAxisDates !== true) details.colorAxisDates = false
+  if (details.hideLeadingUnits !== true) details.hideLeadingUnits = false
 }
 
 /**
