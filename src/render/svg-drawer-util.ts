@@ -1,4 +1,4 @@
-import {setIcon} from 'obsidian'
+import {getIcon} from 'obsidian'
 import {GanttItem} from '../types/settings-types'
 import {Css} from '../const/constants'
 import {GanttEventManager} from '../ctrl/event-manager'
@@ -47,14 +47,24 @@ export class SvgDrawerUtil {
     this.eventManager = em
   }
 
-  private createIconInDiv(d: GanttItem): HTMLDivElement {
-    const iconContainerDiv = window.createDiv({cls: Css.item.iconContainer})
-    iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
-    if (d.displayIcon) setIcon(iconContainerDiv, d.displayIcon)
-    return iconContainerDiv
+  // private createIconInDiv(d: GanttItem): HTMLDivElement {
+  //   const iconContainerDiv = window.createDiv({cls: Css.item.iconContainer})
+  //   iconContainerDiv.style.setProperty('--gt-icon-color', d.displayIconColor)
+  //   if (d.displayIcon) setIcon(iconContainerDiv, d.displayIcon)
+  //   return iconContainerDiv
+  // }
+
+  private readonly iconTemplateCache = new Map<string, SVGSVGElement | null>()
+
+  private getCachedIconTemplate(iconName: string): SVGSVGElement | null {
+    if (!this.iconTemplateCache.has(iconName)) {
+      this.iconTemplateCache.set(iconName, getIcon(iconName))
+    }
+    return this.iconTemplateCache.get(iconName) ?? null
   }
 
   /**
+   * Adds SVG icons to events.
    * @param d event to draw icon for
    * @param x x-coordinate of upper-left corner of svg
    * @param y y-coordinate of upper-left corner of svg
@@ -65,16 +75,30 @@ export class SvgDrawerUtil {
                            container: SVGElement): boolean {
     if (!d.displayIcon || this.eventManager?.isDragging) return false
 
-    const foreignObj = createSvg('foreignObject',
-      Css.preventUserInteraction, {x, y, width: this.iconSize, height: this.iconSize}
-    )
-    foreignObj.appendChild(this.createIconInDiv(d))
-    // if (availableWidth !== 0) {
-    //   const textSvg = createSvg('text', Css.item.textBar, {x: 0, y})
-    //   textSvg.textContent = '...'
-    //   container.appendChild(textSvg)
-    // }
-    container.appendChild(foreignObj)
+    // const foreignObj = createSvg('foreignObject',
+    //   Css.preventUserInteraction, {x, y, width: this.iconSize, height: this.iconSize}
+    // )
+    // foreignObj.appendChild(this.createIconInDiv(d))
+    // // if (availableWidth !== 0) {
+    // //   const textSvg = createSvg('text', Css.item.textBar, {x: 0, y})
+    // //   textSvg.textContent = '...'
+    // //   container.appendChild(textSvg)
+    // // }
+    // container.appendChild(foreignObj)
+
+    const iconSvg = this.getCachedIconTemplate(d.displayIcon)
+    if (!iconSvg) return false
+
+
+    const iconClone = iconSvg.cloneNode(true) as SVGSVGElement
+    iconClone.setAttribute('class', `${Css.item.iconContainer} ${Css.preventUserInteraction}`)
+    iconClone.setAttribute('x', String(x))
+    iconClone.setAttribute('y', String(y))
+    iconClone.setAttribute('width', String(this.iconSize))
+    iconClone.setAttribute('height', String(this.iconSize))
+    iconClone.style.color = d.displayIconColor ?? 'currentColor'
+    container.appendChild(iconClone)
+
     return true
   }
 

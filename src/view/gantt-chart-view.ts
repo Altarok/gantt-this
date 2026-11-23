@@ -14,8 +14,8 @@ export class GanttChartView {
 
   private chartEventContainer!: HTMLDivElement
   private chartCalendarContainer!: HTMLDivElement
-  private eventSvg!: SVGElement
-  private calendarSvg!: SVGElement
+  eventSvg!: SVGSVGElement
+  calendarSvg!: SVGElement
 
   /** Group background colors + group badges   */
   private backgroundLayer!: SVGGElement
@@ -349,6 +349,10 @@ export class GanttChartView {
   /** Used by arrow drawer */
   get canvasDimensions(): DOMRect {
     return this.eventSvg.getBoundingClientRect()
+  }
+
+  get calendarDimensions(): DOMRect {
+    return this.calendarSvg.getBoundingClientRect()
   }
 
   /**

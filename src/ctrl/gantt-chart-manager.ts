@@ -16,6 +16,7 @@ import {GanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
 import {RedrawOption} from '../model/redraw-options'
 import {debug} from '../util/debug'
+import {ContextMenuBuilder} from './context-menu'
 
 /**
  * Each chart should have one of these.
@@ -155,6 +156,9 @@ export class ChartManager {
     setToolbarReactions(this.chartContext, tv, this.renderEngine, this.refreshChartCallback)
 
     if (this.diagnosticsContext.hasWarnings) tv.setHasWarnings()
+
+
+    new ContextMenuBuilder(this.plugin, this.renderEngine.view, this.settingsContext).build()
   }
 }
 
