@@ -137,6 +137,10 @@ export class SettingsContext implements GanttChartSources {
     return this.global.frontMatterProperty_event_time_end
   }
 
+  get frontMatterProperty_event_time_of_day(): string {
+    return this.global.frontMatterProperty_event_time_of_day
+  }
+
   get frontMatterProperty_calendar_name(): string {
     return this.global.frontMatterProperty_calendar_name
   }

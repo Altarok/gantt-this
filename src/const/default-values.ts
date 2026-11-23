@@ -53,6 +53,7 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
   frontMatterProperty_gantt_this_optional: true,
   frontMatterProperty_event_time_start: 'gantt-start', // start of event (or timestamp if no end is given )
   frontMatterProperty_event_time_end: 'gantt-end', // ... or time.start
+  frontMatterProperty_event_time_of_day: 'gantt-time',
   frontMatterProperty_event_name: 'gantt-name', // ... or filename
   frontMatterProperty_event_calendar: 'gantt-calendar', // name of matching calendar or global fallback
   frontMatterProperty_event_group: 'gantt-group', // ... or general

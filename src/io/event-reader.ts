@@ -1,8 +1,15 @@
-import {EventId, GanttItem, GanttItemDisplayType, GroupOrCalendarSettings, ParsedDate} from '../types/settings-types'
+import {
+  EventId,
+  GanttItem,
+  GanttItemDisplayType,
+  GroupOrCalendarSettings,
+  ParsedDate,
+  TypeOfDayParsed
+} from '../types/settings-types'
 import {CalendarConfig} from '../types/calendar-types'
 import {FrontMatterCache, TFile} from 'obsidian'
 import {EventPropertyReader} from './event-property-reader'
-import {parseEventDate} from '../date-calculations/event-date-input-calc'
+import {parseEventDate, parseTimeOfDay} from '../date-calculations/event-date-input-calc'
 import {findPredecessorsAndSuccessors} from './event-hierarchy-analysis'
 import {getCalendarDefinition} from './calendar-reader'
 import {GanttError} from '../model/gantt-error'
@@ -80,14 +87,43 @@ function createItem(chartCtx: ChartContext,
   if (endRes) {
     if (endRes.days <= startRes.days) {
       chartCtx.addLog('endDateNotAfterStartDate', {end: endRes.display, start: startRes.display}, file)
-      endRes = {days: startRes.days, display: startRes.display}
+      endRes = {days: startRes.days, display: startRes.display, typeOfDay: startRes.typeOfDay}
     }
   } else {
-    endRes = {days: startRes.days, display: startRes.display}
+    endRes = {days: startRes.days, display: startRes.display, typeOfDay: startRes.typeOfDay}
   }
 
 
   const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
+
+  let startTimeOfDay: TypeOfDayParsed | undefined = undefined
+  let endTimeOfDay: TypeOfDayParsed | undefined = undefined
+
+  if (isTimeSpan) {
+    if (startRes.typeOfDay) {
+      startTimeOfDay = startRes.typeOfDay
+      startRes.days = startRes.days + startRes.typeOfDay.value
+    }
+    if (endRes.typeOfDay) {
+      endTimeOfDay = endRes.typeOfDay
+      endRes.days = endRes.days + endRes.typeOfDay.value
+    }
+  } else /* timestamp */ {
+
+    if (startRes.typeOfDay) {
+      startTimeOfDay = startRes.typeOfDay
+    } else {
+      const timeOfDay = chartCtx.propertyReader.getEventTimeOfDay(frontMatter, file)
+      startTimeOfDay = parseTimeOfDay(timeOfDay, calendarConfig)
+    }
+
+    if (startTimeOfDay) {
+      endTimeOfDay = startTimeOfDay
+      startRes.days = startRes.days + startTimeOfDay.value
+      endRes.days = endRes.days + startTimeOfDay.value
+    }
+  }
+
 
   let displayType: GanttItemDisplayType = eventPropertyReader.getEventSymbol(frontMatter, file, isTimeSpan)
 
@@ -101,6 +137,8 @@ function createItem(chartCtx: ChartContext,
     endDateDisplay: endRes.display,
     startDays: startRes.days,
     endDays: endRes.days,
+    startTimeOfDay: startTimeOfDay ?? undefined,
+    endTimeOfDay: endTimeOfDay ?? undefined,
     group: group,
     displayType,
     displayIcon: eventPropertyReader.getEventIconID(frontMatter, file),

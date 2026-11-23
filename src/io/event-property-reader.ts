@@ -49,6 +49,14 @@ export class EventPropertyReader {
     return {startDate, endDate}
   }
 
+  getEventTimeOfDay(frontMatter: FrontMatterCache, file: TFile): string | undefined {
+    const key = this.settings.frontMatterProperty_event_time_of_day
+    return frontMatter[key] as string
+      ?? this.basesCtx?.readPropertyValue(file, key)
+      ?? undefined
+  }
+
+
   /*
    * Default key: 'gantt-calendar-definition'
    */

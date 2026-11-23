@@ -49,12 +49,19 @@ export type RepeatRule = {
   endDay: number
 }
 
+export type TypeOfDayParsed = {
+  input: string
+  value: number /* 0 < x < 1 */
+  timeOfDayFractions: { nominator: number, denominator: number }[]
+}
+
 export type ParsedDate = {
   /** Absolute offset to day 0 of the event's relative calendar. */
   days: number
   /** Human-readable display of date. May include (short) month names if given. */
   display: string
   repeatRule?: RepeatRule
+  typeOfDay?: TypeOfDayParsed
 }
 
 export type EventId = string
@@ -67,6 +74,8 @@ export type GanttItem = {
   endDateDisplay: string
   startDays: number /* Quantized timeline tracking unit: Days from default point zero */
   endDays: number
+  startTimeOfDay?: TypeOfDayParsed
+  endTimeOfDay?: TypeOfDayParsed
   group: string
   displayType: GanttItemDisplayType
   displayIcon?: string /* SVG icon ID */
@@ -194,6 +203,7 @@ export type PluginSettings = GanttChartSources & {
   frontMatterProperty_gantt_this_optional: boolean /* activate to save 1 front-matter property */
   frontMatterProperty_event_time_start: string
   frontMatterProperty_event_time_end: string
+  frontMatterProperty_event_time_of_day: string
   frontMatterProperty_event_name: string
   frontMatterProperty_event_calendar: string
   frontMatterProperty_event_group: string

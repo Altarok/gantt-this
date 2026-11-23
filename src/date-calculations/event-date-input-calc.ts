@@ -1,4 +1,4 @@
-import {ParsedDate, RepeatRule} from '../types/settings-types'
+import {ParsedDate, RepeatRule, TypeOfDayParsed} from '../types/settings-types'
 import {
   CalendarConfig,
   PositionalCalendarConfig,
@@ -9,6 +9,7 @@ import {isCustomLeapYear} from './leap-year-calc'
 import {parseDescriptiveDateToValidInput, TODAY} from './dates'
 import {createRepeatRule} from '../util/recurring-events'
 import {throwGanttError} from '../model/gantt-error'
+import {splitOnce} from '../const/constants'
 
 /**
  * Parse event data to {@link ParsedDate}.
@@ -23,20 +24,42 @@ export function parseEventDate(doCheckForRepetitions: boolean,
   if (!date) throwGanttError('unparseableDate', {date})
   if (!config) throwGanttError('missingCalConfigForDate', {date})
 
+  /*
+   * 1.: Remove repetition rule
+   */
+
   let repeatRule: RepeatRule | undefined
 
   if (doCheckForRepetitions && date.includes(' repeat ')) {
     const parts = date.split(' repeat ')
-    date = parts[0] ?? ''
+    date = parts[0]?.trim() ?? ''
     const suffix = parts[1] ?? ''
     if (suffix) repeatRule = createRepeatRule(isStartDate, suffix.trim(), config)
   }
+
+  /*
+   * 2.: Parse time of day
+   */
+  let typeOfDayParsed: TypeOfDayParsed | undefined
+
+  if (date.includes(' ')) {
+    const {left, right} = splitOnce(date, ' ')
+    if (left && right) {
+      date = left
+      typeOfDayParsed = parseTimeOfDay(right, config)
+    }
+  }
+
+  /*
+   * 3.: Parse actual date
+   */
 
   let cleanInput: string = date.startsWith(TODAY) ? parseDescriptiveDateToValidInput(date.trim(), config) : date.trim()
 
   const parsedDate = createParsedDate(cleanInput, config)
 
   if (parsedDate) parsedDate.repeatRule = repeatRule
+  if (typeOfDayParsed) parsedDate.typeOfDay = typeOfDayParsed
 
   return parsedDate
 }
@@ -247,3 +270,45 @@ function calculateDaysForYears(upToYear: number, details: RuleBasedDetails): num
 
   return totalDays
 }
+
+export function parseTimeOfDay(timeInput: string | undefined,
+                               calendarConfig: CalendarConfig | null): TypeOfDayParsed | undefined {
+  /*
+   * TODO add warnings to all of those `return null`
+   */
+  if (!timeInput || !calendarConfig?.timeOfDay) return undefined
+
+  const {timeOfDay: timeConfig} = calendarConfig
+  const timeInputSegments = timeInput.split(':').filter(Boolean)
+  if (!timeInputSegments.length) return undefined
+
+  const joinedSegmentCount = Math.min(timeInputSegments.length, timeConfig.length)
+
+  const timeOfDayFractions: { nominator: number, denominator: number }[] = []
+
+  let value = 0
+  let lastUnitFragment = 1
+
+  for (let index = 0; index < joinedSegmentCount; index++) {
+
+    const timeConfigUnit = timeConfig[index]
+    const timeInputSegment = Number(timeInputSegments[index])
+
+    if (!timeConfigUnit || Number.isNaN(timeInputSegment)) return undefined
+
+    const {count} = timeConfigUnit
+
+    if (timeInputSegment < 0 || timeInputSegment >= count) return undefined
+
+
+    value = value + lastUnitFragment * (timeInputSegment / count)
+    lastUnitFragment = lastUnitFragment / count
+    timeOfDayFractions.push({nominator: timeInputSegment, denominator: count})
+  }
+
+  if (value < 0 && value > 1) return undefined
+
+  return {input: timeInput, value, timeOfDayFractions}
+
+}
+

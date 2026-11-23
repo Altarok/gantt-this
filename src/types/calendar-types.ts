@@ -55,6 +55,12 @@ export type RuleBasedDetails = {
   outputFormat: DateFormatComponent[]
 }
 
+type TimeOfDay = {
+  unit: string
+  names: string[]
+  count: number
+}[]
+
 /**
  * This one has to be implemented by the user inside a Markdown note.
  */
@@ -80,9 +86,10 @@ type BaseCalendarConfig = {
   weekdays?: Weekdays
   colors?: CalendarColor | {
     axis?: CalendarColor
-    dates?: CalendarColor //
+    dates?: CalendarColor
     ticks?: CalendarColor
   }
+  timeOfDay: TimeOfDay
 }
 
 type PositionalUnit = {
