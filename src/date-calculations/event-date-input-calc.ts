@@ -109,12 +109,15 @@ function parseDateWithPositionalConfig(date: string, calendarConfig: PositionalC
     const segment = segments[i]
     if (!segment || Number.isNaN(Number(segment)))
       throwGanttError('positionalDateWithInvalidSegment', {date, segment: String(segment)})
-    let number = Number(segment)
+    let count = Number(segment)
     if (i < units.length - 1 && oneBased) {
-      if (number < 1) throwGanttError('invalid1BasedPositionalDateContainsZero', {date})
-      number--
+      /*
+       * Magic here: If 1-based, reduce all numbers (except the last one) by 1 for absolute day calculation
+       */
+      if (count < 1) throwGanttError('invalid1BasedPositionalDateContainsZero', {date})
+      count--
     }
-    totalDays += number * units[i]!.days
+    totalDays += count * units[i]!.days
   }
 
   let displaySegments = segments
