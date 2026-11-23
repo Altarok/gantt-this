@@ -60,7 +60,10 @@ export function calculateMoonPositions(engine: GanttRenderEngine,
   if (moons.length === 0) return moonDrawData /* fast-fail */
 
   moons.forEach((moon: Moon, index) => {
-    if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) return /* fast-fail TODO add error */
+    if (Number.isNaN(moon.cycle) || moon.cycle <= 0 || Number.isNaN(moon.offset)) {
+      /* fast-fail TODO add error */
+      return
+    }
 
     const phaseStep: number | null = calculatePhaseStepsForThisMoon(engine, moon)
 
