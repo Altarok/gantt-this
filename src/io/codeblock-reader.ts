@@ -13,7 +13,7 @@ export function readCodeBlock(currentFolder: string,
 
   const codeBlockContent: RawChartInput = {}
 
-  const lines = source.split('\n')
+  const lines = source.split('\n').filter(Boolean)
 
   for (const line of lines) {
     if (!line.includes(':')) continue
