@@ -89,7 +89,7 @@ type BaseCalendarConfig = {
     dates?: CalendarColor
     ticks?: CalendarColor
   }
-  timeOfDay: TimeOfDay
+  timeOfDay?: TimeOfDay
 }
 
 type PositionalUnit = {
