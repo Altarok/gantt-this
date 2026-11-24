@@ -104,8 +104,8 @@ function combineSvgsToData(axisSvg: SVGSVGElement, itemsSvg: SVGSVGElement): str
   combined.setAttribute('width', String(totalWidth))
   combined.setAttribute('height', String(totalHeight))
   combined.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`)
-  combined.style.overflow = 'hidden'
-
+  combined.setAttribute('overflow', 'hidden')
+  
   const defs = window.document.createElementNS(svgNs, 'defs')
   const clipPath = window.document.createElementNS(svgNs, 'clipPath')
   clipPath.setAttribute('id', 'export-clip')
