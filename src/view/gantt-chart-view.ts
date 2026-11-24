@@ -15,7 +15,7 @@ export class GanttChartView {
   private chartEventContainer!: HTMLDivElement
   private chartCalendarContainer!: HTMLDivElement
   eventSvg!: SVGSVGElement
-  calendarSvg!: SVGElement
+  calendarSvg!: SVGSVGElement
 
   /** Group background colors + group badges   */
   private backgroundLayer!: SVGGElement
