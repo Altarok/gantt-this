@@ -351,10 +351,6 @@ export class GanttChartView {
     return this.eventSvg.getBoundingClientRect()
   }
 
-  get calendarDimensions(): DOMRect {
-    return this.calendarSvg.getBoundingClientRect()
-  }
-
   /**
    * Event area height has to be set once after drawing everything or when height changes.
    * @param visibleHeight new value for event area height

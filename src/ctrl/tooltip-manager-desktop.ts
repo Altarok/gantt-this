@@ -36,7 +36,7 @@ export default class TooltipManager implements HoverParent {
   public destroy() {
     this.engine.view.container.removeEventListener('mouseover', this.boundMouseOver)
     this.connectorDrawer?.destroy()
-    this.hideTooltip()
+    this.hideTooltip('destroy')
   }
 
   private handleMouseOver(evt: MouseEvent) {
@@ -90,13 +90,13 @@ export default class TooltipManager implements HoverParent {
 
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
     const target = evt.target as HTMLElement // Find the closest task element (works for SVG rects or HTML bars)
-    if (!target?.hasAttribute('data-id')) return this.hideTooltip('not data-id') // is it a gantt chart with data?
+    if (!target) return this.hideTooltip('target missing')
+    if (!target.hasAttribute('data-id')) return this.hideTooltip('not data-id') // is it a gantt chart with data?
     const id = target.getAttribute('data-id') // extract data ID (unique)
     if (id === null) return this.hideTooltip('data-id is null')
     const ganttItem: GanttItem | undefined = this.getEventById(id)
     if (!ganttItem) return this.hideTooltip('target not a GanttItem')
 
-    if (!target) return this.hideTooltip('target missing')
     if (target.dataset.hasPopover === 'true') return this.hideTooltip('target already has a popover') // already hovering said target?
 
     return {target, ganttItem}
@@ -418,7 +418,8 @@ export default class TooltipManager implements HoverParent {
   }
 
   /* Clean up if mouse drifted off a data element onto empty SVG space */
-  hideTooltip(_msg?: string): null {
+  hideTooltip(_msg: string): null {
+    // debug.info(`hideTooltip >> ${_msg}`)
     if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
     this.hideHighlightAroundElement()
     if (this.lastHoveredTarget) {
@@ -476,6 +477,17 @@ class SelfAligningHoverPopover extends HoverPopover {
     super.onload()
     this.contentPopulator(this.ganttItem, this.hoverEl)
     this.hoverEl.setCssStyles({bottom: ''})
+
+    /*
+     * TODO
+     *
+     * #9 (SelfAligningHoverPopover.onload bounds check): getBoundingClientRect() returns coordinates relative
+     *  to the viewport, not the document. chartRect.height is just the element's height (for example, 500px).
+     *  If the page is scrolled down so the chart's bottom is at 900px in the viewport and a hovered item is
+     *  at y = 600px, comparing against chartRect.height - 10 (490px) treats 600px as past the bottom edge even
+     * when space remains below (chartRect.bottom - 10).
+     */
+
 
     const rect = this.hoverEl.getBoundingClientRect()
     const targetRect = (this.targetEl as unknown as HTMLDivElement).getBoundingClientRect()

@@ -120,6 +120,13 @@ export class ChartManager {
     if (reset.isManual) {
       debug.log(`Manual refresh. Cooldown is at ${remainingCooldown} milliseconds.`)
     } else if (remainingCooldown > 0) {
+      /*
+       * TODO
+       *
+       * Auto-refresh dropped during cooldown (ChartManager refreshChartCallback):
+       * For non-manual refreshes (!reset.isManual), if remainingCooldown > 0, the callback returns immediately
+       *  instead of scheduling an update once the cooldown expires.
+       */
       debug.log(`Auto-refresh has to wait for another ${remainingCooldown} milliseconds.`)
       return
     } else {

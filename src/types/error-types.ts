@@ -11,7 +11,7 @@ export const knownErrors: Record<string, ErrorDef> = {
   endDateNotAfterStartDate: {
     level: 'info',
     type: 'event',
-    messageTemplate: `End date '{end}' not after start date '{start}'. Will be ignored.`
+    messageTemplate: `Given end date '{end}' not after start date '{start}'. Will be ignored.`
   },
   eventDirEmpty: {
     level: 'warn',

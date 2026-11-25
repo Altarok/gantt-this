@@ -54,6 +54,20 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
 
       if (item2) item2.id = newName
 
+      /*
+       * TODO
+       *
+       * Renaming calendars/groups does not update references (FantasyGanttSettingTab.openRenameForm):
+       * Updating item.id does not update defaultCalendar / defaultGroup if that entry was the default,
+       * nor does it migrate existing event frontmatter or calendar/group assignments.
+       *
+       * #13 (Updating frontmatter across multiple files): Noted for a second look / merging options.
+       * To update frontmatter across files in an Obsidian plugin, iterate over this.app.vault.getMarkdownFiles()
+       * (filtering to relevant notes) and call
+       * this.app.fileManager.processFrontMatter(file, (frontmatter) => { ... }),
+       * which safely parses and rewrites YAML frontmatter.
+       */
+
       void this.plugin.saveData(this.settings).then(() => this.update())
     }).open()
   }

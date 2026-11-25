@@ -1,6 +1,7 @@
 import {Consts} from '../const/constants'
 import {GroupOrCalendarDrawerData} from '../types/settings-types'
 import {SettingsContext} from './settings-context'
+import {debug} from '../util/debug'
 
 type Margin = { top: number, bottom: number, left: number, right: number }
 
@@ -154,6 +155,7 @@ export class GanttChartModel {
   }
 
   setDayRange(min: number, max: number) {
+    debug.log(`setDayRange >> min '${min}', max '${max}'`)
     this.minDays = min
     this.maxDays = max
   }
