@@ -81,22 +81,29 @@ export class GanttRenderEngine {
   }
 
   private calculateGlobalBounds() {
+    debug.log('calculateGlobalBounds >>')
+
     if (this.rawData.length === 0) {
       const todayDays = this.chartCtx.calendarCache.get(this.settings.defaultCalendar)?.today ?? 0
       this.viewModel.setDayRange(todayDays - 15, todayDays + 15)
       return
     }
 
-    const startValues = this.rawData.map(d => d.startDays)
-    const endValues = this.rawData.map(d => Math.max(d.startDays, d.endDays))
+    const startValues: number[] = []
+    const endValues: number[] = []
+
+    this.rawData.forEach((item) => {
+      startValues.push(item.startDays)
+      endValues.push(Math.max(item.startDays, item.endDays))
+    })
 
     const lowerBound = Math.min(...startValues)
     const upperBound = Math.max(...endValues)
     const diff = upperBound - lowerBound
 
     const paddingDays = diff > 150 ? Math.floor(diff / 10) : 15
-
     this.viewModel.setDayRange(lowerBound - paddingDays, upperBound + paddingDays)
+    debug.log('calculateGlobalBounds <<')
   }
 
   initLayout() {
@@ -227,6 +234,13 @@ export class GanttRenderEngine {
   private calculateAndSetEventAreaHeight(): void {
 
     debug.info(`calculateAndSetEventAreaHeight >>`)
+
+    /*
+     * TODO break in split windows
+     *
+     * GanttRenderEngine.calculateAndSetEventAreaHeight): Resolves viewportHeight from
+     * activeWindow (chartContainer.ownerDocument.defaultView ?? window), but queries .status-bar from window.document.
+     */
 
     const activeWindow = this.view.chartContainer.ownerDocument.defaultView ?? window
     const viewportHeight = activeWindow.innerHeight
