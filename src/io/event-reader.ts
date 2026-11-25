@@ -117,6 +117,7 @@ function createItem(chartCtx: ChartContext,
 
   const item = new GanttItemImpl(id,
     eventPropertyReader.getEventName(frontMatter, file),
+    // startDate, endDate,
     startDate.display,
     endDate.display,
     startDate.days,

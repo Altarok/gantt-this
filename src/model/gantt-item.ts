@@ -12,6 +12,8 @@ export class GanttItemImpl implements GanttItem {
 
   constructor(readonly id: string,
               readonly name: string,
+              // readonly startDate: ParsedDate,
+              // readonly endDate: ParsedDate,
               readonly startDateDisplay: string,
               readonly endDateDisplay: string,
               readonly startDays: number,
