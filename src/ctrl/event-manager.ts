@@ -95,8 +95,10 @@ export abstract class GanttEventManagerBase implements GanttEventManager {
   }
 
   protected openEventFileInNewTab(target?: HTMLElement): void {
-    const dataID = target?.getAttribute?.('data-id')
+    let dataID = target?.getAttribute?.('data-id')
+    debug.log(`openEventFileInNewTab >> data-id ${dataID}`)
     if (!dataID) return
+    if (dataID.contains('-rep-')) dataID = dataID.replace(/-rep-.*/, '')
     const link = this.engine.rawData.find(d => d.id === dataID)?.link
     if (link) void this.chartCtx.workspace.openLinkText(link, '', true)
   }
