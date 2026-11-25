@@ -40,11 +40,10 @@ function parseFirstPart(input?: string): { delta: number, step: Step } | null {
 /**
  * Interpret input-date suffix to make its event repeat itself.
  *
- * @param isStartDate - decide which suffixes to check
  * @param input - suffix of a date, what came after `' repeat '`
  * @param calendarConfig
  */
-export function createRepeatRule(isStartDate: boolean, input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
+export function createRepeatRule(input: string, calendarConfig: CalendarConfig): RepeatRule | undefined {
 
   const parts: string[] = input.split(',').map(x => x.trim()).filter(Boolean)
 

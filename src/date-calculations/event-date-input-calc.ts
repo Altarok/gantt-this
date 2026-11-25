@@ -34,7 +34,7 @@ export function parseEventDate(doCheckForRepetitions: boolean,
     const parts = date.split(' repeat ')
     date = parts[0]?.trim() ?? ''
     const suffix = parts[1] ?? ''
-    if (suffix) repeatRule = createRepeatRule(isStartDate, suffix.trim(), config)
+    if (suffix) repeatRule = createRepeatRule(suffix.trim(), config)
   }
 
   /*
