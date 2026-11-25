@@ -44,9 +44,9 @@ export function parseEventDate(doCheckForRepetitions: boolean,
 
   if (date.includes(' ')) {
     const {left, right} = splitOnce(date, ' ')
-    if (left && right) {
-      date = left
+    if (left && right && /\d+(:\d+)*/.test(right)) {
       typeOfDayParsed = parseTimeOfDay(right, config)
+      if (typeOfDayParsed /* Actually found time of day */) date = left
     }
   }
 
