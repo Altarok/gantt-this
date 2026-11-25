@@ -123,7 +123,7 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
 
     try {
       if (item.repeatRule.step === 'day') duplicateEventWithDayDelta(item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
-      else if (item.repeatRule.step === 'year') duplicateEventWithYearDelta(chartCtx, item, expanded, engine, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
+      else if (item.repeatRule.step === 'year') duplicateEventWithYearDelta(chartCtx, item, expanded, pixelsPerDay, doubleIconSize, visibleMinDays, visibleMaxDays)
     } catch (err) {
       if (err instanceof GanttError) {
         err.message = `Failed to duplicate event: ${err.message}`
@@ -139,7 +139,6 @@ export function expandRecurringEvents(chartCtx: ChartContext, engine: GanttRende
 function duplicateEventWithYearDelta(chartCtx: ChartContext,
                                      item: GanttItem,
                                      expanded: GanttItem[],
-                                     renderEngine: GanttRenderEngine,
                                      pixelsPerDay: number,
                                      doubleIconSize: number,
                                      visibleMinDays: number,
@@ -154,7 +153,7 @@ function duplicateEventWithYearDelta(chartCtx: ChartContext,
 
   const duration = item.endDays ? (item.endDays - item.startDays) : 0
 
-  /* Extract  date parts components from item's start date */
+  /* Extract date parts components from item's start date */
   const startDate: string = item.startDateDisplay.trim()
   let dateParts: string[]
   if (calendarConfig.delimiter === '-' && startDate.startsWith('-')) {
