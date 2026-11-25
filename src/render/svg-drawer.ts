@@ -24,6 +24,7 @@ import {debug} from '../util/debug'
 import {MoonDrawData} from '../types/moon-types'
 import {getCalendarColors} from '../util/calendar-utils'
 import {ColoredDateData, parseDaysToPositionalDateStringWithColor} from '../date-calculations/positional-dates'
+import {LaneAssigner} from './vertical-lane-assigner'
 
 export class GanttRenderEngine {
   private readonly svgDrawerUtil: SvgDrawerUtil
@@ -124,12 +125,12 @@ export class GanttRenderEngine {
       })
 
       groupedMap.forEach((items, groupName) => {
-        const {processedData, totalLanes} = this.calculateStacking(items)
+        const {sortedItems, totalLanes} = LaneAssigner.sortEventsIntoLanes(items)
         const groupContentLanes = totalLanes > 0 ? totalLanes : 0
         const groupHeight = groupContentLanes * this.viewModel.eventRowHeight + this.viewModel.getGroupHeaderHeight
         this.groups.push({
           name: groupName,
-          items: processedData,
+          items: sortedItems,
           yOffset: currentYOffset,
           height: groupHeight,
           lanes: totalLanes
@@ -137,12 +138,12 @@ export class GanttRenderEngine {
         currentYOffset += groupHeight
       })
     } else {
-      const {processedData, totalLanes} = this.calculateStacking(this.drawnData)
+      const {sortedItems, totalLanes} = LaneAssigner.sortEventsIntoLanes(this.drawnData)
       const groupContentLanes = totalLanes > 0 ? totalLanes : 0
       const groupHeight = groupContentLanes * this.viewModel.eventRowHeight
       this.groups.push({
         name: 'All',
-        items: processedData,
+        items: sortedItems,
         yOffset: currentYOffset,
         height: groupHeight,
         lanes: totalLanes
@@ -631,48 +632,9 @@ export class GanttRenderEngine {
     this.viewModel.resetPanAndZoom()
   }
 
-  private calculateStacking(items: GanttItem[]): { processedData: GanttItem[], totalLanes: number } {
-
-    const eras = items.filter(i => i.displayType === 'era')
-    const nonEras = items.filter(i => i.displayType !== 'era' && !i.isRecurringInstance).sort((a, b) => a.startDays - b.startDays)
-
-    const itemLaneMap = new Map<string, number>()
-    const lanes: GanttItem[][] = []
-
-    nonEras.forEach(item => {
-      let placed = false
-      for (let i = 0; i < lanes.length; i++) {
-        const lane = lanes[i]
-        if (!lane) continue
-
-        const lastItem = lane[lane.length - 1]
-
-        if (lastItem && lastItem.endDays < item.startDays - 1) {
-          lane.push(item)
-          item.lane = i
-          itemLaneMap.set(item.id, i)
-          placed = true
-          break
-        }
-      }
-      if (!placed) {
-        lanes.push([item])
-        const newLaneIndex = lanes.length - 1
-        item.lane = newLaneIndex
-        itemLaneMap.set(item.id, newLaneIndex)
-      }
-    })
-
-    const repeaters = items.filter(i => i.displayType !== 'era' && i.isRecurringInstance === true)
-
-    repeaters.forEach(item => {
-      item.lane = item.parentEventId !== undefined ? itemLaneMap.get(item.parentEventId) : 0
-    })
-
-    const processedData = [...eras, ...nonEras, ...repeaters]
-    return {processedData, totalLanes: lanes.length}
-  }
-
+  /**
+   * Day -> Pixel
+   */
   getXPosition(days: number): number {
     if (this.viewModel.maxDays <= this.viewModel.minDays) {
       return this.viewModel.panTranslateX
