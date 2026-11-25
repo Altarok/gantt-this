@@ -1,4 +1,4 @@
-import {ParsedDate, RepeatRule, TypeOfDayParsed} from '../types/settings-types'
+import {ParsedDate, RepeatRule, TimeOfDayParsed} from '../types/settings-types'
 import {
   CalendarConfig,
   PositionalCalendarConfig,
@@ -40,13 +40,13 @@ export function parseEventDate(doCheckForRepetitions: boolean,
   /*
    * 2.: Parse time of day
    */
-  let typeOfDayParsed: TypeOfDayParsed | undefined
+  let timeOfDayParsed: TimeOfDayParsed | undefined
 
   if (date.includes(' ')) {
     const {left, right} = splitOnce(date, ' ')
     if (left && right && /\d+(:\d+)*/.test(right)) {
-      typeOfDayParsed = parseTimeOfDay(right, config)
-      if (typeOfDayParsed /* Actually found time of day */) date = left
+      timeOfDayParsed = parseTimeOfDay(right, config)
+      if (timeOfDayParsed /* Actually found time of day */) date = left
     }
   }
 
@@ -59,7 +59,7 @@ export function parseEventDate(doCheckForRepetitions: boolean,
   const parsedDate = createParsedDate(cleanInput, config)
 
   if (parsedDate) parsedDate.repeatRule = repeatRule
-  if (typeOfDayParsed) parsedDate.typeOfDay = typeOfDayParsed
+  if (timeOfDayParsed) parsedDate.timeOfDay = timeOfDayParsed
 
   return parsedDate
 }
@@ -272,7 +272,7 @@ function calculateDaysForYears(upToYear: number, details: RuleBasedDetails): num
 }
 
 export function parseTimeOfDay(timeInput: string | undefined,
-                               calendarConfig: CalendarConfig | null): TypeOfDayParsed | undefined {
+                               calendarConfig: CalendarConfig | null): TimeOfDayParsed | undefined {
   /*
    * TODO add warnings to all of those `return null`
    */
@@ -298,7 +298,7 @@ export function parseTimeOfDay(timeInput: string | undefined,
 
     const {count} = timeConfigUnit
 
-    if (timeInputSegment < 0 || timeInputSegment >= count) return undefined
+    if (timeInputSegment < 0 || timeInputSegment > count) return undefined
 
 
     value = value + lastUnitFragment * (timeInputSegment / count)
@@ -306,7 +306,7 @@ export function parseTimeOfDay(timeInput: string | undefined,
     timeOfDayFractions.push({nominator: timeInputSegment, denominator: count})
   }
 
-  if (value < 0 && value > 1) return undefined
+  if (value < 0 || value > 1) return undefined
 
   return {input: timeInput, value, timeOfDayFractions}
 

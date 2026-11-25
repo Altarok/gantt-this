@@ -4,7 +4,7 @@ import {
   GanttItemDisplayType,
   GroupOrCalendarSettings,
   ParsedDate,
-  TypeOfDayParsed
+  TimeOfDayParsed
 } from '../types/settings-types'
 import {CalendarConfig} from '../types/calendar-types'
 import {FrontMatterCache, TFile} from 'obsidian'
@@ -14,6 +14,9 @@ import {findPredecessorsAndSuccessors} from './event-hierarchy-analysis'
 import {getCalendarDefinition} from './calendar-reader'
 import {GanttError} from '../model/gantt-error'
 import {ChartContext} from '../model/chart-context'
+import {GanttItemImpl} from '../model/gantt-item'
+
+const NO_TIME_OF_DAY: TimeOfDayParsed = {input: '', value: 0, timeOfDayFractions: []}
 
 /**
  * Parse given files to {@link GanttItem}s.
@@ -60,8 +63,8 @@ export async function parseFiles(files: TFile[],
 }
 
 function createItem(chartCtx: ChartContext,
-                    startDate: string,
-                    endDate: string | undefined,
+                    startDateInput: string,
+                    endDateInput: string | undefined,
                     /** Calendar to use for event */
                     calendarId: string,
                     calendarConfig: CalendarConfig | null,
@@ -70,96 +73,71 @@ function createItem(chartCtx: ChartContext,
                     id: EventId): GanttItem | null {
 
   const eventPropertyReader: EventPropertyReader = chartCtx.propertyReader
-  let startRes: ParsedDate | undefined
-  let endRes: ParsedDate | undefined
+
+  let startDate: ParsedDate | undefined
+  let endDate: ParsedDate | undefined
 
   try {
-    startRes = parseEventDate(true, true, startDate, calendarConfig)
-    if (!startRes) return null
-    if (endDate) endRes = parseEventDate(true, false, endDate, calendarConfig)
-
+    startDate = parseEventDate(true, true, startDateInput, calendarConfig)
+    if (!startDate) return null
+    if (endDateInput) endDate = parseEventDate(true, false, endDateInput, calendarConfig)
   } catch (err) {
-    // new Notice(`Failed to parse event date: ${endDate} in file ${file.name}`)
     if (err instanceof GanttError) chartCtx.addErr(err, file)
     return null
   }
 
-  if (endRes) {
-    if (endRes.days <= startRes.days) {
-      chartCtx.addLog('endDateNotAfterStartDate', {end: endRes.display, start: startRes.display}, file)
-      endRes = {days: startRes.days, display: startRes.display, typeOfDay: startRes.typeOfDay}
-    }
-  } else {
-    endRes = {days: startRes.days, display: startRes.display, typeOfDay: startRes.typeOfDay}
-  }
+  const fallbackTimeOfDay: TimeOfDayParsed = parseTimeOfDay(chartCtx.propertyReader.getEventTimeOfDay(frontMatter, file), calendarConfig)
+    ?? NO_TIME_OF_DAY
 
 
-  const isTimeSpan: boolean = !!endDate && startRes.days < endRes.days
+  startDate.timeOfDay ??= fallbackTimeOfDay
+  // startDate.days = startDate.days + (startDate.timeOfDay?.value ?? 0)
 
-  let startTimeOfDay: TypeOfDayParsed | undefined = undefined
-  let endTimeOfDay: TypeOfDayParsed | undefined = undefined
+  let isTimeSpan = false
 
-  if (isTimeSpan) {
-    if (startRes.typeOfDay) {
-      startTimeOfDay = startRes.typeOfDay
-      startRes.days = startRes.days + startRes.typeOfDay.value
-    }
-    if (endRes.typeOfDay) {
-      endTimeOfDay = endRes.typeOfDay
-      endRes.days = endRes.days + endRes.typeOfDay.value
-    }
-  } else /* timestamp */ {
+  if (endDateInput && endDate) {
+    endDate.timeOfDay ??= fallbackTimeOfDay
+    // endDate.days = endDate.days + (endDate.timeOfDay?.value ?? 0)
 
-    if (startRes.typeOfDay) {
-      startTimeOfDay = startRes.typeOfDay
+    if (endDate.days + (endDate.timeOfDay?.value ?? 0) > startDate.days + (startDate.timeOfDay?.value ?? 0)) {
+      isTimeSpan = true
     } else {
-      const timeOfDay = chartCtx.propertyReader.getEventTimeOfDay(frontMatter, file)
-      startTimeOfDay = parseTimeOfDay(timeOfDay, calendarConfig)
-    }
-
-    if (startTimeOfDay) {
-      endTimeOfDay = startTimeOfDay
-      startRes.days = startRes.days + startTimeOfDay.value
-      endRes.days = endRes.days + startTimeOfDay.value
+      chartCtx.addLog('endDateNotAfterStartDate', {end: endDate.display, start: startDate.display}, file)
+      endDate = startDate
     }
   }
 
+  endDate ??= startDate
+  endDate.timeOfDay ??= fallbackTimeOfDay
 
   let displayType: GanttItemDisplayType = eventPropertyReader.getEventSymbol(frontMatter, file, isTimeSpan)
 
   const group = eventPropertyReader.getEventGroup(frontMatter, file)
   const color = eventPropertyReader.getEventColor(frontMatter, file, group, calendarId)
 
-  const item: GanttItem = {
-    id: id,
-    name: eventPropertyReader.getEventName(frontMatter, file),
-    startDateDisplay: startRes.display,
-    endDateDisplay: endRes.display,
-    startDays: startRes.days,
-    endDays: endRes.days,
-    startTimeOfDay: startTimeOfDay ?? undefined,
-    endTimeOfDay: endTimeOfDay ?? undefined,
-    group: group,
+  const item = new GanttItemImpl(id,
+    eventPropertyReader.getEventName(frontMatter, file),
+    startDate.display,
+    endDate.display,
+    startDate.days,
+    endDate.days,
+    startDate.timeOfDay,
+    endDate.timeOfDay,
+    group,
     displayType,
-    displayIcon: eventPropertyReader.getEventIconID(frontMatter, file),
-    displayIconColor: eventPropertyReader.getEventIconColor(frontMatter, file),
-    calendarType: calendarId,
+    eventPropertyReader.getEventIconID(frontMatter, file),
+    eventPropertyReader.getEventIconColor(frontMatter, file),
+    calendarId,
     color,
-    link: file.path + eventPropertyReader.getHeaderToLinkTo(frontMatter, file),
+    file.path + eventPropertyReader.getHeaderToLinkTo(frontMatter, file),
     frontMatter,
-    file,
-    predecessors: [],
-    successors: [],
-  }
+    file)
 
-  if (endDate && endRes.repeatRule) {
-    item.repeatRule = endRes.repeatRule
-  } else if (startRes.repeatRule) {
-    item.repeatRule = startRes.repeatRule
-  }
+  if (endDateInput && endDate.repeatRule) item.repeatRule = endDate.repeatRule
+  else if (startDate.repeatRule) item.repeatRule = startDate.repeatRule
 
-  delete endRes.repeatRule
-  delete startRes.repeatRule
+  delete endDate.repeatRule
+  delete startDate.repeatRule
 
   return item
 }

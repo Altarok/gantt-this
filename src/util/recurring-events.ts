@@ -223,7 +223,7 @@ function duplicateEventWithYearDelta(chartCtx: ChartContext,
 
     /* Only push if it falls within the visible screen area */
     if (nextStartDays >= visibleMinDays && nextStartDays >= item.repeatRule.startDay) {
-      expanded.push(createItem(item, nextStartDays, duration))
+      expanded.push(item.clone(nextStartDays, duration))
     }
 
     yearOffset += effectiveDelta // delta
@@ -268,22 +268,8 @@ function duplicateEventWithDayDelta(item: GanttItem,
   let iterations = 0
 
   while (currentStart <= renderMax && iterations < 100) {
-    expanded.push(createItem(item, currentStart, duration))
+    expanded.push(item.clone(currentStart, duration))
     currentStart += step
     iterations++
-  }
-}
-
-function createItem(item: GanttItem,
-                    startDays: number,
-                    duration: number): GanttItem {
-  return {
-    ...item,
-    id: `${item.id}-rep-${startDays}`,
-    startDays,
-    endDays: item.endDays ? startDays + duration : startDays,
-    isRecurringInstance: true,
-    parentEventId: item.id,
-    lane: item.lane
   }
 }

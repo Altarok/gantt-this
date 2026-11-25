@@ -315,7 +315,7 @@ export class GanttRenderEngine {
           const nextItem = currentIndex !== -1 ? currentLaneItems[currentIndex + 1] : undefined
           const nextX = nextItem ? this.getXPosition(nextItem.startDays) : this.currRenderWidth
           const availableWidth = Math.max(0, nextX - x1 - 10) // 10px padding buffer
-          return this.drawTimeStamp(x1, displayType, d, laneY, halfRowHeight, firstYValue, group, totalChartHeight, totalGroupHeight, availableWidth)
+          return this.drawTimeStamp(x1, displayType, d, laneY, firstYValue, group, totalChartHeight, totalGroupHeight, availableWidth)
         }
 
       }) // end loop group.items.forEach(GanttItem)
@@ -644,9 +644,7 @@ export class GanttRenderEngine {
    * Day -> Pixel
    */
   getXPosition(days: number): number {
-    if (this.viewModel.maxDays <= this.viewModel.minDays) {
-      return this.viewModel.panTranslateX
-    } // fail-safe
+    if (this.viewModel.maxDays <= this.viewModel.minDays) return this.viewModel.panTranslateX // fail-safe
 
     const renderWidth = this.currRenderWidth
     const percentage = (days - this.viewModel.minDays) / (this.viewModel.totalDaysSpan)

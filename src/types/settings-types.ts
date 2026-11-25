@@ -49,7 +49,7 @@ export type RepeatRule = {
   endDay: number
 }
 
-export type TypeOfDayParsed = {
+export type TimeOfDayParsed = {
   input: string
   value: number /* 0 < x < 1 */
   timeOfDayFractions: { nominator: number, denominator: number }[]
@@ -61,7 +61,7 @@ export type ParsedDate = {
   /** Human-readable display of date. May include (short) month names if given. */
   display: string
   repeatRule?: RepeatRule
-  typeOfDay?: TypeOfDayParsed
+  timeOfDay?: TimeOfDayParsed
 }
 
 export type EventId = string
@@ -74,8 +74,8 @@ export type GanttItem = {
   endDateDisplay: string
   startDays: number /* Quantized timeline tracking unit: Days from default point zero */
   endDays: number
-  startTimeOfDay?: TypeOfDayParsed
-  endTimeOfDay?: TypeOfDayParsed
+  startTimeOfDay: TimeOfDayParsed
+  endTimeOfDay: TimeOfDayParsed
   group: string
   displayType: GanttItemDisplayType
   displayIcon?: string /* SVG icon ID */
@@ -95,6 +95,10 @@ export type GanttItem = {
   // repeatUntilDays?: number // Optional upper end bound for recurrence
   isRecurringInstance?: boolean
   parentEventId?: EventId
+
+  get startDayWithTimeOfDay(): number
+  get endDayWithTimeOfDay(): number
+  clone(startDays: number, duration: number): GanttItem
 }
 
 export type GanttGroup = {
