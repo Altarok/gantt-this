@@ -10,7 +10,7 @@ import {
 } from './test-configs'
 import {Consts} from '../src/const/constants'
 import {parseEventDate} from '../src/date-calculations/event-date-input-calc'
-import {CalendarConfig} from '../src/types/calendar-types'
+import {CalendarConfig, RuleBasedCalendarConfig} from '../src/types/calendar-types'
 
 function createAxisDate(days: number,
                         calendarConfig: CalendarConfig,
@@ -238,3 +238,81 @@ describe('Parse days to date format', () => {
 
 })
 
+/**
+ * AI trying to fail my code:
+ */
+describe('parseDaysToNonGregorianDateString noYearZero leap check', () => {
+  it('fails if isCustomLeapYear skips noYearZero shift on negative loop years', () => {
+    const config: RuleBasedCalendarConfig = {
+      id: 'custom-interval',
+      name: 'Custom Interval',
+      type: 'rule-based',
+      offsetToDayZero: 0,
+      sharedOffset: 0,
+      delimiter: '-',
+      ruleBasedDetails: {
+        daysInStandardYear: 365,
+        noYearZero: true,
+        format: ['year', 'month', 'day'],
+        outputFormat: ['year', 'month', 'day'],
+        leapYearRule: {
+          ruleType: 'interval',
+          intervalYears: 4,
+          extraDays: 1,
+          applyToMonthIndex: 1,
+        },
+        months: [
+          {name: 'M01', shortname: 'M01', days: 31},
+          {name: 'M02', shortname: 'M02', days: 28},
+        ],
+      },
+      link: ''
+    }
+
+    // Steps backward into negative years; passing `true` for `yearWasAlreadyShifted`
+    // skips `year + 1` in `isCustomLeapYear`, checking unshifted `year` instead.
+    const result = createAxisDateDescription(-1460, config, true)
+    expect(result).toBeDefined()
+  })
+})
+
+/**
+ * AI trying to fail my code:
+ */
+describe('parseDaysToNonGregorianDateString noYearZero leap check', () => {
+  it('fails when isCustomLeapYear skips noYearZero shift for year -1', () => {
+    const months = Array.from({length: 12}, (_, i) => ({
+      name: `M${String(i + 1).padStart(2, '0')}`,
+      shortname: `M${String(i + 1).padStart(2, '0')}`,
+      days: 30,
+    }))
+
+    const config: RuleBasedCalendarConfig = {
+      id: 'custom-interval',
+      name: 'Custom Interval',
+      type: 'rule-based',
+      offsetToDayZero: 0,
+      sharedOffset: 0,
+      delimiter: '-',
+      ruleBasedDetails: {
+        daysInStandardYear: 360,
+        noYearZero: true,
+        format: ['year', 'month', 'day'],
+        outputFormat: ['year', 'month', 'day'],
+        leapYearRule: {
+          ruleType: 'interval',
+          intervalYears: 4,
+          extraDays: 1,
+          applyToMonthIndex: 0,
+        },
+        months,
+      },
+      link: ''
+    }
+
+    // At loop year -1: `yearWasAlreadyShifted = true` checks -1 (non-leap -> 360 days, remainingDays = 360),
+    // whereas `yearWasAlreadyShifted = false` shifts -1 -> 0 (leap -> 361 days, remainingDays = 361).
+    const result = createAxisDateDescription(-361, config, true)
+    expect(result).toBe('-0002-M12-30')
+  })
+})

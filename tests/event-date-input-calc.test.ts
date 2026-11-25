@@ -61,8 +61,10 @@ describe('Parsing event dates fails for', () => {
     //     messageTemplate: `Can't parse positional date '{date}', should have {unitLength} units.`
     // },
     const err: GanttError = getGanttErrorFromId('positionalDateWithInvalidLength')
-    err.message = `Can't parse positional date '1.2.3', should have 5 units.`
-    expect(() => parseDate('1.2.3', mayanConfig)).toThrow(err)
+    expect(parseDate('1.2.3', mayanConfig)).toEqual({
+      days: -1_137_104, // -1_137_507 (offset) + 3*1 + 2*20 + 1*360
+      display: '0.0.1.2.3'
+    })
 
     err.message = `Can't parse positional date '1.2.3.4.5.6.7', should have 5 units.`
     expect(() => parseDate('1.2.3.4.5.6.7', mayanConfig)).toThrow(err)
@@ -341,7 +343,11 @@ describe('Fail Suite - Edge Cases & Logic Bugs', () => {
     const err: GanttError = getGanttErrorFromId('positionalDateWithInvalidLength')
 
     err.message = `Can't parse positional date '0.0.0.1', should have 5 units.`
-    expect(() => parseDate('0.0.0.1', mayanConfig)).toThrow(err)
+    expect(parseDate('0.0.0.1', mayanConfig)).toEqual({
+      days: -1_137_506, // -1_137_507 (offset) + 1
+      display: '0.0.0.0.1'
+    })
+
 
     err.message = `Can't parse positional date '0.0.0.0.0.1', should have 5 units.`
     expect(() => parseDate('0.0.0.0.0.1', mayanConfig)).toThrow(err)
