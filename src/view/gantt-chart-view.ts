@@ -302,7 +302,7 @@ export class GanttChartView {
 
   findSvgElementById<T extends SVGElement = SVGElement>(id: string): T | null {
     const selector = `[data-id="${id}"]`
-    return this.eventLayer.querySelector<T>(selector)
+    return this.eventSvg.querySelector<T>(selector)
   }
 
   makeToolbarSticky(sticky: boolean) {
