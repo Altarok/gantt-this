@@ -195,6 +195,7 @@ export type PluginSettings = GanttChartSources & {
   uxMoveToolbarBelowChart: boolean
   uxMakeToolbarSticky: boolean
   uxMakeCalAxesSticky: boolean
+  uxRenderEventsAccordingToTimeOfDay: boolean
   /*
    * Front-matter property names configurable by user
    */

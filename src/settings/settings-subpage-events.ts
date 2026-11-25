@@ -102,6 +102,17 @@ export function createEventSettings(settings: PluginSettings): SettingDefinition
               min: 10, max: 30, step: 2,
               defaultValue: DEFAULT_SETTINGS.viewEventIconHeight
             }
+          },
+          {
+            name: 'Render Events according to time of day',
+            desc: `
+            If active, events get drawn at their exact time of day between day ticks.
+            12:00 would be centered in a Gregorian calendar.
+            This requires you to define time of day in your calendar.`,
+            control: {
+              type: 'toggle', key: 'uxRenderEventsAccordingToTimeOfDay',
+              defaultValue: DEFAULT_SETTINGS.uxRenderEventsAccordingToTimeOfDay
+            }
           }
         ]
       },

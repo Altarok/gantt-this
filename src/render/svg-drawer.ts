@@ -275,11 +275,12 @@ export class GanttRenderEngine {
   renderData() {
     this.view.clearEventLayer()
 
-    const halfRowHeight = this.viewModel.eventRowHeightHalf
     const firstYValue = this.viewModel.margin.top
     const totalChartHeight = this.calculateTotalChartHeight()
 
     const headerHeight = this.viewModel.getGroupHeaderHeight
+
+    const isMoveEventsByTimeOfDay: boolean = this.settings.moveEventsByTimeOfDay
 
     this.groups.forEach(group => {
       const groupContentHeight = (group.lanes ?? 1) * this.viewModel.eventRowHeight
@@ -293,13 +294,20 @@ export class GanttRenderEngine {
         const laneY = groupYStart + (lane ?? 0) * this.viewModel.eventRowHeight
         const displayType: GanttItemDisplayType = d.displayType
 
-        const x1 = this.getXPosition(d.startDays)
-        const x2 = (d.endDays <= d.startDays) ? x1 : this.getXPosition(d.endDays)
+        const x1 = isMoveEventsByTimeOfDay
+          ? this.getXPosition(d.startDayWithTimeOfDay)
+          : this.getXPosition(d.startDays)
+
+        if (isTimespan(displayType)) {
+
+          const x2 = isMoveEventsByTimeOfDay
+            ? this.getXPosition(d.endDayWithTimeOfDay)
+            : this.getXPosition(d.endDays)
 
 
-        if (isTimespan(displayType))
-          return this.drawTimeSpan(x1, x2, displayType, d, laneY, halfRowHeight, firstYValue, group, totalChartHeight, totalGroupHeight)
-        else if (isTimestamp(displayType)) {
+          return this.drawTimeSpan(x1, Math.max(x1, x2), displayType, d, laneY, firstYValue, group, totalChartHeight, totalGroupHeight)
+
+        } else if (isTimestamp(displayType)) {
 
           /* Calculate available width for timestamp text */
           const currentLaneItems = laneItemsMap.get(d.lane ?? 0) ?? []
@@ -320,7 +328,6 @@ export class GanttRenderEngine {
                        displayType: GanttItemDisplayTypeTimespans,
                        d: GanttItem,
                        laneY: number,
-                       halfRowHeight: number,
                        firstYValue: number,
                        group: GanttGroup,
                        totalChartHeight: number,
@@ -330,7 +337,7 @@ export class GanttRenderEngine {
     const x2 = Math.min(xEnd, this.currRenderWidth + 8)
     switch (displayType) {
       case 'bar':
-        return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + halfRowHeight)
+        return this.svgDrawerUtil.drawBar(d, x1, x2, laneY + this.viewModel.eventRowHeightHalf)
       case 'era': {
         const isNotInAGroup = d.group === NO_GROUP
         const y: number = isNotInAGroup ? firstYValue : group.yOffset
@@ -344,12 +351,13 @@ export class GanttRenderEngine {
                         displayType: GanttItemDisplayTypeTimestamp,
                         d: GanttItem,
                         laneY: number,
-                        halfRowHeight: number,
                         firstYValue: number,
                         group: GanttGroup,
                         totalChartHeight: number,
                         totalGroupHeight: number,
                         availableWidth: number): void {
+    const halfRowHeight = this.viewModel.eventRowHeightHalf
+
     switch (displayType) {
       case 'point':
         return this.svgDrawerUtil.drawPoint(d, x1, laneY + halfRowHeight, availableWidth)

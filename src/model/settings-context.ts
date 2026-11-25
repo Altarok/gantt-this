@@ -333,6 +333,10 @@ export class SettingsContext implements GanttChartSources {
     this.local.uxScrollingWithMouseWheel = val
   }
 
+  get moveEventsByTimeOfDay(): boolean {
+    return this.local.uxRenderEventsAccordingToTimeOfDay ?? this.global.uxRenderEventsAccordingToTimeOfDay
+  }
+
   get rerenderCooldownSeconds(): number {
     return /* this.local.uxRerenderCooldownSeconds ?? */ this.global.uxRerenderCooldownSeconds
   }

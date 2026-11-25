@@ -71,5 +71,6 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
   uxVerticalLineEventWidth: 3,
   viewEventRowHeight: 24,
   viewEventShapeHeight: 16,
-  viewEventIconHeight: 16
+  viewEventIconHeight: 16,
+  uxRenderEventsAccordingToTimeOfDay: true
 } as const
