@@ -1,4 +1,4 @@
-import {ParsedDate, RepeatRule, TimeOfDayParsed} from '../types/settings-types'
+import {ParsedDate, RepeatRule, TimeOfDayParsed} from '../types/event-types'
 import {
   CalendarConfig,
   PositionalCalendarConfig,

@@ -1,4 +1,4 @@
-import {GanttItem, RepeatRule, Step} from '../types/settings-types'
+import {GanttItem, RepeatRule, Step} from '../types/event-types'
 import {CalendarConfig} from '../types/calendar-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {createParsedDate} from '../date-calculations/event-date-input-calc'

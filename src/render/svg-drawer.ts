@@ -1,5 +1,5 @@
+import {GanttGroup} from '../types/settings-types'
 import {
-  GanttGroup,
   GanttItem,
   GanttItemDisplayType,
   GanttItemDisplayTypeTimespans,
@@ -7,7 +7,7 @@ import {
   isTimespan,
   isTimestamp,
   NO_GROUP
-} from '../types/settings-types'
+} from '../types/event-types'
 import {CalendarColors, CalendarConfig} from '../types/calendar-types'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {createGanttEventManager} from '../ctrl/event-manager-creator'

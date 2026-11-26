@@ -1,5 +1,5 @@
 import {TFile} from 'obsidian'
-import {GanttItem} from '../types/settings-types'
+import {GanttItem} from '../types/event-types'
 import {parseFiles} from './event-reader'
 import {getFilteredFiles} from './file-collector'
 import {ChartContext} from '../model/chart-context'

@@ -1,5 +1,5 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {EventId, GanttItem, isTimespan} from '../types/settings-types'
+import {EventId, GanttItem, isTimespan} from '../types/event-types'
 import {CalendarConfig} from '../types/calendar-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttConnectorDrawer} from '../render/arrow-drawer'

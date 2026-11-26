@@ -1,5 +1,5 @@
 import {getIcon} from 'obsidian'
-import {GanttItem} from '../types/settings-types'
+import {GanttItem} from '../types/event-types'
 import {Css} from '../const/constants'
 import {GanttEventManager} from '../ctrl/event-manager'
 import {ChartContext} from '../model/chart-context'

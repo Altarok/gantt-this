@@ -1,5 +1,5 @@
 import {FrontMatterCache, TFile} from 'obsidian'
-import {GanttItem, GanttItemDisplayType, RepeatRule, TimeOfDayParsed} from '../types/settings-types'
+import {GanttItem, GanttItemDisplayType, RepeatRule, TimeOfDayParsed} from '../types/event-types'
 
 export class GanttItemImpl implements GanttItem {
   predecessors: string[]

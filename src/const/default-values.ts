@@ -1,4 +1,5 @@
-import {DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP, PluginSettings} from '../types/settings-types'
+import {PluginSettings} from '../types/settings-types'
+import {DEFAULT_TIMESPAN, DEFAULT_TIMESTAMP} from '../types/event-types'
 import {DateFormatComponent} from '../types/calendar-types'
 
 export const DEFAULT_FALLBACK_CALENDAR = 'gregorian'

@@ -1,4 +1,4 @@
-import {GanttItem} from '../types/settings-types'
+import {GanttItem} from '../types/event-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttChartModel} from '../model/gantt-chart-model'
 import {GanttChartView} from '../view/gantt-chart-view'

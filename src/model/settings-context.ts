@@ -1,14 +1,12 @@
 import {
   ControlKey,
   GanttChartSources,
-  GanttItemDisplayTypeTimespans,
-  GanttItemDisplayTypeTimestamp,
   GroupOrCalendarSettings,
   LocalChartSettings,
-  ParsedDate,
   PluginSettings,
   RawChartInput
 } from '../types/settings-types'
+import {GanttItemDisplayTypeTimespans, GanttItemDisplayTypeTimestamp, ParsedDate} from '../types/event-types'
 import {parseEventDate} from '../date-calculations/event-date-input-calc'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {ChartContext} from './chart-context'

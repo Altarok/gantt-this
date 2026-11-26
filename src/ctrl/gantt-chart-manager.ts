@@ -1,6 +1,7 @@
 import {Notice} from 'obsidian'
 import FantasyGanttPlugin from '../main'
-import {Destroyable, GanttItem, RawChartInput} from '../types/settings-types'
+import {GanttItem} from '../types/event-types'
+import {Destroyable, RawChartInput} from '../types/settings-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {setToolbarReactions} from './toolbar-controller'
 import TextWidthCache from '../render/text-space-cache'

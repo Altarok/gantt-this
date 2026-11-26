@@ -1,5 +1,5 @@
 import {Notice, parseYaml, TFile} from 'obsidian'
-import {ParsedDate} from '../types/settings-types'
+import {ParsedDate} from '../types/event-types'
 import {CalendarConfig, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../types/calendar-types'
 import {DEFAULT_CAL_DATE_FORMAT, DEFAULT_FALLBACK_CALENDAR} from '../const/default-values'
 import {runOffsetCalculations} from '../date-calculations/calendar-offset-calc'
@@ -31,7 +31,7 @@ function addTodayDateAsAbsoluteDay(newCalendarConfig: CalendarConfig) {
   if (today) {
     /* Check user input for correct type! */
     if (typeof today === 'string') {
-      const parsedInput: ParsedDate | null = createParsedDate(String(today), newCalendarConfig)
+      const parsedInput: ParsedDate = createParsedDate(String(today), newCalendarConfig)
       newCalendarConfig.today = parsedInput?.days ?? undefined
     } else if (typeof today !== 'number') {
       /* Number would be fine, everything else must be deleted since it would break some code */

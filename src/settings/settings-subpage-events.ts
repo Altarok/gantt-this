@@ -1,5 +1,6 @@
 import {SettingDefinitionItem} from 'obsidian'
-import {GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP, PluginSettings} from '../types/settings-types'
+import {PluginSettings} from '../types/settings-types'
+import {GANTT_ITEM_DISPLAY_TYPE_FOR_TIMESTAMP} from '../types/event-types'
 import {DEFAULT_SETTINGS} from '../const/default-values'
 import {toRecord} from './settings-util'
 

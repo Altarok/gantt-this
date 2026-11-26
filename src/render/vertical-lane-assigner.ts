@@ -1,4 +1,4 @@
-import {GanttItem} from '../types/settings-types'
+import {GanttItem} from '../types/event-types'
 
 function findAvailableLane(lanes: GanttItem[][], item: GanttItem): number | undefined {
   for (let i = 0; i < lanes.length; i++) {
