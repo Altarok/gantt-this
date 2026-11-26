@@ -42,7 +42,7 @@ describe('Calendar offset calculations are done correctly for', () => {
   })
 
   it('mock data (null)', () => {
-    const calculatedOffsetToDayZero = runOffsetCalculations(null)
+    const calculatedOffsetToDayZero = runOffsetCalculations()
     expect(calculatedOffsetToDayZero).toBe(0)
   })
 
