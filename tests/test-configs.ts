@@ -1,4 +1,5 @@
 import {DateFormatComponent, PositionalCalendarConfig, RuleBasedCalendarConfig} from '../src/types/calendar-types'
+import {GregorianCalendar} from '../src/const/fallback-calendar'
 
 const formatYMD: DateFormatComponent[] = ['year', 'month', 'day']
 
@@ -23,36 +24,9 @@ export const MockRuleBasedCalendarConfig: RuleBasedCalendarConfig = {
 }
 
 export const gregorianConfig: RuleBasedCalendarConfig = {
-  ...MockCalendarConfig,
-  id: 'gregorian',
-  name: 'Gregorian Calendar',
-  displayName: 'Gregorian',
-  sharedOffset: 0,
-  offsetToDayZero: 0,
-  type: 'rule-based',
-  delimiter: '-',
-  ruleBasedDetails: {
-    noYearZero: false, // == default value
-    daysInStandardYear: 365,
-    leapYearRule: {ruleType: 'gregorian', applyToMonthIndex: 1},
-    format: formatYMD,
-    outputFormat: formatYMD,
-    months: [
-      {shortname: 'Jan', name: 'January', days: 31},
-      {shortname: 'Feb', name: 'February', days: 28},
-      {shortname: 'Mar', name: 'March', days: 31},
-      {shortname: 'Apr', name: 'April', days: 30},
-      {shortname: 'May', name: 'May', days: 31},
-      {shortname: 'Jun', name: 'June', days: 30},
-      {shortname: 'Jul', name: 'July', days: 31},
-      {shortname: 'Aug', name: 'August', days: 31},
-      {shortname: 'Sep', name: 'September', days: 30},
-      {shortname: 'Oct', name: 'October', days: 31},
-      {shortname: 'Nov', name: 'November', days: 30},
-      {shortname: 'Dec', name: 'December', days: 31}
-    ]
-  },
-  moons: [{offset: 18.2, cycle: 29.53059, color: "orange"}]
+  ...GregorianCalendar, /* Productive fallback calendar */
+  bcSuffix: undefined,
+  adSuffix: undefined
 }
 
 export const gregorianConfigWithoutYearZero: RuleBasedCalendarConfig = {

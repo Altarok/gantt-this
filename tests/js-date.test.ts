@@ -6,7 +6,7 @@ import {describe, expect, it} from 'vitest'
 const zeroOffset = -719162
 
 /**
- * @param sharedOffset beware that month has an offset of 1 -> month input = 1 -> january
+ * @param sharedOffset beware that month has an offset of 1 -> month input = 1 -> January
  */
 const newOffsetDate = (sharedOffset: { year: number, month: number, day: number } | number = 0) => {
   /* Always start with Monday, 1 AD January 1st */

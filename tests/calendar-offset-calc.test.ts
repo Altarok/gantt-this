@@ -23,19 +23,19 @@ describe('Calendar offset calculations are done correctly for', () => {
     expect(calculatedOffsetToDayZero).toBe(0)
   })
 
-  it('shire calendar', () => {
+  it('Shire calendar', () => {
     const calculatedOffsetToDayZero = runOffsetCalculations(shireConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(shireConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(-8)
   })
 
-  it('mayan calendar', () => {
+  it('Mayan calendar', () => {
     const calculatedOffsetToDayZero = runOffsetCalculations(mayanConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(mayanConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(-1_137_507)
   })
 
-  it('french revolution calendar', () => {
+  it('French Revolution calendar', () => {
     const calculatedOffsetToDayZero = runOffsetCalculations(frenchRevolutionConfig.sharedOffset)
     expect(calculatedOffsetToDayZero).toBe(frenchRevolutionConfig.offsetToDayZero)
     expect(calculatedOffsetToDayZero).toBe(654_415)

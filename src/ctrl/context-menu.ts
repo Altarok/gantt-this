@@ -105,13 +105,13 @@ function combineSvgsToData(axisSvg: SVGSVGElement, itemsSvg: SVGSVGElement): str
   combined.setAttribute('height', String(totalHeight))
   combined.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`)
   combined.setAttribute('overflow', 'hidden')
-  
+
   const defs = window.document.createElementNS(svgNs, 'defs')
   const clipPath = window.document.createElementNS(svgNs, 'clipPath')
   clipPath.setAttribute('id', 'export-clip')
 
 
-  /* Add css */
+  /* Add CSS */
   const exportCss = createCss(itemsSvg /* , axisSvg */)
   const styleEl = window.document.createElementNS(svgNs, 'style')
   styleEl.textContent = exportCss
@@ -153,8 +153,7 @@ function combineSvgsToData(axisSvg: SVGSVGElement, itemsSvg: SVGSVGElement): str
   appendPart(itemsSvg, 0, 0)
   appendPart(axisSvg, 0, itemsRect.height)
 
-  const svgData = new XMLSerializer().serializeToString(combined)
-  return svgData
+  return new XMLSerializer().serializeToString(combined)
 }
 
 function readCssVar(computed: CSSStyleDeclaration, name: string, fallback: string): string {

@@ -217,7 +217,6 @@ body.is-popout-window .gt-chart-container {
   color: orange;
 }
 
-
 .gt-toolbar-button:hover {
   background-color: var(--interactive-hover);
   color: var(--text-normal);
@@ -229,7 +228,6 @@ body.is-popout-window .gt-chart-container {
   min-width: 18px; /* Forces old WebKit to render SVG width */
   min-height: 18px; /* Forces old WebKit to render SVG height */
   fill: none;
-  stroke-width: 1.5px;
   stroke: currentcolor;
   stroke-linecap: round;
   stroke-linejoin: round;

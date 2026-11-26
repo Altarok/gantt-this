@@ -28,7 +28,7 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       ? this.settings.groups.map(g => g.id)
       : this.settings.calendars.map(c => c.id)
 
-    new AddEntryModal(this.plugin, existingIds, (entry) => {
+    new AddEntryModal(this.plugin, existingIds, (entry: GroupOrCalendarSettings) => {
       const list = this.settings[target]
       /* Set priority to the end of the current list */
       const newEntry = {...entry, priority: list.length}
@@ -46,13 +46,16 @@ export class FantasyGanttSettingTab extends PluginSettingTab {
       ? this.settings.groups.map(g => g.id)
       : this.settings.calendars.map(c => c.id)
 
-    new RenameEntryModal(this.plugin, existingIds, item, (newName: string) => {
+    new RenameEntryModal(this.plugin, existingIds, item, (entry: GroupOrCalendarSettings) => {
 
       const item2: GroupOrCalendarSettings | undefined = target === 'groups'
         ? this.settings.groups.find(g => g.id === item.id)
         : this.settings.calendars.find(c => c.id === item.id)
 
-      if (item2) item2.id = newName
+      if (item2) {
+        item2.id = entry.id
+        item2.color = entry.color
+      }
 
       /*
        * TODO

@@ -1,6 +1,6 @@
 /**
  * Calculates the Greatest Common Divisor using the Euclidean algorithm.
- * greatest common divisor = Groesster gemeinsamer Teiler
+ * greatest common divisor = größter gemeinsamer Teiler
  */
 export function gcd(a: number, b: number): number {
   return b === 0 ? a : gcd(b, a % b)
