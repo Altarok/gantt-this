@@ -13,10 +13,6 @@ export class AddEntryModal extends BaseEntryModificationModal {
       'Add')
   }
 
-  isValidId(_id: string): boolean {
-    return true
-  }
-
   onOpen() {
 
     const input: GroupOrCalendarSettings = {

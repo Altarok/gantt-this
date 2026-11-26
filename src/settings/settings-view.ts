@@ -2,12 +2,12 @@ import {ColorComponent, Notice, PluginSettingTab, Setting, SettingDefinitionItem
 import FantasyGanttPlugin from '../main'
 import {GroupOrCalendarSettings} from '../types/settings-types'
 import {DEFAULT_FALLBACK_CALENDAR, DEFAULT_FALLBACK_GROUP, DEFAULT_SETTINGS} from '../const/default-values'
-import {AddEntryModal} from './settings-cal-grp-creation'
+import {AddEntryModal} from './modal-cal-grp-creation'
 import {createFrontMatterSettingDefinitions} from './settings-subpage-frontmatter'
 import {createWorkspaceSettings} from './settings-subpage-workspace'
 import {createEventSettings} from './settings-subpage-events'
 import {createChartSettingDefinition} from './settings-subpage-chart'
-import {RenameEntryModal} from './settings-cal-grp-rename'
+import {RenameEntryModal} from './modal-cal-grp-rename'
 
 // const HIDEABLE_GROUP_DESCRIPTION = 'Once happy with your settings, you may hide this group. It will fold itself into a sub-page after reloading the app.'
 const VISIBLE_ICON = 'eye' /* an open eye */

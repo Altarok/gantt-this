@@ -13,10 +13,6 @@ export class RenameEntryModal extends BaseEntryModificationModal {
       'Save')
   }
 
-  isValidId(id: string): boolean {
-    return id !== this.itemToBeChanged.id
-  }
-
   onOpen() {
 
     const input: GroupOrCalendarSettings = {
