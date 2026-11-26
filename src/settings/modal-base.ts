@@ -11,10 +11,10 @@ export abstract class BaseEntryModificationModal extends Modal {
 
   protected existingIds: Set<string>
 
-  constructor(readonly plugin: FantasyGanttPlugin,
-              existingIds: string[],
-              readonly headerDescription: string,
-              readonly buttonDescription: string) {
+  protected constructor(readonly plugin: FantasyGanttPlugin,
+                        existingIds: string[],
+                        readonly headerDescription: string,
+                        readonly buttonDescription: string) {
     super(plugin.app)
     this.existingIds = new Set(existingIds)
   }

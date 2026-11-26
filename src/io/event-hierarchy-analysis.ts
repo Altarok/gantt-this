@@ -9,7 +9,7 @@ export function findPredecessorsAndSuccessors(items: GanttItem[],
    *
    * #8 (Predecessor/successor matching): Noted as NOK and marked for a task/code-location search.
    *  In Obsidian plugins, resolving links against a source file's path typically uses
-   * this.app.metadataCache.getFirstLinkpathDest(linkpath, sourceFile.path) alongside TFile.path rather
+   * this.app.metadataCache.getFirstLinkpathDest(linkPath, sourceFile.path) alongside TFile.path rather
    * than relying solely on basename.
    */
 

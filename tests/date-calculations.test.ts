@@ -66,7 +66,7 @@ describe('Verify test data is configured correctly', () => {
   })
 
 
-  it('test mayan epoch gregorian', () => {
+  it('test Mayan epoch gregorian', () => {
     const {sharedOffset} = mayanConfig
 
     const date = new Date('0001-01-01')
@@ -78,7 +78,7 @@ describe('Verify test data is configured correctly', () => {
     expect(locallyCalculatedOffsetToDayZero).toBe(mayanConfig.offsetToDayZero)
   })
 
-  it('test mayan offsetToDayZero (manually configured for tests)', () => {
+  it('test Mayan offsetToDayZero (manually configured for tests)', () => {
     const parseToAbsoluteDays = parseEventDate(false, false, '0.0.0.0.0', mayanConfig)
     expect(parseToAbsoluteDays.days).toBe(mayanConfig.offsetToDayZero)
     expect(parseToAbsoluteDays.display).toBe('0.0.0.0.0')

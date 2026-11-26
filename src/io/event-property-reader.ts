@@ -94,7 +94,7 @@ export class EventPropertyReader {
    * @param frontMatter
    * @param file
    * @param group name of group, e.g. 'historic'
-   * @param calendar name of calendar, e.g. 'mayan'
+   * @param calendar name of calendar, e.g. 'Mayan'
    */
   getEventColor(frontMatter: FrontMatterCache, file: TFile, group: string, calendar: string): string {
     const key = this.settings.frontMatterProperty_event_color
