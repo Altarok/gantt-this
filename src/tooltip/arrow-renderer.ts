@@ -1,11 +1,11 @@
 import {GanttChartView} from '../view/gantt-chart-view'
 import {Css} from '../const/constants'
-import {createSvg} from './svg-drawer-util'
+import {createSvg} from '../render/svg-drawer-util'
 
 const diff = 2
 type Point = { x: number, y: number }
 
-export class GanttConnectorDrawer {
+export class ArrowRenderer {
   constructor(private readonly view: GanttChartView) {
   }
 
@@ -39,7 +39,6 @@ export class GanttConnectorDrawer {
     const arrowPathData = createBezierCurve(startX, startY, endX, endY)
     this.drawArrow(arrowPathData)
   }
-
 
   /** Draw arrow and cache it to be able to delete it. */
   private drawArrow(pathData: string) {

@@ -62,3 +62,21 @@ export function shortenLargeNumber(rawVal: number): string {
   if (value >= 10_000) return `${prefix}${value.toLocaleString('en-US')}`
   return `${prefix}${value.toString().padStart(4, '0')}`
 }
+
+/**
+ * Formats an integer number with commas every three digits from the right.
+ * Usage of regex OK, since this is only used to create tooltips.
+ */
+export function formatIntegerWithCommas(integerPart: number): string {
+  return String(integerPart).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+// /**
+//  * Formats a number or bigint with commas every three digits from the right.
+//  */
+// function formatWithCommas(value: number | bigint): string {
+//   const [integerPart, decimalPart] = value.toString().split('.')
+//   const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+//
+//   return decimalPart !== undefined ? `${formattedInteger}.${decimalPart}` : formattedInteger
+// }

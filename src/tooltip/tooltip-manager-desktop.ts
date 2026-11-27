@@ -1,33 +1,32 @@
 import {HoverParent, HoverPopover} from 'obsidian'
-import {EventId, GanttItem, isTimespan} from '../types/event-types'
-import {CalendarConfig} from '../types/calendar-types'
+import {EventId, GanttItem} from '../types/event-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
-import {GanttConnectorDrawer} from '../render/arrow-drawer'
 import {GanttChartView} from '../view/gantt-chart-view'
-import {createSvg, SvgDrawerUtil} from '../render/svg-drawer-util'
-import {Css} from '../const/constants'
-import {createAxisDateDescription} from '../date-calculations/dates'
+import {SvgDrawerUtil} from '../render/svg-drawer-util'
 import {ChartContext} from '../model/chart-context'
-import {SettingsContext} from '../model/settings-context'
 import {debug} from '../util/debug'
-
-type VerticalOverlay = { upper: SVGLineElement, lower: SVGLineElement }
-
-type HighLightTarget = { item: GanttItem, svg: SVGElement }
-type RelatedTargets = { predecessors: HighLightTarget[], successors: HighLightTarget[] }
+import {SelfAligningHoverPopover} from './hover-popover'
+import {VerticalLineRenderer} from './vertical-line-renderer'
+import {EventHighlightRenderer} from './event-highlight-renderer'
+import {TooltipRendererHelper} from './tooltip-renderer-helper'
+import {Popup} from '../util/popup'
+import {TooltipContentBuilder} from './tooltip-content-builder'
 
 export default class TooltipManager implements HoverParent {
   hoverPopover: HoverPopover | null = null
-  private verticalGuides: VerticalOverlay[] = []
-  private lastHoveredTarget: HTMLElement | null = null
   private lastHoverTarget: HTMLElement | null = null
-  private connectorDrawer: GanttConnectorDrawer
+  private verticalLineRenderer: TooltipRendererHelper
+  private eventHighlightRenderer: TooltipRendererHelper
+  private tooltipContentBuilder: TooltipRendererHelper
+
   private readonly boundMouseOver: (evt: MouseEvent) => void
 
   constructor(private readonly chartCtx: ChartContext,
               private readonly engine: GanttRenderEngine,
-              private readonly svgDrawerUtil: SvgDrawerUtil) {
-    this.connectorDrawer = new GanttConnectorDrawer(engine.view)
+              svgDrawerUtil: SvgDrawerUtil) {
+    this.verticalLineRenderer = new VerticalLineRenderer(chartCtx, engine)
+    this.eventHighlightRenderer = new EventHighlightRenderer(chartCtx, engine, svgDrawerUtil)
+    this.tooltipContentBuilder = new TooltipContentBuilder(chartCtx, engine)
 
     this.boundMouseOver = (evt: MouseEvent) => this.handleMouseOver(evt)
     this.engine.view.container.addEventListener('mouseover', this.boundMouseOver)
@@ -35,43 +34,48 @@ export default class TooltipManager implements HoverParent {
 
   public destroy() {
     this.engine.view.container.removeEventListener('mouseover', this.boundMouseOver)
-    this.connectorDrawer?.destroy()
+    this.verticalLineRenderer?.destroy()
+    this.eventHighlightRenderer?.destroy()
     this.hideTooltip('destroy')
   }
 
-  private handleMouseOver(evt: MouseEvent) {
+  private handleMouseOver(evt: MouseEvent): void {
+    debug.wnm(`handleMouseOver >> ${evt.x},${evt.y}`)
     let hoverData: { target: HTMLElement, ganttItem: GanttItem } | null = this.getTargetAndMatchingEvent(evt)
     if (!hoverData) {
-      this.hideTooltip('not data-id')
+      debug.wnm(`handleMouseOver << no target`)
+      this.hideTooltip('no target')
       return
     }
 
     const {target, ganttItem} = hoverData
 
-    /*
-     * At THIS point we decided to really show a tooltip
-     */
-
+    /* At THIS point we decided to really show a tooltip */
     if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
+    this.lastHoverTarget = target
+    target.dataset.hasPopover = 'true' // mark element to not duplicate popover on internal mouse moves
+
+    this.renderEventHighlights(target, ganttItem)
 
     /* CTRL key is reserved for native file preview */
     if (evt.ctrlKey) {
-      if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
+      debug.wnm(`handleMouseOver -- show native preview`)
+      if (!ganttItem.link) return debug.wnm(`handleMouseOver << event missing a link`)
       this.showNativePreview(evt, target, ganttItem.link)
-      return
+    } else {
+      debug.wnm(`handleMouseOver -- show tooltip`)
+      this.renderTooltip(evt, target, ganttItem)
     }
 
-    this.lastHoverTarget = target
+    debug.wnm(`handleMouseOver <<`)
+  }
 
-    target.dataset.hasPopover = 'true' // mark element to not duplicate popover on internal mouse moves
-
-    this.showHighlightAroundElement(target, ganttItem)
-    this.showVerticalGuide(target, ganttItem)
-
+  private renderTooltip(event: MouseEvent, target: HTMLElement, ganttItem: GanttItem): void {
     try {
       /* create single popover and populate/position it once in onload */
-      const popover = new SelfAligningHoverPopover(this, target, ganttItem, this.chartView.container.getBoundingClientRect(),
-        (item, el) => this.setTooltipContent(item, el)
+      const popover = new SelfAligningHoverPopover(this, target, ganttItem,
+        this.chartView.container.getBoundingClientRect(),
+        (item, el) => this.tooltipContentBuilder.render(el, item)
       )
 
       popover.hoverEl.addEventListener('mouseleave', () => {
@@ -80,14 +84,32 @@ export default class TooltipManager implements HoverParent {
         delete target.dataset.hasPopover
       })
     } catch (err) {
-      debug.warn(String(err))
+      Popup.nok('Failed to show tooltip', err)
     }
   }
 
-  private getEventById(id: EventId): GanttItem | undefined {
-    return this.engine.drawnData.find(d => d.id === id) // is it a GanttItem?
+  /**
+   * Highlights hovered event, related events, renders arrows to connect them.
+   * @param target
+   * @param ganttItem
+   */
+  private renderEventHighlights(target: HTMLElement, ganttItem: GanttItem) {
+
+    /* No love for era events */
+    if (ganttItem.displayType === 'era') return
+
+    /* Search for SVG */
+    const eventSvg: SVGSVGElement | null = target.closest('svg')
+    if (!eventSvg) return
+
+    this.verticalLineRenderer.render(target, ganttItem, eventSvg)
+    this.eventHighlightRenderer.render(target, ganttItem, eventSvg)
   }
 
+  /**
+   * Try to find HTML element under mouse cursor.
+   * @param evt mouse event
+   */
   private getTargetAndMatchingEvent(evt: MouseEvent): { target: HTMLElement, ganttItem: GanttItem } | null {
     const target = evt.target as HTMLElement // Find the closest task element (works for SVG rects or HTML bars)
     if (!target) return this.hideTooltip('target missing')
@@ -96,420 +118,38 @@ export default class TooltipManager implements HoverParent {
     if (id === null) return this.hideTooltip('data-id is null')
     const ganttItem: GanttItem | undefined = this.getEventById(id)
     if (!ganttItem) return this.hideTooltip('target not a GanttItem')
-
     if (target.dataset.hasPopover === 'true') return this.hideTooltip('target already has a popover') // already hovering said target?
-
     return {target, ganttItem}
   }
 
-  /**
-   * @param event
-   * @param tooltip the popover's main div: hoverEl
-   * @private
-   */
-  private setTooltipContent(event: GanttItem, tooltip: HTMLElement) {
-
-    const g = tooltip.createDiv({cls: Css.tooltip.tooltip})
-
-    const tooltipTitle = (event.name || event.file.basename)
-
-    g.createDiv({text: tooltipTitle, cls: Css.tooltip.title})
-
-    if (this.hasSelectedBaseProperties) this.createBasesTooltipContent(g, event)
-
-    g.createDiv({text: 'Click to open in new tab', cls: Css.tooltip.link})
-
-    this.addDateDetails(g, event)
-  }
-
-  private dateInOutputFormat(days: number, cc: CalendarConfig): string {
-    return createAxisDateDescription(days, cc)
-  }
-
-  /**
-   * Add event date details below 'click here' tip. Date gets parsed to output format.
-   * @param container where to add the tooltip
-   * @param item event data
-   */
-  private addDateDetails(container: HTMLDivElement, item: GanttItem): void {
-
-    const calendarConfig = this.chartCtx.calendarCache.get(item.calendarType)
-    if (!calendarConfig) return
-
-    const datesContainer = container.createDiv({cls: Css.tooltip.dateDetails})
-
-    /* add current date */
-    this.addEventDateBelowTableRow(datesContainer, calendarConfig, item)
-
-    /* add repeating event metadata */
-    if (item.isRecurringInstance) {
-      const {repeatRule} = item
-      if (repeatRule?.delta && repeatRule.step)
-        datesContainer.createDiv({
-          text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`,
-          cls: Css.tooltip.suffixRow
-        })
-    }
-
-    /*
-     * 3. Add absolute day (optional)
-     */
-    if (this.addDaySuffixToTooltipTitle) {
-      const absoluteDay = (!isNaN(item.endDays) && item.endDays > item.startDays)
-        ? ` ${item.startDays} to ${item.endDays}`
-        : ` ${item.startDays}`
-      datesContainer.createDiv({text: `Absolute day: ${absoluteDay}`, cls: Css.tooltip.suffixRow})
-    }
-  }
-
-  private addEventDateBelowTableRow(datesContainer: HTMLDivElement,
-                                    calendarConfig: CalendarConfig,
-                                    item: GanttItem) {
-    const dateRow = datesContainer.createDiv({cls: Css.tooltip.repeatRow})
-    dateRow.createSpan({
-      text: isTimespan(item.displayType)
-        ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
-        : `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)}`,
-      cls: Css.tooltip.suffixRow
-    })
-  }
-
-  private get hasSelectedBaseProperties(): boolean {
-    return this.chartCtx.bases?.hasSelectedProperties() ?? false
-  }
-
-  private createBasesTooltipContent(container: HTMLDivElement, d: GanttItem): void {
-    if (!this.chartCtx.bases) return
-    const propertyKeyValues: { key: string, value: string }[] | undefined = this.chartCtx.bases?.readPropertyValues(d)
-    if (!propertyKeyValues || propertyKeyValues.length === 0) return
-
-    container.createDiv({text: 'Selected Base properties:', cls: Css.tooltip.dateDetails})
-    const table = container.createEl('table', {cls: Css.tooltip.table})
-
-    for (const p of propertyKeyValues) {
-      const row = table.insertRow()
-      const cellKey = row.insertCell()
-      cellKey.textContent = p.key
-      const cellVal = row.insertCell()
-      cellVal.textContent = p.value
-    }
-
-    return
-  }
-
-  private showNativePreview(event: MouseEvent, targetEl: HTMLElement, linktext?: string) {
-    if (!linktext) return
-
-    this.chartCtx.workspace.trigger('hover-link', {
-      event, targetEl, linktext, source: 'gantt-this', hoverParent: this.engine.view.container,
-    })
-  }
-
-  private showVerticalGuide(target: HTMLElement, ganttItem: GanttItem) {
-    if (!this.settings.drawVerticalLineOnHover) return
-    if (ganttItem.displayType === 'era') return
-
-    const svg = target.closest('svg')
-    if (!svg) return
-
-    /* Get the bounding box of the hovered element relative to the SVG container */
-    const targetRect = target.getBoundingClientRect()
-    const svgRect = svg.getBoundingClientRect()
-
-    if (ganttItem.displayType === 'bar') {
-      /*
-       * For bars, we want two lines: one at the left edge (start) and one at the right edge (end)
-       * Note: If your SVG bar element bounds represent the full width, we can use targetRect.left and targetRect.right.
-       */
-      const x1 = targetRect.left - svgRect.left
-      const x2 = targetRect.right - svgRect.left
-
-      /* Ensure we have two guideline elements */
-      this.ensureVerticalGuidesCount(2)
-
-      if (this.verticalGuides.length === 2) {
-        this.updateLine(ganttItem, this.verticalGuides[0]!, x1)
-        this.updateLine(ganttItem, this.verticalGuides[1]!, x2)
-      }
-    } else {
-      /* Calculate X position centered on the target element */
-      const x = targetRect.left + targetRect.width / 2 - svgRect.left
-
-      this.ensureVerticalGuidesCount(1)
-
-      if (this.verticalGuides.length === 1) {
-        this.updateLine(ganttItem, this.verticalGuides[0]!, x)
-      }
-    }
-  }
-
-  private ensureVerticalGuidesCount(count: number) {
-    /* Remove excess if switching from bar to point */
-    while (this.verticalGuides.length > count) {
-      const lines = this.verticalGuides.pop()
-      lines?.upper?.remove()
-      lines?.lower?.remove()
-    }
-
-    /* Add missing if switching from point to bar */
-    while (this.verticalGuides.length < count) {
-      const upper: SVGLineElement = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
-      const lower: SVGLineElement = createSvg('line', Css.item.verticalOverlay, {stroke: this.overlayColor})
-      this.chartView.renderVerticalGuidesOverEvent(upper, lower)
-      this.verticalGuides.push({upper, lower})
-    }
-  }
-
-  /**
-   * Show red, dotted, vertical lines around event on mouseover. Vertical line runs through entire gantt chart (upper half),
-   * but will only be visible over calendar related to event (lower half).
-   * <p>
-   * Param height unused, but keep this for now as there will be a plugin setting for this
-   *
-   * @param ganttItem
-   * @param line
-   * @param x
-   * @private
-   */
-  private updateLine(ganttItem: GanttItem, line: VerticalOverlay, x: number) {
-
-    const totalChartHeight = this.engine.calculateTotalChartHeight() + this.engine.viewModel.margin.top
-
-    const xS = String(x)
-
-    line.upper.setAttribute('x1', xS)
-    line.upper.setAttribute('y1', String(this.engine.viewModel.margin.top))
-    line.upper.setAttribute('x2', xS)
-    line.upper.setAttribute('y2', String(totalChartHeight))
-
-    const cal = this.engine.viewModel.drawnCals[ganttItem.calendarType]
-    if (cal) { /* should exist */
-      line.lower.setAttribute('x1', xS)
-      line.lower.setAttribute('y1', String(cal.y1))
-      line.lower.setAttribute('x2', xS)
-      line.lower.setAttribute('y2', String(cal.y2))
-    }
-  }
-
-  /** Remove vertical line. */
-  private hideVerticalGuide() {
-    for (const lines of this.verticalGuides) {
-      lines?.upper?.remove()
-      lines?.lower?.remove()
-    }
-    this.verticalGuides = []
-  }
-
-  private findRelatedElementsToHighlight(gtItem: GanttItem): RelatedTargets {
-
-    const predecessors: HighLightTarget[] = []
-    const successors: HighLightTarget[] = []
-
-    const predecessorsRaw = gtItem.predecessors.map(p => this.getEventById(p)).filter(x => !!x) ?? []
-
-    predecessorsRaw.forEach(item => {
-      const svg: SVGElement | null = this.engine.view.findSvgElementById(item.id)
-      if (svg) predecessors.push({item, svg})
-    })
-
-    const successorsRaw = gtItem.successors.map(s => this.getEventById(s)).filter(x => !!x) ?? []
-
-    successorsRaw.forEach(item => {
-      const svg: SVGElement | null = this.engine.view.findSvgElementById(item.id)
-      if (svg) successors.push({item, svg})
-    })
-
-    return {predecessors, successors}
-  }
-
-  /** Show box around hovered element. */
-  private showHighlightAroundElement(target: HTMLElement, ganttItem: GanttItem) {
-    if (this.lastHoveredTarget && this.lastHoveredTarget !== target) {
-      this.hideHighlightAroundElement()
-    }
-
-    if (ganttItem.displayType === 'era' || ganttItem.displayType === 'vertical-line') return
-
-    this.lastHoveredTarget = target
-    const svgBackground = target.closest('svg')
-    if (!svgBackground) return
-
-    this.addHighLightAroundSvg(ganttItem, svgBackground, target)
-  }
-
-  private addHighLightAroundSvg(ganttItem: GanttItem, svgBackground: SVGElement, target: SVGElement | HTMLElement) {
-
-    if (this.settings.highlightHoveredEvent) this.createShape(ganttItem, target, svgBackground, Css.hover.highlightHoveredEvent)
-
-    const highlightRelatedEvents = this.highlightRelatedEvents
-    const drawArrows = this.isDrawArrows
-
-    if (!highlightRelatedEvents && !drawArrows) return
-
-    const relatedTargets: RelatedTargets = this.findRelatedElementsToHighlight(ganttItem)
-
-    relatedTargets.predecessors.forEach(predecessor => {
-      if (highlightRelatedEvents) this.createShape(predecessor.item, predecessor.svg, svgBackground, Css.hover.highlightRelatedEvent)
-      if (drawArrows) this.connectorDrawer.drawCurvedArrow(predecessor.svg, target)
-    })
-
-    relatedTargets.successors.forEach(successor => {
-      if (highlightRelatedEvents) this.createShape(successor.item, successor.svg, svgBackground, Css.hover.highlightRelatedEvent)
-      if (drawArrows) this.connectorDrawer.drawCurvedArrow(target, successor.svg)
-    })
-  }
-
-  private createShape(ganttItem: GanttItem,
-                      target: SVGElement | HTMLElement,
-                      backgroundContainer: SVGElement,
-                      cssClass: string): void {
-
-    const targetRect: DOMRect = target.getBoundingClientRect()
-    const svgRect: DOMRect = backgroundContainer.getBoundingClientRect()
-
-    const x: number = targetRect.left - svgRect.left
-    const y: number = targetRect.top - svgRect.top
-    const width: number = targetRect.width
-    const height: number = targetRect.height
-
-    let shape: SVGElement | null
-
-    const centreX = x + width / 2
-    const centreY = y + height / 2
-
-    if (ganttItem.displayType === 'era' || ganttItem.displayType === 'vertical-line') {
-      shape = null // duplicate code added as fallback after method was split
-    } else if (ganttItem.displayType === 'bar' || ganttItem.displayType === 'box') {
-      shape = createSvg('rect', cssClass, {
-        x: x - 1, y: y - 1, width: width + 2, height: height + 2, stroke: this.overlayColor,
-        'pointer-events': 'none'
+  private showNativePreview(event: MouseEvent, target: HTMLElement, linktext: string): void {
+    try {
+      this.chartCtx.workspace.trigger('hover-link', {
+        event, target, linktext, source: 'gantt-this', hoverParent: this.engine.view.container,
       })
-    } else if (ganttItem.displayType === 'point') {
-      shape = createSvg('circle', cssClass, {
-        cx: String(centreX), cy: String(centreY), r: String(width / 2 + 3), stroke: this.overlayColor
-      })
-    } else {
-      const points = this.calculatePolygonPointsForOverlay(centreX, centreY, ganttItem.displayType)
-      shape = createSvg('polygon', cssClass, {points, stroke: this.overlayColor})
-    }
-
-    if (shape) this.chartView.renderShapeAroundEvent(shape)
-  }
-
-  private calculatePolygonPointsForOverlay(x: number, y: number, symbol: 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'octagon' | 'star') {
-    switch (symbol) {
-      case 'triangle':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 2, 3, 1, 0, 3)
-      case 'diamond':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y, 4, 1, 0, 3)
-      case 'pentagon':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 1, 5, 1, 0, 3)
-      case 'hexagon':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y, 6, 1, 0, 3)
-      case 'octagon':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y, 8, 1, 1 / 8, 3)
-      case 'star':
-        return this.svgDrawerUtil.calculatePolygonPoints(x, y + 1, 10, 0.382, 0, 4)
+    } catch (err) {
+      Popup.nok('Failed to show native preview', err)
     }
   }
 
-  private hideHighlightAroundElement() {
-    this.chartView.clearHoverLayer()
-  }
-
-  /* Clean up if mouse drifted off a data element onto empty SVG space */
+  /**
+   * Clean up if mouse drifted off a data element onto empty SVG space
+   */
   hideTooltip(_msg: string): null {
     // debug.info(`hideTooltip >> ${_msg}`)
     if (this.lastHoverTarget) delete this.lastHoverTarget.dataset.hasPopover
-    this.hideHighlightAroundElement()
-    if (this.lastHoveredTarget) {
-      this.lastHoveredTarget = null
-    }
-    this.hideVerticalGuide()
+    this.verticalLineRenderer.destroy()
+    this.chartView.clearHoverLayer() // hide highlights
     return null
   }
 
-  get chartView(): GanttChartView {
+  private getEventById(id: EventId): GanttItem | undefined {
+    return this.engine.drawnData.find(d => d.id === id) // is it a GanttItem?
+  }
+
+  private get chartView(): GanttChartView {
     return this.engine.view
   }
 
-  get settings(): SettingsContext {
-    return this.chartCtx.settings
-  }
 
-  private get highlightRelatedEvents(): boolean {
-    const b = this.settings.highlightRelatedEvents
-    debug.log(`highlightRelatedEvents :: ${b}`)
-    return b
-  }
-
-  private get isDrawArrows(): boolean {
-    const b = this.settings.drawArrows
-    debug.log(`isDrawArrows :: ${b}`)
-    return b
-  }
-
-  get overlayColor(): string {
-    return this.settings.uxVerticalOverlayColor
-  }
-
-  get addDaySuffixToTooltipTitle(): boolean {
-    return this.settings.uxAddDaySuffixToTooltipTitle
-  }
-
-}
-
-/**
- * AI-assisted hell of a class which aligns itself to be contained on the screen.
- * Subclass of HoverPopover to populate content once, measure its actual height,
- * and position it correctly with boundary checking (no double creation / no flicker).
- */
-class SelfAligningHoverPopover extends HoverPopover {
-  constructor(parent: HoverParent,
-              private targetEl: HTMLElement,
-              private ganttItem: GanttItem,
-              private chartRect: DOMRect,
-              private contentPopulator: (item: GanttItem, el: HTMLElement) => void) {
-    super(parent, targetEl, -1)
-  }
-
-  onload() {
-    super.onload()
-    this.contentPopulator(this.ganttItem, this.hoverEl)
-    this.hoverEl.setCssStyles({bottom: ''})
-
-    /*
-     * TODO
-     *
-     * #9 (SelfAligningHoverPopover.onload bounds check): getBoundingClientRect() returns coordinates relative
-     *  to the viewport, not the document. chartRect.height is just the element's height (for example, 500px).
-     *  If the page is scrolled down so the chart's bottom is at 900px in the viewport and a hovered item is
-     *  at y = 600px, comparing against chartRect.height - 10 (490px) treats 600px as past the bottom edge even
-     * when space remains below (chartRect.bottom - 10).
-     */
-
-
-    const rect = this.hoverEl.getBoundingClientRect()
-    const targetRect = (this.targetEl as unknown as HTMLDivElement).getBoundingClientRect()
-    const spacing = 8
-
-    let y = targetRect.top - rect.height - spacing
-    let x = Math.max(targetRect.right, this.chartRect.left + 10)
-    x = Math.min(x, this.chartRect.right - 10 - rect.width)
-
-    if (y < 10) {
-      y = targetRect.bottom + spacing
-    }
-
-    if (y + rect.height > this.chartRect.height - 10) {
-      y = Math.max(10, this.chartRect.height - rect.height - 10)
-    }
-
-    if (x + rect.width > this.chartRect.right - 10) {
-      x = Math.max(this.chartRect.left + 10, targetRect.right - rect.width - 10)
-    }
-
-    this.hoverEl.style.left = `${x}px`
-    this.hoverEl.style.top = `${y}px`
-  }
 }
