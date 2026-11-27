@@ -41,9 +41,8 @@ export abstract class BaseEntryModificationModal extends Modal {
     let addButton: HTMLButtonElement
 
 
-    const idSetting = new Setting(contentEl).setName('ID')
-    .setDesc(DESCRIPTION)
-    .addText(text => {
+    const idSetting = new Setting(contentEl).setName('ID').setDesc(DESCRIPTION)
+    idSetting.addText(text => {
       text.setValue(output.id)
       .onChange(value => {
         output.id = value.trim()
@@ -98,12 +97,10 @@ export abstract class BaseEntryModificationModal extends Modal {
     this.isIdChanged = id !== initialId
     this.isIdValid = isNotEmpty && isValidFormat && (isUnique || !this.isIdChanged)
 
-    if (!idSetting) return
-
     /* Toggle error UI feedback */
     idSetting.descEl.toggleClass('is-error', isNotEmpty && !this.isIdValid)
 
-    if (isNotEmpty && !isValidFormat) {
+    if (!isNotEmpty || !isValidFormat) {
       void idSetting.setDesc(DESCRIPTION_INVALID)
     } else if (this.isIdChanged && !isUnique) {
       void idSetting.setDesc(DESCRIPTION_DUPLICATE)
