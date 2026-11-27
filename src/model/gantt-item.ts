@@ -33,6 +33,22 @@ export class GanttItemImpl implements GanttItem {
     this.successors = []
   }
 
+  get startDay(): number {
+    return this.startDays
+  }
+
+  get endDay(): number {
+    return this.endDays
+  }
+  
+  get startDayWithTimeOfDay(): number {
+    return this.startDays + this.startTimeOfDay.value
+  }
+
+  get endDayWithTimeOfDay(): number {
+    return this.endDays + this.endTimeOfDay.value
+  }
+
   clone(startDays: number, duration: number): GanttItem {
     const endDays = this.endDays ? startDays + duration : startDays
     const clone = new GanttItemImpl(`${this.id}-rep-${startDays}`,
@@ -63,14 +79,6 @@ export class GanttItemImpl implements GanttItem {
     clone.lane = this.lane
 
     return clone
-  }
-
-  get startDayWithTimeOfDay(): number {
-    return this.startDays + this.startTimeOfDay.value
-  }
-
-  get endDayWithTimeOfDay(): number {
-    return this.endDays + this.endTimeOfDay.value
   }
 
 }

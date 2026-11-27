@@ -70,6 +70,8 @@ export type GanttItem = {
   endDateDisplay: string
   startDays: number /* Quantized timeline tracking unit: Days from default point zero */
   endDays: number
+  get startDay(): number
+  get endDay(): number
   startTimeOfDay: TimeOfDayParsed
   endTimeOfDay: TimeOfDayParsed
   group: string
