@@ -16,7 +16,7 @@ export class GanttItemImpl implements GanttItem {
               // readonly startDate: ParsedDate,
               // readonly endDate: ParsedDate,
               readonly startDateDisplay: string,
-              readonly endDateDisplay: string,
+              readonly endDateDisplay: string, /* TODO unused */
               readonly startDays: number,
               readonly endDays: number,
               readonly startTimeOfDay: TimeOfDayParsed,
