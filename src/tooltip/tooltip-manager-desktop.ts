@@ -40,10 +40,10 @@ export default class TooltipManager implements HoverParent {
   }
 
   private handleMouseOver(evt: MouseEvent): void {
-    debug.wnm(`handleMouseOver >> ${evt.x},${evt.y}`)
+    debug.log(`handleMouseOver >> ${evt.x},${evt.y}`)
     let hoverData: { target: HTMLElement, ganttItem: GanttItem } | null = this.getTargetAndMatchingEvent(evt)
     if (!hoverData) {
-      debug.wnm(`handleMouseOver << no target`)
+      debug.log(`handleMouseOver << no target`)
       this.hideTooltip('no target')
       return
     }
@@ -59,15 +59,15 @@ export default class TooltipManager implements HoverParent {
 
     /* CTRL key is reserved for native file preview */
     if (evt.ctrlKey) {
-      debug.wnm(`handleMouseOver -- show native preview`)
-      if (!ganttItem.link) return debug.wnm(`handleMouseOver << event missing a link`)
+      debug.log(`handleMouseOver -- show native preview`)
+      if (!ganttItem.link) return debug.log(`handleMouseOver << event missing a link`)
       this.showNativePreview(evt, target, ganttItem.link)
     } else {
-      debug.wnm(`handleMouseOver -- show tooltip`)
+      debug.log(`handleMouseOver -- show tooltip`)
       this.renderTooltip(evt, target, ganttItem)
     }
 
-    debug.wnm(`handleMouseOver <<`)
+    debug.log(`handleMouseOver <<`)
   }
 
   private renderTooltip(event: MouseEvent, target: HTMLElement, ganttItem: GanttItem): void {

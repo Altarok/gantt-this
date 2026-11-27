@@ -11,7 +11,7 @@ export const debug = {
 const logger: Console | undefined = undefined // window.console
 
 function log(message: string): void {
-  if (isDebug) logger?.info('[D] ', message)
+  if (isDebug) logger?.info('[L] ', message)
 }
 
 function warn(message: string): void {
