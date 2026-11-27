@@ -1,4 +1,4 @@
-const isDebug = true
+const isDebug = false
 
 export const debug = {
   log,
@@ -11,7 +11,7 @@ export const debug = {
 const logger: Console | undefined = undefined // window.console
 
 function log(message: string): void {
-  if (isDebug) logger?.debug('[L] ', message)
+  if (isDebug) logger?.info('[D] ', message)
 }
 
 function warn(message: string): void {
@@ -23,5 +23,5 @@ function info(message: string): void {
 }
 
 function trace(message: string): void {
-  if (isDebug) logger?.trace('[T] ', message)
+  if (isDebug) logger?.info('[T] ', message)
 }
