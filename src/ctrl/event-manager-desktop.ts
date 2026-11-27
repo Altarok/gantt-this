@@ -1,7 +1,7 @@
 import {ControlKey} from '../types/settings-types'
 import {GanttRenderEngine} from '../render/svg-drawer'
 import {GanttEventManagerBase} from './event-manager'
-import TooltipManager from './tooltip-manager-desktop'
+import TooltipManager from '../tooltip/tooltip-manager-desktop'
 import {ChartContext} from '../model/chart-context'
 
 export class GanttDesktopEventManager extends GanttEventManagerBase {
