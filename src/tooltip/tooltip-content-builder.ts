@@ -1,11 +1,12 @@
 import {ChartContext} from '../model/chart-context'
 import {GanttRenderEngine} from '../render/svg-drawer'
-import {GanttItem, isTimespan} from '../types/event-types'
+import {GanttItem, RepeatRule, TimeOfDayParsed} from '../types/event-types'
 import {Css} from '../const/constants'
 import {TooltipRendererHelper} from './tooltip-renderer-helper'
 import {CalendarConfig} from '../types/calendar-types'
 import {createAxisDateDescription} from '../date-calculations/dates'
 import {formatIntegerWithCommas} from '../util/mathe'
+import {Time} from '../date-calculations/time'
 
 export class TooltipContentBuilder extends TooltipRendererHelper {
 
@@ -81,7 +82,7 @@ export class TooltipContentBuilder extends TooltipRendererHelper {
     this.addEventDateBelowTableRow(datesContainer, item, calendarConfig)
 
     /* If event repeats, add repeating event metadata */
-    if (item.isRecurringInstance) this.addRepetitionMetadata(datesContainer, item)
+    if (item.repeatRule) this.addRepetitionMetadata(datesContainer, item.repeatRule)
 
     /* If user wants to see the internal absolute day, add it to the very bottom. */
     if (this.addDaySuffixToTooltipTitle) this.addAbsoluteDayCount(datesContainer, item)
@@ -90,36 +91,32 @@ export class TooltipContentBuilder extends TooltipRendererHelper {
 
   private addEventDateBelowTableRow(container: HTMLDivElement,
                                     item: GanttItem,
-                                    calendarConfig: CalendarConfig) {
+                                    calConfig: CalendarConfig) {
     const dateRow = container.createDiv({cls: Css.tooltip.repeatRow})
     dateRow.createSpan({
-      text: isTimespan(item.displayType)
-        ? `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)} to ${this.dateInOutputFormat(item.endDays, calendarConfig)}`
-        : `Date: ${this.dateInOutputFormat(item.startDays, calendarConfig)}`,
+      text: item.isTimeSpan
+        ? `Date: ${dateInExtensiveFormat(item.startDay, item.startTimeOfDay, calConfig)} to ${dateInExtensiveFormat(item.endDay, item.endTimeOfDay, calConfig)}`
+        : `Date: ${dateInExtensiveFormat(item.startDay, item.startTimeOfDay, calConfig)}`,
       cls: Css.tooltip.suffixRow
     })
   }
 
-  private addRepetitionMetadata(container: HTMLDivElement, item: GanttItem) {
-    const {repeatRule} = item
-    if (repeatRule?.delta && repeatRule.step)
-      container.createDiv({
-        text: `Repeats every ${repeatRule.delta} ${repeatRule.step}${repeatRule.delta > 1 ? 's' : ''}`,
-        cls: Css.tooltip.suffixRow
-      })
+  private addRepetitionMetadata(container: HTMLDivElement, repeatRule: RepeatRule) {
+    const {delta, step} = repeatRule
+    /*
+     * TODO: if delta is very big and step = `day` -> round down to years
+     */
+    const text = delta > 1 ? `Repeats every ${formatIntegerWithCommas(delta)} ${step}s` : `Repeats every ${step}`
+    container.createDiv({text, cls: Css.tooltip.suffixRow})
   }
 
   /** Adds absolute start and end day to tooltip. Use to compare events. */
   private addAbsoluteDayCount(container: HTMLDivElement, item: GanttItem) {
     const {startDay, endDay} = item
-    const absoluteDay = (!Number.isNaN(endDay) && endDay > startDay)
-      ? ` ${formatIntegerWithCommas(startDay)} to ${formatIntegerWithCommas(endDay)}`
-      : ` ${formatIntegerWithCommas(startDay)}`
-    container.createDiv({text: `Absolute day: ${absoluteDay}`, cls: Css.tooltip.suffixRow})
-  }
-
-  private dateInOutputFormat(days: number, cc: CalendarConfig): string {
-    return createAxisDateDescription(days, cc, false, false, false)
+    const text = (!Number.isNaN(endDay) && endDay > startDay)
+      ? `Absolute days: ${formatIntegerWithCommas(startDay)} to ${formatIntegerWithCommas(endDay)}`
+      : `Absolute day: ${formatIntegerWithCommas(startDay)}`
+    container.createDiv({text, cls: Css.tooltip.suffixRow})
   }
 
   private get addDaySuffixToTooltipTitle(): boolean {
@@ -129,4 +126,10 @@ export class TooltipContentBuilder extends TooltipRendererHelper {
   private get hasSelectedBaseProperties(): boolean {
     return this.chartCtx.bases?.hasSelectedProperties() ?? false
   }
+}
+
+function dateInExtensiveFormat(days: number, timeOfDay: TimeOfDayParsed, cc: CalendarConfig): string {
+  const date = createAxisDateDescription(days, cc, false, false, false, true)
+  const time = Time.toHumanReadableTime(timeOfDay, cc, true)
+  return date + (time ? ` at ${time}` : '')
 }
