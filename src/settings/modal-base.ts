@@ -96,7 +96,7 @@ export abstract class BaseEntryModificationModal extends Modal {
     const isUnique = !this.existingIds.has(id)
 
     this.isIdChanged = id !== initialId
-    this.isIdValid = isNotEmpty && isValidFormat && isUnique
+    this.isIdValid = isNotEmpty && isValidFormat && (isUnique || !this.isIdChanged)
 
     if (!idSetting) return
 
@@ -127,7 +127,7 @@ export abstract class BaseEntryModificationModal extends Modal {
    * decides whether the button is to be disabled.
    */
   private toggleButtonEnabled(addButton: HTMLButtonElement) {
-    debug.log(`toggleButtonEnabled >> isIdValid '${this.isIdValid}' isIdChanged '${this.isIdChanged}' isChangedColor '${this.isChangedColor}'`)
+    debug.info(`toggleButtonEnabled >> isIdValid '${this.isIdValid}' isIdChanged '${this.isIdChanged}' isChangedColor '${this.isChangedColor}'`)
     if (!addButton) return
     if (!this.isIdValid) addButton.disabled = true
     else if (this.isIdChanged) addButton.disabled = false
