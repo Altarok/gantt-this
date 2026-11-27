@@ -9,6 +9,7 @@ export class GanttItemImpl implements GanttItem {
   isRecurringInstance = false
   parentEventId: string | undefined = undefined
   lane: number | undefined = undefined
+  private isEndDateAfterStartDate: boolean
 
   constructor(readonly id: string,
               readonly name: string,
@@ -31,6 +32,12 @@ export class GanttItemImpl implements GanttItem {
               readonly file: TFile) {
     this.predecessors = []
     this.successors = []
+    this.isEndDateAfterStartDate = this.endDay >= this.startDay
+      && this.endDayWithTimeOfDay > this.startDayWithTimeOfDay
+  }
+
+  get isTimeSpan(): boolean {
+    return this.isEndDateAfterStartDate
   }
 
   get startDay(): number {
@@ -40,7 +47,7 @@ export class GanttItemImpl implements GanttItem {
   get endDay(): number {
     return this.endDays
   }
-  
+
   get startDayWithTimeOfDay(): number {
     return this.startDays + this.startTimeOfDay.value
   }
