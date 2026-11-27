@@ -9,15 +9,27 @@ export type ColoredDateData = {
  * Creates a human-readable formatted date string for positional calendar configs.
  * @param days - Day value in timeline coordinates
  * @param config - Positional calendar configuration
+ * @param forTooltip
  * @returns Formatted date string, or empty string if no units are defined
  */
 export function parseDaysToPositionalDateString(days: number,
-                                                config: PositionalCalendarConfig): string {
+                                                config: PositionalCalendarConfig,
+                                                forTooltip = false): string {
   const parsed = parsePositionalDateSegments(days, config)
   if (!parsed) return ''
 
   const formattedSegments = parsed.segments.map(segment => segment.digit.toString())
-  return parsed.sign + formattedSegments.join(config.delimiter)
+
+  let dayPrefix = ''
+  if (forTooltip && config.weekdays) {
+    const totalDays = days - config.offsetToDayZero - config.weekdays?.offset - 1 /* -1 for human to array shift */
+    const dayCount = config.weekdays.dayCount
+    const dayIndex = ((totalDays % dayCount) + dayCount) % dayCount
+    const weekday = config.weekdays?.days[dayIndex]
+    if (weekday) dayPrefix = `${weekday.name}, `
+  }
+
+  return dayPrefix + parsed.sign + formattedSegments.join(config.delimiter)
 }
 
 export function parseDaysToPositionalDateStringWithColor(days: number,

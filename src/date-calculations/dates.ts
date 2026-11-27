@@ -45,7 +45,8 @@ function parseDaysToGregorianDateString(days: number,
                                         config: RuleBasedCalendarConfig,
                                         asInput: boolean,
                                         hideDays = false,
-                                        hideMonths = false): string {
+                                        hideMonths = false,
+                                        forTooltip = false): string {
   const details = config.ruleBasedDetails
   let remainingDays = days - config.offsetToDayZero
 
@@ -95,14 +96,15 @@ function parseDaysToGregorianDateString(days: number,
     if (!hideDays) dayFinal = remainingDays
   }
 
-  return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
+  return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal, forTooltip)
 }
 
 function parseDaysToNonGregorianDateString(days: number,
                                            config: RuleBasedCalendarConfig,
                                            asInput: boolean,
                                            hideDays = false,
-                                           hideMonths = false): string {
+                                           hideMonths = false,
+                                           forTooltip = false): string {
 
   const details = config.ruleBasedDetails
   let remainingDays = days - config.offsetToDayZero
@@ -179,7 +181,7 @@ function parseDaysToNonGregorianDateString(days: number,
     }
   }
 
-  return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal)
+  return mergeOutputFormatDateElements(days, asInput, hideMonths, hideDays, config, year, monthFinal, dayFinal, forTooltip)
 }
 
 /* Update the axis label formatter inside the Gantt render engine class */
@@ -187,16 +189,19 @@ function parseDaysToNonGregorianDateString(days: number,
 /* called during runtime, to get axis description */
 export function createAxisDateDescription(days: number,
                                           calendarConfig: CalendarConfig,
-                                          asInput = false, hideDays = false, hideMonths = false): string {
+                                          asInput = false,
+                                          hideDays = false,
+                                          hideMonths = false,
+                                          forTooltip = false): string {
 
   switch (calendarConfig.type) {
     case 'rule-based':
       if (calendarConfig.id === 'gregorian')
-        return parseDaysToGregorianDateString(days, calendarConfig, asInput, hideDays, hideMonths)
+        return parseDaysToGregorianDateString(days, calendarConfig, asInput, hideDays, hideMonths, forTooltip)
       else
-        return parseDaysToNonGregorianDateString(days, calendarConfig, asInput, hideDays, hideMonths)
+        return parseDaysToNonGregorianDateString(days, calendarConfig, asInput, hideDays, hideMonths, forTooltip)
     case 'positional':
-      return parseDaysToPositionalDateString(days, calendarConfig)
+      return parseDaysToPositionalDateString(days, calendarConfig, forTooltip)
     default:
       return 'n/a'
   }
@@ -206,7 +211,7 @@ export function createAxisDateDescription(days: number,
 function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMonths: boolean,
                                        hideDays: boolean,
                                        calConfig: RuleBasedCalendarConfig,
-                                       year: number, month?: string, day?: number) {
+                                       year: number, month?: string, day?: number, forTooltip?: boolean) {
 
   const format: DateFormatComponent[] = asInput ? calConfig.ruleBasedDetails.format : calConfig.ruleBasedDetails.outputFormat
   const displayedYear: { year: number, sign: '-' | '' } = shiftYearIfNeeded(year, calConfig.ruleBasedDetails.noYearZero)
@@ -217,7 +222,7 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
     const dayCount = calConfig.weekdays.dayCount
     const dayIndex = ((totalDays % dayCount) + dayCount) % dayCount
     const weekday = calConfig.weekdays?.days[dayIndex]
-    weekdayStr = weekday?.short ?? weekday?.name
+    weekdayStr = forTooltip ? weekday?.name : (weekday?.short ?? weekday?.name)
   }
 
 
@@ -229,8 +234,9 @@ function mergeOutputFormatDateElements(absDays: number, asInput: boolean, hideMo
   })
 
   const epochSuffix = getEpochSuffix(absDays, calConfig)
-  return (!epochSuffix ? displayedYear.sign : '')
-    + (!asInput && weekdayStr ? ` ${weekdayStr} ` : '')
+  const dayPrefix = weekdayStr ? `${weekdayStr}, ` : ''
+  return dayPrefix
+    + (!epochSuffix ? displayedYear.sign : '')
     + outputParts.filter(Boolean).join(calConfig.delimiter)
     + epochSuffix
 }
