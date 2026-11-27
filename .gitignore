@@ -6,6 +6,7 @@
 .vscode/
 coverage/
 examples/
+qodana.yaml
 # Plugin files
 archive/
 main.js
