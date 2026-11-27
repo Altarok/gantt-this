@@ -92,13 +92,24 @@ export class TooltipContentBuilder extends TooltipRendererHelper {
   private addEventDateBelowTableRow(container: HTMLDivElement,
                                     item: GanttItem,
                                     calConfig: CalendarConfig) {
-    const dateRow = container.createDiv({cls: Css.tooltip.repeatRow})
-    dateRow.createSpan({
-      text: item.isTimeSpan
-        ? `Date: ${dateInExtensiveFormat(item.startDay, item.startTimeOfDay, calConfig)} to ${dateInExtensiveFormat(item.endDay, item.endTimeOfDay, calConfig)}`
-        : `Date: ${dateInExtensiveFormat(item.startDay, item.startTimeOfDay, calConfig)}`,
-      cls: Css.tooltip.suffixRow
-    })
+    if (item.isTimeSpan) {
+      const dateRow1 = container.createDiv({cls: Css.tooltip.repeatRow})
+      dateRow1.createSpan({
+        text: `From: ${dateInExtensiveFormat(item.startDay, item.startTimeOfDay, calConfig)}`,
+        cls: Css.tooltip.suffixRow
+      })
+      const dateRow2 = container.createDiv({cls: Css.tooltip.repeatRow})
+      dateRow2.createSpan({
+        text: `To: ${dateInExtensiveFormat(item.endDay, item.endTimeOfDay, calConfig)}`,
+        cls: Css.tooltip.suffixRow
+      })
+    } else {
+      const dateRow = container.createDiv({cls: Css.tooltip.repeatRow})
+      dateRow.createSpan({
+        text: `Date: ${dateInExtensiveFormat(item.startDay, item.startTimeOfDay, calConfig)}`,
+        cls: Css.tooltip.suffixRow
+      })
+    }
   }
 
   private addRepetitionMetadata(container: HTMLDivElement, repeatRule: RepeatRule) {
