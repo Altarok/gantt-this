@@ -70,7 +70,7 @@ export class GanttItemImpl implements GanttItem {
       this.displayType,
       this.displayIcon,
       this.displayIconColor,
-      this.calendarType,
+      this.calendarType, /* todo mv calendarID */
       this.color,
       this.link,
       this.frontMatter,
